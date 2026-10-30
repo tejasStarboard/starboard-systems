@@ -9,18 +9,22 @@
 
 Both `dev` and `main` must be treated as **protected**: no direct pushes; changes only via pull request.
 
-### GitHub branch protection status
+### License
 
-This repo is **private** on GitHub Free. Classic branch protection and rulesets returned **HTTP 403** (“Upgrade to GitHub Pro or make this repository public”). Until Pro/public is enabled, enforce the same rules via:
+This repository is **public for visibility only**. See root [`LICENSE`](../../LICENSE): proprietary, **UNLICENSED**, no permission to use the code for any purpose.
 
-1. Agent/skills + this doc (no push to `dev`/`main`).
-2. Optional local hook: `scripts/git-hooks/pre-push` (blocks `git push` to `dev`/`main`).
-3. When available, turn on GitHub ruleset **Protect dev and main**: require pull request, no force push, no deletion.
+### Branch protection and auto-merge (`dev`)
+
+On public repos, GitHub Free supports branch protection / rulesets:
+
+1. **`dev` and `main`**: pull request required; no direct push; no force-push/delete.
+2. **`dev`**: required status check **`Lint · typecheck · test · build`** (CI job name).
+3. Repo **auto-merge** enabled; PRs into `dev` are queued to merge when CI passes (see also [`.github/workflows/automerge-dev.yml`](../../.github/workflows/automerge-dev.yml) as a fallback).
+
+Local guard (optional, still useful):
 
 ```bash
-# Install local guard (once per clone)
 ln -sf ../../scripts/git-hooks/pre-push .git/hooks/pre-push
-# or: cp scripts/git-hooks/pre-push .git/hooks/pre-push && chmod +x .git/hooks/pre-push
 ```
 
 ## Per-ticket flow
