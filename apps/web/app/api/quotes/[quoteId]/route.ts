@@ -1,9 +1,12 @@
 import { NextResponse } from "next/server"
+import { quoteFormSchema } from "@starboard/contracts"
 
-import { getQuoteFormValues } from "@/lib/quotes/queries"
-import { quoteFormSchema } from "@/lib/quotes/schema"
-import { saveQuote } from "@/lib/quotes/service"
-import { requireApiSession } from "@/lib/quotes/session"
+import { requireApiSession } from "@/lib/auth/session"
+import { ServiceClientError } from "@/lib/clients/http"
+import {
+  getQuoteFormValuesForOrg,
+  saveQuoteForSession,
+} from "@/lib/quotes/orchestrator"
 
 export async function GET(
   _request: Request,
@@ -15,13 +18,27 @@ export async function GET(
   }
 
   const { quoteId } = await params
-  const quote = await getQuoteFormValues(quoteId)
 
-  if (!quote) {
-    return NextResponse.json({ error: "Quote not found" }, { status: 404 })
+  try {
+    const quote = await getQuoteFormValuesForOrg(
+      quoteId,
+      authResult.session.session.activeOrganizationId!
+    )
+
+    if (!quote) {
+      return NextResponse.json({ error: "Quote not found" }, { status: 404 })
+    }
+
+    return NextResponse.json({ quote })
+  } catch (error) {
+    if (error instanceof ServiceClientError) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: error.status }
+      )
+    }
+    throw error
   }
-
-  return NextResponse.json({ quote })
 }
 
 export async function PUT(
@@ -54,14 +71,19 @@ export async function PUT(
     )
   }
 
-  const result = await saveQuote(parsed.data, {
-    ownerId: authResult.session.user.id,
-    organizationId: authResult.session.session.activeOrganizationId!,
-  })
-
-  if (!result.ok) {
-    return NextResponse.json({ error: result.error }, { status: result.status })
+  try {
+    const quote = await saveQuoteForSession(parsed.data, {
+      ownerId: authResult.session.user.id,
+      organizationId: authResult.session.session.activeOrganizationId!,
+    })
+    return NextResponse.json(quote)
+  } catch (error) {
+    if (error instanceof ServiceClientError) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: error.status }
+      )
+    }
+    throw error
   }
-
-  return NextResponse.json(result.quote)
 }

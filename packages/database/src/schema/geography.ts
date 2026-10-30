@@ -1,22 +1,25 @@
 import { relations } from "drizzle-orm"
 import {
   doublePrecision,
-  pgTable,
+  pgSchema,
   text,
   timestamp,
   varchar,
 } from "drizzle-orm/pg-core"
 
-export const country = pgTable("country", {
+/** Geography service owns this Postgres schema. */
+export const geoSchema = pgSchema("geo")
+
+export const country = geoSchema.table("country", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
 })
 
-export const currency = pgTable("currency", {
+export const currency = geoSchema.table("currency", {
   code: varchar("code", { length: 3 }).primaryKey(),
 })
 
-export const state = pgTable("state", {
+export const state = geoSchema.table("state", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
   countryId: text("country_id")
@@ -24,7 +27,7 @@ export const state = pgTable("state", {
     .references(() => country.id),
 })
 
-export const city = pgTable("city", {
+export const city = geoSchema.table("city", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
   stateId: text("state_id")
@@ -35,7 +38,7 @@ export const city = pgTable("city", {
     .references(() => country.id),
 })
 
-export const port = pgTable("port", {
+export const port = geoSchema.table("port", {
   unlocode: varchar("unlocode", { length: 7 }).primaryKey(),
   zipcode: varchar("zipcode", { length: 8 }).notNull(),
   stateId: text("state_id")
@@ -46,7 +49,7 @@ export const port = pgTable("port", {
     .references(() => country.id),
 })
 
-export const location = pgTable("location", {
+export const location = geoSchema.table("location", {
   id: text("id").primaryKey(),
   address1: text("address1").notNull(),
   address2: text("address2"),

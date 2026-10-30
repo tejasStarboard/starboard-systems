@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server"
 
-import { listQuotes } from "@/lib/quotes/queries"
-import { createQuote } from "@/lib/quotes/service"
-import { requireApiSession } from "@/lib/quotes/session"
+import { requireApiSession } from "@/lib/auth/session"
+import {
+  createQuoteForSession,
+  listQuotesForOrg,
+} from "@/lib/quotes/orchestrator"
+import { ServiceClientError } from "@/lib/clients/http"
 
 export async function GET() {
   const authResult = await requireApiSession()
@@ -10,11 +13,20 @@ export async function GET() {
     return authResult.error
   }
 
-  const quotes = await listQuotes(
-    authResult.session.session.activeOrganizationId
-  )
-
-  return NextResponse.json({ quotes })
+  try {
+    const quotes = await listQuotesForOrg(
+      authResult.session.session.activeOrganizationId!
+    )
+    return NextResponse.json({ quotes })
+  } catch (error) {
+    if (error instanceof ServiceClientError) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: error.status }
+      )
+    }
+    throw error
+  }
 }
 
 export async function POST() {
@@ -23,10 +35,19 @@ export async function POST() {
     return authResult.error
   }
 
-  const created = await createQuote({
-    ownerId: authResult.session.user.id,
-    organizationId: authResult.session.session.activeOrganizationId!,
-  })
-
-  return NextResponse.json(created, { status: 201 })
+  try {
+    const created = await createQuoteForSession({
+      ownerId: authResult.session.user.id,
+      organizationId: authResult.session.session.activeOrganizationId!,
+    })
+    return NextResponse.json(created, { status: 201 })
+  } catch (error) {
+    if (error instanceof ServiceClientError) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: error.status }
+      )
+    }
+    throw error
+  }
 }

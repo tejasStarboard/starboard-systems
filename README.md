@@ -1,21 +1,39 @@
-# shadcn/ui monorepo template
+# Starboard Systems
 
-This is a Next.js monorepo template with shadcn/ui.
+pnpm + Turborepo monorepo: Next.js BFF with Bun domain microservices.
 
-## Adding components
+See [docs/architecture.md](docs/architecture.md) for the production layout (auth in Next, quotes + geography as stateless Bun services, shared Neon with `geo` / `quotes` schemas).
 
-To add components to your app, run the following command at the root of your `web` app:
+## Apps & services
+
+| Path | Role |
+|------|------|
+| `apps/web` | Next.js orchestrator (Better Auth, UI) |
+| `services/quotes` | Quotes API (Bun + Hono) |
+| `services/geography` | Geography / currency API (Bun + Hono) |
+| `packages/contracts` | Shared Zod API contracts |
+| `packages/database` | Drizzle schemas + client |
+| `packages/service-kit` | Service token, request IDs, HTTP client helpers |
+| `packages/ui` | Shared UI |
+| `packages/email` | Resend templates |
+
+## Develop
+
+```bash
+pnpm install
+cp .env.example .env   # fill secrets + INTERNAL_SERVICE_TOKEN + service URLs
+pnpm --filter @starboard/contracts build
+pnpm --filter @starboard/service-kit build
+pnpm --filter @starboard/db build
+pnpm --filter @starboard/db db:push
+pnpm --filter @starboard/db db:seed
+pnpm dev
+```
+
+## UI components
 
 ```bash
 pnpm dlx shadcn@latest add button -c apps/web
 ```
 
-This will place the ui components in the `packages/ui/src/components` directory.
-
-## Using components
-
-To use the components in your app, import them from the `ui` package.
-
-```tsx
-import { Button } from "@workspace/ui/components/button";
-```
+Import from `@workspace/ui/components/button`.

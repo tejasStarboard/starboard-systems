@@ -18,6 +18,10 @@ export const env = createEnv({
     EMAIL_SENDER_ADDRESS: z.email(),
 
     APP_URL: z.url(),
+
+    QUOTES_SERVICE_URL: z.url(),
+    GEOGRAPHY_SERVICE_URL: z.url(),
+    INTERNAL_SERVICE_TOKEN: z.string().min(16),
   },
   client: {
     NEXT_PUBLIC_APP_URL: z.url(),
@@ -39,6 +43,10 @@ export const env = createEnv({
 
     APP_URL: process.env.APP_URL,
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
+
+    QUOTES_SERVICE_URL: process.env.QUOTES_SERVICE_URL,
+    GEOGRAPHY_SERVICE_URL: process.env.GEOGRAPHY_SERVICE_URL,
+    INTERNAL_SERVICE_TOKEN: process.env.INTERNAL_SERVICE_TOKEN,
   },
   emptyStringAsUndefined: true,
 })

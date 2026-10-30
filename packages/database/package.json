@@ -5,28 +5,39 @@
   "type": "module",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "types": "./src/index.ts",
+      "bun": "./src/index.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
     },
     "./schema": {
-      "types": "./dist/schema/index.d.ts",
-      "import": "./dist/schema/index.js"
+      "types": "./src/schema/index.ts",
+      "bun": "./src/schema/index.ts",
+      "import": "./dist/schema/index.js",
+      "default": "./dist/schema/index.js"
     },
     "./schema/auth": {
-      "types": "./dist/schema/auth.d.ts",
-      "import": "./dist/schema/auth.js"
+      "types": "./src/schema/auth.ts",
+      "bun": "./src/schema/auth.ts",
+      "import": "./dist/schema/auth.js",
+      "default": "./dist/schema/auth.js"
     },
     "./schema/quote": {
-      "types": "./dist/schema/quote.d.ts",
-      "import": "./dist/schema/quote.js"
+      "types": "./src/schema/quote.ts",
+      "bun": "./src/schema/quote.ts",
+      "import": "./dist/schema/quote.js",
+      "default": "./dist/schema/quote.js"
     },
     "./schema/geography": {
-      "types": "./dist/schema/geography.d.ts",
-      "import": "./dist/schema/geography.js"
+      "types": "./src/schema/geography.ts",
+      "bun": "./src/schema/geography.ts",
+      "import": "./dist/schema/geography.js",
+      "default": "./dist/schema/geography.js"
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "src"
   ],
   "scripts": {
     "build": "tsup",
@@ -40,6 +51,7 @@
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.2.0",
+    "@starboard/contracts": "workspace:*",
     "drizzle-orm": "^0.45.4",
     "zod": "^4.6.7"
   },

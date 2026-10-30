@@ -1,6 +1,6 @@
 import { defineConfig } from "tsup"
 
-export default defineConfig({
+export default defineConfig((options) => ({
   entry: {
     index: "src/index.ts",
     "schema/index": "src/schema/index.ts",
@@ -10,10 +10,15 @@ export default defineConfig({
   },
   format: ["esm"],
   dts: true,
-  clean: true,
+  clean: !options.watch,
   sourcemap: true,
   splitting: false,
   target: "es2022",
   outDir: "dist",
-  external: ["drizzle-orm", "@neondatabase/serverless", "zod"],
-})
+  external: [
+    "drizzle-orm",
+    "@neondatabase/serverless",
+    "zod",
+    "@starboard/contracts",
+  ],
+}))

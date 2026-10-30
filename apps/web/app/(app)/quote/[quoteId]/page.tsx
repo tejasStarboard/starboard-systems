@@ -4,12 +4,9 @@ import { notFound, redirect } from "next/navigation"
 import { QuoteForm } from "@/components/quotes/quote-form"
 import { auth } from "@/lib/auth"
 import {
-  getQuoteFormValues,
-  listContainerTypeOptions,
-  listCurrencyOptions,
-  listCustomerOptions,
-  listPalletTypeOptions,
-} from "@/lib/quotes/queries"
+  getQuoteFormValuesForOrg,
+  loadQuoteFormOptions,
+} from "@/lib/quotes/orchestrator"
 import { emptyQuoteFormValues } from "@/lib/quotes/schema"
 
 export default async function QuotePage({
@@ -22,23 +19,22 @@ export default async function QuotePage({
     headers: await headers(),
   })
 
-  if (!session?.session.activeOrganizationId) {
+  const organizationId = session?.session.activeOrganizationId
+  if (!organizationId) {
     redirect("/select-org")
   }
 
-  const [
-    savedQuote,
+  const [savedQuote, options] = await Promise.all([
+    getQuoteFormValuesForOrg(quoteId, organizationId),
+    loadQuoteFormOptions(organizationId),
+  ])
+
+  const {
     customerOptions,
     currencyOptions,
     containerTypeOptions,
     palletTypeOptions,
-  ] = await Promise.all([
-    getQuoteFormValues(quoteId),
-    listCustomerOptions(),
-    listCurrencyOptions(),
-    listContainerTypeOptions(),
-    listPalletTypeOptions(),
-  ])
+  } = options
 
   if (!savedQuote && customerOptions.length === 0) {
     notFound()

@@ -1,17 +1,17 @@
+import type { Cargo, LegMode, QuoteSource, QuoteStatus } from "@starboard/contracts"
 import { relations } from "drizzle-orm"
 import {
   doublePrecision,
   jsonb,
-  pgTable,
+  pgSchema,
   text,
   timestamp,
   uniqueIndex,
   varchar,
 } from "drizzle-orm/pg-core"
-import { z } from "zod"
 
-import { organization, user } from "./auth"
-import { currency, location, port } from "./geography"
+/** Quotes service owns this Postgres schema. Auth/geo IDs are opaque (no cross-schema FKs). */
+export const quotesSchema = pgSchema("quotes")
 
 export type Dimensions = {
   length: number
@@ -19,99 +19,44 @@ export type Dimensions = {
   height: number
 }
 
-export type LegMode = "ocean" | "air" | "drayage"
+export type { Cargo, LegMode, QuoteSource, QuoteStatus }
+export type LaneMode = "fcl" | "lcl" | "air"
 
-export const quoteSourceValues = ["email", "manual"] as const
-export type QuoteSource = (typeof quoteSourceValues)[number]
-
-export const quoteStatusValues = [
-  "draft",
-  "review",
-  "sent",
-  "win",
-  "loss",
-  "expired",
-] as const
-export type QuoteStatus = (typeof quoteStatusValues)[number]
-
-export const cargoSchema = z.discriminatedUnion("mode", [
-  z.object({
-    id: z.string(),
-    description: z.string(),
-    createdAt: z.coerce.date(),
-    updatedAt: z.coerce.date(),
-    weight: z.number(),
-    mode: z.literal("fcl"),
-    containerCount: z.number().int(),
-    containerType: z.string(),
-  }),
-  z.object({
-    id: z.string(),
-    description: z.string(),
-    createdAt: z.coerce.date(),
-    updatedAt: z.coerce.date(),
-    weight: z.number(),
-    mode: z.literal("lcl"),
-    volume: z.number(),
-    palletCount: z.number().int(),
-    palletType: z.string(),
-    hazmat: z.boolean(),
-    fragile: z.boolean(),
-  }),
-  z.object({
-    id: z.string(),
-    description: z.string(),
-    createdAt: z.coerce.date(),
-    updatedAt: z.coerce.date(),
-    weight: z.number(),
-    mode: z.literal("air"),
-    volume: z.number(),
-    palletCount: z.number().int(),
-    palletType: z.string(),
-    hazmat: z.boolean(),
-    fragile: z.boolean(),
-  }),
-])
-
-export type Cargo = z.infer<typeof cargoSchema>
-
-export const mode = pgTable("mode", {
+export const mode = quotesSchema.table("mode", {
   mode: varchar("mode", { length: 10 }).primaryKey(),
   label: text("label").notNull(),
 })
 
-export const containerType = pgTable("container_type", {
+export const containerType = quotesSchema.table("container_type", {
   type: varchar("type", { length: 10 }).primaryKey(),
   label: text("label").notNull(),
   dimensions: jsonb("dimensions").$type<Dimensions>().notNull(),
 })
 
-export const palletType = pgTable("pallet_type", {
+export const palletType = quotesSchema.table("pallet_type", {
   type: varchar("type", { length: 10 }).primaryKey(),
   label: text("label").notNull(),
   dimensions: jsonb("dimensions").$type<Dimensions>().notNull(),
 })
 
-export const quote = pgTable(
+export const quote = quotesSchema.table(
   "quote",
   {
     id: text("id").primaryKey(),
     source: text("source").$type<QuoteSource>().notNull().default("manual"),
     status: text("status").$type<QuoteStatus>().notNull().default("draft"),
-    ownerId: text("owner_id")
-      .notNull()
-      .references(() => user.id),
-    organizationId: text("organization_id")
-      .notNull()
-      .references(() => organization.id),
+    /** Opaque user id from auth (BFF-supplied). */
+    ownerId: text("owner_id").notNull(),
+    /** Opaque tenant organization id from auth (BFF-supplied). */
+    organizationId: text("organization_id").notNull(),
     quoteId: varchar("quote_id", { length: 6 }).notNull(),
-    customerId: text("customer_id").references(() => organization.id),
+    /** Opaque customer organization id from auth (BFF-supplied). */
+    customerId: text("customer_id"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     effectiveFrom: timestamp("effective_from"),
     expiryAt: timestamp("expiry_at"),
-    currencyCode: varchar("currency_code", { length: 3 }).references(
-      () => currency.code
-    ),
+    /** Opaque currency code from geography service. */
+    currencyCode: varchar("currency_code", { length: 3 }),
   },
   (table) => [
     uniqueIndex("quote_organization_quote_id_uidx").on(
@@ -121,22 +66,17 @@ export const quote = pgTable(
   ]
 )
 
-export const laneModeValues = ["fcl", "lcl", "air"] as const
-export type LaneMode = (typeof laneModeValues)[number]
-
-export const lane = pgTable("lane", {
+export const lane = quotesSchema.table("lane", {
   id: text("id").primaryKey(),
   mode: varchar("mode", { length: 10 }).$type<LaneMode>().notNull().default("fcl"),
-  pickupId: text("pickup_id").references(() => location.id),
-  origin: varchar("origin", { length: 7 }).references(() => port.unlocode),
-  originVia: varchar("origin_via", { length: 7 }).references(() => port.unlocode),
-  destinationVia: varchar("destination_via", { length: 7 }).references(
-    () => port.unlocode
-  ),
-  destination: varchar("destination", { length: 7 }).references(
-    () => port.unlocode
-  ),
-  deliveryId: text("delivery_id").references(() => location.id),
+  /** Opaque location id from geography. */
+  pickupId: text("pickup_id"),
+  /** Opaque port unlocode from geography. */
+  origin: varchar("origin", { length: 7 }),
+  originVia: varchar("origin_via", { length: 7 }),
+  destinationVia: varchar("destination_via", { length: 7 }),
+  destination: varchar("destination", { length: 7 }),
+  deliveryId: text("delivery_id"),
   legOrder: jsonb("leg_order").$type<LegMode[]>().notNull().default([]),
   quoteId: text("quote_id")
     .notNull()
@@ -149,14 +89,13 @@ export const lane = pgTable("lane", {
     .notNull(),
 })
 
-export const rate = pgTable("rate", {
+export const rate = quotesSchema.table("rate", {
   id: text("id").primaryKey(),
   laneId: text("lane_id")
     .notNull()
     .references(() => lane.id, { onDelete: "cascade" }),
-  currencyCode: varchar("currency_code", { length: 3 })
-    .notNull()
-    .references(() => currency.code),
+  /** Opaque currency code from geography. */
+  currencyCode: varchar("currency_code", { length: 3 }).notNull(),
   rate: doublePrecision("rate").notNull(),
   validFrom: timestamp("valid_from").notNull(),
   validTo: timestamp("valid_to").notNull(),
@@ -167,25 +106,7 @@ export const rate = pgTable("rate", {
     .notNull(),
 })
 
-export const quoteRelations = relations(quote, ({ one, many }) => ({
-  owner: one(user, {
-    fields: [quote.ownerId],
-    references: [user.id],
-  }),
-  organization: one(organization, {
-    fields: [quote.organizationId],
-    references: [organization.id],
-    relationName: "quoteOrganization",
-  }),
-  customer: one(organization, {
-    fields: [quote.customerId],
-    references: [organization.id],
-    relationName: "quoteCustomer",
-  }),
-  currency: one(currency, {
-    fields: [quote.currencyCode],
-    references: [currency.code],
-  }),
+export const quoteRelations = relations(quote, ({ many }) => ({
   lanes: many(lane),
 }))
 
@@ -194,36 +115,6 @@ export const laneRelations = relations(lane, ({ one, many }) => ({
     fields: [lane.quoteId],
     references: [quote.id],
   }),
-  pickup: one(location, {
-    fields: [lane.pickupId],
-    references: [location.id],
-    relationName: "lanePickup",
-  }),
-  delivery: one(location, {
-    fields: [lane.deliveryId],
-    references: [location.id],
-    relationName: "laneDelivery",
-  }),
-  originPort: one(port, {
-    fields: [lane.origin],
-    references: [port.unlocode],
-    relationName: "laneOrigin",
-  }),
-  originViaPort: one(port, {
-    fields: [lane.originVia],
-    references: [port.unlocode],
-    relationName: "laneOriginVia",
-  }),
-  destinationViaPort: one(port, {
-    fields: [lane.destinationVia],
-    references: [port.unlocode],
-    relationName: "laneDestinationVia",
-  }),
-  destinationPort: one(port, {
-    fields: [lane.destination],
-    references: [port.unlocode],
-    relationName: "laneDestination",
-  }),
   rates: many(rate),
 }))
 
@@ -231,9 +122,5 @@ export const rateRelations = relations(rate, ({ one }) => ({
   lane: one(lane, {
     fields: [rate.laneId],
     references: [lane.id],
-  }),
-  currency: one(currency, {
-    fields: [rate.currencyCode],
-    references: [currency.code],
   }),
 }))

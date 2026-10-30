@@ -1,17 +1,23 @@
 import { headers } from "next/headers"
+import { redirect } from "next/navigation"
 
 import { columns } from "@/components/quotes/columns"
 import { CreateQuoteButton } from "@/components/quotes/create-quote-button"
 import { QuotesDataTable } from "@/components/quotes/quotes-data-table"
 import { auth } from "@/lib/auth"
-import { listQuotes } from "@/lib/quotes/queries"
+import { listQuotesForOrg } from "@/lib/quotes/orchestrator"
 
 export default async function HomePage() {
   const session = await auth.api.getSession({
     headers: await headers(),
   })
 
-  const quotes = await listQuotes(session?.session.activeOrganizationId)
+  const organizationId = session?.session.activeOrganizationId
+  if (!organizationId) {
+    redirect("/select-org")
+  }
+
+  const quotes = await listQuotesForOrg(organizationId)
 
   return (
     <div className="flex flex-1 flex-col gap-4 p-4">
