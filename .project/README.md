@@ -16,11 +16,12 @@ Greenfield rewrite of production Starboard (`../starboard-2`) into this monorepo
 
 ## How to pick the next ticket
 
+Default loop: skill **starboard-dev-workflow** (sync `origin/dev`, reconcile `done/`, plan, `--no-track` branch, implement via **starboard-ticket**, PR to `dev` + auto-merge). See also [git-workflow.md](docs/git-workflow.md). Code is proprietary — see root `LICENSE`.
+
 1. List `.project/tickets/todo/*.md` in lexical order.
 2. Take the **lowest-numbered** ticket whose `depends_on` are all in `done/` (or have `status: done`).
-3. Move it to `tickets/in_progress/` and set `status: in_progress`.
-4. Branch from `dev`: `ticket/{id}-{slug}` (see [git-workflow.md](docs/git-workflow.md)). PR **into `dev` only** (auto-merges after CI); promote to `main` via cherry-pick PR. Code is proprietary — see root `LICENSE`.
-5. Open a feature chat with skill **starboard-ticket** and that file only (+ its `docs:` links).
+3. After plan: `git checkout --no-track -b {id} origin/dev` (branch name = ticket id, e.g. `001`); move ticket to `in_progress/`.
+4. PR **into `dev` only** (auto-merge after CI); promote to `main` via cherry-pick PR when asked.
 
 ## Status legend
 
@@ -34,8 +35,8 @@ Greenfield rewrite of production Starboard (`../starboard-2`) into this monorepo
 ## Agent prompt (copy)
 
 ```text
-Use the starboard-ticket skill.
-Implement only .project/tickets/in_progress/<file>.md (or the todo file I name).
+Use the starboard-dev-workflow skill (then starboard-ticket for coding).
+Work the ticket I name, or the next todo. Plan on latest origin/dev, then implement.
 Read its docs: links under .project/docs/. Do not expand scope.
 Do not port deprecated lineages (.project/docs/deprecations.md).
 ```

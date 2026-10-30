@@ -29,17 +29,20 @@ ln -sf ../../scripts/git-hooks/pre-push .git/hooks/pre-push
 
 ## Per-ticket flow
 
-1. Sync: `git fetch origin && git checkout dev && git pull`
-2. Branch from `dev`:
+Agent default: skill **starboard-dev-workflow**.
+
+1. Sync: `git fetch origin` (inspect `git log origin/dev`; reconcile `.project/tickets` → `done/` for merged ids).
+2. Branch from **`origin/dev` without tracking it**:
    ```bash
-   git checkout -b ticket/001-extension-host-skeleton
+   git checkout --no-track -b 001 origin/dev
    ```
-   Naming: `ticket/{id}-{slug}` matching `.project/tickets/…`.
+   Naming: **ticket id only** (e.g. `001`), matching `.project/tickets/…/{id}-*.md`. Do **not** set `dev` as the branch upstream.
 3. Implement the ticket; keep the branch scoped to that ticket.
-4. Push and open a PR **into `dev`**:
+4. Push and open a PR **into `dev`** (enable auto-merge):
    ```bash
    git push -u origin HEAD
    gh pr create --base dev --title "ticket 001: …" --body "…"
+   gh pr merge --auto --merge
    ```
 5. After merge to `dev`: move ticket `in_progress/` → `done/`.
 
@@ -69,11 +72,12 @@ PRs and pushes to `dev` / `main` run [`.github/workflows/ci.yml`](../../.github/
 
 (`typecheck:ci` skips `@workspace/ui` until ticket 006; then switch CI to full `typecheck`.)
 
-Locally mirror with `pnpm ci`.
+Locally mirror with `pnpm run ci` (not bare `pnpm ci`, which is a clean install).
 
 ## Agent rules
 
 - Never commit straight to `dev` or `main`.
 - Never open ticket PRs with `--base main`.
-- Default base for `gh pr create` in this repo: **`dev`**.
-- Keep CI green before merge.
+- Default base for `gh pr create` in this repo: **`dev`**; enable `gh pr merge --auto --merge`.
+- Ticket branches: `git checkout --no-track -b {id} origin/dev` (e.g. `001`; upstream is the ticket branch after push, never `dev`).
+- Run **`pnpm run ci`** locally (same steps as GitHub CI) before push/PR; keep remote CI green before merge.

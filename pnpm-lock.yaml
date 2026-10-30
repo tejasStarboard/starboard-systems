@@ -47,6 +47,9 @@ importers:
       '@starboard/email':
         specifier: workspace:*
         version: link:../../packages/email
+      '@starboard/extension-host':
+        specifier: workspace:*
+        version: link:../../packages/extension-host
       '@starboard/service-kit':
         specifier: workspace:*
         version: link:../../packages/service-kit
@@ -231,6 +234,25 @@ importers:
       globals:
         specifier: ^17.13.0
         version: 17.13.0
+
+  packages/extension-host:
+    dependencies:
+      zod:
+        specifier: ^4.6.7
+        version: 4.6.7
+    devDependencies:
+      '@types/bun':
+        specifier: ^1.3.5
+        version: 1.4.4
+      '@workspace/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
+      tsup:
+        specifier: ^8.5.1
+        version: 8.5.1(jiti@2.7.0)(postcss@8.5.23)(supports-color@7.2.0)(tsx@4.23.15)(typescript@5.9.3)
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
 
   packages/service-kit:
     dependencies:

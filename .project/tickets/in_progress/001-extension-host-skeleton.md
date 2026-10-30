@@ -2,7 +2,7 @@
 id: 001
 wave: 00-shell
 title: Extension host skeleton
-status: open
+status: in_progress
 depends_on: []
 epic: SYS-EXT-HOST
 docs:

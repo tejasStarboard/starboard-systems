@@ -23,14 +23,6 @@ import {
   SidebarMenuItem,
 } from "@workspace/ui/components/sidebar"
 
-const navMain = [
-  {
-    title: "Quotes",
-    url: "/",
-    icon: <FileTextIcon />,
-  },
-]
-
 const navSecondary = [
   {
     title: "Support",
@@ -51,6 +43,7 @@ const navSecondary = [
 
 export function AppSidebar({
   user,
+  extensionNav = [],
   ...props
 }: React.ComponentProps<typeof Sidebar> & {
   user: {
@@ -58,7 +51,25 @@ export function AppSidebar({
     email: string
     image?: string | null
   }
+  extensionNav?: Array<{
+    id: string
+    label: string
+    href: string
+  }>
 }) {
+  const navMain = [
+    {
+      title: "Quotes",
+      url: "/",
+      icon: <FileTextIcon />,
+    },
+    ...extensionNav.map((item) => ({
+      title: item.label,
+      url: item.href,
+      icon: null,
+    })),
+  ]
+
   return (
     <Sidebar
       className="top-(--header-height) h-[calc(100svh-var(--header-height))]!"

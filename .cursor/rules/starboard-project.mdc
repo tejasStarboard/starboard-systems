@@ -6,9 +6,9 @@ alwaysApply: true
 # Starboard Systems rewrite
 
 - Program docs: `.project/docs/`. Tickets: `.project/tickets/{todo,in_progress,done}/`.
-- Feature work: read skill `starboard-ticket`, implement **one** ticket only.
+- Default feature loop: skill `starboard-dev-workflow` (select ticket → sync `origin/dev` / reconcile `done/` → plan → `--no-track` branch off `origin/dev` → implement → PR to `dev` + auto-merge). Coding rules: `starboard-ticket`. **One** ticket only.
 - Orchestration / new tickets: skill `starboard-orchestrator`.
 - Bun services → `starboard-bun-service`; extensions → `starboard-extension`; web BFF → `starboard-shell-bff`.
 - Do not port deprecated lineages (`.project/docs/deprecations.md`). No Linear unless asked.
-- Git: branch from `dev` as `ticket/{id}-{slug}`; PR into **`dev` only**; never push to `dev`/`main`; promote to `main` via cherry-pick PR (`.project/docs/git-workflow.md`).
+- Git: `git checkout --no-track -b {id} origin/dev` (branch = ticket id, e.g. `001`); PR into **`dev` only**; never push to `dev`/`main`; promote to `main` via cherry-pick PR (`.project/docs/git-workflow.md`).
 - Keep context lean: do not dump entire `.project` trees; open only the ticket + linked docs.

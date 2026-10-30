@@ -25,7 +25,7 @@ export function NavMain({
   items: {
     title: string
     url: string
-    icon: React.ReactNode
+    icon?: React.ReactNode
   }[]
 }) {
   const pathname = usePathname()
@@ -41,7 +41,7 @@ export function NavMain({
               isActive={isItemActive(pathname, item.url)}
               render={<Link href={item.url} />}
             >
-              {item.icon}
+              {item.icon ? item.icon : null}
               <span>{item.title}</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
