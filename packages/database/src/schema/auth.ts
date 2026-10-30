@@ -81,6 +81,8 @@ export const organization = pgTable("organization", {
   logo: text("logo"),
   createdAt: timestamp("created_at").notNull(),
   metadata: text("metadata"),
+  /** Billing stub: credit | enterprise. Default credit. Not client-writable. */
+  plan: text("plan").default("credit").notNull(),
 })
 
 export const member = pgTable(

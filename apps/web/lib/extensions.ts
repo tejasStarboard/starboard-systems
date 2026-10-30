@@ -1,6 +1,7 @@
 import "server-only"
 
 import {
+  DEFAULT_PLAN,
   getActiveContributions,
   listManifests,
   type ExtensionManifest,
@@ -8,8 +9,7 @@ import {
   type Plan,
 } from "@starboard/extension-host"
 
-/** Temporary default until ticket 005 persists org plan. */
-export const DEFAULT_ORG_PLAN: Plan = "credit"
+export const DEFAULT_ORG_PLAN: Plan = DEFAULT_PLAN
 
 export function listRegisteredExtensions(): ExtensionManifest[] {
   return listManifests()
