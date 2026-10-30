@@ -1,6 +1,11 @@
 import { describe, expect, test } from "bun:test"
 
 import {
+  createCustomerRequestSchema,
+  getCustomerNamesQuerySchema,
+  listCustomersResponseSchema,
+} from "./crm"
+import {
   ensureCurrencyRequestSchema,
   listPortsQuerySchema,
   listPortsResponseSchema,
@@ -88,5 +93,32 @@ describe("geography contracts", () => {
         ports: [{ value: "CNSHA" }],
       }).success
     ).toBe(false)
+  })
+})
+
+describe("crm contracts", () => {
+  test("createCustomerRequestSchema requires a non-empty name", () => {
+    expect(
+      createCustomerRequestSchema.safeParse({ name: "Acme Freight" }).success
+    ).toBe(true)
+    expect(createCustomerRequestSchema.safeParse({ name: "  " }).success).toBe(
+      false
+    )
+  })
+
+  test("listCustomersResponseSchema parses customer options", () => {
+    const parsed = listCustomersResponseSchema.safeParse({
+      customers: [{ value: "cust-1", label: "Acme Freight" }],
+    })
+    expect(parsed.success).toBe(true)
+  })
+
+  test("getCustomerNamesQuerySchema splits comma-separated ids", () => {
+    expect(getCustomerNamesQuerySchema.parse({ ids: "a, b, ,c" }).ids).toEqual([
+      "a",
+      "b",
+      "c",
+    ])
+    expect(getCustomerNamesQuerySchema.parse({}).ids).toEqual([])
   })
 })

@@ -36,6 +36,7 @@ jobs:
       NEXT_PUBLIC_APP_URL: http://127.0.0.1:3000
       QUOTES_SERVICE_URL: http://127.0.0.1:3102
       GEOGRAPHY_SERVICE_URL: http://127.0.0.1:3101
+      CRM_SERVICE_URL: http://127.0.0.1:3103
       INTERNAL_SERVICE_TOKEN: ci-internal-service-token
 
     steps:
@@ -90,6 +91,7 @@ jobs:
             echo 'NEXT_PUBLIC_APP_URL=http://127.0.0.1:3000'
             echo 'QUOTES_SERVICE_URL=http://127.0.0.1:3102'
             echo 'GEOGRAPHY_SERVICE_URL=http://127.0.0.1:3101'
+            echo 'CRM_SERVICE_URL=http://127.0.0.1:3103'
             echo 'INTERNAL_SERVICE_TOKEN=ci-internal-service-token'
           } > .env
 

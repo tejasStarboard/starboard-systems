@@ -5,6 +5,7 @@ export default defineConfig((options) => ({
     index: "src/index.ts",
     quotes: "src/quotes.ts",
     geography: "src/geography.ts",
+    crm: "src/crm.ts",
   },
   format: ["esm"],
   dts: true,

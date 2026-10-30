@@ -2,7 +2,7 @@
 id: 004
 wave: 00-shell
 title: CRM customers under Better Auth org
-status: open
+status: in_progress
 depends_on: []
 epic: SYS-CRM
 docs:
@@ -32,14 +32,14 @@ Stop treating other Better Auth organizations as customers. Add `services/crm` (
 
 ## Acceptance criteria
 
-- [ ] Customer list/create scoped to active org only
-- [ ] Quote create/save references CRM customer id (opaque text), not peer org id
-- [ ] Better Auth remains source of tenancy/roles
-- [ ] Service follows Bun layering pattern
+- [x] Customer list/create scoped to active org only
+- [x] Quote create/save references CRM customer id (opaque text), not peer org id
+- [x] Better Auth remains source of tenancy/roles
+- [x] Service follows Bun layering pattern
 
 ## Fixtures / tests
 
-- Org isolation test: org A cannot read org B customers
+- [x] Org isolation test: org A cannot read org B customers
 
 ## Out of scope
 
