@@ -89,11 +89,13 @@ export async function loadQuoteFormOptions(organizationId: string) {
   const [
     customerOptions,
     currencyOptions,
+    portOptions,
     containerTypeOptions,
     palletTypeOptions,
   ] = await Promise.all([
     listCustomerOptions(organizationId),
     getGeographyClient().listCurrencyOptions(requestId),
+    getGeographyClient().searchPorts("", requestId),
     getQuotesClient().listContainerTypeOptions(requestId),
     getQuotesClient().listPalletTypeOptions(requestId),
   ])
@@ -101,6 +103,7 @@ export async function loadQuoteFormOptions(organizationId: string) {
   return {
     customerOptions,
     currencyOptions,
+    portOptions,
     containerTypeOptions,
     palletTypeOptions,
   }

@@ -33,6 +33,7 @@ import {
   ToggleGroupItem,
 } from "@workspace/ui/components/toggle-group"
 
+import { PortCombobox } from "@/components/quotes/port-combobox"
 import {
   createContainerLine,
   type LaneMode,
@@ -45,6 +46,7 @@ export function LaneFields({
   register,
   setValue,
   laneIndex,
+  portOptions,
   containerTypeOptions,
   palletTypeOptions,
 }: {
@@ -52,6 +54,7 @@ export function LaneFields({
   register: UseFormRegister<QuoteFormValues>
   setValue: UseFormSetValue<QuoteFormValues>
   laneIndex: number
+  portOptions: QuoteFormOption[]
   containerTypeOptions: QuoteFormOption[]
   palletTypeOptions: QuoteFormOption[]
 }) {
@@ -137,46 +140,80 @@ export function LaneFields({
             {...register(`${prefix}.pickup`)}
           />
         </Field>
-        <Field>
-          <FieldLabel htmlFor={fieldId("origin")}>{originLabel}</FieldLabel>
-          <Input
-            id={fieldId("origin")}
-            placeholder={codePlaceholder}
-            {...register(`${prefix}.origin`)}
-          />
-        </Field>
+        <Controller
+          control={control}
+          name={`${prefix}.origin`}
+          render={({ field }) => (
+            <Field>
+              <FieldLabel htmlFor={fieldId("origin")}>{originLabel}</FieldLabel>
+              <PortCombobox
+                id={fieldId("origin")}
+                options={portOptions}
+                value={field.value}
+                onChange={field.onChange}
+                placeholder={codePlaceholder}
+              />
+            </Field>
+          )}
+        />
         {mode === "fcl" ? (
           <>
-            <Field>
-              <FieldLabel htmlFor={fieldId("originVia")}>Origin via</FieldLabel>
-              <Input
-                id={fieldId("originVia")}
-                placeholder="Optional via port"
-                {...register(`${prefix}.originVia`)}
-              />
-            </Field>
-            <Field>
-              <FieldLabel htmlFor={fieldId("destinationVia")}>
-                Destination via
-              </FieldLabel>
-              <Input
-                id={fieldId("destinationVia")}
-                placeholder="Optional via port"
-                {...register(`${prefix}.destinationVia`)}
-              />
-            </Field>
+            <Controller
+              control={control}
+              name={`${prefix}.originVia`}
+              render={({ field }) => (
+                <Field>
+                  <FieldLabel htmlFor={fieldId("originVia")}>
+                    Origin via
+                  </FieldLabel>
+                  <PortCombobox
+                    id={fieldId("originVia")}
+                    options={portOptions}
+                    value={field.value}
+                    onChange={field.onChange}
+                    placeholder="Optional via port"
+                  />
+                </Field>
+              )}
+            />
+            <Controller
+              control={control}
+              name={`${prefix}.destinationVia`}
+              render={({ field }) => (
+                <Field>
+                  <FieldLabel htmlFor={fieldId("destinationVia")}>
+                    Destination via
+                  </FieldLabel>
+                  <PortCombobox
+                    id={fieldId("destinationVia")}
+                    options={portOptions}
+                    value={field.value}
+                    onChange={field.onChange}
+                    placeholder="Optional via port"
+                  />
+                </Field>
+              )}
+            />
           </>
         ) : null}
-        <Field>
-          <FieldLabel htmlFor={fieldId("destination")}>
-            {destinationLabel}
-          </FieldLabel>
-          <Input
-            id={fieldId("destination")}
-            placeholder={codePlaceholder}
-            {...register(`${prefix}.destination`)}
-          />
-        </Field>
+        <Controller
+          control={control}
+          name={`${prefix}.destination`}
+          render={({ field }) => (
+            <Field>
+              <FieldLabel htmlFor={fieldId("destination")}>
+                {destinationLabel}
+              </FieldLabel>
+              <PortCombobox
+                id={fieldId("destination")}
+                options={portOptions}
+                value={field.value}
+                onChange={field.onChange}
+                placeholder={codePlaceholder}
+              />
+            </Field>
+          )}
+        />
         <Field>
           <FieldLabel htmlFor={fieldId("delivery")}>Delivery</FieldLabel>
           <Input

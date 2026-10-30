@@ -1,6 +1,6 @@
 import "server-only"
 
-import type { FormOption } from "@starboard/contracts"
+import { listPortsResponseSchema, type FormOption } from "@starboard/contracts"
 
 import { env } from "@/env"
 import {
@@ -12,6 +12,7 @@ import {
 export interface GeographyClient {
   listCurrencyOptions(requestId?: string): Promise<FormOption[]>
   ensureCurrency(code: string, requestId?: string): Promise<void>
+  searchPorts(q?: string, requestId?: string): Promise<FormOption[]>
 }
 
 class HttpGeographyClient implements GeographyClient {
@@ -49,6 +50,25 @@ class HttpGeographyClient implements GeographyClient {
       options
     )
     await parseJsonResponse(response, "Failed to ensure currency")
+  }
+
+  async searchPorts(q = "", requestId?: string): Promise<FormOption[]> {
+    const options = createServiceOptions({
+      baseUrl: env.GEOGRAPHY_SERVICE_URL,
+      requestId,
+    })
+    const params = new URLSearchParams()
+    if (q.trim()) {
+      params.set("q", q.trim())
+    }
+    const path = params.size > 0 ? `/ports?${params}` : "/ports"
+    const response = await serviceFetch(path, { method: "GET" }, options)
+    const body = await parseJsonResponse(response, "Failed to search ports")
+    const parsed = listPortsResponseSchema.safeParse(body)
+    if (!parsed.success) {
+      throw new Error("Failed to search ports: invalid response")
+    }
+    return parsed.data.ports
   }
 }
 

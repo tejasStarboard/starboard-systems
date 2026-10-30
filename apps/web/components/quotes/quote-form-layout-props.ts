@@ -20,6 +20,7 @@ export type QuoteFormLayoutProps = {
   errors: FieldErrors<QuoteFormValues>
   customerOptions: QuoteFormOption[]
   currencyOptions: QuoteFormOption[]
+  portOptions: QuoteFormOption[]
   containerTypeOptions: QuoteFormOption[]
   palletTypeOptions: QuoteFormOption[]
   laneFields: FieldArrayWithId<QuoteFormValues, "lanes", "id">[]

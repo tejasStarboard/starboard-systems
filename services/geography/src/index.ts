@@ -20,6 +20,8 @@ app.get("/health", (c) => c.json({ ok: true, service: config.serviceName }))
 
 app.use("/currencies/*", createServiceTokenMiddleware(config.serviceToken))
 app.use("/currencies", createServiceTokenMiddleware(config.serviceToken))
+app.use("/ports/*", createServiceTokenMiddleware(config.serviceToken))
+app.use("/ports", createServiceTokenMiddleware(config.serviceToken))
 
 app.route("/", controller)
 

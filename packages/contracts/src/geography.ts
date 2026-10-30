@@ -25,7 +25,15 @@ export type ListCurrenciesResponse = z.infer<
   typeof listCurrenciesResponseSchema
 >
 
+export const listPortsQuerySchema = z.object({
+  q: z.string().optional().default(""),
+})
+
+export type ListPortsQuery = z.infer<typeof listPortsQuerySchema>
+
 export const portOptionSchema = formOptionSchema
 export const listPortsResponseSchema = z.object({
   ports: z.array(portOptionSchema),
 })
+
+export type ListPortsResponse = z.infer<typeof listPortsResponseSchema>

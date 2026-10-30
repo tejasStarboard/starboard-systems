@@ -26,12 +26,14 @@ export function QuoteForm({
   defaultValues,
   customerOptions,
   currencyOptions,
+  portOptions,
   containerTypeOptions,
   palletTypeOptions,
 }: {
   defaultValues: QuoteFormValues
   customerOptions: QuoteFormOption[]
   currencyOptions: QuoteFormOption[]
+  portOptions: QuoteFormOption[]
   containerTypeOptions: QuoteFormOption[]
   palletTypeOptions: QuoteFormOption[]
 }) {
@@ -203,6 +205,7 @@ export function QuoteForm({
     errors: form.formState.errors,
     customerOptions,
     currencyOptions,
+    portOptions,
     containerTypeOptions,
     palletTypeOptions,
     laneFields,

@@ -32,6 +32,7 @@ export default async function QuotePage({
   const {
     customerOptions,
     currencyOptions,
+    portOptions,
     containerTypeOptions,
     palletTypeOptions,
   } = options
@@ -41,6 +42,7 @@ export default async function QuotePage({
   }
 
   const currencies = [...currencyOptions]
+  const ports = [...portOptions]
 
   const defaultValues =
     savedQuote ??
@@ -56,6 +58,20 @@ export default async function QuotePage({
       value: defaultValues.currencyCode,
       label: defaultValues.currencyCode,
     })
+  }
+
+  for (const lane of defaultValues.lanes) {
+    for (const code of [
+      lane.origin,
+      lane.destination,
+      lane.originVia,
+      lane.destinationVia,
+    ]) {
+      const trimmed = code.trim()
+      if (trimmed && !ports.some((option) => option.value === trimmed)) {
+        ports.push({ value: trimmed, label: trimmed })
+      }
+    }
   }
 
   const firstLane = defaultValues.lanes[0]
@@ -76,6 +92,7 @@ export default async function QuotePage({
         defaultValues={defaultValues}
         customerOptions={customerOptions}
         currencyOptions={currencies}
+        portOptions={ports}
         containerTypeOptions={containerTypeOptions}
         palletTypeOptions={palletTypeOptions}
       />

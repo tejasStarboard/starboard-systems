@@ -2,7 +2,7 @@
 id: 002
 wave: 00-shell
 title: Quote lane/cargo/rate persistence
-status: in_progress
+status: done
 depends_on: []
 epic: SYS-QUOTES
 docs:
