@@ -15,7 +15,7 @@ export const emailSender: EmailSender = {
 }
 
 export async function sendEmail(
-  options: Omit<SendEmailOptions, "from"> & { from?: string },
+  options: Omit<SendEmailOptions, "from"> & { from?: string }
 ) {
   return sendEmailBase(resend, emailSender, options)
 }

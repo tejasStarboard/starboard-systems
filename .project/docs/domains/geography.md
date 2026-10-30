@@ -1,11 +1,11 @@
 # Domain: geography
 
-| | |
-|--|--|
-| Service | `services/geography` |
-| Schema | `geo.*` |
-| Contracts | `@starboard/contracts` geography |
-| Status | Currencies only; ports/locations schema exists unused |
+|           |                                                       |
+| --------- | ----------------------------------------------------- |
+| Service   | `services/geography`                                  |
+| Schema    | `geo.*`                                               |
+| Contracts | `@starboard/contracts` geography                      |
+| Status    | Currencies only; ports/locations schema exists unused |
 
 ## Owns
 

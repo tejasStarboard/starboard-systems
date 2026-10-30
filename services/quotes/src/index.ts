@@ -16,9 +16,7 @@ const app = new Hono<{ Variables: ServiceVariables }>()
 
 app.use("*", createRequestIdMiddleware())
 
-app.get("/health", (c) =>
-  c.json({ ok: true, service: config.serviceName })
-)
+app.get("/health", (c) => c.json({ ok: true, service: config.serviceName }))
 
 const requireServiceToken = createServiceTokenMiddleware(config.serviceToken)
 app.use("/quotes/*", requireServiceToken)

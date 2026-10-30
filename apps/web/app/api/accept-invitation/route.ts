@@ -19,16 +19,13 @@ export async function POST(request: Request) {
     const body = (await request.json()) as { invitationId?: string }
     invitationId = body.invitationId?.trim()
   } catch {
-    return NextResponse.json(
-      { error: "Invalid JSON body" },
-      { status: 400 },
-    )
+    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 })
   }
 
   if (!invitationId) {
     return NextResponse.json(
       { error: "invitationId is required" },
-      { status: 400 },
+      { status: 400 }
     )
   }
 

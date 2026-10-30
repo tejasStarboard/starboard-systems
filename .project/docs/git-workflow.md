@@ -2,9 +2,9 @@
 
 ## Branches
 
-| Branch | Role |
-|--------|------|
-| `dev` | **Default / primary.** Integration branch. All ticket PRs target `dev`. |
+| Branch | Role                                                                                            |
+| ------ | ----------------------------------------------------------------------------------------------- |
+| `dev`  | **Default / primary.** Integration branch. All ticket PRs target `dev`.                         |
 | `main` | Production-stable. Updated by **cherry-pick** (or promote PR) from `dev`, never by feature PRs. |
 
 Both `dev` and `main` must be treated as **protected**: no direct pushes; changes only via pull request.
@@ -57,8 +57,19 @@ Do **not** open feature PRs against `main`.
 
 Batching several ticket SHAs into one promote PR is fine when releasing a wave.
 
+## CI
+
+PRs and pushes to `dev` / `main` run [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml):
+
+`format:check` → `lint` → `typecheck:ci` → `test` → `build`
+
+(`typecheck:ci` skips `@workspace/ui` until ticket 006; then switch CI to full `typecheck`.)
+
+Locally mirror with `pnpm ci`.
+
 ## Agent rules
 
 - Never commit straight to `dev` or `main`.
 - Never open ticket PRs with `--base main`.
 - Default base for `gh pr create` in this repo: **`dev`**.
+- Keep CI green before merge.

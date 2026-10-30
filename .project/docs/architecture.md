@@ -4,14 +4,14 @@ Runtime deploy details for the monorepo live in [docs/architecture.md](../../doc
 
 ## VS Code analogy
 
-| VS Code | Starboard Systems |
-|---------|-------------------|
-| Workbench / bare editor | `apps/web` shell: quote editor, CRM, settings, org switcher |
-| Extension Host | `packages/extension-host` + BFF activation |
-| Extension `package.json` | Extension **manifest** (see [extensions.md](extensions.md)) |
-| Built-ins | Always-on packages/services (pricing, geography, quotes, rates, CRM) |
-| Disable extension | Flag off → hide contributions → stop worker deploy |
-| Extensions view | Future admin node-graph (deferred) |
+| VS Code                  | Starboard Systems                                                    |
+| ------------------------ | -------------------------------------------------------------------- |
+| Workbench / bare editor  | `apps/web` shell: quote editor, CRM, settings, org switcher          |
+| Extension Host           | `packages/extension-host` + BFF activation                           |
+| Extension `package.json` | Extension **manifest** (see [extensions.md](extensions.md))          |
+| Built-ins                | Always-on packages/services (pricing, geography, quotes, rates, CRM) |
+| Disable extension        | Flag off → hide contributions → stop worker deploy                   |
+| Extensions view          | Future admin node-graph (deferred)                                   |
 
 ## Shell (always on)
 
@@ -40,13 +40,13 @@ Browser --cookie--> Next shell/BFF --service token--> Bun domain services --> Ne
 
 ## Data ownership
 
-| Schema / concern | Owner |
-|------------------|--------|
-| `public` / Better Auth | Next shell |
-| `geo.*` | `services/geography` |
-| `quotes.*` | `services/quotes` |
-| `rates.*` | `services/rates` (planned) |
-| `crm.*` | `services/crm` (planned) |
-| Extension job state | Python worker / DBOS |
+| Schema / concern       | Owner                      |
+| ---------------------- | -------------------------- |
+| `public` / Better Auth | Next shell                 |
+| `geo.*`                | `services/geography`       |
+| `quotes.*`             | `services/quotes`          |
+| `rates.*`              | `services/rates` (planned) |
+| `crm.*`                | `services/crm` (planned)   |
+| Extension job state    | Python worker / DBOS       |
 
 Cross-domain FKs are opaque text IDs; BFF enforces integrity.

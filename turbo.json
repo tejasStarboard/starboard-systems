@@ -1,6 +1,27 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "ui": "tui",
+  "globalPassThroughEnv": [
+    "CI",
+    "POSTGRES_URL",
+    "REDIS_URL",
+    "BETTER_AUTH_SECRET",
+    "BETTER_AUTH_URL",
+    "BETTER_AUTH_DOMAIN",
+    "GOOGLE_CLIENT_ID",
+    "GOOGLE_CLIENT_SECRET",
+    "RESEND_API_KEY",
+    "EMAIL_SENDER_NAME",
+    "EMAIL_SENDER_ADDRESS",
+    "APP_URL",
+    "NEXT_PUBLIC_APP_URL",
+    "QUOTES_SERVICE_URL",
+    "GEOGRAPHY_SERVICE_URL",
+    "INTERNAL_SERVICE_TOKEN",
+    "SKIP_ENV_VALIDATION",
+    "VERCEL_URL",
+    "VERCEL_PROJECT_PRODUCTION_URL"
+  ],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
@@ -14,7 +35,7 @@
       "dependsOn": ["^format"]
     },
     "typecheck": {
-      "dependsOn": ["^typecheck"]
+      "dependsOn": ["^build", "^typecheck"]
     },
     "test": {
       "dependsOn": ["^build"],

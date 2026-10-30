@@ -19,8 +19,8 @@ export function OrganizationInvitationEmail({
       heading="You're invited"
     >
       <Text style={paragraph}>
-        {inviterName} invited you to join{" "}
-        <strong>{organizationName}</strong> on Starboard.
+        {inviterName} invited you to join <strong>{organizationName}</strong> on
+        Starboard.
       </Text>
       <Button href={url} style={button}>
         Accept invitation

@@ -1,9 +1,9 @@
 # Domain: pricing
 
-| | |
-|--|--|
-| Package | `packages/pricing` (planned) |
-| Status | Not started — some helpers live in contracts today |
+|         |                                                    |
+| ------- | -------------------------------------------------- |
+| Package | `packages/pricing` (planned)                       |
+| Status  | Not started — some helpers live in contracts today |
 
 ## Owns
 

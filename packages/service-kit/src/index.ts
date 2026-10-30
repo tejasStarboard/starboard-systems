@@ -10,37 +10,33 @@ export type ServiceVariables = {
 }
 
 export function createRequestIdMiddleware() {
-  return createMiddleware<{ Variables: ServiceVariables }>(
-    async (c, next) => {
-      const incoming = c.req.header(REQUEST_ID_HEADER)
-      const requestId = incoming?.trim() || crypto.randomUUID()
-      c.set("requestId", requestId)
-      c.header(REQUEST_ID_HEADER, requestId)
-      await next()
-    }
-  )
+  return createMiddleware<{ Variables: ServiceVariables }>(async (c, next) => {
+    const incoming = c.req.header(REQUEST_ID_HEADER)
+    const requestId = incoming?.trim() || crypto.randomUUID()
+    c.set("requestId", requestId)
+    c.header(REQUEST_ID_HEADER, requestId)
+    await next()
+  })
 }
 
 export function createServiceTokenMiddleware(expectedToken: string) {
-  return createMiddleware<{ Variables: ServiceVariables }>(
-    async (c, next) => {
-      const header = c.req.header(SERVICE_AUTH_HEADER)
-      const token = header?.startsWith("Bearer ")
-        ? header.slice("Bearer ".length).trim()
-        : header?.trim()
+  return createMiddleware<{ Variables: ServiceVariables }>(async (c, next) => {
+    const header = c.req.header(SERVICE_AUTH_HEADER)
+    const token = header?.startsWith("Bearer ")
+      ? header.slice("Bearer ".length).trim()
+      : header?.trim()
 
-      if (!expectedToken || token !== expectedToken) {
-        return c.json({ error: "Unauthorized" }, 401)
-      }
-
-      const organizationId = c.req.header(ORG_ID_HEADER)?.trim()
-      if (organizationId) {
-        c.set("organizationId", organizationId)
-      }
-
-      await next()
+    if (!expectedToken || token !== expectedToken) {
+      return c.json({ error: "Unauthorized" }, 401)
     }
-  )
+
+    const organizationId = c.req.header(ORG_ID_HEADER)?.trim()
+    if (organizationId) {
+      c.set("organizationId", organizationId)
+    }
+
+    await next()
+  })
 }
 
 export function logInfo(
@@ -129,5 +125,9 @@ export async function serviceFetch(
   const url = `${options.baseUrl.replace(/\/$/, "")}${path}`
   const method = init.method ?? "GET"
 
-  return withTimeout(fetch(url, { ...init, headers }), timeoutMs, `${method} ${url}`)
+  return withTimeout(
+    fetch(url, { ...init, headers }),
+    timeoutMs,
+    `${method} ${url}`
+  )
 }

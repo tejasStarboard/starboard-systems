@@ -17,7 +17,10 @@ import {
 } from "@/lib/clients/http"
 
 export interface QuotesClient {
-  listQuotes(organizationId: string, requestId?: string): Promise<QuoteListItem[]>
+  listQuotes(
+    organizationId: string,
+    requestId?: string
+  ): Promise<QuoteListItem[]>
   getQuoteFormValues(
     quoteId: string,
     organizationId: string,

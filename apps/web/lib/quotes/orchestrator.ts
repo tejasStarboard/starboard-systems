@@ -86,13 +86,17 @@ export async function saveQuoteForSession(
 
 export async function loadQuoteFormOptions(organizationId: string) {
   const requestId = crypto.randomUUID()
-  const [customerOptions, currencyOptions, containerTypeOptions, palletTypeOptions] =
-    await Promise.all([
-      listCustomerOptions(organizationId),
-      getGeographyClient().listCurrencyOptions(requestId),
-      getQuotesClient().listContainerTypeOptions(requestId),
-      getQuotesClient().listPalletTypeOptions(requestId),
-    ])
+  const [
+    customerOptions,
+    currencyOptions,
+    containerTypeOptions,
+    palletTypeOptions,
+  ] = await Promise.all([
+    listCustomerOptions(organizationId),
+    getGeographyClient().listCurrencyOptions(requestId),
+    getQuotesClient().listContainerTypeOptions(requestId),
+    getQuotesClient().listPalletTypeOptions(requestId),
+  ])
 
   return {
     customerOptions,

@@ -11,11 +11,7 @@ import {
 } from "react-hook-form"
 
 import { Button } from "@workspace/ui/components/button"
-import {
-  Field,
-  FieldGroup,
-  FieldLabel,
-} from "@workspace/ui/components/field"
+import { Field, FieldGroup, FieldLabel } from "@workspace/ui/components/field"
 import { Input } from "@workspace/ui/components/input"
 import {
   Select,
@@ -89,11 +85,9 @@ export function LaneFields({
       setValue(`${prefix}.destinationVia`, "", { shouldDirty: true })
       setValue(`${prefix}.containers`, [], { shouldDirty: true })
       if (!palletTypeOptions.some((option) => option.value === "EUROPEAN")) {
-        setValue(
-          `${prefix}.palletType`,
-          palletTypeOptions[0]?.value ?? "",
-          { shouldDirty: true }
-        )
+        setValue(`${prefix}.palletType`, palletTypeOptions[0]?.value ?? "", {
+          shouldDirty: true,
+        })
       } else {
         setValue(`${prefix}.palletType`, "EUROPEAN", { shouldDirty: true })
       }

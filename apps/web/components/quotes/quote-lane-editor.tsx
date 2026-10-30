@@ -1,10 +1,6 @@
 "use client"
 
-import {
-  MagnifyingGlassIcon,
-  PlusIcon,
-  TrashIcon,
-} from "@phosphor-icons/react"
+import { MagnifyingGlassIcon, PlusIcon, TrashIcon } from "@phosphor-icons/react"
 import {
   Controller,
   type Control,

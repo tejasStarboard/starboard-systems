@@ -49,4 +49,8 @@ export const env = createEnv({
     INTERNAL_SERVICE_TOKEN: process.env.INTERNAL_SERVICE_TOKEN,
   },
   emptyStringAsUndefined: true,
+  // Allow `next build` in CI / local without a full .env when explicitly opted in.
+  skipValidation:
+    process.env.SKIP_ENV_VALIDATION === "1" ||
+    process.env.SKIP_ENV_VALIDATION === "true",
 })

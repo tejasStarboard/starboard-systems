@@ -1,11 +1,11 @@
 # Domain: crm
 
-| | |
-|--|--|
-| Service | `services/crm` (planned) |
-| Schema | `crm.*` (planned) |
-| Auth | Better Auth **organization** = tenant; CRM rows scoped by `organizationId` |
-| Status | Not started — web currently misuses other orgs as customers |
+|         |                                                                            |
+| ------- | -------------------------------------------------------------------------- |
+| Service | `services/crm` (planned)                                                   |
+| Schema  | `crm.*` (planned)                                                          |
+| Auth    | Better Auth **organization** = tenant; CRM rows scoped by `organizationId` |
+| Status  | Not started — web currently misuses other orgs as customers                |
 
 ## Owns
 

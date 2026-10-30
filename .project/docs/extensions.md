@@ -6,34 +6,34 @@ Shell discovers extensions via `packages/extension-host` (see ticket 001). UI an
 
 ```ts
 type ExtensionManifest = {
-  id: string; // e.g. "spot.maersk"
-  version: string;
-  displayName: string;
-  requiredPlan: Array<"credit" | "enterprise">;
+  id: string // e.g. "spot.maersk"
+  version: string
+  displayName: string
+  requiredPlan: Array<"credit" | "enterprise">
   contributes: {
-    nav?: Array<{ id: string; label: string; href: string }>;
-    jobs?: Array<{ type: string; carrier?: string }>;
-    api?: Array<{ pathPrefix: string }>;
-    uiSlots?: string[]; // e.g. "quote.rateSources", "rates.upload"
-  };
+    nav?: Array<{ id: string; label: string; href: string }>
+    jobs?: Array<{ type: string; carrier?: string }>
+    api?: Array<{ pathPrefix: string }>
+    uiSlots?: string[] // e.g. "quote.rateSources", "rates.upload"
+  }
   worker?: {
-    kind: "python-dbos";
-    service: string; // "ingestion" | "messaging" | "spot"
-    plugin: string;
-  };
-  healthPath?: string;
-  enabled?: boolean; // deploy / org flag
-};
+    kind: "python-dbos"
+    service: string // "ingestion" | "messaging" | "spot"
+    plugin: string
+  }
+  healthPath?: string
+  enabled?: boolean // deploy / org flag
+}
 ```
 
 ## Registered extensions (stubs)
 
-| id | Wave | Worker | Notes |
-|----|------|--------|-------|
-| `ingestion.fcl_v6` | 2 | Python ingestion | Ocean FCL only; gate-first save |
-| `messaging.msgraph` | 3 | Python messaging | First email provider |
-| `spot.maersk` | 4 | Python spot | API and/or scraper strategies |
-| `spot.cma` | 4 | Python spot | API and/or scraper strategies |
+| id                  | Wave | Worker           | Notes                           |
+| ------------------- | ---- | ---------------- | ------------------------------- |
+| `ingestion.fcl_v6`  | 2    | Python ingestion | Ocean FCL only; gate-first save |
+| `messaging.msgraph` | 3    | Python messaging | First email provider            |
+| `spot.maersk`       | 4    | Python spot      | API and/or scraper strategies   |
+| `spot.cma`          | 4    | Python spot      | API and/or scraper strategies   |
 
 ## Planned later (not registered yet)
 

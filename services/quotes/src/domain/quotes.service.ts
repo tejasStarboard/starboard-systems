@@ -28,10 +28,7 @@ export class QuotesNotFoundError extends Error {
 
 export interface QuotesService {
   list(organizationId: string): Promise<QuoteListItem[]>
-  get(
-    quoteId: string,
-    organizationId: string
-  ): Promise<QuoteFormValues>
+  get(quoteId: string, organizationId: string): Promise<QuoteFormValues>
   create(input: CreateQuoteRequest): Promise<{ id: string }>
   save(
     values: QuoteFormValues,
@@ -51,10 +48,7 @@ export class DefaultQuotesService implements QuotesService {
     return this.dao.listByOrganization(organizationId)
   }
 
-  async get(
-    quoteId: string,
-    organizationId: string
-  ): Promise<QuoteFormValues> {
+  async get(quoteId: string, organizationId: string): Promise<QuoteFormValues> {
     if (!organizationId) {
       throw new QuotesValidationError("organizationId is required")
     }
@@ -165,7 +159,9 @@ export class DefaultQuotesService implements QuotesService {
       }
     }
 
-    throw new Error("Unable to generate a unique quote ID for this organization")
+    throw new Error(
+      "Unable to generate a unique quote ID for this organization"
+    )
   }
 }
 
