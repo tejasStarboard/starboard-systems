@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# Blocks direct pushes to protected branches. Install:
+#   ln -sf ../../scripts/git-hooks/pre-push .git/hooks/pre-push
+set -euo pipefail
+
+protected='^(refs/heads/main|refs/heads/dev)$'
+while read -r local_ref local_sha remote_ref remote_sha; do
+  if [[ "$remote_ref" =~ $protected ]]; then
+    echo "error: direct push to ${remote_ref#refs/heads/} is not allowed."
+    echo "Create a ticket/* branch and open a PR into 'dev' (see .project/docs/git-workflow.md)."
+    exit 1
+  fi
+done
+exit 0
