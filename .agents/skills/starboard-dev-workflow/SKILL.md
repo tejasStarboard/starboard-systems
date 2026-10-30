@@ -66,6 +66,20 @@ Then move ticket `todo/` → `in_progress/` and set `status: in_progress` (if no
 
 Follow [starboard-ticket](../starboard-ticket/SKILL.md): acceptance only; add the tests the ticket asks for.
 
+### Commit titles
+
+Every commit message subject must be:
+
+```text
+{feat|fix|chore}({id}) - {commit title}
+```
+
+Examples: `feat(001) - extension host skeleton`, `chore(001) - mark ticket done`.
+
+- Same `{feat|fix|chore}` + ticket `{id}` pattern as the PR title.
+- One logical change per commit when practical; each subject still uses this format.
+- Use a HEREDOC for the message (`git commit -m "$(cat <<'EOF' … EOF)"`).
+
 ## 6. Local CI gate (required before PR)
 
 Mirror [.github/workflows/ci.yml](../../../.github/workflows/ci.yml) locally. **Do not push or open a PR until this passes.**
@@ -120,6 +134,7 @@ Re-run §2: move ticket `in_progress/` → `done/`, `status: done`, update linke
 ## Hard rules
 
 - One ticket per branch / PR.
+- Commit subjects and PR titles: `{feat|fix|chore}({id}) - …`.
 - **Never open/push a ticket PR without a green local `pnpm run ci`.**
 - No Linear unless the user asks.
 - No direct push to `dev`/`main`; promote to `main` only via separate cherry-pick PR (git-workflow.md) when asked.
