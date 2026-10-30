@@ -1,0 +1,13 @@
+---
+description: Starboard Systems rewrite — use .project tickets and .agents skills
+alwaysApply: true
+---
+
+# Starboard Systems rewrite
+
+- Program docs: `.project/docs/`. Tickets: `.project/tickets/{todo,in_progress,done}/`.
+- Feature work: read skill `starboard-ticket`, implement **one** ticket only.
+- Orchestration / new tickets: skill `starboard-orchestrator`.
+- Bun services → `starboard-bun-service`; extensions → `starboard-extension`; web BFF → `starboard-shell-bff`.
+- Do not port deprecated lineages (`.project/docs/deprecations.md`). No Linear unless asked.
+- Keep context lean: do not dump entire `.project` trees; open only the ticket + linked docs.
