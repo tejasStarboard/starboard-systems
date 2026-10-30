@@ -2,7 +2,7 @@
 id: 003
 wave: 00-shell
 title: Geography ports and locations API
-status: in_progress
+status: done
 depends_on: []
 epic: SYS-GEO
 docs:

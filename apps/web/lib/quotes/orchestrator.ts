@@ -9,10 +9,10 @@ import type {
 import { getGeographyClient } from "@/lib/clients/geography-client"
 import { getQuotesClient } from "@/lib/clients/quotes-client"
 import {
-  getOrganizationNamesByIds,
-  getUserNamesByIds,
+  getCustomerNamesByIds,
   listCustomerOptions,
-} from "@/lib/organizations/queries"
+} from "@/lib/crm/orchestrator"
+import { getUserNamesByIds } from "@/lib/organizations/queries"
 
 export async function listQuotesForOrg(
   organizationId: string
@@ -25,7 +25,7 @@ export async function listQuotesForOrg(
 
   const [owners, customers] = await Promise.all([
     getUserNamesByIds(ownerIds),
-    getOrganizationNamesByIds(customerIds),
+    getCustomerNamesByIds(organizationId, customerIds),
   ])
 
   return quotes.map((quote) => ({
@@ -93,7 +93,7 @@ export async function loadQuoteFormOptions(organizationId: string) {
     containerTypeOptions,
     palletTypeOptions,
   ] = await Promise.all([
-    listCustomerOptions(organizationId),
+    listCustomerOptions(organizationId, requestId),
     getGeographyClient().listCurrencyOptions(requestId),
     getGeographyClient().searchPorts("", requestId),
     getQuotesClient().listContainerTypeOptions(requestId),

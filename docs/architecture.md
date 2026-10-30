@@ -61,9 +61,10 @@ If `db:push` only drops old `public` tables and seed fails with `relation "quote
 ```sql
 CREATE SCHEMA IF NOT EXISTS geo;
 CREATE SCHEMA IF NOT EXISTS quotes;
+CREATE SCHEMA IF NOT EXISTS crm;
 ```
 
-Default ports: web `3000`, geography `3101`, quotes `3102`.
+Default ports: web `3000`, geography `3101`, quotes `3102`, crm `3103`.
 
 ## Deploy
 

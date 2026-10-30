@@ -57,7 +57,7 @@ export const quote = quotesSchema.table(
     /** Opaque tenant organization id from auth (BFF-supplied). */
     organizationId: text("organization_id").notNull(),
     quoteId: varchar("quote_id", { length: 6 }).notNull(),
-    /** Opaque customer organization id from auth (BFF-supplied). */
+    /** Opaque CRM customer id (BFF-supplied; no cross-schema FK). */
     customerId: text("customer_id"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     effectiveFrom: timestamp("effective_from"),

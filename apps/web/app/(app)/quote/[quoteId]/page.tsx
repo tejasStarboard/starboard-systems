@@ -1,5 +1,5 @@
 import { headers } from "next/headers"
-import { notFound, redirect } from "next/navigation"
+import { redirect } from "next/navigation"
 
 import { QuoteForm } from "@/components/quotes/quote-form"
 import { auth } from "@/lib/auth"
@@ -36,10 +36,6 @@ export default async function QuotePage({
     containerTypeOptions,
     palletTypeOptions,
   } = options
-
-  if (!savedQuote && customerOptions.length === 0) {
-    notFound()
-  }
 
   const currencies = [...currencyOptions]
   const ports = [...portOptions]

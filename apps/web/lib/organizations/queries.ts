@@ -1,45 +1,9 @@
 import "server-only"
 
-import { and, asc, eq, inArray, ne } from "drizzle-orm"
-import { member, organization, user } from "@starboard/db/schema"
-import type { FormOption } from "@starboard/contracts"
+import { and, eq, inArray } from "drizzle-orm"
+import { member, user } from "@starboard/db/schema"
 
 import { db } from "@/lib/db"
-
-/** BFF-owned: customer picker excludes the active tenant org. */
-export async function listCustomerOptions(
-  activeOrganizationId: string
-): Promise<FormOption[]> {
-  const rows = await db
-    .select({
-      id: organization.id,
-      name: organization.name,
-    })
-    .from(organization)
-    .where(ne(organization.id, activeOrganizationId))
-    .orderBy(asc(organization.name))
-
-  return rows.map((row) => ({
-    value: row.id,
-    label: row.name,
-  }))
-}
-
-export async function getOrganizationNamesByIds(
-  ids: string[]
-): Promise<Map<string, string>> {
-  const unique = [...new Set(ids.filter(Boolean))]
-  if (unique.length === 0) {
-    return new Map()
-  }
-
-  const rows = await db
-    .select({ id: organization.id, name: organization.name })
-    .from(organization)
-    .where(inArray(organization.id, unique))
-
-  return new Map(rows.map((row) => [row.id, row.name]))
-}
 
 export async function getUserNamesByIds(
   ids: string[]

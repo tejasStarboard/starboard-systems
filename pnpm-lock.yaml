@@ -363,6 +363,40 @@ importers:
         specifier: ^5.9.3
         version: 5.9.3
 
+  services/crm:
+    dependencies:
+      '@neondatabase/serverless':
+        specifier: ^1.2.0
+        version: 1.2.0
+      '@starboard/contracts':
+        specifier: workspace:*
+        version: link:../../packages/contracts
+      '@starboard/db':
+        specifier: workspace:*
+        version: link:../../packages/database
+      '@starboard/service-kit':
+        specifier: workspace:*
+        version: link:../../packages/service-kit
+      dotenv:
+        specifier: ^18.0.9
+        version: 18.0.9
+      drizzle-orm:
+        specifier: ^0.45.4
+        version: 0.45.4(@neondatabase/serverless@1.2.0)(bun-types@1.4.4)(kysely@0.29.7)
+      hono:
+        specifier: ^4.11.3
+        version: 4.13.14
+    devDependencies:
+      '@types/bun':
+        specifier: ^1.3.5
+        version: 1.4.4
+      '@workspace/typescript-config':
+        specifier: workspace:*
+        version: link:../../packages/typescript-config
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+
   services/geography:
     dependencies:
       '@neondatabase/serverless':
