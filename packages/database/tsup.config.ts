@@ -8,6 +8,7 @@ export default defineConfig((options) => ({
     "schema/geography": "src/schema/geography.ts",
     "schema/quote": "src/schema/quote.ts",
     "schema/crm": "src/schema/crm.ts",
+    "schema/rates": "src/schema/rates.ts",
   },
   format: ["esm"],
   dts: true,

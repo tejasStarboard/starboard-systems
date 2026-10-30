@@ -37,6 +37,7 @@ jobs:
       QUOTES_SERVICE_URL: http://127.0.0.1:3102
       GEOGRAPHY_SERVICE_URL: http://127.0.0.1:3101
       CRM_SERVICE_URL: http://127.0.0.1:3103
+      RATES_SERVICE_URL: http://127.0.0.1:3104
       INTERNAL_SERVICE_TOKEN: ci-internal-service-token
 
     steps:
@@ -92,6 +93,7 @@ jobs:
             echo 'QUOTES_SERVICE_URL=http://127.0.0.1:3102'
             echo 'GEOGRAPHY_SERVICE_URL=http://127.0.0.1:3101'
             echo 'CRM_SERVICE_URL=http://127.0.0.1:3103'
+            echo 'RATES_SERVICE_URL=http://127.0.0.1:3104'
             echo 'INTERNAL_SERVICE_TOKEN=ci-internal-service-token'
           } > .env
 

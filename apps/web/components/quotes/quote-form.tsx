@@ -250,7 +250,12 @@ export function QuoteForm({
         )}
       </form>
 
-      <RatesSearchSheet open={ratesOpen} onOpenChange={setRatesOpen} />
+      <RatesSearchSheet
+        open={ratesOpen}
+        onOpenChange={setRatesOpen}
+        origin={selectedLane?.origin || undefined}
+        destination={selectedLane?.destination || undefined}
+      />
     </div>
   )
 }

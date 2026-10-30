@@ -48,7 +48,7 @@ Browser --cookie--> Next shell/BFF --service token--> Bun domain services --> Ne
 | Org plan (`credit` \| `enterprise`) | Next shell (`organization.plan`) |
 | `geo.*`                             | `services/geography`             |
 | `quotes.*`                          | `services/quotes`                |
-| `rates.*`                           | `services/rates` (planned)       |
+| `rates.*`                           | `services/rates`                 |
 | `crm.*`                             | `services/crm`                   |
 | Extension job state                 | Python worker / DBOS             |
 

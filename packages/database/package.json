@@ -33,6 +33,12 @@
       "bun": "./src/schema/geography.ts",
       "import": "./dist/schema/geography.js",
       "default": "./dist/schema/geography.js"
+    },
+    "./schema/rates": {
+      "types": "./src/schema/rates.ts",
+      "bun": "./src/schema/rates.ts",
+      "import": "./dist/schema/rates.js",
+      "default": "./dist/schema/rates.js"
     }
   },
   "files": [
