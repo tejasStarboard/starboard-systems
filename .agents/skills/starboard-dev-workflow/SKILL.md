@@ -86,11 +86,17 @@ Only after §6 is green:
 
 ```bash
 git push -u origin HEAD
-gh pr create --base dev --title "ticket {id}: {title}" --body "$(cat <<'EOF'
+gh pr create --base dev --title "{type}({id}) - {brief title}" --body "$(cat <<'EOF'
 ## Summary
+…
+
+## What it covers
 - …
 
-## Test plan
+## Out of Scope
+- …
+
+## QA Instructions
 - [ ] `pnpm run ci` passed locally
 - [ ] …
 
@@ -98,6 +104,10 @@ EOF
 )"
 gh pr merge --auto --merge
 ```
+
+**Title:** `{fix|feat|chore}({id}) - {brief title}` — e.g. `feat(001) - extension host skeleton`. Pick `feat` / `fix` / `chore` from the change; `{id}` is the ticket id.
+
+**Body sections (required):** Summary · What it covers · Out of Scope · QA Instructions.
 
 - Base **`dev` only** (never `main`).
 - `-u origin HEAD` tracks the **ticket branch**, not `dev`.

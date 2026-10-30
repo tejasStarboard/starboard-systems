@@ -41,7 +41,8 @@ Agent default: skill **starboard-dev-workflow**.
 4. Push and open a PR **into `dev`** (enable auto-merge):
    ```bash
    git push -u origin HEAD
-   gh pr create --base dev --title "ticket 001: …" --body "…"
+   gh pr create --base dev --title "feat(001) - …" --body "…"   # title: {fix|feat|chore}({id}) - brief title
+   # body sections: Summary · What it covers · Out of Scope · QA Instructions
    gh pr merge --auto --merge
    ```
 5. After merge to `dev`: move ticket `in_progress/` → `done/`.

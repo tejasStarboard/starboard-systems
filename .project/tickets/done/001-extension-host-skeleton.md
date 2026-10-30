@@ -2,7 +2,7 @@
 id: 001
 wave: 00-shell
 title: Extension host skeleton
-status: in_progress
+status: done
 depends_on: []
 epic: SYS-EXT-HOST
 docs:
@@ -32,11 +32,11 @@ Add `packages/extension-host` with manifest types, an in-repo registry of stub m
 
 ## Acceptance criteria
 
-- [ ] Manifest Zod (or TS) schema matches `.project/docs/extensions.md`
-- [ ] Stub manifests registered for `ingestion.fcl_v6`, `messaging.msgraph`, `spot.maersk`, `spot.cma` (all `enabled: false` or inert)
-- [ ] Shell can list manifests; disabled extensions do not appear as active contributions
-- [ ] Package builds in the monorepo
-- [ ] Short note in `.project/docs/extensions.md` if schema drifts
+- [x] Manifest Zod (or TS) schema matches `.project/docs/extensions.md`
+- [x] Stub manifests registered for `ingestion.fcl_v6`, `messaging.msgraph`, `spot.maersk`, `spot.cma` (all `enabled: false` or inert)
+- [x] Shell can list manifests; disabled extensions do not appear as active contributions
+- [x] Package builds in the monorepo
+- [x] Short note in `.project/docs/extensions.md` if schema drifts
 
 ## Fixtures / tests
 
