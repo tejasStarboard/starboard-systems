@@ -3,6 +3,7 @@ import { redirect } from "next/navigation"
 
 import { AppShell } from "@/components/app-shell"
 import { auth } from "@/lib/auth"
+import { listActiveExtensionNav } from "@/lib/extensions"
 
 export default async function AppLayout({
   children,
@@ -21,6 +22,8 @@ export default async function AppLayout({
     redirect("/select-org")
   }
 
+  const extensionNav = listActiveExtensionNav()
+
   return (
     <AppShell
       user={{
@@ -28,6 +31,7 @@ export default async function AppLayout({
         email: session.user.email,
         image: session.user.image,
       }}
+      extensionNav={extensionNav}
     >
       {children}
     </AppShell>

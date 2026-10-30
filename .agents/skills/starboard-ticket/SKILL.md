@@ -2,11 +2,15 @@
 name: starboard-ticket
 description: >-
   Implement one Starboard Systems rewrite ticket from .project/tickets.
-  Use when the user points at a ticket file, says implement ticket NNN,
-  pick next ticket, or work a SYS-* epic slice in this monorepo.
+  Use when coding a ticket already selected, or with starboard-dev-workflow
+  for the default plan → branch → PR loop.
 ---
 
 # Implement a Starboard ticket
+
+Default git/ticket lifecycle (select ticket, sync `origin/dev`, reconcile
+`done/`, plan, `--no-track` branch, PR + auto-merge):
+[starboard-dev-workflow](../starboard-dev-workflow/SKILL.md).
 
 ## Before coding
 
@@ -30,16 +34,12 @@ description: >-
 - ~300 LOC soft cap per file; follow existing package patterns.
 - FCL **v6 only** for ocean ingest; never resurrect v3–v5.
 
-## Workflow
+## Implement
 
-1. Move ticket `todo/` → `in_progress/` and set `status: in_progress` (if not already).
-2. Branch from **`dev`**: `ticket/{id}-{slug}`. Never commit to `dev` or `main` directly. See [.project/docs/git-workflow.md](../../../.project/docs/git-workflow.md).
-3. Implement vertical slice: contracts → db schema (if any) → service → BFF client/orchestrator → UI.
-4. Build/typecheck the touched packages; add the tests the ticket asks for.
-5. Open PR with **`--base dev`**. Do not PR into `main` (promote later via cherry-pick). Enable auto-merge when available:
-   `gh pr merge --auto --merge` (CI must pass; `dev` requires the CI check).
-6. When merged: check off acceptance; move ticket to `tickets/done/`; set `status: done`.
-7. Update the linked `.project/docs/domains/*.md` status line if behavior changed.
+1. Ticket already in `in_progress/` on branch `{id}` (e.g. `001`; see dev-workflow).
+2. Vertical slice: contracts → db schema (if any) → service → BFF client/orchestrator → UI.
+3. Build/typecheck touched packages; add the tests the ticket asks for.
+4. After merge (dev-workflow §7): acceptance checked; ticket in `done/`; update linked `.project/docs/domains/*.md` if behavior changed.
 
 ## Agent reply style
 

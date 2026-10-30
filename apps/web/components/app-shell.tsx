@@ -10,11 +10,19 @@ type AppShellUser = {
   image?: string | null
 }
 
+export type ExtensionNavItem = {
+  id: string
+  label: string
+  href: string
+}
+
 export function AppShell({
   user,
+  extensionNav = [],
   children,
 }: {
   user: AppShellUser
+  extensionNav?: ExtensionNavItem[]
   children: React.ReactNode
 }) {
   return (
@@ -22,7 +30,7 @@ export function AppShell({
       <SidebarProvider className="flex flex-col">
         <SiteHeader />
         <div className="flex flex-1">
-          <AppSidebar user={user} />
+          <AppSidebar user={user} extensionNav={extensionNav} />
           <SidebarInset>
             <div className="flex flex-1 flex-col">{children}</div>
           </SidebarInset>
