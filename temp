@@ -1,0 +1,122 @@
+create following db tables with properties - 
+
+table country - 
+id - text, primary
+name - text
+
+table currency - 
+code - varchar, max 3 char
+
+table state - 
+id - text, primary
+name - text
+country - country.id
+
+table city - 
+id - text, primary
+name - text
+state - state.Id
+country - country.id
+
+table port - 
+unlocode - varchar, max length 7, primary key
+zipcode - varchar, max length 8
+state - state.Id
+
+country - country.id
+
+table location - 
+id - text, primary
+address1 - text
+address2 - text (optional)
+city - city.id
+state - state.id
+country - country.id
+zipcode - varchar, max length 8
+latitude - float
+longitude - float
+createdAt - date
+updatedAt - date
+
+table mode - 
+mode - varchar, max length 10, primary key
+label - text
+
+table containerType - 
+type - varchar, max length 10, primary key
+label - text
+dimensions - json object
+  - length - float
+  - width - float
+  - height - float
+
+table palletType - 
+type - varchar, max length 10, primary key
+label - text
+dimensions - json object
+  - length - float
+  - width - float
+  - height - float
+
+table rate - 
+id - text, primary
+laneId - lane.id
+currency - currency.code
+rate - float
+validFrom - date
+validTo - date
+createdAt - date
+updatedAt - date
+
+
+table lane - 
+id - text, primary
+pickup - location.id
+origin - port.unlocode
+pol - port.unlocode
+pod - port.unlocode
+destination - port.unlocode
+delivery - location.id
+legOrder - ordrered array of {ocean, air, drayage} - eg [drayage, ocean, drayage], [ocean, drayage], [drayage, ocean], [drayage, air, drayage], [air, drayage], [drayage, air], 
+quoteId - quote.id
+cargo - json cargo array
+createdAt - date
+updatedAt - date
+
+zod object cargo -
+id - text
+description - text
+createdAt - date
+updatedAt - date
+weight - float
+mode - mode.mode, discriminator
+  - fcl -
+    containerCount - int
+    containerType - containerType.type
+  - lcl -
+    volume - float
+    palletCount - int
+    palletType - palletType.type
+    hazmat - boolean
+    fragile - boolean
+  - air -
+    volume - float
+    palletCount - int
+    palletType - palletType.type
+    hazmat - boolean
+    fragile - boolean
+
+
+
+create a quote db table with following properties - 
+id - text, primary key
+source - "email" or "manual"
+owner - user.id
+quoteId - varchar, max length 6
+customer - org.id
+createdAt - date
+effectiveFrom - date
+expiryAt - date
+currency - currency.code
+lanes = array of lanes
+

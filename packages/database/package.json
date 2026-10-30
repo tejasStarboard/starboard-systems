@@ -15,9 +15,19 @@
     "./schema/auth": {
       "types": "./dist/schema/auth.d.ts",
       "import": "./dist/schema/auth.js"
+    },
+    "./schema/quote": {
+      "types": "./dist/schema/quote.d.ts",
+      "import": "./dist/schema/quote.js"
+    },
+    "./schema/geography": {
+      "types": "./dist/schema/geography.d.ts",
+      "import": "./dist/schema/geography.js"
     }
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
@@ -25,17 +35,20 @@
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
+    "db:seed": "tsx src/seed/index.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.2.0",
-    "drizzle-orm": "^0.45.4"
+    "drizzle-orm": "^0.45.4",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@workspace/typescript-config": "workspace:*",
     "dotenv": "^18.0.9",
     "drizzle-kit": "^0.31.11",
     "tsup": "^8.5.1",
+    "tsx": "^4.23.15",
     "typescript": "^5.9.3"
   }
 }
