@@ -102,8 +102,7 @@ jobs:
         run: pnpm lint
 
       - name: Typecheck
-        # Excludes @workspace/ui until Phosphor Icon* → unsuffixed exports are fixed (ticket 006).
-        run: pnpm typecheck:ci
+        run: pnpm typecheck
 
       - name: Test
         run: pnpm test

@@ -2,7 +2,7 @@
 id: 006
 wave: 00-shell
 title: Fix @workspace/ui Phosphor icons + typecheck
-status: open
+status: in_progress
 depends_on: []
 epic: SYS-SHELL
 docs:
@@ -28,9 +28,9 @@ Make `pnpm exec turbo typecheck --filter=@workspace/ui` pass so CI can drop `typ
 
 ## Acceptance criteria
 
-- [ ] `@workspace/ui` typecheck passes
-- [ ] CI workflow uses `pnpm typecheck` (not `typecheck:ci`)
-- [ ] Lint still passes
+- [x] `@workspace/ui` typecheck passes
+- [x] CI workflow uses `pnpm typecheck` (not `typecheck:ci`)
+- [x] Lint still passes
 
 ## Fixtures / tests
 

@@ -89,7 +89,7 @@ Mirror [.github/workflows/ci.yml](../../../.github/workflows/ci.yml) locally. **
 pnpm run ci
 ```
 
-Use **`pnpm run ci`** (not bare `pnpm ci` — that is pnpm’s clean-install command). Same sequence as GitHub: `format:check` → `lint` → `typecheck:ci` → `test` → `build`.
+Use **`pnpm run ci`** (not bare `pnpm ci` — that is pnpm’s clean-install command). Same sequence as GitHub: `format:check` → `lint` → `typecheck` → `test` → `build`.
 
 - If it fails: fix, re-run `pnpm run ci`, only then continue.
 - Prefer full `pnpm run ci` over package-only checks before PR (package filters are fine while iterating).
