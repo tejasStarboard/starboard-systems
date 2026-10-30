@@ -66,6 +66,7 @@ export function QuoteFormTablet(props: QuoteFormLayoutProps) {
           manualRatesVisible={props.manualRatesVisible}
           totals={props.totals}
           currencyCode={props.currencyCode}
+          portOptions={props.portOptions}
           containerTypeOptions={props.containerTypeOptions}
           palletTypeOptions={props.palletTypeOptions}
           onSearchRates={props.onSearchRates}

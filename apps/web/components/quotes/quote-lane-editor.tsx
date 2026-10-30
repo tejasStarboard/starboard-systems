@@ -73,6 +73,7 @@ export function QuoteLaneEditor({
   manualRatesVisible,
   totals,
   currencyCode,
+  portOptions,
   containerTypeOptions,
   palletTypeOptions,
   fullWidthActions,
@@ -97,6 +98,7 @@ export function QuoteLaneEditor({
   manualRatesVisible: boolean
   totals: { subtotal: number; markup: number; total: number }
   currencyCode: string
+  portOptions: QuoteFormOption[]
   containerTypeOptions: QuoteFormOption[]
   palletTypeOptions: QuoteFormOption[]
   fullWidthActions?: boolean
@@ -123,6 +125,7 @@ export function QuoteLaneEditor({
         register={register}
         setValue={setValue}
         laneIndex={selectedLaneIndex}
+        portOptions={portOptions}
         containerTypeOptions={containerTypeOptions}
         palletTypeOptions={palletTypeOptions}
       />

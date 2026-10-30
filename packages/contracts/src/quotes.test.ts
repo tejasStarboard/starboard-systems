@@ -1,6 +1,10 @@
 import { describe, expect, test } from "bun:test"
 
-import { ensureCurrencyRequestSchema } from "./geography"
+import {
+  ensureCurrencyRequestSchema,
+  listPortsQuerySchema,
+  listPortsResponseSchema,
+} from "./geography"
 import {
   calculateManualRateTotals,
   createQuoteRequestSchema,
@@ -65,5 +69,24 @@ describe("geography contracts", () => {
     expect(ensureCurrencyRequestSchema.safeParse({ code: "US" }).success).toBe(
       false
     )
+  })
+
+  test("listPortsQuerySchema defaults q to empty string", () => {
+    expect(listPortsQuerySchema.safeParse({}).success).toBe(true)
+    expect(listPortsQuerySchema.parse({}).q).toBe("")
+    expect(listPortsQuerySchema.parse({ q: "CNS" }).q).toBe("CNS")
+  })
+
+  test("listPortsResponseSchema parses port options", () => {
+    const parsed = listPortsResponseSchema.safeParse({
+      ports: [{ value: "CNSHA", label: "CNSHA — China" }],
+    })
+    expect(parsed.success).toBe(true)
+
+    expect(
+      listPortsResponseSchema.safeParse({
+        ports: [{ value: "CNSHA" }],
+      }).success
+    ).toBe(false)
   })
 })

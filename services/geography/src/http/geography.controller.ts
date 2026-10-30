@@ -52,5 +52,26 @@ export function createGeographyController(service: GeographyService) {
     }
   })
 
+  app.get("/ports", async (c) => {
+    const requestId = c.get("requestId")
+    try {
+      const q = c.req.query("q") ?? ""
+      const ports = await service.searchPorts(q)
+      logInfo("geography", requestId, "search_ports", {
+        q,
+        count: ports.length,
+      })
+      return c.json({ ports })
+    } catch (error) {
+      if (error instanceof GeographyValidationError) {
+        return c.json({ error: error.message }, error.status)
+      }
+      logError("geography", requestId, "search_ports_failed", {
+        error: error instanceof Error ? error.message : String(error),
+      })
+      return c.json({ error: "Internal server error" }, 500)
+    }
+  })
+
   return app
 }

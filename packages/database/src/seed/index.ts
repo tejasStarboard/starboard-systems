@@ -3,7 +3,9 @@ import { resolve, dirname } from "node:path"
 import { fileURLToPath } from "node:url"
 
 import { createDb } from "../client"
+import { country, port, state } from "../schema/geography"
 import { containerType, palletType } from "../schema/quote"
+import { defaultCountries, defaultPorts, defaultStates } from "./geography-data"
 import { defaultContainerTypes, defaultPalletTypes } from "./reference-data"
 
 const rootDir = resolve(dirname(fileURLToPath(import.meta.url)), "../../../..")
@@ -42,8 +44,26 @@ async function seed() {
       })
   }
 
+  for (const row of defaultCountries) {
+    await db.insert(country).values(row).onConflictDoNothing({
+      target: country.id,
+    })
+  }
+
+  for (const row of defaultStates) {
+    await db.insert(state).values(row).onConflictDoNothing({
+      target: state.id,
+    })
+  }
+
+  for (const row of defaultPorts) {
+    await db.insert(port).values(row).onConflictDoNothing({
+      target: port.unlocode,
+    })
+  }
+
   console.log(
-    `Seeded ${defaultContainerTypes.length} container types and ${defaultPalletTypes.length} pallet types`
+    `Seeded ${defaultContainerTypes.length} container types, ${defaultPalletTypes.length} pallet types, and ${defaultPorts.length} ports`
   )
 }
 

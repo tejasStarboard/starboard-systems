@@ -2,7 +2,7 @@
 id: 003
 wave: 00-shell
 title: Geography ports and locations API
-status: open
+status: in_progress
 depends_on: []
 epic: SYS-GEO
 docs:
@@ -31,10 +31,10 @@ Expose ports (and basic location search) on `services/geography` using existing 
 
 ## Acceptance criteria
 
-- [ ] `GET` ports search (query string) behind service token
-- [ ] Idempotent ensure/create not required for ports unless needed for seed
-- [ ] Web can select a port and store opaque id/unlocode on the lane
-- [ ] `/health` remains open; port routes require service token
+- [x] `GET` ports search (query string) behind service token
+- [x] Idempotent ensure/create not required for ports unless needed for seed
+- [x] Web can select a port and store opaque id/unlocode on the lane
+- [x] `/health` remains open; port routes require service token
 
 ## Fixtures / tests
 
