@@ -8,7 +8,7 @@ Cursor skills: [../../.agents/README.md](../../.agents/README.md).
 
 | Ticket                                                  | Title                                    | Status |
 | ------------------------------------------------------- | ---------------------------------------- | ------ |
-| [001](../tickets/todo/001-extension-host-skeleton.md)   | Extension host skeleton                  | open   |
+| [001](../tickets/done/001-extension-host-skeleton.md)   | Extension host skeleton                  | done   |
 | [002](../tickets/todo/002-quote-lane-persistence.md)    | Quote lane/cargo/rate persistence        | open   |
 | [003](../tickets/todo/003-geography-ports-api.md)       | Geography ports/locations API            | open   |
 | [004](../tickets/todo/004-crm-under-org.md)             | CRM under Better Auth org                | open   |
