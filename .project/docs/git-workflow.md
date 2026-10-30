@@ -7,7 +7,21 @@
 | `dev` | **Default / primary.** Integration branch. All ticket PRs target `dev`. |
 | `main` | Production-stable. Updated by **cherry-pick** (or promote PR) from `dev`, never by feature PRs. |
 
-Both `dev` and `main` are **protected**: no direct pushes; changes only via pull request.
+Both `dev` and `main` must be treated as **protected**: no direct pushes; changes only via pull request.
+
+### GitHub branch protection status
+
+This repo is **private** on GitHub Free. Classic branch protection and rulesets returned **HTTP 403** (“Upgrade to GitHub Pro or make this repository public”). Until Pro/public is enabled, enforce the same rules via:
+
+1. Agent/skills + this doc (no push to `dev`/`main`).
+2. Optional local hook: `scripts/git-hooks/pre-push` (blocks `git push` to `dev`/`main`).
+3. When available, turn on GitHub ruleset **Protect dev and main**: require pull request, no force push, no deletion.
+
+```bash
+# Install local guard (once per clone)
+ln -sf ../../scripts/git-hooks/pre-push .git/hooks/pre-push
+# or: cp scripts/git-hooks/pre-push .git/hooks/pre-push && chmod +x .git/hooks/pre-push
+```
 
 ## Per-ticket flow
 
