@@ -21,3 +21,5 @@ export {
   getActiveContributions,
   type ActiveContributions,
 } from "./entitlements.js"
+
+export { DEFAULT_PLAN, parsePlan } from "./plan.js"

@@ -3,6 +3,7 @@ import { redirect } from "next/navigation"
 
 import { AppShell } from "@/components/app-shell"
 import { auth } from "@/lib/auth"
+import { getOrganizationPlan } from "@/lib/billing/plan"
 import { listActiveExtensionNav } from "@/lib/extensions"
 
 export default async function AppLayout({
@@ -18,11 +19,13 @@ export default async function AppLayout({
     redirect("/login")
   }
 
-  if (!session.session.activeOrganizationId) {
+  const organizationId = session.session.activeOrganizationId
+  if (!organizationId) {
     redirect("/select-org")
   }
 
-  const extensionNav = listActiveExtensionNav()
+  const plan = await getOrganizationPlan(organizationId)
+  const extensionNav = listActiveExtensionNav(plan)
 
   return (
     <AppShell

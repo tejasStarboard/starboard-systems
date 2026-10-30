@@ -3,6 +3,7 @@
 import Link from "next/link"
 import {
   CaretRightIcon,
+  CurrencyCircleDollarIcon,
   GearIcon,
   LockSimpleIcon,
   PlugsConnectedIcon,
@@ -46,6 +47,12 @@ const sections: SettingsSection[] = [
         description: "Connect carriers, email, and other workspace tools.",
         href: "/settings/integrations",
         icon: <PlugsConnectedIcon />,
+      },
+      {
+        title: "Billing",
+        description: "Current plan and workspace billing details.",
+        href: "/settings/billing",
+        icon: <CurrencyCircleDollarIcon />,
       },
     ],
   },

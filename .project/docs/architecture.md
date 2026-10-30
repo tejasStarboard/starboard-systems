@@ -20,7 +20,9 @@ Runtime deploy details for the monorepo live in [docs/architecture.md](../../doc
 - CRM customers/contacts/vendors as **domain data scoped to the active org**
 - Geography (ports, currencies, locations)
 - Rates catalog (manual + written by extensions)
-- Billing: **credit** and **enterprise** plans; entitlements gate extensions
+- Billing: **credit** and **enterprise** plans; entitlements gate extensions.
+  Plan is stored on Better Auth `organization.plan` (default **`credit`**, not
+  client-writable). `packages/extension-host` filters manifests by `requiredPlan`.
 
 ## Extensions (optional)
 
@@ -40,13 +42,14 @@ Browser --cookie--> Next shell/BFF --service token--> Bun domain services --> Ne
 
 ## Data ownership
 
-| Schema / concern       | Owner                      |
-| ---------------------- | -------------------------- |
-| `public` / Better Auth | Next shell                 |
-| `geo.*`                | `services/geography`       |
-| `quotes.*`             | `services/quotes`          |
-| `rates.*`              | `services/rates` (planned) |
-| `crm.*`                | `services/crm` (planned)   |
-| Extension job state    | Python worker / DBOS       |
+| Schema / concern                    | Owner                            |
+| ----------------------------------- | -------------------------------- |
+| `public` / Better Auth              | Next shell                       |
+| Org plan (`credit` \| `enterprise`) | Next shell (`organization.plan`) |
+| `geo.*`                             | `services/geography`             |
+| `quotes.*`                          | `services/quotes`                |
+| `rates.*`                           | `services/rates` (planned)       |
+| `crm.*`                             | `services/crm`                   |
+| Extension job state                 | Python worker / DBOS             |
 
 Cross-domain FKs are opaque text IDs; BFF enforces integrity.

@@ -2,7 +2,7 @@
 id: 004
 wave: 00-shell
 title: CRM customers under Better Auth org
-status: in_progress
+status: done
 depends_on: []
 epic: SYS-CRM
 docs:

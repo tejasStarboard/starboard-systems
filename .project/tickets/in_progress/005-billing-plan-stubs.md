@@ -2,7 +2,7 @@
 id: 005
 wave: 00-shell
 title: Billing plan stubs (credit + enterprise)
-status: open
+status: in_progress
 depends_on: [001]
 epic: SYS-BILLING
 docs:

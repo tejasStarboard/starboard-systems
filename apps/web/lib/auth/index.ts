@@ -67,6 +67,18 @@ export const auth = betterAuth({
         admin,
         member,
       },
+      schema: {
+        organization: {
+          additionalFields: {
+            plan: {
+              type: "string",
+              required: false,
+              defaultValue: "credit",
+              input: false,
+            },
+          },
+        },
+      },
       sendInvitationEmail: async (data) => {
         const inviteLink = `${env.APP_URL}/invitation?invitationId=${data.id}`
         await sendEmail({
