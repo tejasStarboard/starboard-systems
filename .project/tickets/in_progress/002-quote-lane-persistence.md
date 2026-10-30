@@ -2,7 +2,7 @@
 id: 002
 wave: 00-shell
 title: Quote lane/cargo/rate persistence
-status: open
+status: in_progress
 depends_on: []
 epic: SYS-QUOTES
 docs:
@@ -33,10 +33,10 @@ Persist quote lanes, cargo, and rates end-to-end: form → BFF orchestrator → 
 
 ## Acceptance criteria
 
-- [ ] Creating/saving a quote with ≥1 lane and cargo round-trips correctly
-- [ ] Rates attached to a lane persist and reload
-- [ ] Org scoping unchanged (`organizationId` on all queries)
-- [ ] No dual-write from Next directly to Drizzle for quote tables (service only)
+- [x] Creating/saving a quote with ≥1 lane and cargo round-trips correctly
+- [x] Rates attached to a lane persist and reload
+- [x] Org scoping unchanged (`organizationId` on all queries)
+- [x] No dual-write from Next directly to Drizzle for quote tables (service only)
 
 ## Fixtures / tests
 

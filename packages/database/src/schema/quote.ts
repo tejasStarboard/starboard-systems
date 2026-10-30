@@ -15,6 +15,8 @@ import {
   varchar,
 } from "drizzle-orm/pg-core"
 
+export type LaneMarkupType = "amount" | "percent"
+
 /** Quotes service owns this Postgres schema. Auth/geo IDs are opaque (no cross-schema FKs). */
 export const quotesSchema = pgSchema("quotes")
 
@@ -90,6 +92,11 @@ export const lane = quotesSchema.table("lane", {
     .notNull()
     .references(() => quote.id, { onDelete: "cascade" }),
   cargo: jsonb("cargo").$type<Cargo[]>().notNull().default([]),
+  markupType: varchar("markup_type", { length: 10 })
+    .$type<LaneMarkupType>()
+    .notNull()
+    .default("amount"),
+  markupValue: doublePrecision("markup_value").notNull().default(0),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at")
     .defaultNow()
@@ -104,6 +111,7 @@ export const rate = quotesSchema.table("rate", {
     .references(() => lane.id, { onDelete: "cascade" }),
   /** Opaque currency code from geography. */
   currencyCode: varchar("currency_code", { length: 3 }).notNull(),
+  label: text("label").notNull().default(""),
   rate: doublePrecision("rate").notNull(),
   validFrom: timestamp("valid_from").notNull(),
   validTo: timestamp("valid_to").notNull(),

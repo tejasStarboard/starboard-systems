@@ -136,6 +136,18 @@ export class DefaultQuotesService implements QuotesService {
       }
     }
 
+    const lanesReplaced = await this.dao.replaceLanes({
+      quoteId: data.id,
+      organizationId: input.organizationId,
+      lanes: data.lanes,
+      currencyCode,
+      effectiveFrom: payload.effectiveFrom,
+      expiryAt: payload.expiryAt,
+    })
+    if (!lanesReplaced) {
+      throw new QuotesNotFoundError()
+    }
+
     return { id: data.id }
   }
 
