@@ -1,0 +1,60 @@
+{
+  "$schema_version": "1.0.0",
+  "description": "Rewrite golden cases for computeManualLaneTotals / calculateManualRateTotals. Line amounts are the buy seed; sell = buy + markup. Money rounded to 2 dp.",
+  "cases": [
+    {
+      "id": "percent_markup_basic",
+      "input": {
+        "lines": [{ "amount": 100 }, { "amount": 50 }],
+        "markupType": "percent",
+        "markupValue": 10
+      },
+      "expected": { "buy": 150, "markup": 15, "sell": 165 }
+    },
+    {
+      "id": "amount_markup_basic",
+      "input": {
+        "lines": [{ "amount": 100 }, { "amount": 50 }],
+        "markupType": "amount",
+        "markupValue": 25
+      },
+      "expected": { "buy": 150, "markup": 25, "sell": 175 }
+    },
+    {
+      "id": "empty_lines_zero",
+      "input": {
+        "lines": [],
+        "markupType": "percent",
+        "markupValue": 10
+      },
+      "expected": { "buy": 0, "markup": 0, "sell": 0 }
+    },
+    {
+      "id": "non_finite_line_ignored",
+      "input": {
+        "lines": [{ "amount": 100 }, { "amount": null }, { "amount": "x" }],
+        "markupType": "amount",
+        "markupValue": 5
+      },
+      "expected": { "buy": 100, "markup": 5, "sell": 105 }
+    },
+    {
+      "id": "percent_rounding_half_up",
+      "input": {
+        "lines": [{ "amount": 10 }],
+        "markupType": "percent",
+        "markupValue": 33.333
+      },
+      "expected": { "buy": 10, "markup": 3.33, "sell": 13.33 }
+    },
+    {
+      "id": "amount_markup_non_finite_zero",
+      "input": {
+        "lines": [{ "amount": 40 }],
+        "markupType": "amount",
+        "markupValue": null
+      },
+      "expected": { "buy": 40, "markup": 0, "sell": 40 }
+    }
+  ]
+}
