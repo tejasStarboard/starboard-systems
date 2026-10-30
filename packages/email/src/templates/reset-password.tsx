@@ -7,10 +7,7 @@ type ResetPasswordEmailProps = {
   url: string
 }
 
-export function ResetPasswordEmail({
-  userName,
-  url,
-}: ResetPasswordEmailProps) {
+export function ResetPasswordEmail({ userName, url }: ResetPasswordEmailProps) {
   return (
     <EmailLayout
       preview="Reset your Starboard password"

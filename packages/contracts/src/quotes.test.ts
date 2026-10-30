@@ -24,9 +24,9 @@ describe("quote contracts", () => {
       }).success
     ).toBe(true)
 
-    expect(createQuoteRequestSchema.safeParse({ ownerId: "user-1" }).success).toBe(
-      false
-    )
+    expect(
+      createQuoteRequestSchema.safeParse({ ownerId: "user-1" }).success
+    ).toBe(false)
   })
 
   test("quoteListItemSchema accepts service list rows", () => {

@@ -1,4 +1,9 @@
-import type { Cargo, LegMode, QuoteSource, QuoteStatus } from "@starboard/contracts"
+import type {
+  Cargo,
+  LegMode,
+  QuoteSource,
+  QuoteStatus,
+} from "@starboard/contracts"
 import { relations } from "drizzle-orm"
 import {
   doublePrecision,
@@ -68,7 +73,10 @@ export const quote = quotesSchema.table(
 
 export const lane = quotesSchema.table("lane", {
   id: text("id").primaryKey(),
-  mode: varchar("mode", { length: 10 }).$type<LaneMode>().notNull().default("fcl"),
+  mode: varchar("mode", { length: 10 })
+    .$type<LaneMode>()
+    .notNull()
+    .default("fcl"),
   /** Opaque location id from geography. */
   pickupId: text("pickup_id"),
   /** Opaque port unlocode from geography. */

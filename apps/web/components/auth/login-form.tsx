@@ -52,7 +52,7 @@ export function LoginForm() {
     <div className="flex flex-col gap-6">
       <div className="space-y-1">
         <h1 className="text-sm font-medium">Sign in</h1>
-        <p className="text-muted-foreground text-xs">
+        <p className="text-xs text-muted-foreground">
           Enter your email and password to continue.
         </p>
       </div>
@@ -78,7 +78,7 @@ export function LoginForm() {
               <FieldLabel htmlFor="password">Password</FieldLabel>
               <Link
                 href="/forgot-password"
-                className="text-muted-foreground text-xs hover:text-foreground"
+                className="text-xs text-muted-foreground hover:text-foreground"
               >
                 Forgot password?
               </Link>
@@ -104,9 +104,12 @@ export function LoginForm() {
         </Button>
       </form>
 
-      <p className="text-muted-foreground text-center text-xs">
+      <p className="text-center text-xs text-muted-foreground">
         Don&apos;t have an account?{" "}
-        <Link href="/register" className="text-foreground underline-offset-4 hover:underline">
+        <Link
+          href="/register"
+          className="text-foreground underline-offset-4 hover:underline"
+        >
           Create one
         </Link>
       </p>

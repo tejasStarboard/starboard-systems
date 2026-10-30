@@ -58,11 +58,10 @@ export function InvitationForm() {
     setPending(true)
     setError(null)
 
-    const { error: acceptError } = await authClient.organization.acceptInvitation(
-      {
+    const { error: acceptError } =
+      await authClient.organization.acceptInvitation({
         invitationId,
-      },
-    )
+      })
 
     setPending(false)
 
@@ -84,7 +83,9 @@ export function InvitationForm() {
   }
 
   if (loadingInvite || sessionPending) {
-    return <p className="text-muted-foreground text-xs">Loading invitation...</p>
+    return (
+      <p className="text-xs text-muted-foreground">Loading invitation...</p>
+    )
   }
 
   if (!session) {
@@ -92,7 +93,7 @@ export function InvitationForm() {
       <div className="flex flex-col gap-4">
         <div className="space-y-1">
           <h1 className="text-sm font-medium">Accept invitation</h1>
-          <p className="text-muted-foreground text-xs">
+          <p className="text-xs text-muted-foreground">
             Sign in or create an account to join
             {organizationName ? ` ${organizationName}` : " this organization"}.
           </p>
@@ -101,7 +102,7 @@ export function InvitationForm() {
           className="w-full"
           onClick={() =>
             router.push(
-              `/login?next=${encodeURIComponent(`/invitation?invitationId=${invitationId}`)}`,
+              `/login?next=${encodeURIComponent(`/invitation?invitationId=${invitationId}`)}`
             )
           }
         >
@@ -121,10 +122,12 @@ export function InvitationForm() {
     <div className="flex flex-col gap-6">
       <div className="space-y-1">
         <h1 className="text-sm font-medium">Join organization</h1>
-        <p className="text-muted-foreground text-xs">
+        <p className="text-xs text-muted-foreground">
           You&apos;ve been invited to join{" "}
           {organizationName ? (
-            <span className="text-foreground font-medium">{organizationName}</span>
+            <span className="font-medium text-foreground">
+              {organizationName}
+            </span>
           ) : (
             "an organization"
           )}

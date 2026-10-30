@@ -64,12 +64,7 @@ export function QuoteLanesPanel({
           </span>
         </div>
         {isStrip ? (
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={onAddLane}
-          >
+          <Button type="button" variant="outline" size="sm" onClick={onAddLane}>
             <PlusIcon data-icon="inline-start" />
             Add lane
           </Button>
@@ -88,10 +83,7 @@ export function QuoteLanesPanel({
           const lane = lanes?.[index]
           const selected = index === selectedLaneIndex
           return (
-            <li
-              key={field.id}
-              className={cn("shrink-0", !isStrip && "w-full")}
-            >
+            <li key={field.id} className={cn("shrink-0", !isStrip && "w-full")}>
               <div
                 className={cn(
                   "group flex items-start gap-1 rounded-md",

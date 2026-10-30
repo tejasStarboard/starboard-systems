@@ -1,10 +1,10 @@
 # Domain: rates
 
-| | |
-|--|--|
+|         |                            |
+| ------- | -------------------------- |
 | Service | `services/rates` (planned) |
-| Schema | `rates.*` (planned) |
-| Status | Not started |
+| Schema  | `rates.*` (planned)        |
+| Status  | Not started                |
 
 ## Owns
 

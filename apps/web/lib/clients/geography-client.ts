@@ -20,7 +20,11 @@ class HttpGeographyClient implements GeographyClient {
       baseUrl: env.GEOGRAPHY_SERVICE_URL,
       requestId,
     })
-    const response = await serviceFetch("/currencies", { method: "GET" }, options)
+    const response = await serviceFetch(
+      "/currencies",
+      { method: "GET" },
+      options
+    )
     const body = await parseJsonResponse<{ currencies: FormOption[] }>(
       response,
       "Failed to list currencies"

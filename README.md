@@ -6,16 +6,16 @@ See [docs/architecture.md](docs/architecture.md) for the production layout (auth
 
 ## Apps & services
 
-| Path | Role |
-|------|------|
-| `apps/web` | Next.js orchestrator (Better Auth, UI) |
-| `services/quotes` | Quotes API (Bun + Hono) |
-| `services/geography` | Geography / currency API (Bun + Hono) |
-| `packages/contracts` | Shared Zod API contracts |
-| `packages/database` | Drizzle schemas + client |
+| Path                   | Role                                            |
+| ---------------------- | ----------------------------------------------- |
+| `apps/web`             | Next.js orchestrator (Better Auth, UI)          |
+| `services/quotes`      | Quotes API (Bun + Hono)                         |
+| `services/geography`   | Geography / currency API (Bun + Hono)           |
+| `packages/contracts`   | Shared Zod API contracts                        |
+| `packages/database`    | Drizzle schemas + client                        |
 | `packages/service-kit` | Service token, request IDs, HTTP client helpers |
-| `packages/ui` | Shared UI |
-| `packages/email` | Resend templates |
+| `packages/ui`          | Shared UI                                       |
+| `packages/email`       | Resend templates                                |
 
 ## Develop
 

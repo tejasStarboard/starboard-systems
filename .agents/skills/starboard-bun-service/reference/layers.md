@@ -2,12 +2,12 @@
 
 ## Allowed imports
 
-| Layer | May import |
-|-------|------------|
-| Controller | contracts, service-kit, service layer types |
-| Service | DAO interface, domain errors, contracts types |
-| DAO impl | `@starboard/db`, drizzle |
-| `container.ts` | wires concrete DAO → service → controllers |
+| Layer          | May import                                    |
+| -------------- | --------------------------------------------- |
+| Controller     | contracts, service-kit, service layer types   |
+| Service        | DAO interface, domain errors, contracts types |
+| DAO impl       | `@starboard/db`, drizzle                      |
+| `container.ts` | wires concrete DAO → service → controllers    |
 
 ## Anti-patterns
 

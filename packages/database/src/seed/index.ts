@@ -4,10 +4,7 @@ import { fileURLToPath } from "node:url"
 
 import { createDb } from "../client"
 import { containerType, palletType } from "../schema/quote"
-import {
-  defaultContainerTypes,
-  defaultPalletTypes,
-} from "./reference-data"
+import { defaultContainerTypes, defaultPalletTypes } from "./reference-data"
 
 const rootDir = resolve(dirname(fileURLToPath(import.meta.url)), "../../../..")
 config({ path: resolve(rootDir, ".env") })

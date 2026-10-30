@@ -1,10 +1,10 @@
 # Domain: messaging
 
-| | |
-|--|--|
-| Service | `services/messaging` (Python, planned) |
-| First extension | `messaging.msgraph` |
-| Status | Not started |
+|                 |                                        |
+| --------------- | -------------------------------------- |
+| Service         | `services/messaging` (Python, planned) |
+| First extension | `messaging.msgraph`                    |
+| Status          | Not started                            |
 
 ## Owns
 

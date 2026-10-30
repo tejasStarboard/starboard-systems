@@ -109,7 +109,9 @@ export function SelectOrgForm() {
     setCreating(false)
 
     if (activeError) {
-      setError(activeError.message ?? "Organization created, but could not enter it")
+      setError(
+        activeError.message ?? "Organization created, but could not enter it"
+      )
       await loadOrganizations()
       return
     }
@@ -122,7 +124,9 @@ export function SelectOrgForm() {
     return (
       <div className="flex items-center justify-center gap-2 py-8">
         <Spinner />
-        <span className="text-muted-foreground text-xs">Loading organizations...</span>
+        <span className="text-xs text-muted-foreground">
+          Loading organizations...
+        </span>
       </div>
     )
   }
@@ -131,7 +135,7 @@ export function SelectOrgForm() {
     <div className="flex flex-col gap-6">
       <div className="space-y-1">
         <h1 className="text-sm font-medium">Select organization</h1>
-        <p className="text-muted-foreground text-xs">
+        <p className="text-xs text-muted-foreground">
           Choose an organization to continue, or create a new one.
         </p>
       </div>
@@ -150,25 +154,27 @@ export function SelectOrgForm() {
               type="button"
               disabled={enteringId !== null}
               onClick={() => void enterOrganization(org.id)}
-              className="border-border hover:bg-muted flex w-full items-center gap-3 border px-3 py-2.5 text-left transition-colors disabled:opacity-50"
+              className="flex w-full items-center gap-3 border border-border px-3 py-2.5 text-left transition-colors hover:bg-muted disabled:opacity-50"
             >
-              <span className="bg-muted flex size-8 items-center justify-center">
+              <span className="flex size-8 items-center justify-center bg-muted">
                 <Buildings className="size-4" />
               </span>
               <span className="min-w-0 flex-1">
-                <span className="block truncate text-xs font-medium">{org.name}</span>
-                <span className="text-muted-foreground block truncate text-xs">
+                <span className="block truncate text-xs font-medium">
+                  {org.name}
+                </span>
+                <span className="block truncate text-xs text-muted-foreground">
                   {org.slug}
                 </span>
               </span>
-              <span className="text-muted-foreground text-xs">
+              <span className="text-xs text-muted-foreground">
                 {enteringId === org.id ? "Entering..." : "Enter"}
               </span>
             </button>
           ))}
         </div>
       ) : (
-        <p className="text-muted-foreground text-xs">
+        <p className="text-xs text-muted-foreground">
           You don&apos;t belong to any organizations yet.
         </p>
       )}

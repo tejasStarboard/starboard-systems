@@ -4,15 +4,15 @@ Greenfield rewrite of production Starboard (`../starboard-2`) into this monorepo
 
 ## Layout
 
-| Path | Purpose |
-|------|---------|
-| [docs/](docs/) | Program architecture, ADRs, domain status, deprecations |
-| [tickets/todo/](tickets/todo/) | Open tickets (lexical order = priority) |
-| [tickets/in_progress/](tickets/in_progress/) | Actively being implemented |
-| [tickets/done/](tickets/done/) | Accepted / merged |
-| [../.agents/](../.agents/) | Cursor skills for feature + orchestrator agents |
-| [../docs/architecture.md](../docs/architecture.md) | Runtime deploy note |
-| [docs/git-workflow.md](docs/git-workflow.md) | `dev` / `main`, ticket branches, cherry-pick promote |
+| Path                                               | Purpose                                                 |
+| -------------------------------------------------- | ------------------------------------------------------- |
+| [docs/](docs/)                                     | Program architecture, ADRs, domain status, deprecations |
+| [tickets/todo/](tickets/todo/)                     | Open tickets (lexical order = priority)                 |
+| [tickets/in_progress/](tickets/in_progress/)       | Actively being implemented                              |
+| [tickets/done/](tickets/done/)                     | Accepted / merged                                       |
+| [../.agents/](../.agents/)                         | Cursor skills for feature + orchestrator agents         |
+| [../docs/architecture.md](../docs/architecture.md) | Runtime deploy note                                     |
+| [docs/git-workflow.md](docs/git-workflow.md)       | `dev` / `main`, ticket branches, cherry-pick promote    |
 
 ## How to pick the next ticket
 
@@ -24,12 +24,12 @@ Greenfield rewrite of production Starboard (`../starboard-2`) into this monorepo
 
 ## Status legend
 
-| Folder / status | Meaning |
-|-----------------|---------|
-| `todo` + `open` | Ready when dependencies are done |
-| `in_progress` | Someone is implementing |
+| Folder / status         | Meaning                          |
+| ----------------------- | -------------------------------- |
+| `todo` + `open`         | Ready when dependencies are done |
+| `in_progress`           | Someone is implementing          |
 | `blocked` (frontmatter) | Waiting — note why in the ticket |
-| `done/` + `done` | Merged; domain docs updated |
+| `done/` + `done`        | Merged; domain docs updated      |
 
 ## Agent prompt (copy)
 

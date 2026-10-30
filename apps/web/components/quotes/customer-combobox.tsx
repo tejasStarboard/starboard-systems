@@ -22,8 +22,7 @@ export function CustomerCombobox({
   onChange: (value: string) => void
   invalid?: boolean
 }) {
-  const selected =
-    options.find((option) => option.value === value) ?? null
+  const selected = options.find((option) => option.value === value) ?? null
 
   return (
     <Combobox

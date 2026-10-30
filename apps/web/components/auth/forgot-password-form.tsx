@@ -43,7 +43,7 @@ export function ForgotPasswordForm() {
       <div className="flex flex-col gap-4">
         <div className="space-y-1">
           <h1 className="text-sm font-medium">Check your email</h1>
-          <p className="text-muted-foreground text-xs">
+          <p className="text-xs text-muted-foreground">
             If an account exists for that address, we sent a password reset
             link.
           </p>
@@ -62,7 +62,7 @@ export function ForgotPasswordForm() {
     <div className="flex flex-col gap-6">
       <div className="space-y-1">
         <h1 className="text-sm font-medium">Forgot password</h1>
-        <p className="text-muted-foreground text-xs">
+        <p className="text-xs text-muted-foreground">
           Enter your email and we&apos;ll send a reset link.
         </p>
       </div>
@@ -93,8 +93,11 @@ export function ForgotPasswordForm() {
         </Button>
       </form>
 
-      <p className="text-muted-foreground text-center text-xs">
-        <Link href="/login" className="text-foreground underline-offset-4 hover:underline">
+      <p className="text-center text-xs text-muted-foreground">
+        <Link
+          href="/login"
+          className="text-foreground underline-offset-4 hover:underline"
+        >
           Back to sign in
         </Link>
       </p>

@@ -53,13 +53,13 @@ export function RegisterForm() {
       <div className="flex flex-col gap-4">
         <div className="space-y-1">
           <h1 className="text-sm font-medium">Check your email</h1>
-          <p className="text-muted-foreground text-xs">
+          <p className="text-xs text-muted-foreground">
             We sent a verification link. Verify your email before signing in.
           </p>
         </div>
         <Link
           href="/login"
-          className="border-border bg-background hover:bg-muted inline-flex h-8 w-full items-center justify-center border text-xs font-medium"
+          className="inline-flex h-8 w-full items-center justify-center border border-border bg-background text-xs font-medium hover:bg-muted"
         >
           Back to sign in
         </Link>
@@ -71,7 +71,7 @@ export function RegisterForm() {
     <div className="flex flex-col gap-6">
       <div className="space-y-1">
         <h1 className="text-sm font-medium">Create account</h1>
-        <p className="text-muted-foreground text-xs">
+        <p className="text-xs text-muted-foreground">
           Sign up with Google or email and password.
         </p>
       </div>
@@ -127,9 +127,12 @@ export function RegisterForm() {
         </Button>
       </form>
 
-      <p className="text-muted-foreground text-center text-xs">
+      <p className="text-center text-xs text-muted-foreground">
         Already have an account?{" "}
-        <Link href="/login" className="text-foreground underline-offset-4 hover:underline">
+        <Link
+          href="/login"
+          className="text-foreground underline-offset-4 hover:underline"
+        >
           Sign in
         </Link>
       </p>

@@ -1,11 +1,11 @@
 # Domain: quotes
 
-| | |
-|--|--|
-| Service | `services/quotes` |
-| Schema | `quotes.*` |
-| Contracts | `@starboard/contracts` quotes |
-| Status | Partial — header CRUD works; lanes/cargo/rates not persisted |
+|           |                                                              |
+| --------- | ------------------------------------------------------------ |
+| Service   | `services/quotes`                                            |
+| Schema    | `quotes.*`                                                   |
+| Contracts | `@starboard/contracts` quotes                                |
+| Status    | Partial — header CRUD works; lanes/cargo/rates not persisted |
 
 ## Owns
 

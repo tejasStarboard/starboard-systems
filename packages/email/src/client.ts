@@ -24,7 +24,7 @@ export function formatSender(sender: EmailSender) {
 export async function sendEmail(
   resend: Resend,
   sender: EmailSender,
-  options: SendEmailOptions,
+  options: SendEmailOptions
 ) {
   const { data, error } = await resend.emails.send({
     from: options.from ?? formatSender(sender),

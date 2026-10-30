@@ -104,11 +104,7 @@ export function QuoteStatusField({
             </SelectTrigger>
             <SelectContent>
               {quoteStatusOptions.map((status) => (
-                <SelectItem
-                  key={status}
-                  value={status}
-                  className="capitalize"
-                >
+                <SelectItem key={status} value={status} className="capitalize">
                   {status}
                 </SelectItem>
               ))}
@@ -178,10 +174,7 @@ export function QuoteCurrencyField({
               field.onChange(value ?? "")
             }}
           >
-            <SelectTrigger
-              className="w-full"
-              aria-invalid={fieldState.invalid}
-            >
+            <SelectTrigger className="w-full" aria-invalid={fieldState.invalid}>
               <SelectValue placeholder="—" />
             </SelectTrigger>
             <SelectContent>
