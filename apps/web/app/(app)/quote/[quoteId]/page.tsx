@@ -58,10 +58,11 @@ export default async function QuotePage({
     })
   }
 
-  const firstContainer = defaultValues.lane.containers[0]
+  const firstLane = defaultValues.lanes[0]
+  const firstContainer = firstLane?.containers[0]
   const defaultContainerType = containerTypeOptions[0]?.value
   if (
-    defaultValues.lane.mode === "fcl" &&
+    firstLane?.mode === "fcl" &&
     firstContainer &&
     !firstContainer.containerType &&
     defaultContainerType
@@ -70,7 +71,7 @@ export default async function QuotePage({
   }
 
   return (
-    <div className="flex flex-1 flex-col p-4">
+    <div className="flex flex-1 flex-col p-3 sm:p-4">
       <QuoteForm
         defaultValues={defaultValues}
         customerOptions={customerOptions}

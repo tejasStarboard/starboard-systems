@@ -1,71 +1,26 @@
 "use client"
 
-import { useMemo, useState, useTransition } from "react"
+import { useEffect, useMemo, useState, useTransition } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
-import {
-  CopyIcon,
-  MagnifyingGlassIcon,
-  PlusIcon,
-  TrashIcon,
-} from "@phosphor-icons/react"
-import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form"
+import { useFieldArray, useForm, useWatch } from "react-hook-form"
 
-import { Button } from "@workspace/ui/components/button"
-import {
-  Field,
-  FieldError,
-  FieldLabel,
-} from "@workspace/ui/components/field"
-import { Input } from "@workspace/ui/components/input"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@workspace/ui/components/select"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@workspace/ui/components/table"
-import {
-  ToggleGroup,
-  ToggleGroupItem,
-} from "@workspace/ui/components/toggle-group"
+import { useBreakpoint } from "@workspace/ui/hooks/use-breakpoint"
+import { toast } from "@workspace/ui/components/toast"
 
-import { CustomerCombobox } from "@/components/quotes/customer-combobox"
-import { LaneFields } from "@/components/quotes/lane-fields"
+import { QuoteFormDesktop } from "@/components/quotes/quote-form-desktop"
+import type { QuoteFormLayoutProps } from "@/components/quotes/quote-form-layout-props"
+import { QuoteFormMobile } from "@/components/quotes/quote-form-mobile"
+import { QuoteFormTablet } from "@/components/quotes/quote-form-tablet"
 import { RatesSearchSheet } from "@/components/quotes/rates-search-sheet"
 import {
   calculateManualRateTotals,
   createManualRateLine,
+  emptyLaneFormValues,
   isLaneReady,
   quoteFormSchema,
-  quoteStatusSchema,
   type QuoteFormOption,
   type QuoteFormValues,
 } from "@/lib/quotes/schema"
-import { toast } from "@workspace/ui/components/toast"
-import { Separator } from "@workspace/ui/components/separator"
-
-const quoteStatusOptions = quoteStatusSchema.options
-
-
-function formatMoney(value: number, currencyCode: string) {
-  try {
-    return new Intl.NumberFormat(undefined, {
-      style: "currency",
-      currency: currencyCode || "USD",
-      maximumFractionDigits: 2,
-    }).format(value)
-  } catch {
-    return value.toFixed(2)
-  }
-}
 
 export function QuoteForm({
   defaultValues,
@@ -80,10 +35,16 @@ export function QuoteForm({
   containerTypeOptions: QuoteFormOption[]
   palletTypeOptions: QuoteFormOption[]
 }) {
+  const breakpoint = useBreakpoint()
   const [pending, startTransition] = useTransition()
   const [ratesOpen, setRatesOpen] = useState(false)
-  const [manualRatesVisible, setManualRatesVisible] = useState(
-    defaultValues.manualRates.length > 0
+  const [selectedLaneIndex, setSelectedLaneIndex] = useState(0)
+  const [manualRatesVisibleByLane, setManualRatesVisibleByLane] = useState<
+    Record<string, boolean>
+  >(() =>
+    Object.fromEntries(
+      defaultValues.lanes.map((lane) => [lane.id, lane.manualRates.length > 0])
+    )
   )
 
   const form = useForm<QuoteFormValues>({
@@ -91,33 +52,65 @@ export function QuoteForm({
     defaultValues,
   })
 
-  const { fields, append, remove } = useFieldArray({
+  const {
+    fields: laneFields,
+    append: appendLane,
+    remove: removeLane,
+  } = useFieldArray({
     control: form.control,
-    name: "manualRates",
+    name: "lanes",
   })
 
-  const lane = useWatch({ control: form.control, name: "lane" })
-  const manualRates = useWatch({ control: form.control, name: "manualRates" })
-  const markupType = useWatch({ control: form.control, name: "markupType" })
-  const markupValue = useWatch({ control: form.control, name: "markupValue" })
+  const lanePath = `lanes.${selectedLaneIndex}` as const
+
+  const {
+    fields: rateFields,
+    append: appendRate,
+    remove: removeRate,
+  } = useFieldArray({
+    control: form.control,
+    name: `${lanePath}.manualRates`,
+  })
+
+  const selectedLane = useWatch({
+    control: form.control,
+    name: lanePath,
+  })
+  const lanes = useWatch({ control: form.control, name: "lanes" })
   const currencyCode = useWatch({
     control: form.control,
     name: "currencyCode",
   })
 
+  useEffect(() => {
+    if (selectedLaneIndex > laneFields.length - 1) {
+      setSelectedLaneIndex(Math.max(0, laneFields.length - 1))
+    }
+  }, [laneFields.length, selectedLaneIndex])
+
   const laneReady = useMemo(
-    () => isLaneReady(lane ?? defaultValues.lane),
-    [lane, defaultValues.lane]
+    () =>
+      isLaneReady(
+        selectedLane ??
+          defaultValues.lanes[selectedLaneIndex] ??
+          emptyLaneFormValues()
+      ),
+    [selectedLane, defaultValues.lanes, selectedLaneIndex]
   )
+
+  const selectedLaneId = selectedLane?.id
+  const manualRatesVisible = selectedLaneId
+    ? Boolean(manualRatesVisibleByLane[selectedLaneId])
+    : false
 
   const totals = useMemo(
     () =>
       calculateManualRateTotals({
-        lines: manualRates ?? [],
-        markupType: markupType ?? "amount",
-        markupValue: Number(markupValue) || 0,
+        lines: selectedLane?.manualRates ?? [],
+        markupType: selectedLane?.markupType ?? "amount",
+        markupValue: Number(selectedLane?.markupValue) || 0,
       }),
-    [manualRates, markupType, markupValue]
+    [selectedLane]
   )
 
   function onSubmit(values: QuoteFormValues) {
@@ -148,359 +141,110 @@ export function QuoteForm({
     })
   }
 
-  function handleAddManualRate() {
-    if (!manualRatesVisible) {
-      setManualRatesVisible(true)
+  function handleAddLane() {
+    const next = emptyLaneFormValues("fcl")
+    if (next.containers[0] && containerTypeOptions[0]) {
+      next.containers[0].containerType = containerTypeOptions[0].value
     }
-    append(createManualRateLine({ label: "Freight" }))
+    appendLane(next)
+    setManualRatesVisibleByLane((prev) => ({
+      ...prev,
+      [next.id]: false,
+    }))
+    setSelectedLaneIndex(laneFields.length)
+  }
+
+  function handleRemoveLane(index: number) {
+    if (laneFields.length <= 1) return
+    const removedId = lanes?.[index]?.id
+    removeLane(index)
+    if (removedId) {
+      setManualRatesVisibleByLane((prev) => {
+        const next = { ...prev }
+        delete next[removedId]
+        return next
+      })
+    }
+    setSelectedLaneIndex((current) => {
+      if (index < current) return current - 1
+      if (index === current) return Math.max(0, current - 1)
+      return current
+    })
+  }
+
+  function handleAddManualRate() {
+    if (selectedLaneId) {
+      setManualRatesVisibleByLane((prev) => ({
+        ...prev,
+        [selectedLaneId]: true,
+      }))
+    }
+    appendRate(createManualRateLine({ label: "Freight" }))
+  }
+
+  function handleCancel() {
+    form.reset(defaultValues)
+    setSelectedLaneIndex(0)
+    setManualRatesVisibleByLane(
+      Object.fromEntries(
+        defaultValues.lanes.map((lane) => [
+          lane.id,
+          lane.manualRates.length > 0,
+        ])
+      )
+    )
+  }
+
+  const layoutProps: QuoteFormLayoutProps = {
+    quoteId: defaultValues.quoteId,
+    control: form.control,
+    register: form.register,
+    setValue: form.setValue,
+    errors: form.formState.errors,
+    customerOptions,
+    currencyOptions,
+    containerTypeOptions,
+    palletTypeOptions,
+    laneFields,
+    lanes,
+    selectedLane,
+    selectedLaneIndex,
+    selectedLaneId,
+    lanePath,
+    laneReady,
+    rateFields,
+    manualRatesVisible,
+    totals,
+    currencyCode: currencyCode ?? "",
+    pending,
+    isDirty: form.formState.isDirty,
+    onSelectLane: setSelectedLaneIndex,
+    onAddLane: handleAddLane,
+    onRemoveLane: handleRemoveLane,
+    onSearchRates: () => setRatesOpen(true),
+    onAddManualRate: handleAddManualRate,
+    onAppendRate: () => appendRate(createManualRateLine()),
+    onRemoveRate: removeRate,
+    onCancel: handleCancel,
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex h-full flex-col">
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="flex w-full flex-col gap-6 h-full"
+        className="flex h-full w-full flex-col gap-4"
       >
-        <div className="flex flex-wrap items-end justify-between gap-3 border-b pb-4">
-          <div className="space-y-1">
-            <p className="text-[11px] tracking-wide text-muted-foreground uppercase">
-              Quote
-            </p>
-            <div className="flex items-center gap-2">
-              <p className="font-medium tabular-nums">
-                {defaultValues.quoteId}
-              </p>
-              <Button variant="outline" size="icon-sm" onClick={() => {
-                navigator.clipboard.writeText(defaultValues.quoteId)
-                toast.add({
-                  title: "Quote ID copied to clipboard",
-                  description: "You can now paste it into your email or chat",
-                })
-              }}
-              disabled={!defaultValues.quoteId}
-              >
-                <CopyIcon />
-              </Button>
-            </div>
-          </div>
-
-          <div className="flex flex-1 flex-wrap items-end gap-3">
-            <Controller
-              control={form.control}
-              name="status"
-              render={({ field, fieldState }) => (
-                <Field
-                  className="w-[8.5rem]"
-                  data-invalid={fieldState.invalid || undefined}
-                >
-                  <FieldLabel>Status</FieldLabel>
-                  <Select
-                    value={field.value}
-                    onValueChange={(value) => {
-                      if (
-                        value === "draft" ||
-                        value === "review" ||
-                        value === "sent" ||
-                        value === "win" ||
-                        value === "loss" ||
-                        value === "expired"
-                      ) {
-                        field.onChange(value)
-                      }
-                    }}
-                  >
-                    <SelectTrigger
-                      className="w-full capitalize"
-                      aria-invalid={fieldState.invalid}
-                    >
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {quoteStatusOptions.map((status) => (
-                        <SelectItem
-                          key={status}
-                          value={status}
-                          className="capitalize"
-                        >
-                          {status}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FieldError errors={[fieldState.error]} />
-                </Field>
-              )}
-            />
-
-            <Controller
-              control={form.control}
-              name="customerId"
-              render={({ field, fieldState }) => (
-                <Field
-                  className="min-w-[12rem] flex-1"
-                  data-invalid={fieldState.invalid || undefined}
-                >
-                  <FieldLabel>Customer</FieldLabel>
-                  <CustomerCombobox
-                    options={customerOptions}
-                    value={field.value}
-                    onChange={field.onChange}
-                    invalid={fieldState.invalid}
-                  />
-                  <FieldError errors={[fieldState.error]} />
-                </Field>
-              )}
-            />
-
-            <Controller
-              control={form.control}
-              name="currencyCode"
-              render={({ field, fieldState }) => (
-                <Field
-                  className="w-[7.5rem]"
-                  data-invalid={fieldState.invalid || undefined}
-                >
-                  <FieldLabel>Currency</FieldLabel>
-                  <Select
-                    value={field.value || null}
-                    onValueChange={(value) => {
-                      field.onChange(value ?? "")
-                    }}
-                  >
-                    <SelectTrigger
-                      className="w-full"
-                      aria-invalid={fieldState.invalid}
-                    >
-                      <SelectValue placeholder="—" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {currencyOptions.map((option) => (
-                        <SelectItem key={option.value} value={option.value}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FieldError errors={[fieldState.error]} />
-                </Field>
-              )}
-            />
-
-            <Field
-              className="w-[10.5rem]"
-              data-invalid={!!form.formState.errors.effectiveFrom || undefined}
-            >
-              <FieldLabel htmlFor="effectiveFrom">Effective</FieldLabel>
-              <Input
-                id="effectiveFrom"
-                type="date"
-                aria-invalid={!!form.formState.errors.effectiveFrom}
-                {...form.register("effectiveFrom")}
-              />
-              <FieldError errors={[form.formState.errors.effectiveFrom]} />
-            </Field>
-
-            <Field
-              className="w-[10.5rem]"
-              data-invalid={!!form.formState.errors.expiryAt || undefined}
-            >
-              <FieldLabel htmlFor="expiryAt">Expires</FieldLabel>
-              <Input
-                id="expiryAt"
-                type="date"
-                aria-invalid={!!form.formState.errors.expiryAt}
-                {...form.register("expiryAt")}
-              />
-              <FieldError errors={[form.formState.errors.expiryAt]} />
-            </Field>
-          </div>
-        </div>
-
-        <section className="mx-auto flex w-full max-w-3xl flex-col gap-4 flex-1">
-          <div className="space-y-1">
-            <h2 className="text-sm font-medium">Lane</h2>
-            <p className="text-xs text-muted-foreground">
-              Choose a mode and set the route. Rate actions unlock once origin
-              and destination are set.
-            </p>
-          </div>
-
-          <LaneFields
-            control={form.control}
-            register={form.register}
-            setValue={form.setValue}
-            containerTypeOptions={containerTypeOptions}
-            palletTypeOptions={palletTypeOptions}
-          />
-
-          <div className="flex flex-wrap gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              disabled={!laneReady}
-              onClick={() => setRatesOpen(true)}
-            >
-              <MagnifyingGlassIcon data-icon="inline-start" />
-              Search rates
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              disabled={!laneReady}
-              onClick={handleAddManualRate}
-            >
-              <PlusIcon data-icon="inline-start" />
-              Add manual rate
-            </Button>
-          </div>
-
-          {manualRatesVisible ? (
-            <div className="space-y-4 border-t pt-4">
-              <div className="space-y-1">
-                <h3 className="text-sm font-medium">Manual rates</h3>
-                <p className="text-xs text-muted-foreground">
-                  Build an invoice-style breakdown for this lane.
-                </p>
-              </div>
-
-              <div className="overflow-hidden rounded-none border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Charge</TableHead>
-                      <TableHead className="w-40 text-right">Amount</TableHead>
-                      <TableHead className="w-10" />
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {fields.length ? (
-                      fields.map((field, index) => (
-                        <TableRow key={field.id}>
-                          <TableCell>
-                            <Input
-                              placeholder="Surcharge label"
-                              {...form.register(`manualRates.${index}.label`)}
-                            />
-                          </TableCell>
-                          <TableCell>
-                            <Input
-                              type="number"
-                              step="0.01"
-                              className="text-right tabular-nums"
-                              {...form.register(`manualRates.${index}.amount`, {
-                                valueAsNumber: true,
-                              })}
-                            />
-                          </TableCell>
-                          <TableCell>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="icon-sm"
-                              aria-label="Remove charge"
-                              onClick={() => remove(index)}
-                            >
-                              <TrashIcon />
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    ) : (
-                      <TableRow>
-                        <TableCell
-                          colSpan={3}
-                          className="h-16 text-center text-muted-foreground"
-                        >
-                          No charges yet.
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
-              </div>
-
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => append(createManualRateLine())}
-              >
-                <PlusIcon data-icon="inline-start" />
-                Add charge
-              </Button>
-
-              <div className="ml-auto flex w-full max-w-sm flex-col gap-3">
-                <div className="flex items-center justify-between gap-3 text-xs">
-                  <span className="text-muted-foreground">Subtotal</span>
-                  <span className="tabular-nums">
-                    {formatMoney(totals.subtotal, currencyCode)}
-                  </span>
-                </div>
-
-                <div className="flex items-end justify-between gap-3">
-                  <Field className="flex-1">
-                    <FieldLabel>Markup</FieldLabel>
-                    <div className="flex items-center gap-2">
-                      <Controller
-                        control={form.control}
-                        name="markupType"
-                        render={({ field }) => (
-                          <ToggleGroup
-                            value={[field.value]}
-                            onValueChange={(value) => {
-                              const next = value[0]
-                              if (next === "amount" || next === "percent") {
-                                field.onChange(next)
-                              }
-                            }}
-                            variant="outline"
-                            size="sm"
-                          >
-                            <ToggleGroupItem value="amount">$</ToggleGroupItem>
-                            <ToggleGroupItem value="percent">%</ToggleGroupItem>
-                          </ToggleGroup>
-                        )}
-                      />
-                      <Input
-                        type="number"
-                        step="0.01"
-                        className="w-28 text-right tabular-nums"
-                        {...form.register("markupValue", {
-                          valueAsNumber: true,
-                        })}
-                      />
-                    </div>
-                  </Field>
-                  <span className="pb-2 text-xs tabular-nums">
-                    {formatMoney(totals.markup, currencyCode)}
-                  </span>
-                </div>
-
-                <div className="flex items-center justify-between gap-3 border-t pt-3 text-sm font-medium">
-                  <span>Total</span>
-                  <span className="tabular-nums">
-                    {formatMoney(totals.total, currencyCode)}
-                  </span>
-                </div>
-              </div>
-            </div>
-          ) : null}
-
-        </section>
-
         <input type="hidden" {...form.register("id")} />
         <input type="hidden" {...form.register("quoteId")} />
         <input type="hidden" {...form.register("source")} />
 
-<Separator/>
-        <div className="flex items-center justify-end gap-3">
-          <Button variant="outline" size="sm" onClick={() => form.reset(defaultValues)}>
-            Cancel
-          </Button>
-          <Button type="submit" disabled={pending || !form.formState.isDirty}>
-            {pending ? "Saving..." : "Save"}
-          </Button>
-        </div>
+        {breakpoint === "mobile" ? (
+          <QuoteFormMobile {...layoutProps} />
+        ) : breakpoint === "tablet" ? (
+          <QuoteFormTablet {...layoutProps} />
+        ) : (
+          <QuoteFormDesktop {...layoutProps} />
+        )}
       </form>
 
       <RatesSearchSheet open={ratesOpen} onOpenChange={setRatesOpen} />

@@ -69,7 +69,18 @@ export const containerLineSchema = z.object({
 
 export type ContainerLine = z.infer<typeof containerLineSchema>
 
+export const manualRateLineSchema = z.object({
+  id: z.string(),
+  label: z.string(),
+  amount: z.number(),
+})
+
+export type ManualRateLine = z.infer<typeof manualRateLineSchema>
+
+export const markupTypeSchema = z.enum(["amount", "percent"])
+
 export const laneFormSchema = z.object({
+  id: z.string(),
   mode: laneModeSchema,
   pickup: z.string(),
   origin: z.string(),
@@ -82,19 +93,12 @@ export const laneFormSchema = z.object({
   volume: z.number(),
   palletCount: z.number(),
   palletType: z.string(),
+  manualRates: z.array(manualRateLineSchema),
+  markupType: markupTypeSchema,
+  markupValue: z.number(),
 })
 
 export type LaneFormValues = z.infer<typeof laneFormSchema>
-
-export const manualRateLineSchema = z.object({
-  id: z.string(),
-  label: z.string(),
-  amount: z.number(),
-})
-
-export type ManualRateLine = z.infer<typeof manualRateLineSchema>
-
-export const markupTypeSchema = z.enum(["amount", "percent"])
 
 export const quoteFormSchema = z.object({
   id: z.string(),
@@ -110,10 +114,7 @@ export const quoteFormSchema = z.object({
     ),
   effectiveFrom: z.string(),
   expiryAt: z.string(),
-  lane: laneFormSchema,
-  manualRates: z.array(manualRateLineSchema),
-  markupType: markupTypeSchema,
-  markupValue: z.number(),
+  lanes: z.array(laneFormSchema).min(1),
 })
 
 export type QuoteFormValues = z.infer<typeof quoteFormSchema>
@@ -202,6 +203,7 @@ export function createContainerLine(
 
 export function emptyLaneFormValues(mode: LaneMode = "fcl"): LaneFormValues {
   return {
+    id: crypto.randomUUID(),
     mode,
     pickup: "",
     origin: "",
@@ -214,6 +216,9 @@ export function emptyLaneFormValues(mode: LaneMode = "fcl"): LaneFormValues {
     volume: 0,
     palletCount: 0,
     palletType: "",
+    manualRates: [],
+    markupType: "amount",
+    markupValue: 0,
   }
 }
 
@@ -247,10 +252,7 @@ export function emptyQuoteFormValues(input: {
     currencyCode: "",
     effectiveFrom: "",
     expiryAt: "",
-    lane: emptyLaneFormValues("fcl"),
-    manualRates: [],
-    markupType: "amount",
-    markupValue: 0,
+    lanes: [emptyLaneFormValues("fcl")],
   }
 }
 

@@ -125,10 +125,7 @@ export class DrizzleQuotesDao implements QuotesDao {
       currencyCode: row.currencyCode ?? "",
       effectiveFrom: toDateInputValue(row.effectiveFrom),
       expiryAt: toDateInputValue(row.expiryAt),
-      lane: emptyLaneFormValues(),
-      manualRates: [],
-      markupType: "amount",
-      markupValue: 0,
+      lanes: [emptyLaneFormValues()],
     }
   }
 
