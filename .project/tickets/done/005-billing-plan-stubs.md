@@ -2,7 +2,7 @@
 id: 005
 wave: 00-shell
 title: Billing plan stubs (credit + enterprise)
-status: in_progress
+status: done
 depends_on: [001]
 epic: SYS-BILLING
 docs:
@@ -31,10 +31,10 @@ Model two plans — `credit` and `enterprise` — on the org (or org metadata), 
 
 ## Acceptance criteria
 
-- [ ] Org has a plan of `credit` | `enterprise` (default documented)
-- [ ] Extension host filters manifests by `requiredPlan`
-- [ ] Settings page shows current plan
-- [ ] No payment provider required for local dev
+- [x] Org has a plan of `credit` | `enterprise` (default documented)
+- [x] Extension host filters manifests by `requiredPlan`
+- [x] Settings page shows current plan
+- [x] No payment provider required for local dev
 
 ## Fixtures / tests
 

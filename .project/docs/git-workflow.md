@@ -70,9 +70,7 @@ Batching several ticket SHAs into one promote PR is fine when releasing a wave.
 
 PRs and pushes to `dev` / `main` run [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml):
 
-`format:check` → `lint` → `typecheck:ci` → `test` → `build`
-
-(`typecheck:ci` skips `@workspace/ui` until ticket 006; then switch CI to full `typecheck`.)
+`format:check` → `lint` → `typecheck` → `test` → `build`
 
 Locally mirror with `pnpm run ci` (not bare `pnpm ci`, which is a clean install).
 
