@@ -7,6 +7,7 @@
     "dev": "bun run --watch src/index.ts",
     "start": "bun run src/index.ts",
     "typecheck": "tsc --noEmit",
+    "test": "bun test",
     "build": "echo \"Bun service — no compile step\""
   },
   "dependencies": {

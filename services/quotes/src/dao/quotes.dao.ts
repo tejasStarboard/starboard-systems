@@ -1,15 +1,29 @@
-import { and, asc, desc, eq } from "drizzle-orm"
+import { and, asc, desc, eq, inArray } from "drizzle-orm"
 import {
   emptyLaneFormValues,
   toDateInputValue,
   type FormOption,
+  type LaneFormValues,
   type QuoteFormValues,
   type QuoteListItem,
   type QuoteSource,
   type QuoteStatus,
 } from "@starboard/contracts"
-import { containerType, palletType, quote } from "@starboard/db/schema"
+import {
+  containerType,
+  lane,
+  palletType,
+  quote,
+  rate,
+} from "@starboard/db/schema"
 
+import {
+  laneFormToRows,
+  resolveRateValidity,
+  rowsToLaneForm,
+  type LaneRow,
+  type RateRow,
+} from "../domain/lane-mapper"
 import type { QuotesDb } from "./db"
 
 export type QuoteInsert = {
@@ -33,6 +47,15 @@ export type QuoteUpdate = {
   currencyCode: string | null
 }
 
+export type ReplaceLanesInput = {
+  quoteId: string
+  organizationId: string
+  lanes: LaneFormValues[]
+  currencyCode: string | null
+  effectiveFrom: Date | null
+  expiryAt: Date | null
+}
+
 export interface QuotesDao {
   listByOrganization(organizationId: string): Promise<QuoteListItem[]>
   findFormValues(
@@ -50,6 +73,7 @@ export interface QuotesDao {
     payload: QuoteUpdate
   ): Promise<boolean>
   existsInOrganization(id: string, organizationId: string): Promise<boolean>
+  replaceLanes(input: ReplaceLanesInput): Promise<boolean>
   listContainerTypes(): Promise<FormOption[]>
   listPalletTypes(): Promise<FormOption[]>
 }
@@ -116,6 +140,60 @@ export class DrizzleQuotesDao implements QuotesDao {
       return null
     }
 
+    const laneRows = await this.db
+      .select({
+        id: lane.id,
+        mode: lane.mode,
+        pickupId: lane.pickupId,
+        origin: lane.origin,
+        originVia: lane.originVia,
+        destinationVia: lane.destinationVia,
+        destination: lane.destination,
+        deliveryId: lane.deliveryId,
+        quoteId: lane.quoteId,
+        cargo: lane.cargo,
+        markupType: lane.markupType,
+        markupValue: lane.markupValue,
+      })
+      .from(lane)
+      .where(eq(lane.quoteId, quoteId))
+      .orderBy(asc(lane.createdAt))
+
+    const laneIds = laneRows.map((entry) => entry.id)
+    const rateRows =
+      laneIds.length === 0
+        ? []
+        : await this.db
+            .select({
+              id: rate.id,
+              laneId: rate.laneId,
+              currencyCode: rate.currencyCode,
+              label: rate.label,
+              rate: rate.rate,
+              validFrom: rate.validFrom,
+              validTo: rate.validTo,
+            })
+            .from(rate)
+            .where(inArray(rate.laneId, laneIds))
+            .orderBy(asc(rate.createdAt))
+
+    const ratesByLane = new Map<string, RateRow[]>()
+    for (const rateRow of rateRows) {
+      const list = ratesByLane.get(rateRow.laneId) ?? []
+      list.push(rateRow)
+      ratesByLane.set(rateRow.laneId, list)
+    }
+
+    const lanes =
+      laneRows.length === 0
+        ? [emptyLaneFormValues()]
+        : laneRows.map((laneRow) =>
+            rowsToLaneForm(
+              laneRow as LaneRow,
+              ratesByLane.get(laneRow.id) ?? []
+            )
+          )
+
     return {
       id: row.id,
       quoteId: row.quoteId,
@@ -125,7 +203,7 @@ export class DrizzleQuotesDao implements QuotesDao {
       currencyCode: row.currencyCode ?? "",
       effectiveFrom: toDateInputValue(row.effectiveFrom),
       expiryAt: toDateInputValue(row.expiryAt),
-      lanes: [emptyLaneFormValues()],
+      lanes,
     }
   }
 
@@ -173,6 +251,65 @@ export class DrizzleQuotesDao implements QuotesDao {
       .limit(1)
 
     return Boolean(row)
+  }
+
+  async replaceLanes(input: ReplaceLanesInput): Promise<boolean> {
+    const inOrg = await this.existsInOrganization(
+      input.quoteId,
+      input.organizationId
+    )
+    if (!inOrg) {
+      return false
+    }
+
+    await this.db.delete(lane).where(eq(lane.quoteId, input.quoteId))
+
+    const validity = resolveRateValidity({
+      effectiveFrom: input.effectiveFrom,
+      expiryAt: input.expiryAt,
+    })
+    const currencyCode = input.currencyCode ?? ""
+
+    for (const formLane of input.lanes) {
+      const mapped = laneFormToRows(
+        formLane,
+        input.quoteId,
+        currencyCode,
+        validity
+      )
+
+      await this.db.insert(lane).values({
+        id: mapped.lane.id,
+        mode: mapped.lane.mode,
+        pickupId: mapped.lane.pickupId,
+        origin: mapped.lane.origin,
+        originVia: mapped.lane.originVia,
+        destinationVia: mapped.lane.destinationVia,
+        destination: mapped.lane.destination,
+        deliveryId: mapped.lane.deliveryId,
+        quoteId: mapped.lane.quoteId,
+        cargo: mapped.lane.cargo,
+        markupType: mapped.lane.markupType,
+        markupValue: mapped.lane.markupValue,
+        legOrder: [],
+      })
+
+      if (mapped.rates.length > 0) {
+        await this.db.insert(rate).values(
+          mapped.rates.map((rateRow) => ({
+            id: rateRow.id,
+            laneId: rateRow.laneId,
+            currencyCode: rateRow.currencyCode,
+            label: rateRow.label,
+            rate: rateRow.rate,
+            validFrom: rateRow.validFrom,
+            validTo: rateRow.validTo,
+          }))
+        )
+      }
+    }
+
+    return true
   }
 
   async listContainerTypes(): Promise<FormOption[]> {
