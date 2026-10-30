@@ -72,6 +72,27 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Write CI env for Next
+        working-directory: apps/web
+        run: |
+          {
+            echo 'POSTGRES_URL=postgresql://ci:ci@127.0.0.1:5432/ci'
+            echo 'REDIS_URL=redis://127.0.0.1:6379'
+            echo 'BETTER_AUTH_SECRET=ci-better-auth-secret-min-32-chars!!'
+            echo 'BETTER_AUTH_URL=http://127.0.0.1:3000'
+            echo 'BETTER_AUTH_DOMAIN=localhost'
+            echo 'GOOGLE_CLIENT_ID=ci-google-client-id'
+            echo 'GOOGLE_CLIENT_SECRET=ci-google-client-secret'
+            echo 'RESEND_API_KEY=re_ci_dummy_key'
+            echo 'EMAIL_SENDER_NAME=Starboard CI'
+            echo 'EMAIL_SENDER_ADDRESS=ci@example.com'
+            echo 'APP_URL=http://127.0.0.1:3000'
+            echo 'NEXT_PUBLIC_APP_URL=http://127.0.0.1:3000'
+            echo 'QUOTES_SERVICE_URL=http://127.0.0.1:3102'
+            echo 'GEOGRAPHY_SERVICE_URL=http://127.0.0.1:3101'
+            echo 'INTERNAL_SERVICE_TOKEN=ci-internal-service-token'
+          } > .env
+
       - name: Format check
         run: pnpm format:check
 
