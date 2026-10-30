@@ -2,7 +2,7 @@
 id: 010
 wave: 01-quoting
 title: packages/pricing ONE MATH
-status: in_progress
+status: done
 depends_on: [002]
 epic: SYS-PRICING
 docs:
