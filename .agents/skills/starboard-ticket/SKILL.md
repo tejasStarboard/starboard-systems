@@ -36,7 +36,8 @@ description: >-
 2. Branch from **`dev`**: `ticket/{id}-{slug}`. Never commit to `dev` or `main` directly. See [.project/docs/git-workflow.md](../../../.project/docs/git-workflow.md).
 3. Implement vertical slice: contracts → db schema (if any) → service → BFF client/orchestrator → UI.
 4. Build/typecheck the touched packages; add the tests the ticket asks for.
-5. Open PR with **`--base dev`**. Do not PR into `main` (promote later via cherry-pick).
+5. Open PR with **`--base dev`**. Do not PR into `main` (promote later via cherry-pick). Enable auto-merge when available:
+   `gh pr merge --auto --merge` (CI must pass; `dev` requires the CI check).
 6. When merged: check off acceptance; move ticket to `tickets/done/`; set `status: done`.
 7. Update the linked `.project/docs/domains/*.md` status line if behavior changed.
 
