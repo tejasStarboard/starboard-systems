@@ -68,15 +68,16 @@ Follow [starboard-ticket](../starboard-ticket/SKILL.md): acceptance only; add th
 
 ### Commit titles
 
-Every commit message subject must be:
+Ticket work — every commit subject must be:
 
 ```text
 {feat|fix|chore}({id}) - {commit title}
 ```
 
-Examples: `feat(001) - extension host skeleton`, `chore(001) - mark ticket done`.
+Examples: `feat(001) - extension host skeleton`, `fix(002) - quote save validation`, `chore(001) - mark ticket done`.
 
 - Same `{feat|fix|chore}` + ticket `{id}` pattern as the PR title.
+- Non-ticket meta/docs only (no `.project` ticket): `chore - {commit title}` (no id).
 - One logical change per commit when practical; each subject still uses this format.
 - Use a HEREDOC for the message (`git commit -m "$(cat <<'EOF' … EOF)"`).
 
