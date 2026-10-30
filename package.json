@@ -9,7 +9,7 @@
     "format": "turbo format",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,mjs,cjs,json,md,css}\"",
     "typecheck": "turbo typecheck",
-    "typecheck:ci": "turbo run typecheck --filter='@starboard/*' --filter=web --only",
+    "typecheck:ci": "turbo run build --filter='@starboard/*' && turbo run typecheck --filter='@starboard/*' --filter=web --only",
     "test": "turbo test",
     "ci": "pnpm format:check && pnpm lint && pnpm typecheck:ci && pnpm test && pnpm build"
   },
