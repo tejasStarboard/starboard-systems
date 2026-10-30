@@ -37,7 +37,8 @@ Agent default: skill **starboard-dev-workflow**.
    git checkout --no-track -b 001 origin/dev
    ```
    Naming: **ticket id only** (e.g. `001`), matching `.project/tickets/…/{id}-*.md`. Do **not** set `dev` as the branch upstream.
-3. Implement the ticket; keep the branch scoped to that ticket.
+3. Implement the ticket; keep the branch scoped to that ticket. Commit subjects:
+   `{feat|fix|chore}({id}) - {commit title}` (e.g. `feat(001) - extension host skeleton`).
 4. Push and open a PR **into `dev`** (enable auto-merge):
    ```bash
    git push -u origin HEAD
