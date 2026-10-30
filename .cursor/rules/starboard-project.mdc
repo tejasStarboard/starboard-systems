@@ -10,4 +10,5 @@ alwaysApply: true
 - Orchestration / new tickets: skill `starboard-orchestrator`.
 - Bun services → `starboard-bun-service`; extensions → `starboard-extension`; web BFF → `starboard-shell-bff`.
 - Do not port deprecated lineages (`.project/docs/deprecations.md`). No Linear unless asked.
+- Git: branch from `dev` as `ticket/{id}-{slug}`; PR into **`dev` only**; never push to `dev`/`main`; promote to `main` via cherry-pick PR (`.project/docs/git-workflow.md`).
 - Keep context lean: do not dump entire `.project` trees; open only the ticket + linked docs.

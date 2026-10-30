@@ -23,6 +23,7 @@ Read [orchestrator.md](../../../.project/docs/orchestrator.md) and follow that s
 - Implement large features in the orchestrator chat when a ticket exists — open/assign a ticket instead
 - Use Linear unless the user explicitly asks
 - Port deprecated modules ([deprecations.md](../../../.project/docs/deprecations.md))
+- Allow or instruct direct commits / PRs to `main` for ticket work — see [git-workflow.md](../../../.project/docs/git-workflow.md)
 
 ## Ticket authoring
 

@@ -12,13 +12,15 @@ Greenfield rewrite of production Starboard (`../starboard-2`) into this monorepo
 | [tickets/done/](tickets/done/) | Accepted / merged |
 | [../.agents/](../.agents/) | Cursor skills for feature + orchestrator agents |
 | [../docs/architecture.md](../docs/architecture.md) | Runtime deploy note |
+| [docs/git-workflow.md](docs/git-workflow.md) | `dev` / `main`, ticket branches, cherry-pick promote |
 
 ## How to pick the next ticket
 
 1. List `.project/tickets/todo/*.md` in lexical order.
 2. Take the **lowest-numbered** ticket whose `depends_on` are all in `done/` (or have `status: done`).
 3. Move it to `tickets/in_progress/` and set `status: in_progress`.
-4. Open a feature chat with skill **starboard-ticket** and that file only (+ its `docs:` links).
+4. Branch from `dev`: `ticket/{id}-{slug}` (see [git-workflow.md](docs/git-workflow.md)). PR **into `dev` only**; promote to `main` via cherry-pick PR.
+5. Open a feature chat with skill **starboard-ticket** and that file only (+ its `docs:` links).
 
 ## Status legend
 
