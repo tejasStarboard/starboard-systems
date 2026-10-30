@@ -1,0 +1,116 @@
+{
+  "$schema_version": "1.0.0",
+  "description": "SB-2827 sub-plan 01 — shared behavioral oracle for the free/min/max usage-constraint procedure (dossier Rule CR-1, 'min is min, max is max, free is free'). James's canonical worked example: a surcharge of $50/unit with free_usage=3, min_usage=2, max_usage=10. Both surfaces MUST produce identical effectiveUsage for every case below: webapp `getEffectiveUsageAmount` (apps/webapp/utils/shared/quotes/qv2Formatting.ts) and addin `applyUsageConstraints` (apps/outlook-addin/src/taskpane/rfq-v2/store/rates/pricing/surchargeCalculation.ts). The drift detectors are the two app-side fixture tests — a new case block in `apps/webapp/utils/shared/quotes/__tests__/qv2Formatting.test.ts` and a new case block in the addin's `surchargeCalculation` test — both load this fixture and assert the helper's output. SCOPE — ROWS 1-10 ONLY: the dossier CR-1 procedure order is max-caps-raw -> free-reduces -> min-floors; the actual code order on BOTH surfaces is free-reduces -> min-floors -> max-caps. These two orders produce identical results for raw <= max but diverge for raw > max (e.g. raw=11 -> CR-1 yields 7, current code yields 8). Rows 1-10 are all raw <= max=10, so they are order-invariant and lock the procedure unambiguously against current code AND the canonical intent. Rows 11-12 (raw > max) and the `min > max` misconfiguration case are DEFERRED to sub-plan 07, which reorders the ONE MATH primitive set to match the dossier — see epic `sub-plan-01-followup-handoff.md` item #7. Per concern C1, every case here has min_usage > 0 (the addin's `if (minUsage > 0)` guard treats min_usage=0 as unset; min=0 cases would not exercise the floor and are not part of this oracle).",
+  "cases": [
+    {
+      "id": "raw-1-free-reduces-to-zero-min-floors",
+      "input": {
+        "rawUsage": 1,
+        "freeUsage": 3,
+        "minUsage": 2,
+        "maxUsage": 10,
+        "rate": 50
+      },
+      "expected": { "effectiveUsage": 2, "bill": 100 }
+    },
+    {
+      "id": "raw-2-free-reduces-to-zero-min-floors",
+      "input": {
+        "rawUsage": 2,
+        "freeUsage": 3,
+        "minUsage": 2,
+        "maxUsage": 10,
+        "rate": 50
+      },
+      "expected": { "effectiveUsage": 2, "bill": 100 }
+    },
+    {
+      "id": "raw-3-free-exactly-cancels-min-floors",
+      "input": {
+        "rawUsage": 3,
+        "freeUsage": 3,
+        "minUsage": 2,
+        "maxUsage": 10,
+        "rate": 50
+      },
+      "expected": { "effectiveUsage": 2, "bill": 100 }
+    },
+    {
+      "id": "raw-4-free-leaves-1-min-floors-to-2",
+      "input": {
+        "rawUsage": 4,
+        "freeUsage": 3,
+        "minUsage": 2,
+        "maxUsage": 10,
+        "rate": 50
+      },
+      "expected": { "effectiveUsage": 2, "bill": 100 }
+    },
+    {
+      "id": "raw-5-free-leaves-2-min-just-barely",
+      "input": {
+        "rawUsage": 5,
+        "freeUsage": 3,
+        "minUsage": 2,
+        "maxUsage": 10,
+        "rate": 50
+      },
+      "expected": { "effectiveUsage": 2, "bill": 100 }
+    },
+    {
+      "id": "raw-6-above-min-min-no-longer-binds",
+      "input": {
+        "rawUsage": 6,
+        "freeUsage": 3,
+        "minUsage": 2,
+        "maxUsage": 10,
+        "rate": 50
+      },
+      "expected": { "effectiveUsage": 3, "bill": 150 }
+    },
+    {
+      "id": "raw-7-above-min-passes-through",
+      "input": {
+        "rawUsage": 7,
+        "freeUsage": 3,
+        "minUsage": 2,
+        "maxUsage": 10,
+        "rate": 50
+      },
+      "expected": { "effectiveUsage": 4, "bill": 200 }
+    },
+    {
+      "id": "raw-8-above-min-passes-through",
+      "input": {
+        "rawUsage": 8,
+        "freeUsage": 3,
+        "minUsage": 2,
+        "maxUsage": 10,
+        "rate": 50
+      },
+      "expected": { "effectiveUsage": 5, "bill": 250 }
+    },
+    {
+      "id": "raw-9-above-min-passes-through",
+      "input": {
+        "rawUsage": 9,
+        "freeUsage": 3,
+        "minUsage": 2,
+        "maxUsage": 10,
+        "rate": 50
+      },
+      "expected": { "effectiveUsage": 6, "bill": 300 }
+    },
+    {
+      "id": "raw-10-at-max-boundary-still-no-cap",
+      "input": {
+        "rawUsage": 10,
+        "freeUsage": 3,
+        "minUsage": 2,
+        "maxUsage": 10,
+        "rate": 50
+      },
+      "expected": { "effectiveUsage": 7, "bill": 350 }
+    }
+  ]
+}

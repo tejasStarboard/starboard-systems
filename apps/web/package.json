@@ -19,6 +19,7 @@
     "@starboard/db": "workspace:*",
     "@starboard/email": "workspace:*",
     "@starboard/extension-host": "workspace:*",
+    "@starboard/pricing": "workspace:*",
     "@starboard/service-kit": "workspace:*",
     "server-only": "^0.0.1",
     "@t3-oss/env-nextjs": "^0.13.11",

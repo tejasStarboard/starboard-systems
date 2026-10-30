@@ -1,9 +1,10 @@
 /**
  * Re-exports quote form contracts for UI convenience.
  * Canonical schemas live in `@starboard/contracts`.
+ * Pricing math lives in `@starboard/pricing`.
  */
+export { calculateManualRateTotals } from "@starboard/pricing"
 export {
-  calculateManualRateTotals,
   createContainerLine,
   createManualRateLine,
   emptyLaneFormValues,

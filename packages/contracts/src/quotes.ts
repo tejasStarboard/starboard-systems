@@ -255,25 +255,3 @@ export function emptyQuoteFormValues(input: {
     lanes: [emptyLaneFormValues("fcl")],
   }
 }
-
-export function calculateManualRateTotals(input: {
-  lines: Array<{ amount: number }>
-  markupType: z.infer<typeof markupTypeSchema>
-  markupValue: number
-}) {
-  const subtotal = input.lines.reduce(
-    (sum, line) => sum + (Number.isFinite(line.amount) ? line.amount : 0),
-    0
-  )
-  const markupValue = Number.isFinite(input.markupValue) ? input.markupValue : 0
-  const markup =
-    input.markupType === "percent"
-      ? (subtotal * markupValue) / 100
-      : markupValue
-
-  return {
-    subtotal,
-    markup,
-    total: subtotal + markup,
-  }
-}

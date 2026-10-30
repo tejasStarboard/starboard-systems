@@ -17,9 +17,9 @@ Cursor skills: [../../.agents/README.md](../../.agents/README.md).
 
 ## Wave 1 — Quoting parity
 
-| Ticket                                         | Title                       | Status |
-| ---------------------------------------------- | --------------------------- | ------ |
-| [010](../tickets/todo/010-packages-pricing.md) | `packages/pricing` ONE MATH | open   |
+| Ticket                                                | Title                       | Status      |
+| ----------------------------------------------------- | --------------------------- | ----------- |
+| [010](../tickets/in_progress/010-packages-pricing.md) | `packages/pricing` ONE MATH | in_progress |
 
 ## Wave 2 — Rates + FCL v6 ingestion
 

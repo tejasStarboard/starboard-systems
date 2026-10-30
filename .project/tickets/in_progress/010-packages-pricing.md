@@ -2,7 +2,7 @@
 id: 010
 wave: 01-quoting
 title: packages/pricing ONE MATH
-status: open
+status: in_progress
 depends_on: [002]
 epic: SYS-PRICING
 docs:
@@ -31,10 +31,10 @@ Extract a single `packages/pricing` implementation for buy/sell totals, surcharg
 
 ## Acceptance criteria
 
-- [ ] One exported API for manual rate totals (at minimum)
-- [ ] Conformance tests pass for copied fixtures
-- [ ] Web/quotes no longer duplicate the same math in two places
-- [ ] Documented in `.project/docs/domains/pricing.md`
+- [x] One exported API for manual rate totals (at minimum)
+- [x] Conformance tests pass for copied fixtures
+- [x] Web/quotes no longer duplicate the same math in two places
+- [x] Documented in `.project/docs/domains/pricing.md`
 
 ## Fixtures / tests
 
