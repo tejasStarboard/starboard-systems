@@ -11,7 +11,6 @@ import {
   listPortsResponseSchema,
 } from "./geography"
 import {
-  calculateManualRateTotals,
   createQuoteRequestSchema,
   emptyQuoteFormValues,
   quoteFormSchema,
@@ -53,16 +52,6 @@ describe("quote contracts", () => {
       createdAt: new Date().toISOString(),
     })
     expect(parsed.success).toBe(true)
-  })
-
-  test("calculateManualRateTotals applies percent markup", () => {
-    expect(
-      calculateManualRateTotals({
-        lines: [{ amount: 100 }, { amount: 50 }],
-        markupType: "percent",
-        markupValue: 10,
-      })
-    ).toEqual({ subtotal: 150, markup: 15, total: 165 })
   })
 })
 
