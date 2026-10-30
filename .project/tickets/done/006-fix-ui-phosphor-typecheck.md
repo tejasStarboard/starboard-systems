@@ -2,7 +2,7 @@
 id: 006
 wave: 00-shell
 title: Fix @workspace/ui Phosphor icons + typecheck
-status: in_progress
+status: done
 depends_on: []
 epic: SYS-SHELL
 docs:

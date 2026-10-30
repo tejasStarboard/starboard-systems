@@ -6,14 +6,14 @@ Cursor skills: [../../.agents/README.md](../../.agents/README.md).
 
 ## Wave 0 — Shell foundation
 
-| Ticket                                                  | Title                                    | Status      |
-| ------------------------------------------------------- | ---------------------------------------- | ----------- |
-| [001](../tickets/done/001-extension-host-skeleton.md)   | Extension host skeleton                  | done        |
-| [002](../tickets/done/002-quote-lane-persistence.md)    | Quote lane/cargo/rate persistence        | done        |
-| [003](../tickets/done/003-geography-ports-api.md)       | Geography ports/locations API            | done        |
-| [004](../tickets/done/004-crm-under-org.md)             | CRM under Better Auth org                | done        |
-| [005](../tickets/in_progress/005-billing-plan-stubs.md) | Billing plan stubs (credit + enterprise) | in_progress |
-| [006](../tickets/todo/006-fix-ui-phosphor-typecheck.md) | Fix UI Phosphor icons / full typecheck   | open        |
+| Ticket                                                  | Title                                    | Status |
+| ------------------------------------------------------- | ---------------------------------------- | ------ |
+| [001](../tickets/done/001-extension-host-skeleton.md)   | Extension host skeleton                  | done   |
+| [002](../tickets/done/002-quote-lane-persistence.md)    | Quote lane/cargo/rate persistence        | done   |
+| [003](../tickets/done/003-geography-ports-api.md)       | Geography ports/locations API            | done   |
+| [004](../tickets/done/004-crm-under-org.md)             | CRM under Better Auth org                | done   |
+| [005](../tickets/done/005-billing-plan-stubs.md)        | Billing plan stubs (credit + enterprise) | done   |
+| [006](../tickets/done/006-fix-ui-phosphor-typecheck.md) | Fix UI Phosphor icons / full typecheck   | done   |
 
 ## Wave 1 — Quoting parity
 
