@@ -42,6 +42,16 @@ const stubManifests = [
       jobs: [{ type: "messaging.msgraph.sync" }],
       api: [{ pathPrefix: "/api/extensions/messaging.msgraph" }],
       uiSlots: ["messaging.inbox"],
+      settings: [
+        {
+          key: "sync_interval_minutes",
+          label: "Sync interval (minutes)",
+          description: "How often the mailbox sync job should run.",
+          type: "number",
+          default: 15,
+          scope: "platform",
+        },
+      ],
     },
     worker: {
       kind: "python-temporal",
@@ -78,6 +88,16 @@ const stubManifests = [
       jobs: [{ type: "spot.search", carrier: "maersk" }],
       api: [{ pathPrefix: "/api/extensions/spot.maersk" }],
       uiSlots: ["quote.rateSources"],
+      settings: [
+        {
+          key: "live_strategy",
+          label: "Live strategy",
+          description: "Use the live carrier strategy instead of the fixture.",
+          type: "boolean",
+          default: false,
+          scope: "platform",
+        },
+      ],
     },
     worker: {
       kind: "python-temporal",

@@ -4,13 +4,26 @@ export {
   extensionNavContributionSchema,
   extensionJobContributionSchema,
   extensionApiContributionSchema,
+  extensionSettingContributionSchema,
+  extensionSettingTypeSchema,
   extensionWorkerSchema,
   planSchema,
   type ExtensionManifest,
   type ExtensionContributes,
   type ExtensionNavContribution,
+  type ExtensionSettingContribution,
+  type ExtensionSettingType,
   type Plan,
 } from "./manifest.js"
+
+export {
+  getDeclaredSettings,
+  resolveExtensionSettingValues,
+  resolveStaffSettings,
+  validateSettingValues,
+  type StaffSettingView,
+  type StoredExtensionSetting,
+} from "./settings.js"
 
 export { extensionRegistry, listManifests } from "./registry.js"
 

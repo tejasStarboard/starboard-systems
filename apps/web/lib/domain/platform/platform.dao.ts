@@ -4,6 +4,7 @@ import { eq, ilike, inArray, or } from "drizzle-orm"
 import {
   extensionRollout,
   extensionRolloutOrg,
+  extensionSetting,
   organization,
   platformAuditLog,
   platformCommonBetaOrg,
@@ -18,6 +19,12 @@ import { db } from "@/lib/db"
 
 function newId(prefix: string) {
   return `${prefix}_${crypto.randomUUID().replace(/-/g, "")}`
+}
+
+export type ExtensionSettingRow = {
+  extensionId: string
+  key: string
+  value: unknown
 }
 
 export type OrganizationSummary = {
@@ -144,6 +151,62 @@ export class PlatformDao {
       action: "rollout.set",
       extensionId,
       detail: JSON.stringify({ mode, organizationIds }),
+    })
+  }
+
+  async listExtensionSettings(
+    extensionId?: string
+  ): Promise<ExtensionSettingRow[]> {
+    const query = db
+      .select({
+        extensionId: extensionSetting.extensionId,
+        key: extensionSetting.key,
+        value: extensionSetting.value,
+      })
+      .from(extensionSetting)
+
+    if (!extensionId) {
+      return query
+    }
+
+    return query.where(eq(extensionSetting.extensionId, extensionId))
+  }
+
+  async upsertExtensionSettings(input: {
+    extensionId: string
+    entries: Array<{ key: string; value: unknown }>
+    actorUserId: string
+  }) {
+    if (input.entries.length === 0) {
+      return
+    }
+
+    for (const entry of input.entries) {
+      await db
+        .insert(extensionSetting)
+        .values({
+          extensionId: input.extensionId,
+          key: entry.key,
+          value: entry.value,
+          updatedByUserId: input.actorUserId,
+        })
+        .onConflictDoUpdate({
+          target: [extensionSetting.extensionId, extensionSetting.key],
+          set: {
+            value: entry.value,
+            updatedByUserId: input.actorUserId,
+            updatedAt: new Date(),
+          },
+        })
+    }
+
+    await this.appendAudit({
+      actorUserId: input.actorUserId,
+      action: "extension_setting.update",
+      extensionId: input.extensionId,
+      detail: JSON.stringify({
+        keys: input.entries.map((entry) => entry.key),
+      }),
     })
   }
 

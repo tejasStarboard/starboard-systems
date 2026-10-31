@@ -2,7 +2,7 @@
 
 Shell discovers extensions via `extensions/host` (`@starboard/ext-host`). UI and BFF must not hard-code optional features. **Foundation:** [ADR 0005](adr/0005-extension-foundation.md) (tickets **055** / **056**). Skill: [`starboard-extension`](../../.agents/skills/starboard-extension/SKILL.md).
 
-**Admin settings (planned):** `contributes.settings` — per-extension toggles declared in the kit, stored in platform DB. Tickets [057](../tickets/todo/057-extension-settings-schema.md) → [058](../tickets/todo/058-admin-extension-settings-ui.md). Separate from rollout on/off.
+**Admin settings:** `contributes.settings` — per-extension values declared in the kit and stored in `platform.extension_setting`. Ticket [057](../tickets/in_progress/057-extension-settings-schema.md). Admin UI is [058](../tickets/todo/058-admin-extension-settings-ui.md). Separate from rollout on/off.
 
 Product tickets (apply rates, live spot, CRM expansion, …) **depend on 055 + 056**. Prefer this cookbook over reading starboard-2.
 
@@ -19,15 +19,15 @@ type ExtensionManifest = {
     jobs?: Array<{ type: string; carrier?: string }>
     api?: Array<{ pathPrefix: string }>
     uiSlots?: string[] // e.g. "quote.rateSources", "rates.upload"
-    // Planned (057)
     settings?: Array<{
       key: string
       label: string
       description?: string
       type: "boolean" | "string" | "number" | "select" | "secret"
       default?: boolean | string | number | null
-      options?: Array<{ value: string; label: string }>
-      scope: "platform"
+      options?: Array<{ value: string; label: string }> // select
+      scope: "platform" // v1: platform admin only
+      required?: boolean
     }>
   }
   worker?: {
@@ -124,12 +124,25 @@ Use contributions / activation helpers. Domain pages owned by a single slot (e.g
 - Missing rollout row = **on**.
 - `getRolloutMap()` failure → **fail closed**: log, empty contributions, `isExtensionActive` false (APIs 404). Shell Quotes stays up. See `apps/web/lib/extensions-rollout.ts`.
 
+### 7b. Admin settings
+
+Declared on `contributes.settings`. v1 `scope` is `"platform"` only. Stored in Postgres schema `platform`, table `extension_setting` (`extension_id`, `key`, `value` jsonb, `updated_at`, `updated_by`), unique on `(extension_id, key)`.
+
+| Call                                 | Behavior                                                                                                                                                                          |
+| ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET /api/admin/extensions/settings` | Staff only. Every extension’s declarations plus effective values. Missing row uses the manifest `default`. Secrets return `{ configured: true \| false }` and omit the raw value. |
+| `PUT /api/admin/extensions/settings` | Body `{ extensionId, values }`. Unknown key or wrong type → **400**. Unknown extension → **404**.                                                                                 |
+| Auth                                 | No session → **401**. Signed-in non-staff → **404** (`requireStaffApiSession`).                                                                                                   |
+| Audit                                | `platform_audit_log` action `extension_setting.update` records the changed keys, not secret values.                                                                               |
+
+Workers read saved values, including secrets, through `getExtensionSettings(extensionId)` on the platform manager. Temporal workers are not wired to that helper yet.
+
 ### 8. Unplug checklist (verified post-055)
 
 1. Set `enabled: false` in the registry **or** org rollout `off` (admin).
 2. Confirm shell: `listActiveExtensionNav` / `listActiveUiSlots` / `listActiveSpotRateSources` omit the extension; `requireActiveExtension` + generic route → **404**. Covered by `apps/web/lib/extensions-all-off.test.ts`.
 3. Stop deploying the worker process / plugin package for that carrier.
-4. Expand/contract drop optional schema if the extension owned any (most stubs: none).
+4. Expand/contract drop optional schema if the extension owned any (most stubs: none). Delete that extension’s rows in `platform.extension_setting` (`extension_id`, `key`). Nothing drops those rows automatically.
 5. Delete the plugin package + registry row + Python POST route. **Zero** surgical edits to unrelated shell feature components.
 
 ### 9. Test matrix
