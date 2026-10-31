@@ -10,7 +10,10 @@ import {
   type GeographyClient,
   getGeographyClient,
 } from "@/lib/domain/geography/geography.client"
-import { getQuotesClient, type QuotesClient } from "@/lib/domain/quotes/quotes.client"
+import {
+  getQuotesClient,
+  type QuotesClient,
+} from "@/lib/domain/quotes/quotes.client"
 import { type CrmManager, getCrmManager } from "@/lib/domain/crm/crm.manager"
 import {
   getOrganizationsDao,
