@@ -2,12 +2,12 @@
 id: 058
 wave: 05-foundation
 title: Admin extensions page — collapsible per-extension settings
-status: in_progress
+status: done
 depends_on: [057]
 epic: SYS-PLATFORM-ADMIN
 docs:
   - .project/docs/extensions.md
-  - .project/tickets/in_progress/057-extension-settings-schema.md
+  - .project/tickets/done/057-extension-settings-schema.md
 ---
 
 # Admin extensions page — collapsible per-extension settings

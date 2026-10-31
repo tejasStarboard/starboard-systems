@@ -36,14 +36,14 @@ Cursor skills: [../../.agents/README.md](../../.agents/README.md).
 | [042](../tickets/done/042-ext-spot-cma.md)                            | Extension `spot.cma`           | done   |
 | [050](../tickets/done/050-platform-admin-extensions-impersonation.md) | Platform admin + impersonation | done   |
 
-## Wave 5 — Extension foundation (CURRENT)
+## Wave 5 — Extension foundation
 
-| Ticket                                                           | Title                                                | Status      |
-| ---------------------------------------------------------------- | ---------------------------------------------------- | ----------- |
-| [055](../tickets/done/055-extension-foundation-hardening.md)     | Extension foundation hardening (UI / BFF / Temporal) | done        |
-| [056](../tickets/in_progress/056-extension-dev-workflow-docs.md) | Extension developer cookbook + skill sync            | in_progress |
-| [057](../tickets/todo/057-extension-settings-schema.md)          | Extension settings schema + persistence              | open        |
-| [058](../tickets/todo/058-admin-extension-settings-ui.md)        | Admin collapsible extension settings UI              | open        |
+| Ticket                                                       | Title                                                | Status |
+| ------------------------------------------------------------ | ---------------------------------------------------- | ------ |
+| [055](../tickets/done/055-extension-foundation-hardening.md) | Extension foundation hardening (UI / BFF / Temporal) | done   |
+| [056](../tickets/done/056-extension-dev-workflow-docs.md)    | Extension developer cookbook + skill sync            | done   |
+| [057](../tickets/done/057-extension-settings-schema.md)      | Extension settings schema + persistence              | done   |
+| [058](../tickets/done/058-admin-extension-settings-ui.md)    | Admin collapsible extension settings UI              | done   |
 
 ## Next product wave (after Wave 5)
 
