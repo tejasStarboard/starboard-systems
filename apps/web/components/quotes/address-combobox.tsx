@@ -35,10 +35,12 @@ export function AddressCombobox({
   const [predictions, setPredictions] = useState<AddressPrediction[]>([])
   const [loading, setLoading] = useState(false)
 
-  const selected = useMemo(() => {
+  const selected = useMemo((): AddressOption | null => {
     if (isDoorAddressEmpty(value)) return null
+    // Synthetic item for the committed door snapshot. Use label as placeId so
+    // isItemEqualToValue can match after Places details resolve.
     return {
-      kind: "prediction" as const,
+      kind: "prediction",
       placeId: value.label,
       description: value.label,
       mainText: value.label,
@@ -50,7 +52,7 @@ export function AddressCombobox({
 
   const items: AddressOption[] = useMemo(() => {
     const next = predictions.map((p) => ({ ...p, kind: "prediction" as const }))
-    if (selected && !next.some((p) => p.description === selected.description)) {
+    if (selected && !next.some((p) => p.placeId === selected.placeId)) {
       return [selected, ...next]
     }
     return next
@@ -120,7 +122,11 @@ export function AddressCombobox({
           onChange(emptyDoorAddress())
         }
       }}
-      itemToStringValue={(option) => option.description}
+      // Base UI: label → input display; value → form identity. Without label,
+      // objects serialize as JSON in the input (no `{ value, label }` shape).
+      itemToStringLabel={(option) => option.description}
+      itemToStringValue={(option) => option.placeId}
+      isItemEqualToValue={(a, b) => a.placeId === b.placeId}
     >
       <ComboboxInput
         id={id}

@@ -11,6 +11,7 @@ import {
   InputGroupButton,
   InputGroupInput,
 } from "@starboard/lib-ui/components/input-group"
+import { Spinner } from "@starboard/lib-ui/components/spinner"
 import { CaretDownIcon, XIcon, CheckIcon } from "@phosphor-icons/react"
 
 const Combobox = ComboboxPrimitive.Root
@@ -55,10 +56,12 @@ function ComboboxInput({
   disabled = false,
   showTrigger = true,
   showClear = false,
+  loading = false,
   ...props
 }: ComboboxPrimitive.Input.Props & {
   showTrigger?: boolean
   showClear?: boolean
+  loading?: boolean
 }) {
   return (
     <InputGroup className={cn("w-auto", className)}>
@@ -67,6 +70,13 @@ function ComboboxInput({
         {...props}
       />
       <InputGroupAddon align="inline-end">
+        {loading ? (
+          <Spinner
+            data-slot="combobox-loading"
+            className="size-3.5 text-muted-foreground"
+            aria-label="Searching"
+          />
+        ) : null}
         {showTrigger && (
           <InputGroupButton
             size="icon-xs"

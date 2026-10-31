@@ -1,6 +1,7 @@
 import "server-only"
 
 import type {
+  FormOption,
   QuoteFormValues,
   QuoteListItemView,
   QuoteSource,
@@ -98,21 +99,21 @@ export class QuotesManager {
     const [
       customerOptions,
       currencyOptions,
-      portOptions,
       containerTypeOptions,
       palletTypeOptions,
     ] = await Promise.all([
       this.crmManager.listCustomerOptions(organizationId, requestId),
       this.geographyClient.listCurrencyOptions(requestId),
-      this.geographyClient.searchPorts("", requestId),
       this.quotesClient.listContainerTypeOptions(requestId),
       this.quotesClient.listPalletTypeOptions(requestId),
     ])
 
+    // Ports are not SSR-seeded: PortCombobox searches `/api/geography/ports`,
+    // and the quote page adds labels for codes already on the lanes.
     return {
       customerOptions,
       currencyOptions,
-      portOptions,
+      portOptions: [] as FormOption[],
       containerTypeOptions,
       palletTypeOptions,
     }

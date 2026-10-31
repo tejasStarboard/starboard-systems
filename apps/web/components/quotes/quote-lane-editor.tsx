@@ -35,7 +35,8 @@ import type {
 
 function formatMoney(value: number, currencyCode: string) {
   try {
-    return new Intl.NumberFormat(undefined, {
+    // Pin locale so SSR (Node) and the browser never disagree ($ vs US$).
+    return new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: currencyCode || "USD",
       maximumFractionDigits: 2,
