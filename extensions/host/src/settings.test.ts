@@ -185,13 +185,17 @@ describe("resolve settings", () => {
 })
 
 describe("registered extension settings", () => {
-  test("maersk and msgraph each declare a setting", () => {
+  test("maersk, cma, and msgraph each declare a setting", () => {
     const manifests = listManifests()
     const maersk = manifests.find((manifest) => manifest.id === "spot.maersk")
+    const cma = manifests.find((manifest) => manifest.id === "spot.cma")
     const msgraph = manifests.find(
       (manifest) => manifest.id === "messaging.msgraph"
     )
     expect(getDeclaredSettings(maersk!).map((setting) => setting.key)).toEqual([
+      "live_strategy",
+    ])
+    expect(getDeclaredSettings(cma!).map((setting) => setting.key)).toEqual([
       "live_strategy",
     ])
     expect(getDeclaredSettings(msgraph!).map((setting) => setting.key)).toEqual(

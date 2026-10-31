@@ -21,7 +21,7 @@ export type SpotSearchInput = {
   origin?: string
   destination?: string
   mode?: string
-  /** From admin `live_strategy` setting (spot.maersk). */
+  /** From admin `live_strategy` setting (spot.maersk / spot.cma). */
   liveStrategy?: boolean
 }
 

@@ -135,7 +135,9 @@ Declared on `contributes.settings`. v1 `scope` is `"platform"` only. Stored in P
 | Auth                                 | No session → **401**. Signed-in non-staff → **404** (`requireStaffApiSession`).                                                                                                   |
 | Audit                                | `platform_audit_log` action `extension_setting.update` records the changed keys, not secret values.                                                                               |
 
-**Runtime read path (061):** BFF managers call `getPlatformManager().getExtensionSettings(extensionId)` when enqueueing jobs. Missing DB rows use the manifest `default` via `resolveExtensionSettingValues`. Non-secret values are forwarded on the worker job body (`liveStrategy` for `spot.maersk`, `syncIntervalMinutes` for `messaging.msgraph`). `settingsForJobInput` strips `type: "secret"` keys so secrets never land in Temporal history or logs. Workers do **not** read Postgres directly.
+**Runtime read path (061):** BFF managers call `getPlatformManager().getExtensionSettings(extensionId)` when enqueueing jobs. Missing DB rows use the manifest `default` via `resolveExtensionSettingValues`. Non-secret values are forwarded on the worker job body (`liveStrategy` for `spot.maersk` / `spot.cma`, `syncIntervalMinutes` for `messaging.msgraph`). `settingsForJobInput` strips `type: "secret"` keys so secrets never land in Temporal history or logs. Workers do **not** read Postgres directly.
+
+**Live spot (062):** When `liveStrategy` is true, Maersk/CMA workers use HTTPS `LiveOfferStrategy` (env creds until 069). Fixture path when false. CI uses `httpx.MockTransport` — no carrier network.
 
 ### 8. Unplug checklist (verified post-055)
 
@@ -220,13 +222,13 @@ Files touched for a thin spot carrier (typical):
 
 ## Registered extensions (stubs)
 
-| id                  | Wave | Worker                | Notes                            |
-| ------------------- | ---- | --------------------- | -------------------------------- |
-| `ingestion.fcl_v6`  | 2    | Python + Temporal OSS | Ocean FCL only; gate-first save  |
-| `messaging.msgraph` | 3    | Python + Temporal OSS | First email provider             |
-| `spot.fake`         | 4    | Python + Temporal OSS | Host test plugin (deterministic) |
-| `spot.maersk`       | 4    | Python + Temporal OSS | API and/or scraper strategies    |
-| `spot.cma`          | 4    | Python + Temporal OSS | API and/or scraper strategies    |
+| id                  | Wave | Worker                | Notes                                  |
+| ------------------- | ---- | --------------------- | -------------------------------------- |
+| `ingestion.fcl_v6`  | 2    | Python + Temporal OSS | Ocean FCL only; gate-first save        |
+| `messaging.msgraph` | 3    | Python + Temporal OSS | First email provider                   |
+| `spot.fake`         | 4    | Python + Temporal OSS | Host test plugin (deterministic)       |
+| `spot.maersk`       | 4    | Python + Temporal OSS | Fixture + live HTTPS (`live_strategy`) |
+| `spot.cma`          | 4    | Python + Temporal OSS | Fixture + live HTTPS (`live_strategy`) |
 
 ## Planned later (not registered yet)
 
