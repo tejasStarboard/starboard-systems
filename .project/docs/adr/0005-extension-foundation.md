@@ -49,6 +49,10 @@ Shell must remain usable with **all** extensions inactive.
 - Real Graph OAuth productionization (can follow once job/API patterns exist)
 - Stripe credits
 
+## Related (Wave 5 follow-ons)
+
+- **057 / 058** — per-extension admin settings (declared on manifest, stored in platform DB, collapsible admin UI). Separate from rollout on/off; still part of the extension kit surface area.
+
 ## Consequences
 
 - Ticket `055` (and follow-ups `056+` if split) block feature tickets that depend on extension UX.
