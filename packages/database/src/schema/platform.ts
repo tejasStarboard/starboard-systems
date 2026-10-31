@@ -1,10 +1,35 @@
 import {
-  primaryKey,
+  index,
+  jsonb,
+  pgSchema,
   pgTable,
+  primaryKey,
   text,
   timestamp,
-  index,
 } from "drizzle-orm/pg-core"
+
+/** Platform-admin extension settings. Rollout tables stay in public. */
+export const platformSchema = pgSchema("platform")
+
+export const extensionSetting = platformSchema.table(
+  "extension_setting",
+  {
+    extensionId: text("extension_id").notNull(),
+    key: text("key").notNull(),
+    value: jsonb("value").notNull(),
+    updatedByUserId: text("updated_by_user_id").notNull(),
+    updatedAt: timestamp("updated_at")
+      .defaultNow()
+      .$onUpdate(() => /* @__PURE__ */ new Date())
+      .notNull(),
+  },
+  (table) => [
+    primaryKey({
+      columns: [table.extensionId, table.key],
+      name: "extension_setting_pk",
+    }),
+  ]
+)
 
 /** Staff-controlled extension rollout (shell-owned, public schema). */
 export const extensionRollout = pgTable("extension_rollout", {

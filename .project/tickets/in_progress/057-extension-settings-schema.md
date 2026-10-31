@@ -2,7 +2,7 @@
 id: 057
 wave: 05-foundation
 title: Extension settings schema + persistence (ext-host kit)
-status: open
+status: in_progress
 depends_on: [050]
 epic: SYS-EXT-HOST
 docs:
@@ -58,13 +58,13 @@ settings?: Array<{
 
 ## Acceptance criteria
 
-- [ ] Manifest schema accepts `contributes.settings` with unit tests
-- [ ] At least two registered extensions declare ≥1 setting
-- [ ] Staff can read/write settings; non-staff 404
-- [ ] Invalid type/unknown key → 400
-- [ ] Missing DB row → use manifest `default`
-- [ ] `.project/docs/extensions.md` documents settings contribution + storage
-- [ ] Unplug: deleting settings rows when extension removed is documented (optional migrate)
+- [x] Manifest schema accepts `contributes.settings` with unit tests
+- [x] At least two registered extensions declare ≥1 setting
+- [x] Staff can read/write settings; non-staff 404
+- [x] Invalid type/unknown key → 400
+- [x] Missing DB row → use manifest `default`
+- [x] `.project/docs/extensions.md` documents settings contribution + storage
+- [x] Unplug: deleting settings rows when extension removed is documented (optional migrate)
 
 ## Files to touch
 
