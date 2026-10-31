@@ -4,46 +4,57 @@ Lexical order under [../tickets/todo/](../tickets/todo/) is execution order. Mov
 
 Cursor skills: [../../.agents/README.md](../../.agents/README.md).
 
+**Priority:** harden the **extension foundation** ([ADR 0005](adr/0005-extension-foundation.md)) before more product extensions or quote-loop features that depend on contribution/job patterns.
+
 ## Wave 0 — Shell foundation
 
-| Ticket                                                  | Title                                    | Status |
-| ------------------------------------------------------- | ---------------------------------------- | ------ |
-| [001](../tickets/done/001-extension-host-skeleton.md)   | Extension host skeleton                  | done   |
-| [002](../tickets/done/002-quote-lane-persistence.md)    | Quote lane/cargo/rate persistence        | done   |
-| [003](../tickets/done/003-geography-ports-api.md)       | Geography ports/locations API            | done   |
-| [004](../tickets/done/004-crm-under-org.md)             | CRM under Better Auth org                | done   |
-| [005](../tickets/done/005-billing-plan-stubs.md)        | Billing plan stubs (credit + enterprise) | done   |
-| [006](../tickets/done/006-fix-ui-phosphor-typecheck.md) | Fix UI Phosphor icons / full typecheck   | done   |
+| Ticket | Title | Status |
+|--------|-------|--------|
+| [001](../tickets/done/001-extension-host-skeleton.md) | Extension host skeleton | done |
+| [002](../tickets/done/002-quote-lane-persistence.md) | Quote lane/cargo/rate persistence | done |
+| [003](../tickets/done/003-geography-ports-api.md) | Geography ports/locations API | done |
+| [004](../tickets/done/004-crm-under-org.md) | CRM under Better Auth org | done |
+| [005](../tickets/done/005-billing-plan-stubs.md) | Billing plan stubs (credit + enterprise) | done |
+| [006](../tickets/done/006-fix-ui-phosphor-typecheck.md) | Fix UI Phosphor icons / full typecheck | done |
+| [007](../tickets/done/007-geo-facility-gazetteer.md) | Geo facility gazetteer redesign (ADR 0004) | done |
 
-## Wave 1 — Quoting parity
+## Wave 1 — Quoting / pricing
 
-| Ticket                                         | Title                       | Status |
-| ---------------------------------------------- | --------------------------- | ------ |
-| [010](../tickets/done/010-packages-pricing.md) | `packages/pricing` ONE MATH | done   |
+| Ticket | Title | Status |
+|--------|-------|--------|
+| [010](../tickets/done/010-packages-pricing.md) | `packages/pricing` ONE MATH | done |
 
-## Wave 2 — Rates + FCL v6 ingestion
+## Wave 2–4 — Extension vertical stubs (thin)
 
-| Ticket                                                    | Title                                       | Status      |
-| --------------------------------------------------------- | ------------------------------------------- | ----------- |
-| [020](../tickets/done/020-services-rates.md)              | `services/rates` catalog                    | done        |
-| [021](../tickets/in_progress/021-ext-ingestion-fcl-v6.md) | Extension `ingestion.fcl_v6` (Temporal OSS) | in_progress |
+| Ticket | Title | Status |
+|--------|-------|--------|
+| [020](../tickets/done/020-services-rates.md) | `services/rates` catalog | done |
+| [021](../tickets/done/021-ext-ingestion-fcl-v6.md) | Extension `ingestion.fcl_v6` | done |
+| [030](../tickets/done/030-ext-messaging-msgraph.md) | Extension `messaging.msgraph` | done |
+| [040](../tickets/done/040-spot-extension-host.md) | Spot extension host | done |
+| [041](../tickets/done/041-ext-spot-maersk.md) | Extension `spot.maersk` | done |
+| [042](../tickets/done/042-ext-spot-cma.md) | Extension `spot.cma` | done |
+| [050](../tickets/done/050-platform-admin-extensions-impersonation.md) | Platform admin + impersonation | done |
 
-## Wave 3 — Messaging
+## Wave 5 — Extension foundation (CURRENT)
 
-| Ticket                                              | Title                         | Status |
-| --------------------------------------------------- | ----------------------------- | ------ |
-| [030](../tickets/todo/030-ext-messaging-msgraph.md) | Extension `messaging.msgraph` | open   |
+| Ticket | Title | Status |
+|--------|-------|--------|
+| [055](../tickets/todo/055-extension-foundation-hardening.md) | Extension foundation hardening (UI / BFF / Temporal) | open |
+| [056](../tickets/todo/056-extension-dev-workflow-docs.md) | Extension developer cookbook + skill sync | open |
 
-## Wave 4 — Spot
+## Next product wave (after 055/056)
 
-| Ticket                                            | Title                       | Status |
-| ------------------------------------------------- | --------------------------- | ------ |
-| [040](../tickets/todo/040-spot-extension-host.md) | Spot worker / Temporal host | open   |
-| [041](../tickets/todo/041-ext-spot-maersk.md)     | Extension `spot.maersk`     | open   |
-| [042](../tickets/todo/042-ext-spot-cma.md)        | Extension `spot.cma`        | open   |
+Draft only — create tickets when foundation lands:
 
-## Later (no tickets yet)
+- Apply catalog/spot rate → quote lane (+ pricing)
+- Messaging production path (real Graph OAuth + Neon)
+- Settings / team shell pages
+- CRM contacts + richer customer fields
+- Live spot strategies; Excel/PDF ingest
+- Further ingest modes as separate extensions
 
-- Ingestion extensions: air_v2, lcl, cartage_v2, drayage_v2
+## Later
+
 - Outlook add-in / Gmail / Companion
 - Public API, ML, admin node-graph, ERP/OS

@@ -23,6 +23,8 @@ Default loop: skill **starboard-dev-workflow** (sync `origin/dev`, reconcile `do
 3. After plan: `git checkout --no-track -b {id} origin/dev` (branch name = ticket id, e.g. `001`); move ticket to `in_progress/`.
 4. PR **into `dev` only** (auto-merge after CI); promote to `main` via cherry-pick PR when asked.
 
+**Current focus:** Wave 5 extension foundation — [`055`](tickets/todo/055-extension-foundation-hardening.md) then [`056`](tickets/todo/056-extension-dev-workflow-docs.md) ([ADR 0005](docs/adr/0005-extension-foundation.md)). Product extensions wait until those land.
+
 ## Status legend
 
 | Folder / status         | Meaning                          |
