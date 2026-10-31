@@ -1,0 +1,24 @@
+{
+  "quotes": [
+    {
+      "quoteId": "CMA-FIXTURE-001",
+      "productName": "CMA CGM Spot",
+      "origin": { "unlocode": "CNSHA", "name": "Shanghai" },
+      "destination": { "unlocode": "NLRTM", "name": "Rotterdam" },
+      "equipment": { "iso": "42G1", "label": "40 Dry" },
+      "price": { "amount": 4125.0, "currency": "USD" },
+      "validity": { "from": "2026-08-01", "to": "2026-08-14" },
+      "schedule": { "etd": "2026-08-09", "eta": "2026-09-12" }
+    },
+    {
+      "quoteId": "CMA-FIXTURE-002",
+      "productName": "CMA CGM Spot",
+      "origin": { "unlocode": "CNSHA", "name": "Shanghai" },
+      "destination": { "unlocode": "NLRTM", "name": "Rotterdam" },
+      "equipment": { "iso": "22G1", "label": "20 Dry" },
+      "price": { "amount": 2890.5, "currency": "USD" },
+      "validity": { "from": "2026-08-01", "to": "2026-08-14" },
+      "schedule": { "etd": "2026-08-11", "eta": "2026-09-15" }
+    }
+  ]
+}

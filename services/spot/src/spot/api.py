@@ -106,4 +106,13 @@ def create_app(
     async def enqueue_maersk_search(body: SearchJobBody) -> EnqueueResponse:
         return await enqueue_search("maersk", body)
 
+    @app.post(
+        "/extensions/spot.cma/jobs",
+        response_model=EnqueueResponse,
+        status_code=202,
+        dependencies=[Depends(require_service_token)],
+    )
+    async def enqueue_cma_search(body: SearchJobBody) -> EnqueueResponse:
+        return await enqueue_search("cma", body)
+
     return app

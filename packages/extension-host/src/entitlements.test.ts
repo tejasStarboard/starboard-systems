@@ -141,4 +141,21 @@ describe("entitlement filter", () => {
       )
     ).toBe(true)
   })
+
+  test("enabled spot.cma contributes quote.rateSources and spot.search for credit", () => {
+    const contributions = getActiveContributions("credit", listManifests())
+    expect(
+      contributions.jobs.some(
+        (job) => job.type === "spot.search" && job.carrier === "cma"
+      )
+    ).toBe(true)
+    expect(
+      contributions.api.some((item) => item.pathPrefix.includes("spot.cma"))
+    ).toBe(true)
+    expect(
+      listActiveExtensions("credit", listManifests()).some(
+        (m) => m.id === "spot.cma"
+      )
+    ).toBe(true)
+  })
 })

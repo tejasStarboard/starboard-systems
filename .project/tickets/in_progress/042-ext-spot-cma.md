@@ -2,7 +2,7 @@
 id: 042
 wave: 04-spot
 title: Extension spot.cma
-status: open
+status: in_progress
 depends_on: [040]
 epic: SYS-EXT-SPOT
 docs:
@@ -29,9 +29,9 @@ Implement `spot.cma` (CMA CGM) as a separate extension plugin — prefer officia
 
 ## Acceptance criteria
 
-- [ ] Search job returns structured rates or structured error
-- [ ] Independently disableable from `spot.maersk`
-- [ ] Clean plugin boundary; no shell edits beyond registry enable
+- [x] Search job returns structured rates or structured error
+- [x] Independently disableable from `spot.maersk`
+- [x] Clean plugin boundary; no shell edits beyond registry enable
 
 ## Fixtures / tests
 

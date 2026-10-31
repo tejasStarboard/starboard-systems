@@ -103,7 +103,7 @@ const stubManifests = [
       plugin: "cma",
     },
     healthPath: "/health",
-    enabled: false,
+    enabled: true,
   },
 ] as const satisfies readonly ExtensionManifest[]
 

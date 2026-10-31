@@ -5,6 +5,7 @@ from typing import Any
 from temporalio import activity
 
 from spot.plugins.base import NoopCredentialPort, SearchRequest, SpotSearchError
+from spot.plugins.cma.credentials import EnvCmaCredentialPort
 from spot.plugins.maersk.credentials import EnvMaerskCredentialPort
 from spot.plugins.registry import get_plugin
 
@@ -12,6 +13,8 @@ from spot.plugins.registry import get_plugin
 def _load_credentials(plugin_id: str, organization_id: str) -> dict[str, str] | None:
     if plugin_id == "maersk":
         return EnvMaerskCredentialPort().get(organization_id, "maersk")
+    if plugin_id == "cma":
+        return EnvCmaCredentialPort().get(organization_id, "cma")
     return NoopCredentialPort().get(organization_id, plugin_id)
 
 
