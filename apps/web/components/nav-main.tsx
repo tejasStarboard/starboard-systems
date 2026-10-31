@@ -12,8 +12,8 @@ import {
 } from "@workspace/ui/components/sidebar"
 
 function isItemActive(pathname: string, url: string) {
-  if (url === "/") {
-    return pathname === "/"
+  if (url === "/" || url === "/admin") {
+    return pathname === url
   }
 
   return pathname === url || pathname.startsWith(`${url}/`)
@@ -21,18 +21,20 @@ function isItemActive(pathname: string, url: string) {
 
 export function NavMain({
   items,
+  label = "Platform",
 }: {
   items: {
     title: string
     url: string
     icon?: React.ReactNode
   }[]
+  label?: string
 }) {
   const pathname = usePathname()
 
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Platform</SidebarGroupLabel>
+      <SidebarGroupLabel>{label}</SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => (
           <SidebarMenuItem key={item.title}>

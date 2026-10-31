@@ -19,18 +19,27 @@ export type ExtensionNavItem = {
 export function AppShell({
   user,
   extensionNav = [],
+  showAdminNav = false,
+  impersonationBanner = null,
   children,
 }: {
   user: AppShellUser
   extensionNav?: ExtensionNavItem[]
+  showAdminNav?: boolean
+  impersonationBanner?: React.ReactNode
   children: React.ReactNode
 }) {
   return (
     <div className="[--header-height:calc(--spacing(14))]">
       <SidebarProvider className="flex flex-col">
         <SiteHeader />
+        {impersonationBanner}
         <div className="flex flex-1">
-          <AppSidebar user={user} extensionNav={extensionNav} />
+          <AppSidebar
+            user={user}
+            extensionNav={extensionNav}
+            showAdminNav={showAdminNav}
+          />
           <SidebarInset>
             <div className="flex flex-1 flex-col">{children}</div>
           </SidebarInset>

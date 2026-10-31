@@ -9,6 +9,7 @@ export default defineConfig((options) => ({
     "schema/quote": "src/schema/quote.ts",
     "schema/crm": "src/schema/crm.ts",
     "schema/rates": "src/schema/rates.ts",
+    "schema/platform": "src/schema/platform.ts",
   },
   format: ["esm"],
   dts: true,

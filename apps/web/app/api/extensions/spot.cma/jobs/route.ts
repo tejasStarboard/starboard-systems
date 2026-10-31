@@ -1,25 +1,15 @@
 import { NextResponse } from "next/server"
 
-import { requireApiSession } from "@/lib/auth/session"
-import { getOrganizationPlan } from "@/lib/billing/plan"
+import { requireActiveExtension } from "@/lib/auth/require-active-extension"
 import { ServiceClientError } from "@/lib/clients/http"
 import { getSpotManager } from "@/lib/domain/spot/spot.manager"
-import { isExtensionActive } from "@/lib/extensions"
 
 export async function POST(request: Request) {
-  const authResult = await requireApiSession()
-  if (authResult.error) {
-    return authResult.error
+  const gate = await requireActiveExtension("spot.cma")
+  if (gate.error) {
+    return gate.error
   }
-
-  const organizationId = authResult.session.session.activeOrganizationId!
-  const plan = await getOrganizationPlan(organizationId)
-  if (!isExtensionActive("spot.cma", plan)) {
-    return NextResponse.json(
-      { error: "Extension spot.cma is not enabled" },
-      { status: 404 }
-    )
-  }
+  const organizationId = gate.organizationId
 
   const body = (await request.json().catch(() => null)) as {
     origin?: string

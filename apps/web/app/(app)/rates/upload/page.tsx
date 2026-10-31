@@ -1,21 +1,14 @@
-import { headers } from "next/headers"
 import { redirect } from "next/navigation"
 
 import { RatesUploadForm } from "@/components/rates/rates-upload-form"
-import { auth } from "@/lib/auth"
+import { requireOrganizationContext } from "@/lib/auth/organization-context"
 import { getOrganizationPlan } from "@/lib/billing/plan"
 import { listActiveUiSlots } from "@/lib/extensions"
 
 export default async function RatesUploadPage() {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  })
-  if (!session?.session.activeOrganizationId) {
-    redirect("/login")
-  }
-
-  const plan = await getOrganizationPlan(session.session.activeOrganizationId)
-  const slots = listActiveUiSlots(plan)
+  const { organizationId } = await requireOrganizationContext()
+  const plan = await getOrganizationPlan(organizationId)
+  const slots = await listActiveUiSlots(plan, organizationId)
   if (!slots.includes("rates.upload")) {
     redirect("/")
   }

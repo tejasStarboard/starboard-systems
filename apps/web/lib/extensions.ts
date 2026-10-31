@@ -11,6 +11,7 @@ import {
   type Plan,
 } from "@starboard/extension-host"
 
+import { getPlatformManager } from "@/lib/domain/platform/platform.manager"
 import type { SpotRateSource } from "@/lib/spot-rate-source"
 
 export const DEFAULT_ORG_PLAN: Plan = DEFAULT_PLAN
@@ -21,20 +22,33 @@ export function listRegisteredExtensions(): ExtensionManifest[] {
   return listManifests()
 }
 
-export function listActiveExtensionNav(
-  plan: Plan = DEFAULT_ORG_PLAN
-): ExtensionNavContribution[] {
-  return getActiveContributions(plan).nav
+async function rolloutContext(organizationId: string) {
+  const rollouts = await getPlatformManager().getRolloutMap()
+  return { organizationId, rollouts }
 }
 
-export function listActiveUiSlots(plan: Plan = DEFAULT_ORG_PLAN): string[] {
-  return getActiveContributions(plan).uiSlots
+export async function listActiveExtensionNav(
+  plan: Plan,
+  organizationId: string
+): Promise<ExtensionNavContribution[]> {
+  const context = await rolloutContext(organizationId)
+  return getActiveContributions(plan, listManifests(), context).nav
 }
 
-export function listActiveSpotRateSources(
-  plan: Plan = DEFAULT_ORG_PLAN
-): SpotRateSource[] {
-  return listActiveExtensions(plan)
+export async function listActiveUiSlots(
+  plan: Plan,
+  organizationId: string
+): Promise<string[]> {
+  const context = await rolloutContext(organizationId)
+  return getActiveContributions(plan, listManifests(), context).uiSlots
+}
+
+export async function listActiveSpotRateSources(
+  plan: Plan,
+  organizationId: string
+): Promise<SpotRateSource[]> {
+  const context = await rolloutContext(organizationId)
+  return listActiveExtensions(plan, listManifests(), context)
     .filter(
       (manifest) =>
         manifest.contributes.uiSlots?.includes("quote.rateSources") ||
@@ -52,13 +66,15 @@ export function listActiveSpotRateSources(
     })
 }
 
-export function isExtensionActive(
+export async function isExtensionActive(
   extensionId: string,
-  plan: Plan = DEFAULT_ORG_PLAN
-): boolean {
+  plan: Plan,
+  organizationId: string
+): Promise<boolean> {
   const manifest = listManifests().find((item) => item.id === extensionId)
   if (!manifest) {
     return false
   }
-  return isActive(manifest, plan)
+  const context = await rolloutContext(organizationId)
+  return isActive(manifest, plan, context)
 }

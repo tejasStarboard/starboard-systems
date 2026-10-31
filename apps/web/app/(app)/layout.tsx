@@ -1,9 +1,8 @@
-import { headers } from "next/headers"
-import { redirect } from "next/navigation"
-
 import { AppShell } from "@/components/app-shell"
-import { auth } from "@/lib/auth"
+import { ImpersonationBanner } from "@/components/admin/impersonation-banner"
+import { requireOrganizationContext } from "@/lib/auth/organization-context"
 import { getOrganizationPlan } from "@/lib/billing/plan"
+import { getPlatformManager } from "@/lib/domain/platform/platform.manager"
 import { listActiveExtensionNav } from "@/lib/extensions"
 
 export default async function AppLayout({
@@ -11,21 +10,19 @@ export default async function AppLayout({
 }: {
   children: React.ReactNode
 }) {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  })
-
-  if (!session) {
-    redirect("/login")
-  }
-
-  const organizationId = session.session.activeOrganizationId
-  if (!organizationId) {
-    redirect("/select-org")
-  }
+  const { session, organizationId, impersonation, isStaff } =
+    await requireOrganizationContext()
 
   const plan = await getOrganizationPlan(organizationId)
-  const extensionNav = listActiveExtensionNav(plan)
+  const extensionNav = await listActiveExtensionNav(plan, organizationId)
+
+  let impersonatedOrgName: string | null = null
+  if (impersonation) {
+    const org = await getPlatformManager().getOrganizationById(
+      impersonation.organizationId
+    )
+    impersonatedOrgName = org?.name ?? impersonation.organizationId
+  }
 
   return (
     <AppShell
@@ -35,6 +32,12 @@ export default async function AppLayout({
         image: session.user.image,
       }}
       extensionNav={extensionNav}
+      showAdminNav={isStaff}
+      impersonationBanner={
+        impersonation ? (
+          <ImpersonationBanner organizationName={impersonatedOrgName!} />
+        ) : null
+      }
     >
       {children}
     </AppShell>

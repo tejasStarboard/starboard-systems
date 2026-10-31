@@ -2,7 +2,7 @@
 id: 042
 wave: 04-spot
 title: Extension spot.cma
-status: in_progress
+status: done
 depends_on: [040]
 epic: SYS-EXT-SPOT
 docs:

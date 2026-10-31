@@ -17,7 +17,7 @@ export async function GET(
 
   try {
     const rate = await getRatesManager().getRateForOrg(
-      authResult.session.session.activeOrganizationId!,
+      authResult.organizationId,
       rateId
     )
     return NextResponse.json(rate)

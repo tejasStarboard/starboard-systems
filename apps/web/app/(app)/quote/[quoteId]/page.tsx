@@ -1,8 +1,5 @@
-import { headers } from "next/headers"
-import { redirect } from "next/navigation"
-
 import { QuoteForm } from "@/components/quotes/quote-form"
-import { auth } from "@/lib/auth"
+import { requireOrganizationContext } from "@/lib/auth/organization-context"
 import { getOrganizationPlan } from "@/lib/billing/plan"
 import { getQuotesManager } from "@/lib/domain/quotes/quotes.manager"
 import { emptyQuoteFormValues } from "@/lib/domain/quotes/quotes.schema"
@@ -14,14 +11,7 @@ export default async function QuotePage({
   params: Promise<{ quoteId: string }>
 }) {
   const { quoteId } = await params
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  })
-
-  const organizationId = session?.session.activeOrganizationId
-  if (!organizationId) {
-    redirect("/select-org")
-  }
+  const { organizationId } = await requireOrganizationContext()
 
   const quotesManager = getQuotesManager()
   const [savedQuote, options, plan] = await Promise.all([
@@ -29,7 +19,7 @@ export default async function QuotePage({
     quotesManager.loadQuoteFormOptions(organizationId),
     getOrganizationPlan(organizationId),
   ])
-  const spotRateSources = listActiveSpotRateSources(plan)
+  const spotRateSources = await listActiveSpotRateSources(plan, organizationId)
 
   const {
     customerOptions,

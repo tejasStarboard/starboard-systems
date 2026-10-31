@@ -1,25 +1,15 @@
 import { NextResponse } from "next/server"
 
-import { requireApiSession } from "@/lib/auth/session"
-import { getOrganizationPlan } from "@/lib/billing/plan"
+import { requireActiveExtension } from "@/lib/auth/require-active-extension"
 import { ServiceClientError } from "@/lib/clients/http"
-import { isExtensionActive } from "@/lib/extensions"
 import { getIngestionManager } from "@/lib/domain/ingestion/ingestion.manager"
 
 export async function POST(request: Request) {
-  const authResult = await requireApiSession()
-  if (authResult.error) {
-    return authResult.error
+  const gate = await requireActiveExtension("ingestion.fcl_v6")
+  if (gate.error) {
+    return gate.error
   }
-
-  const organizationId = authResult.session.session.activeOrganizationId!
-  const plan = await getOrganizationPlan(organizationId)
-  if (!isExtensionActive("ingestion.fcl_v6", plan)) {
-    return NextResponse.json(
-      { error: "Extension ingestion.fcl_v6 is not enabled" },
-      { status: 404 }
-    )
-  }
+  const organizationId = gate.organizationId
 
   let form: FormData
   try {
