@@ -19,12 +19,12 @@ const stubManifests = [
       uiSlots: ["rates.upload"],
     },
     worker: {
-      kind: "python-dbos",
+      kind: "python-temporal",
       service: "ingestion",
       plugin: "fcl_v6",
     },
     healthPath: "/health",
-    enabled: false,
+    enabled: true,
   },
   {
     id: "messaging.msgraph",
@@ -44,7 +44,7 @@ const stubManifests = [
       uiSlots: ["messaging.inbox"],
     },
     worker: {
-      kind: "python-dbos",
+      kind: "python-temporal",
       service: "messaging",
       plugin: "msgraph",
     },
@@ -62,7 +62,7 @@ const stubManifests = [
       uiSlots: ["quote.rateSources"],
     },
     worker: {
-      kind: "python-dbos",
+      kind: "python-temporal",
       service: "spot",
       plugin: "maersk",
     },
@@ -80,7 +80,7 @@ const stubManifests = [
       uiSlots: ["quote.rateSources"],
     },
     worker: {
-      kind: "python-dbos",
+      kind: "python-temporal",
       service: "spot",
       plugin: "cma",
     },

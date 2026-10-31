@@ -1,10 +1,10 @@
 # Domain: spot
 
-|            |                                                                 |
-| ---------- | --------------------------------------------------------------- |
-| Service    | `services/spot` or `services/carriers` (Python + DBOS, planned) |
-| Extensions | Per carrier: `spot.maersk`, `spot.cma`, …                       |
-| Status     | Not started                                                     |
+|            |                                                                         |
+| ---------- | ----------------------------------------------------------------------- |
+| Service    | `services/spot` or `services/carriers` (Python + Temporal OSS, planned) |
+| Extensions | Per carrier: `spot.maersk`, `spot.cma`, …                               |
+| Status     | Not started                                                             |
 
 ## Owns
 

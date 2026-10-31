@@ -16,8 +16,9 @@ type ExtensionManifest = {
     api?: Array<{ pathPrefix: string }>
     uiSlots?: string[] // e.g. "quote.rateSources", "rates.upload"
   }
+  // Async extensions use Temporal OSS (ADR 0002). kind is always python-temporal.
   worker?: {
-    kind: "python-dbos"
+    kind: "python-temporal"
     service: string // "ingestion" | "messaging" | "spot"
     plugin: string
   }
@@ -28,12 +29,12 @@ type ExtensionManifest = {
 
 ## Registered extensions (stubs)
 
-| id                  | Wave | Worker           | Notes                           |
-| ------------------- | ---- | ---------------- | ------------------------------- |
-| `ingestion.fcl_v6`  | 2    | Python ingestion | Ocean FCL only; gate-first save |
-| `messaging.msgraph` | 3    | Python messaging | First email provider            |
-| `spot.maersk`       | 4    | Python spot      | API and/or scraper strategies   |
-| `spot.cma`          | 4    | Python spot      | API and/or scraper strategies   |
+| id                  | Wave | Worker                | Notes                           |
+| ------------------- | ---- | --------------------- | ------------------------------- |
+| `ingestion.fcl_v6`  | 2    | Python + Temporal OSS | Ocean FCL only; gate-first save |
+| `messaging.msgraph` | 3    | Python + Temporal OSS | First email provider            |
+| `spot.maersk`       | 4    | Python + Temporal OSS | API and/or scraper strategies   |
+| `spot.cma`          | 4    | Python + Temporal OSS | API and/or scraper strategies   |
 
 ## Planned later (not registered yet)
 

@@ -23,6 +23,7 @@ export const env = createEnv({
     GEOGRAPHY_SERVICE_URL: z.url(),
     CRM_SERVICE_URL: z.url(),
     RATES_SERVICE_URL: z.url(),
+    INGESTION_SERVICE_URL: z.url(),
     INTERNAL_SERVICE_TOKEN: z.string().min(16),
   },
   client: {
@@ -50,6 +51,7 @@ export const env = createEnv({
     GEOGRAPHY_SERVICE_URL: process.env.GEOGRAPHY_SERVICE_URL,
     CRM_SERVICE_URL: process.env.CRM_SERVICE_URL,
     RATES_SERVICE_URL: process.env.RATES_SERVICE_URL,
+    INGESTION_SERVICE_URL: process.env.INGESTION_SERVICE_URL,
     INTERNAL_SERVICE_TOKEN: process.env.INTERNAL_SERVICE_TOKEN,
   },
   emptyStringAsUndefined: true,

@@ -1,0 +1,10 @@
+{
+  "name": "@starboard/temporal",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "docker compose -f docker-compose.yml up --remove-orphans",
+    "down": "docker compose -f docker-compose.yml down",
+    "build": "echo \"Temporal OSS via Docker — no compile step\""
+  }
+}

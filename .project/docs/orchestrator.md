@@ -21,9 +21,9 @@ NON-NEGOTIABLES
 - Domain services are stateless; Bearer INTERNAL_SERVICE_TOKEN + X-Organization-Id.
 - One writer per Postgres schema. No dual-write with the BFF.
 - ONE MATH in packages/pricing — never twin-sync.
-- Long jobs (ingest, spot API/scrape, LLM) = DBOS durable queues; HTTP 202.
+- Long jobs (ingest, spot API/scrape, LLM) = Temporal OSS workflows; HTTP 202.
 - Bun services: controller → service → DAO → createContainer().
-- Python extension workers: FastAPI + hexagonal + DBOS (foundry role).
+- Python extension workers: FastAPI + hexagonal + Temporal workers.
 - Soft cross-domain IDs; BFF enforces cross-domain integrity.
 - ~300 LOC soft cap; contracts-first; expand/contract migrations.
 - NEVER port deprecated lineages (see .project/docs/deprecations.md).

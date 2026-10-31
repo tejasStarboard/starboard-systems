@@ -109,8 +109,17 @@ function handleError(
     return c.json({ error: error.message }, error.status)
   }
 
-  logError("rates", requestId, event, {
-    error: error instanceof Error ? error.message : String(error),
-  })
-  return c.json({ error: "Internal server error" }, 500)
+  const message = error instanceof Error ? error.message : String(error)
+  const cause =
+    error instanceof Error && "cause" in error && error.cause instanceof Error
+      ? error.cause.message
+      : undefined
+  logError("rates", requestId, event, { error: message, cause })
+  return c.json(
+    {
+      error: "Internal server error",
+      detail: cause ?? message,
+    },
+    500
+  )
 }

@@ -47,13 +47,14 @@ Cross-domain foreign keys are **softened** to opaque text IDs. Integrity for `ow
 ```bash
 # root .env — see .env.example
 pnpm install
+uv sync --all-packages --group dev   # Python workspace: packages/* + services/*
 pnpm --filter @starboard/contracts build
 pnpm --filter @starboard/service-kit build
 pnpm --filter @starboard/db build
 # drizzle.config schemaFilter includes public + geo + quotes (default is public-only)
 pnpm --filter @starboard/db db:push
 pnpm --filter @starboard/db db:seed
-pnpm dev   # turbo: web + quotes + geography
+pnpm dev   # turbo: web + Bun services + Temporal OSS (Docker) + ingestion
 ```
 
 If `db:push` only drops old `public` tables and seed fails with `relation "quotes.*" does not exist`, create the schemas once then push again:
@@ -65,7 +66,9 @@ CREATE SCHEMA IF NOT EXISTS crm;
 CREATE SCHEMA IF NOT EXISTS rates;
 ```
 
-Default ports: web `3000`, geography `3101`, quotes `3102`, crm `3103`, rates `3104`.
+Default ports: web `3000`, geography `3101`, quotes `3102`, crm `3103`, rates
+`3104`, ingestion (Python) `3201`. Async extension workflows use **Temporal OSS**
+(`TEMPORAL_ADDRESS`, default `localhost:7233`).
 
 ## Deploy
 

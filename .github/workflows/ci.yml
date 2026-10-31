@@ -38,6 +38,7 @@ jobs:
       GEOGRAPHY_SERVICE_URL: http://127.0.0.1:3101
       CRM_SERVICE_URL: http://127.0.0.1:3103
       RATES_SERVICE_URL: http://127.0.0.1:3104
+      INGESTION_SERVICE_URL: http://127.0.0.1:3201
       INTERNAL_SERVICE_TOKEN: ci-internal-service-token
 
     steps:
@@ -62,6 +63,11 @@ jobs:
         with:
           bun-version: latest
 
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
       - name: Cache Turborepo
         uses: actions/cache@v4
         with:
@@ -73,6 +79,9 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Install Python workspace
+        run: uv sync --all-packages --group dev --frozen
 
       - name: Write CI env for Next
         working-directory: apps/web
@@ -94,6 +103,7 @@ jobs:
             echo 'GEOGRAPHY_SERVICE_URL=http://127.0.0.1:3101'
             echo 'CRM_SERVICE_URL=http://127.0.0.1:3103'
             echo 'RATES_SERVICE_URL=http://127.0.0.1:3104'
+            echo 'INGESTION_SERVICE_URL=http://127.0.0.1:3201'
             echo 'INTERNAL_SERVICE_TOKEN=ci-internal-service-token'
           } > .env
 

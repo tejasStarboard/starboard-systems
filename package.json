@@ -5,7 +5,7 @@
   "license": "UNLICENSED",
   "scripts": {
     "build": "turbo build",
-    "dev": "turbo dev",
+    "dev": "turbo dev --concurrency=25",
     "lint": "turbo lint",
     "format": "turbo format",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,mjs,cjs,json,md,css}\"",

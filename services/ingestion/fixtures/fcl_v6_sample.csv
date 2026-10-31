@@ -1,0 +1,2 @@
+origin,destination,carrier,label,currency,amount,valid_from,valid_to
+CNSHA,USLAX,MSC,FCL SHA-LAX sample,USD,1250.00,2026-01-01,2026-12-31

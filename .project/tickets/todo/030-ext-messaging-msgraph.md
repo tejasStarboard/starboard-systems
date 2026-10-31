@@ -8,7 +8,7 @@ epic: SYS-EXT-MSGRAPH
 docs:
   - .project/docs/domains/messaging.md
   - .project/docs/extensions.md
-  - .project/docs/adr/0002-python-dbos-extensions.md
+  - .project/docs/adr/0002-python-temporal-extensions.md
 ---
 
 # Extension messaging.msgraph
