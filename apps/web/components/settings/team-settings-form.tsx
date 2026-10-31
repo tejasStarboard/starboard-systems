@@ -117,7 +117,7 @@ export function TeamSettingsForm() {
         </p>
       </div>
 
-      <section className="space-y-3 rounded-xl border bg-card p-4">
+      <section className="space-y-3">
         <h2 className="text-sm font-medium">Members</h2>
         {loading ? (
           <p className="text-sm text-muted-foreground">Loading…</p>
@@ -145,7 +145,7 @@ export function TeamSettingsForm() {
         )}
       </section>
 
-      <section className="space-y-3 rounded-xl border bg-card p-4">
+      <section className="space-y-3">
         <h2 className="text-sm font-medium">Invite</h2>
         <form
           className="space-y-3"
