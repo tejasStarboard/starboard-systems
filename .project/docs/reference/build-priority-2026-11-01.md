@@ -25,11 +25,12 @@ Parallel with P0 (small, unblocks live spot):
 
 ## P1 — Make extensions production-shaped
 
-| Order | Ticket                                                                                             | Why                                                    |
-| ----: | -------------------------------------------------------------------------------------------------- | ------------------------------------------------------ |
-|     5 | **[068](../../tickets/todo/068-global-charges-incoterm-scope.md)** Globals + bucket/incoterm scope | Completes surcharge story for door-to-door / Incoterms |
-|     6 | **[062](../../tickets/todo/062-live-spot-strategies.md)** Live Maersk → CMA                        | Real buy rates into 060 (after 061)                    |
-|     7 | **[063](../../tickets/todo/063-messaging-production-path.md)** Graph OAuth + Neon                  | Email-native loop; can parallel 062                    |
+| Order | Ticket                                                                                                    | Why                                                               |
+| ----: | --------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
+|     5 | **[068](../../tickets/todo/068-global-charges-incoterm-scope.md)** Globals + bucket/incoterm scope        | Completes surcharge story for door-to-door / Incoterms            |
+|     6 | **[069](../../tickets/todo/069-org-carrier-credentials-settings.md)** Org carrier credentials in settings | Replace env JSON; tenants set Maersk/CMA secrets like starboard-2 |
+|     7 | **[062](../../tickets/todo/062-live-spot-strategies.md)** Live Maersk → CMA                               | Real buy rates into 060 (after 061 + 069)                         |
+|     8 | **[063](../../tickets/todo/063-messaging-production-path.md)** Graph OAuth + Neon                         | Email-native loop; can parallel 062                               |
 
 ---
 
@@ -37,9 +38,9 @@ Parallel with P0 (small, unblocks live spot):
 
 | Order | Ticket                                                                                           | Why                                              |
 | ----: | ------------------------------------------------------------------------------------------------ | ------------------------------------------------ |
-|     8 | **[064](../../tickets/todo/064-crm-and-settings-shell.md)** CRM fields/contacts + settings pages | Needed for real tenants; not blocking money math |
-|     9 | Quote stages / validity / PDF export                                                             | Ticket TBD after 067                             |
-|    10 | FCL v6 beyond CSV (Excel/PDF agent)                                                              | Ticket TBD; keep as `ingestion.fcl_v6` extension |
+|     9 | **[064](../../tickets/todo/064-crm-and-settings-shell.md)** CRM fields/contacts + settings pages | Needed for real tenants; not blocking money math |
+|    10 | Quote stages / validity / PDF export                                                             | Ticket TBD after 067                             |
+|    11 | FCL v6 beyond CSV (Excel/PDF agent)                                                              | Ticket TBD; keep as `ingestion.fcl_v6` extension |
 
 ---
 
@@ -58,7 +59,8 @@ Parallel with P0 (small, unblocks live spot):
 
 ```text
 060 apply rate ─────────┐
-061 settings runtime ───┼──► 062 live spot
+061 settings runtime ───┤
+069 org carrier creds ──┼──► 062 live spot
 065 → 066 → 067 surcharges ──► 068 globals/incoterm
 063 messaging (parallel)
 064 CRM/settings (whenever)

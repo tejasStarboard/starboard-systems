@@ -22,11 +22,12 @@ Shell, geo, rates stub, pricing helpers, thin extensions, platform admin, extens
 
 ### P1 — Extensions production-shaped
 
-| Ticket                                                      | Title                           | Status |
-| ----------------------------------------------------------- | ------------------------------- | ------ |
-| [068](../tickets/todo/068-global-charges-incoterm-scope.md) | Globals + incoterm/bucket scope | open   |
-| [062](../tickets/todo/062-live-spot-strategies.md)          | Live spot Maersk/CMA            | open   |
-| [063](../tickets/todo/063-messaging-production-path.md)     | Messaging Graph OAuth + Neon    | open   |
+| Ticket                                                         | Title                               | Status |
+| -------------------------------------------------------------- | ----------------------------------- | ------ |
+| [068](../tickets/todo/068-global-charges-incoterm-scope.md)    | Globals + incoterm/bucket scope     | open   |
+| [069](../tickets/todo/069-org-carrier-credentials-settings.md) | Org carrier credentials in settings | open   |
+| [062](../tickets/todo/062-live-spot-strategies.md)             | Live spot Maersk/CMA                | open   |
+| [063](../tickets/todo/063-messaging-production-path.md)        | Messaging Graph OAuth + Neon        | open   |
 
 ### P2 — Shell completeness
 
