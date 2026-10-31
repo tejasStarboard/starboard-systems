@@ -2,7 +2,7 @@
 id: 041
 wave: 04-spot
 title: Extension spot.maersk
-status: in_progress
+status: done
 depends_on: [040]
 epic: SYS-EXT-SPOT
 docs:
