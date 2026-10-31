@@ -2,7 +2,7 @@
 id: 050
 wave: 05-platform-admin
 title: Platform admin — extension rollout + org impersonation
-status: in_progress
+status: done
 depends_on: [001, 005]
 epic: SYS-PLATFORM-ADMIN
 docs:
@@ -49,14 +49,14 @@ only see connection UX for extensions already active for them.
 
 ## Acceptance criteria
 
-- [ ] Non-staff users cannot open `/admin/*` (404) and see no admin nav
-- [ ] Staff can set an extension to off / beta (org allowlist) / on for all
+- [x] Non-staff users cannot open `/admin/*` (404) and see no admin nav
+- [x] Staff can set an extension to off / beta (org allowlist) / on for all
       entitled orgs; shell contributions respect that rollout
-- [ ] Staff can search organizations and switch into one; shell data then
+- [x] Staff can search organizations and switch into one; shell data then
       scopes to that org; staff can exit impersonation
-- [ ] Impersonation and rollout changes record actor (staff user id) for audit
+- [x] Impersonation and rollout changes record actor (staff user id) for audit
       (persist at least enough for later audit UI)
-- [ ] Customer Integrations page is not an extensions marketplace / enable UI
+- [x] Customer Integrations page is not an extensions marketplace / enable UI
 
 ## Fixtures / tests
 
