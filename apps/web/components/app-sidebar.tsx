@@ -12,6 +12,7 @@ import {
   ShieldCheckIcon,
 } from "@phosphor-icons/react"
 
+import { NavExtensions } from "@/components/nav-extensions"
 import { NavMain } from "@/components/nav-main"
 import { NavSecondary } from "@/components/nav-secondary"
 import { NavUser } from "@/components/nav-user"
@@ -25,21 +26,16 @@ import {
   SidebarMenuItem,
 } from "@starboard/lib-ui/components/sidebar"
 
-const navSecondary = [
+const navMain = [
   {
-    title: "Support",
-    url: "#",
-    icon: <LifebuoyIcon />,
+    title: "Quotes",
+    url: "/",
+    icon: <FileTextIcon />,
   },
   {
-    title: "Feedback",
-    url: "#",
-    icon: <PaperPlaneTiltIcon />,
-  },
-  {
-    title: "Settings",
-    url: "/settings",
-    icon: <GearIcon />,
+    title: "Customers",
+    url: "/customers",
+    icon: <AddressBookIcon />,
   },
 ]
 
@@ -61,26 +57,26 @@ export function AppSidebar({
   }>
   showAdminNav?: boolean
 }) {
-  const navMain = [
+  const navSecondary = [
     {
-      title: "Quotes",
-      url: "/",
-      icon: <FileTextIcon />,
+      title: "Support",
+      url: "#",
+      icon: <LifebuoyIcon />,
     },
     {
-      title: "Customers",
-      url: "/customers",
-      icon: <AddressBookIcon />,
+      title: "Feedback",
+      url: "#",
+      icon: <PaperPlaneTiltIcon />,
     },
-    ...extensionNav.map((item) => ({
-      title: item.label,
-      url: item.href,
-      icon: null,
-    })),
+    {
+      title: "Settings",
+      url: "/settings",
+      icon: <GearIcon />,
+    },
     ...(showAdminNav
       ? [
           {
-            title: "Platform admin",
+            title: "Admin",
             url: "/admin",
             icon: <ShieldCheckIcon />,
           },
@@ -110,6 +106,7 @@ export function AppSidebar({
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={navMain} />
+        <NavExtensions items={extensionNav} />
         <NavSecondary items={navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>

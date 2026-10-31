@@ -6,7 +6,10 @@ import { getQuotesManager } from "@/lib/domain/quotes/quotes.manager"
 
 export default async function HomePage() {
   const { organizationId } = await requireOrganizationContext()
-  const quotes = await getQuotesManager().listQuotesForOrg(organizationId)
+  const initial = await getQuotesManager().listQuotesForOrg(organizationId, {
+    page: 1,
+    pageSize: 25,
+  })
 
   return (
     <div className="flex flex-1 flex-col gap-4 p-4">
@@ -20,7 +23,7 @@ export default async function HomePage() {
         <CreateQuoteButton />
       </div>
 
-      <QuotesDataTable columns={columns} data={quotes} />
+      <QuotesDataTable columns={columns} initial={initial} />
     </div>
   )
 }

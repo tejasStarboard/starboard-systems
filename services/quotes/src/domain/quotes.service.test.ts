@@ -22,6 +22,8 @@ import type {
   QuoteInsert,
   QuoteUpdate,
   QuotesDao,
+  QuotesListParams,
+  QuotesListResult,
   ReplaceLanesInput,
 } from "../dao/quotes.dao"
 
@@ -30,22 +32,42 @@ class InMemoryQuotesDao implements QuotesDao {
   private lanesByQuote = new Map<string, LaneRow[]>()
   private ratesByLane = new Map<string, RateRow[]>()
 
-  async listByOrganization(organizationId: string): Promise<QuoteListItem[]> {
-    return [...this.quotes.values()]
+  async listByOrganization(
+    organizationId: string,
+    params: QuotesListParams
+  ): Promise<QuotesListResult> {
+    const q = params.q?.trim().toLowerCase() ?? ""
+    const filtered = [...this.quotes.values()]
       .filter((row) => row.organizationId === organizationId)
-      .map((row) => ({
-        id: row.id,
-        quoteId: row.quoteId,
-        source: row.source,
-        status: row.status,
-        customerId: row.customerId,
-        currencyCode: row.currencyCode,
-        ownerId: row.ownerId,
-        organizationId: row.organizationId,
-        effectiveFrom: row.effectiveFrom?.toISOString() ?? null,
-        expiryAt: row.expiryAt?.toISOString() ?? null,
-        createdAt: new Date().toISOString(),
-      }))
+      .filter((row) => {
+        if (!q) return true
+        return (
+          row.quoteId.toLowerCase().includes(q) ||
+          row.status.toLowerCase().includes(q) ||
+          (row.currencyCode ?? "").toLowerCase().includes(q) ||
+          row.source.toLowerCase().includes(q)
+        )
+      })
+      .map(
+        (row): QuoteListItem => ({
+          id: row.id,
+          quoteId: row.quoteId,
+          source: row.source,
+          status: row.status,
+          customerId: row.customerId,
+          currencyCode: row.currencyCode,
+          ownerId: row.ownerId,
+          organizationId: row.organizationId,
+          effectiveFrom: row.effectiveFrom?.toISOString() ?? null,
+          expiryAt: row.expiryAt?.toISOString() ?? null,
+          createdAt: new Date().toISOString(),
+        })
+      )
+
+    return {
+      rows: filtered.slice(params.offset, params.offset + params.limit),
+      total: filtered.length,
+    }
   }
 
   async findFormValues(
@@ -250,6 +272,30 @@ describe("DefaultQuotesService.save", () => {
     await expect(service.get("quote-2", "org-other")).rejects.toMatchObject({
       status: 404,
     })
+  })
+
+  test("paginates quote lists", async () => {
+    const dao = new InMemoryQuotesDao()
+    const service = new DefaultQuotesService(dao)
+
+    for (const id of ["quote-a", "quote-b", "quote-c"]) {
+      const values = emptyQuoteFormValues({ id, quoteId: id.slice(-6).toUpperCase() })
+      values.lanes = [emptyLaneFormValues("fcl")]
+      await service.save(values, {
+        ownerId: "user-1",
+        organizationId: "org-1",
+      })
+    }
+
+    const page1 = await service.list("org-1", { page: 1, pageSize: 2 })
+    expect(page1.quotes).toHaveLength(2)
+    expect(page1.total).toBe(3)
+    expect(page1.page).toBe(1)
+    expect(page1.pageSize).toBe(2)
+
+    const page2 = await service.list("org-1", { page: 2, pageSize: 2 })
+    expect(page2.quotes).toHaveLength(1)
+    expect(page2.total).toBe(3)
   })
 })
 

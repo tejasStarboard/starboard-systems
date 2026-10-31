@@ -147,6 +147,35 @@ export const quoteListItemViewSchema = quoteListItemSchema.extend({
 
 export type QuoteListItemView = z.infer<typeof quoteListItemViewSchema>
 
+export const quotesListQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).optional().default(1),
+  pageSize: z.coerce.number().int().min(1).max(100).optional().default(25),
+  q: z.string().optional().default(""),
+})
+
+export type QuotesListQuery = z.infer<typeof quotesListQuerySchema>
+export type QuotesListQueryInput = z.input<typeof quotesListQuerySchema>
+
+export const listQuotesResponseSchema = z.object({
+  quotes: z.array(quoteListItemSchema),
+  page: z.number().int().min(1),
+  pageSize: z.number().int().min(1),
+  total: z.number().int().min(0),
+})
+
+export type ListQuotesResponse = z.infer<typeof listQuotesResponseSchema>
+
+export const listQuotesViewResponseSchema = z.object({
+  quotes: z.array(quoteListItemViewSchema),
+  page: z.number().int().min(1),
+  pageSize: z.number().int().min(1),
+  total: z.number().int().min(0),
+})
+
+export type ListQuotesViewResponse = z.infer<
+  typeof listQuotesViewResponseSchema
+>
+
 export const formOptionSchema = z.object({
   value: z.string(),
   label: z.string(),

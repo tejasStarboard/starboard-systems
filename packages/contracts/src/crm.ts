@@ -108,8 +108,20 @@ export const customerListItemSchema = customerRecordSchema.extend({
 
 export type CustomerListItem = z.infer<typeof customerListItemSchema>
 
+export const crmListQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).optional().default(1),
+  pageSize: z.coerce.number().int().min(1).max(100).optional().default(25),
+  q: z.string().optional().default(""),
+})
+
+export type CrmListQuery = z.infer<typeof crmListQuerySchema>
+export type CrmListQueryInput = z.input<typeof crmListQuerySchema>
+
 export const listCustomerRecordsResponseSchema = z.object({
   customers: z.array(customerListItemSchema),
+  page: z.number().int().min(1),
+  pageSize: z.number().int().min(1),
+  total: z.number().int().min(0),
 })
 
 export type ListCustomerRecordsResponse = z.infer<
@@ -163,6 +175,9 @@ export type UpdateContactRequest = z.infer<typeof updateContactRequestSchema>
 
 export const listContactsResponseSchema = z.object({
   contacts: z.array(contactRecordSchema),
+  page: z.number().int().min(1),
+  pageSize: z.number().int().min(1),
+  total: z.number().int().min(0),
 })
 
 export type ListContactsResponse = z.infer<typeof listContactsResponseSchema>

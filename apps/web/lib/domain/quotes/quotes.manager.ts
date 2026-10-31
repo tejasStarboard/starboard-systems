@@ -2,8 +2,9 @@ import "server-only"
 
 import type {
   FormOption,
+  ListQuotesViewResponse,
   QuoteFormValues,
-  QuoteListItemView,
+  QuotesListQueryInput,
   QuoteSource,
 } from "@starboard/lib-contracts"
 
@@ -29,10 +30,13 @@ export class QuotesManager {
     private readonly organizationsDao: OrganizationsDao = getOrganizationsDao()
   ) {}
 
-  async listQuotesForOrg(organizationId: string): Promise<QuoteListItemView[]> {
-    const quotes = await this.quotesClient.listQuotes(organizationId)
-    const ownerIds = quotes.map((q) => q.ownerId)
-    const customerIds = quotes
+  async listQuotesForOrg(
+    organizationId: string,
+    query?: QuotesListQueryInput
+  ): Promise<ListQuotesViewResponse> {
+    const result = await this.quotesClient.listQuotes(organizationId, query)
+    const ownerIds = result.quotes.map((q) => q.ownerId)
+    const customerIds = result.quotes
       .map((q) => q.customerId)
       .filter((id): id is string => Boolean(id))
 
@@ -41,13 +45,18 @@ export class QuotesManager {
       this.crmManager.getCustomerNamesByIds(organizationId, customerIds),
     ])
 
-    return quotes.map((quote) => ({
-      ...quote,
-      ownerName: owners.get(quote.ownerId) ?? "Unknown",
-      customerName: quote.customerId
-        ? (customers.get(quote.customerId) ?? null)
-        : null,
-    }))
+    return {
+      quotes: result.quotes.map((quote) => ({
+        ...quote,
+        ownerName: owners.get(quote.ownerId) ?? "Unknown",
+        customerName: quote.customerId
+          ? (customers.get(quote.customerId) ?? null)
+          : null,
+      })),
+      page: result.page,
+      pageSize: result.pageSize,
+      total: result.total,
+    }
   }
 
   async getQuoteFormValuesForOrg(quoteId: string, organizationId: string) {

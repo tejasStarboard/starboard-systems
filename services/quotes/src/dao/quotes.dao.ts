@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, inArray } from "drizzle-orm"
+import { and, asc, count, desc, eq, ilike, inArray, or, type SQL } from "drizzle-orm"
 import {
   emptyLaneFormValues,
   toDateInputValue,
@@ -56,8 +56,22 @@ export type ReplaceLanesInput = {
   expiryAt: Date | null
 }
 
+export type QuotesListParams = {
+  limit: number
+  offset: number
+  q?: string
+}
+
+export type QuotesListResult = {
+  rows: QuoteListItem[]
+  total: number
+}
+
 export interface QuotesDao {
-  listByOrganization(organizationId: string): Promise<QuoteListItem[]>
+  listByOrganization(
+    organizationId: string,
+    params: QuotesListParams
+  ): Promise<QuotesListResult>
   findFormValues(
     quoteId: string,
     organizationId: string
@@ -81,7 +95,17 @@ export interface QuotesDao {
 export class DrizzleQuotesDao implements QuotesDao {
   constructor(private readonly db: QuotesDb) {}
 
-  async listByOrganization(organizationId: string): Promise<QuoteListItem[]> {
+  async listByOrganization(
+    organizationId: string,
+    params: QuotesListParams
+  ): Promise<QuotesListResult> {
+    const whereClause = this.listWhere(organizationId, params.q)
+
+    const [totalRow] = await this.db
+      .select({ total: count() })
+      .from(quote)
+      .where(whereClause)
+
     const rows = await this.db
       .select({
         id: quote.id,
@@ -97,22 +121,46 @@ export class DrizzleQuotesDao implements QuotesDao {
         createdAt: quote.createdAt,
       })
       .from(quote)
-      .where(eq(quote.organizationId, organizationId))
+      .where(whereClause)
       .orderBy(desc(quote.createdAt))
+      .limit(params.limit)
+      .offset(params.offset)
 
-    return rows.map((row) => ({
-      id: row.id,
-      quoteId: row.quoteId,
-      source: row.source,
-      status: row.status,
-      customerId: row.customerId,
-      currencyCode: row.currencyCode,
-      ownerId: row.ownerId,
-      organizationId: row.organizationId,
-      effectiveFrom: row.effectiveFrom?.toISOString() ?? null,
-      expiryAt: row.expiryAt?.toISOString() ?? null,
-      createdAt: row.createdAt.toISOString(),
-    }))
+    return {
+      rows: rows.map((row) => ({
+        id: row.id,
+        quoteId: row.quoteId,
+        source: row.source,
+        status: row.status,
+        customerId: row.customerId,
+        currencyCode: row.currencyCode,
+        ownerId: row.ownerId,
+        organizationId: row.organizationId,
+        effectiveFrom: row.effectiveFrom?.toISOString() ?? null,
+        expiryAt: row.expiryAt?.toISOString() ?? null,
+        createdAt: row.createdAt.toISOString(),
+      })),
+      total: totalRow?.total ?? 0,
+    }
+  }
+
+  private listWhere(organizationId: string, q?: string): SQL {
+    const conditions: SQL[] = [eq(quote.organizationId, organizationId)]
+    const trimmed = q?.trim()
+    if (!trimmed) {
+      return and(...conditions)!
+    }
+
+    const pattern = `%${trimmed}%`
+    conditions.push(
+      or(
+        ilike(quote.quoteId, pattern),
+        ilike(quote.status, pattern),
+        ilike(quote.currencyCode, pattern),
+        ilike(quote.source, pattern)
+      )!
+    )
+    return and(...conditions)!
   }
 
   async findFormValues(

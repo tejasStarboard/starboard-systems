@@ -1,15 +1,16 @@
 "use client"
 
-import { TrashIcon } from "@phosphor-icons/react"
+import { CaretLeftIcon, CaretRightIcon, TrashIcon } from "@phosphor-icons/react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useRouter } from "next/navigation"
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Controller, useForm } from "react-hook-form"
 
 import {
   customerRecordSchema,
   type ContactRecord,
   type CustomerRecord,
+  type ListContactsResponse,
 } from "@starboard/lib-contracts"
 import { Button } from "@starboard/lib-ui/components/button"
 import {
@@ -56,19 +57,31 @@ import {
 } from "@/lib/domain/crm/crm-forms.schema"
 import { toastFormErrors } from "@/lib/form-toast"
 
+const CONTACTS_PAGE_SIZE = 25
+
+function totalPages(total: number, pageSize: number) {
+  return Math.max(1, Math.ceil(total / pageSize))
+}
+
 function SwitchRow({
   title,
   description,
   checked,
+  disabled,
   onCheckedChange,
 }: {
   title: string
   description: string
   checked: boolean
+  disabled?: boolean
   onCheckedChange: (checked: boolean) => void
 }) {
   return (
-    <label className="flex cursor-pointer items-center justify-between gap-4 py-3">
+    <label
+      className={`flex items-center justify-between gap-4 py-3 ${
+        disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer"
+      }`}
+    >
       <span className="min-w-0 space-y-0.5">
         <span className="block text-sm font-medium">{title}</span>
         <span className="block text-xs text-muted-foreground">
@@ -77,6 +90,7 @@ function SwitchRow({
       </span>
       <Switch
         checked={checked === true}
+        disabled={disabled}
         onCheckedChange={(value) => onCheckedChange(value === true)}
         className="shrink-0"
       />
@@ -89,13 +103,25 @@ export function CustomerDetail({
   initialContacts,
 }: {
   initialCustomer: CustomerRecord
-  initialContacts: ContactRecord[]
+  initialContacts: ListContactsResponse
 }) {
   const router = useRouter()
-  const [contacts, setContacts] = useState(initialContacts)
+  const [contacts, setContacts] = useState(initialContacts.contacts)
+  const [contactsTotal, setContactsTotal] = useState(initialContacts.total)
+  const [contactsPageSize] = useState(
+    initialContacts.pageSize || CONTACTS_PAGE_SIZE
+  )
+  const [contactsLoading, setContactsLoading] = useState(false)
   const [contactsSheetOpen, setContactsSheetOpen] = useState(false)
   const [contactQuery, setContactQuery] = useState("")
+  const [contactsListQuery, setContactsListQuery] = useState({
+    page: initialContacts.page,
+    q: "",
+  })
   const [contactDialogOpen, setContactDialogOpen] = useState(false)
+  const [isActive, setIsActive] = useState(initialCustomer.isActive === true)
+  const [togglingActive, setTogglingActive] = useState(false)
+  const skipContactsFetchRef = useRef(true)
 
   const form = useForm<CustomerFormValues>({
     resolver: zodResolver(customerFormSchema),
@@ -108,33 +134,142 @@ export function CustomerDetail({
   })
 
   const customerName = form.watch("name")
+  const formDisabled = !isActive || togglingActive
+  const contactsPages = totalPages(contactsTotal, contactsPageSize)
 
   useEffect(() => {
     form.reset(customerToFormValues(initialCustomer))
-    setContacts(initialContacts)
+    setIsActive(initialCustomer.isActive === true)
+    setContacts(initialContacts.contacts)
+    setContactsTotal(initialContacts.total)
+    setContactsListQuery({ page: initialContacts.page, q: "" })
   }, [form, initialCustomer, initialContacts])
 
-  const filteredContacts = useMemo(() => {
-    const q = contactQuery.trim().toLowerCase()
-    if (!q) return contacts
-    return contacts.filter(
-      (contact) =>
-        contact.name.toLowerCase().includes(q) ||
-        contact.email?.toLowerCase().includes(q) ||
-        contact.phone?.toLowerCase().includes(q) ||
-        contact.role?.toLowerCase().includes(q)
-    )
-  }, [contactQuery, contacts])
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      const nextQ = contactQuery.trim()
+      setContactsListQuery((prev) =>
+        prev.q === nextQ ? prev : { page: 1, q: nextQ }
+      )
+    }, 300)
+    return () => window.clearTimeout(timer)
+  }, [contactQuery])
 
-  async function onSaveCustomer(values: CustomerFormValues) {
+  useEffect(() => {
+    if (skipContactsFetchRef.current) {
+      skipContactsFetchRef.current = false
+      return
+    }
+
+    let cancelled = false
+    async function loadContacts() {
+      setContactsLoading(true)
+      try {
+        const params = new URLSearchParams({
+          page: String(contactsListQuery.page),
+          pageSize: String(contactsPageSize),
+        })
+        if (contactsListQuery.q) params.set("q", contactsListQuery.q)
+        const response = await fetch(
+          `/api/customers/${initialCustomer.id}/contacts?${params}`
+        )
+        const body = (await response.json().catch(() => null)) as
+          | (ListContactsResponse & { error?: string })
+          | null
+        if (!response.ok || !body?.contacts) {
+          if (!cancelled) {
+            toast.add({
+              type: "error",
+              title: "Unable to load contacts",
+              description: body?.error ?? "Something went wrong. Try again.",
+            })
+          }
+          return
+        }
+        if (!cancelled) {
+          setContacts(body.contacts)
+          setContactsTotal(body.total)
+        }
+      } catch {
+        if (!cancelled) {
+          toast.add({
+            type: "error",
+            title: "Unable to load contacts",
+            description: "Something went wrong. Try again.",
+          })
+        }
+      } finally {
+        if (!cancelled) setContactsLoading(false)
+      }
+    }
+
+    void loadContacts()
+    return () => {
+      cancelled = true
+    }
+  }, [contactsListQuery, contactsPageSize, initialCustomer.id])
+
+  async function toggleActive(nextActive: boolean) {
+    if (togglingActive) return
+    setTogglingActive(true)
+    if (!nextActive && form.formState.isDirty) {
+      form.reset()
+    }
     try {
       const response = await fetch(`/api/customers/${initialCustomer.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values),
+        body: JSON.stringify({ isActive: nextActive }),
       })
       const body = (await response.json().catch(() => null)) as
-        (CustomerRecord & { error?: string }) | null
+        | (CustomerRecord & { error?: string })
+        | null
+      if (!response.ok || !body) {
+        toast.add({
+          type: "error",
+          title: "Unable to update status",
+          description: body?.error ?? "Something went wrong. Try again.",
+        })
+        return
+      }
+      const parsed = customerRecordSchema.safeParse(body)
+      if (!parsed.success) {
+        toast.add({
+          type: "error",
+          title: "Unable to update status",
+          description: "Invalid response from server.",
+        })
+        return
+      }
+      setIsActive(parsed.data.isActive === true)
+      form.reset(customerToFormValues(parsed.data))
+      toast.add({
+        type: "success",
+        title: parsed.data.isActive ? "Customer activated" : "Customer deactivated",
+      })
+      router.refresh()
+    } catch {
+      toast.add({
+        type: "error",
+        title: "Unable to update status",
+        description: "Something went wrong. Try again.",
+      })
+    } finally {
+      setTogglingActive(false)
+    }
+  }
+
+  async function onSaveCustomer(values: CustomerFormValues) {
+    if (!isActive) return
+    try {
+      const response = await fetch(`/api/customers/${initialCustomer.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...values, isActive: true }),
+      })
+      const body = (await response.json().catch(() => null)) as
+        | (CustomerRecord & { error?: string })
+        | null
       if (!response.ok || !body) {
         toast.add({
           type: "error",
@@ -152,6 +287,7 @@ export function CustomerDetail({
         })
         return
       }
+      setIsActive(parsed.data.isActive === true)
       form.reset(customerToFormValues(parsed.data))
       toast.add({ type: "success", title: "Customer saved" })
       router.refresh()
@@ -162,6 +298,30 @@ export function CustomerDetail({
         description: "Something went wrong. Try again.",
       })
     }
+  }
+
+  async function reloadContacts(
+    page = contactsListQuery.page,
+    q = contactsListQuery.q
+  ) {
+    const params = new URLSearchParams({
+      page: String(page),
+      pageSize: String(contactsPageSize),
+    })
+    if (q) params.set("q", q)
+    const response = await fetch(
+      `/api/customers/${initialCustomer.id}/contacts?${params}`
+    )
+    const body = (await response.json().catch(() => null)) as
+      | (ListContactsResponse & { error?: string })
+      | null
+    if (!response.ok || !body?.contacts) {
+      throw new Error(body?.error ?? "Unable to load contacts")
+    }
+    skipContactsFetchRef.current = true
+    setContacts(body.contacts)
+    setContactsTotal(body.total)
+    setContactsListQuery({ page: body.page, q })
   }
 
   async function onAddContact(values: ContactFormValues) {
@@ -184,11 +344,10 @@ export function CustomerDetail({
         })
         return
       }
-      setContacts((prev) =>
-        [...prev, body].sort((a, b) => a.name.localeCompare(b.name))
-      )
       contactForm.reset(emptyContactFormValues)
       setContactDialogOpen(false)
+      setContactQuery("")
+      await reloadContacts(1, "")
       toast.add({ type: "success", title: "Contact added" })
     } catch {
       toast.add({
@@ -215,7 +374,16 @@ export function CustomerDetail({
       })
       return
     }
-    setContacts((prev) => prev.filter((row) => row.id !== contactId))
+    try {
+      const nextPage =
+        contacts.length <= 1 && contactsListQuery.page > 1
+          ? contactsListQuery.page - 1
+          : contactsListQuery.page
+      await reloadContacts(nextPage)
+    } catch {
+      setContacts((prev) => prev.filter((row) => row.id !== contactId))
+      setContactsTotal((prev) => Math.max(0, prev - 1))
+    }
   }
 
   const { isDirty, isSubmitting } = form.formState
@@ -246,9 +414,9 @@ export function CustomerDetail({
                 onClick={() => setContactsSheetOpen(true)}
               >
                 View contacts
-                {contacts.length > 0 ? (
+                {contactsTotal > 0 ? (
                   <span className="text-muted-foreground">
-                    ({contacts.length})
+                    ({contactsTotal})
                   </span>
                 ) : null}
               </Button>
@@ -265,6 +433,7 @@ export function CustomerDetail({
                       <Input
                         id="customer-name"
                         {...field}
+                        disabled={formDisabled}
                         aria-invalid={fieldState.invalid}
                       />
                       <FieldError errors={[fieldState.error]} />
@@ -282,6 +451,7 @@ export function CustomerDetail({
                           id="customer-email"
                           type="email"
                           {...field}
+                          disabled={formDisabled}
                           aria-invalid={fieldState.invalid}
                         />
                         <FieldError errors={[fieldState.error]} />
@@ -294,7 +464,11 @@ export function CustomerDetail({
                     render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid || undefined}>
                         <FieldLabel htmlFor="customer-phone">Phone</FieldLabel>
-                        <Input id="customer-phone" {...field} />
+                        <Input
+                          id="customer-phone"
+                          {...field}
+                          disabled={formDisabled}
+                        />
                         <FieldError errors={[fieldState.error]} />
                       </Field>
                     )}
@@ -308,7 +482,12 @@ export function CustomerDetail({
                       <FieldLabel htmlFor="customer-address">
                         Address
                       </FieldLabel>
-                      <Textarea id="customer-address" rows={3} {...field} />
+                      <Textarea
+                        id="customer-address"
+                        rows={3}
+                        {...field}
+                        disabled={formDisabled}
+                      />
                       <FieldError errors={[fieldState.error]} />
                     </Field>
                   )}
@@ -320,7 +499,11 @@ export function CustomerDetail({
                     render={({ field }) => (
                       <Field>
                         <FieldLabel htmlFor="customer-city">City</FieldLabel>
-                        <Input id="customer-city" {...field} />
+                        <Input
+                          id="customer-city"
+                          {...field}
+                          disabled={formDisabled}
+                        />
                       </Field>
                     )}
                   />
@@ -332,7 +515,11 @@ export function CustomerDetail({
                         <FieldLabel htmlFor="customer-state">
                           State / province
                         </FieldLabel>
-                        <Input id="customer-state" {...field} />
+                        <Input
+                          id="customer-state"
+                          {...field}
+                          disabled={formDisabled}
+                        />
                       </Field>
                     )}
                   />
@@ -344,7 +531,11 @@ export function CustomerDetail({
                         <FieldLabel htmlFor="customer-zip">
                           ZIP / postal
                         </FieldLabel>
-                        <Input id="customer-zip" {...field} />
+                        <Input
+                          id="customer-zip"
+                          {...field}
+                          disabled={formDisabled}
+                        />
                       </Field>
                     )}
                   />
@@ -360,6 +551,7 @@ export function CustomerDetail({
                           id="customer-country"
                           placeholder="US"
                           {...field}
+                          disabled={formDisabled}
                         />
                       </Field>
                     )}
@@ -368,24 +560,13 @@ export function CustomerDetail({
                 <div className="divide-y">
                   <Controller
                     control={form.control}
-                    name="isActive"
-                    render={({ field }) => (
-                      <SwitchRow
-                        title="Active"
-                        description="Inactive accounts stay in CRM but are hidden from the quote picker."
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    )}
-                  />
-                  <Controller
-                    control={form.control}
                     name="isCustomer"
                     render={({ field }) => (
                       <SwitchRow
                         title="Customer"
                         description="Treat this account as a customer for quoting and sales."
                         checked={field.value}
+                        disabled={formDisabled}
                         onCheckedChange={field.onChange}
                       />
                     )}
@@ -398,6 +579,7 @@ export function CustomerDetail({
                         title="Vendor"
                         description="Mark this account as a vendor or carrier partner."
                         checked={field.value}
+                        disabled={formDisabled}
                         onCheckedChange={field.onChange}
                       />
                     )}
@@ -408,16 +590,28 @@ export function CustomerDetail({
           </div>
         </div>
 
-        <div className="flex shrink-0 items-center justify-end gap-3 border-t bg-background px-5 py-4 lg:px-8">
+        <div className="flex shrink-0 items-center gap-3 border-t bg-background px-5 py-4 lg:px-8">
+          <label className="mr-auto flex items-center gap-2">
+            <Switch
+              checked={isActive}
+              disabled={togglingActive || isSubmitting}
+              onCheckedChange={(value) => void toggleActive(value === true)}
+              aria-label="Active"
+            />
+            <span className="text-sm font-medium">Active</span>
+          </label>
           <Button
             type="button"
             variant="outline"
-            disabled={!isDirty || isSubmitting}
+            disabled={formDisabled || !isDirty || isSubmitting}
             onClick={() => form.reset()}
           >
             Undo
           </Button>
-          <Button type="submit" disabled={isSubmitting || !isDirty}>
+          <Button
+            type="submit"
+            disabled={formDisabled || isSubmitting || !isDirty}
+          >
             {isSubmitting ? "Saving…" : "Save"}
           </Button>
         </div>
@@ -427,7 +621,10 @@ export function CustomerDetail({
         open={contactsSheetOpen}
         onOpenChange={(open) => {
           setContactsSheetOpen(open)
-          if (!open) setContactQuery("")
+          if (!open) {
+            setContactQuery("")
+            setContactsListQuery({ page: 1, q: "" })
+          }
         }}
       >
         <SheetContent
@@ -454,14 +651,16 @@ export function CustomerDetail({
           </div>
 
           <ul className="min-h-0 flex-1 space-y-2 overflow-y-auto px-4">
-            {filteredContacts.length === 0 ? (
+            {contacts.length === 0 ? (
               <li className="py-6 text-sm text-muted-foreground">
-                {contacts.length === 0
-                  ? "No contacts yet."
-                  : "No contacts match."}
+                {contactsLoading
+                  ? "Loading…"
+                  : contactsTotal === 0 && !contactsListQuery.q
+                    ? "No contacts yet."
+                    : "No contacts match."}
               </li>
             ) : (
-              filteredContacts.map((contact) => (
+              contacts.map((contact) => (
                 <li key={contact.id}>
                   <Card size="sm" className="group">
                     <CardHeader className="has-data-[slot=card-action]:grid-cols-[minmax(0,1fr)_auto]">
@@ -489,6 +688,49 @@ export function CustomerDetail({
               ))
             )}
           </ul>
+
+          <div className="flex shrink-0 items-center justify-between gap-2 border-t px-4 py-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={contactsLoading || contactsListQuery.page <= 1}
+              onClick={() =>
+                setContactsListQuery((prev) => ({
+                  ...prev,
+                  page: Math.max(1, prev.page - 1),
+                }))
+              }
+              aria-label="Previous contacts page"
+            >
+              <CaretLeftIcon className="size-4" />
+              <span className="sr-only sm:not-sr-only">Prev</span>
+            </Button>
+            <span className="text-xs text-muted-foreground">
+              {contactsTotal === 0 ? "0" : contactsListQuery.page} /{" "}
+              {contactsTotal === 0 ? 0 : contactsPages}
+            </span>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={
+                contactsLoading ||
+                contactsListQuery.page >= contactsPages ||
+                contactsTotal === 0
+              }
+              onClick={() =>
+                setContactsListQuery((prev) => ({
+                  ...prev,
+                  page: prev.page + 1,
+                }))
+              }
+              aria-label="Next contacts page"
+            >
+              <span className="sr-only sm:not-sr-only">Next</span>
+              <CaretRightIcon className="size-4" />
+            </Button>
+          </div>
 
           <div className="shrink-0 border-t px-4 py-3">
             <Dialog

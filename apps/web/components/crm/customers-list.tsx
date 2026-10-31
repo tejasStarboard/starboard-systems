@@ -1,16 +1,17 @@
 "use client"
 
-import { PlusIcon } from "@phosphor-icons/react"
+import { CaretLeftIcon, CaretRightIcon, PlugsIcon, PlusIcon } from "@phosphor-icons/react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { Controller, useForm } from "react-hook-form"
 
 import type {
   ContactRecord,
   CustomerListItem,
   CustomerRecord,
+  ListCustomerRecordsResponse,
 } from "@starboard/lib-contracts"
 import { Button } from "@starboard/lib-ui/components/button"
 import {
@@ -37,6 +38,8 @@ import {
   type CreateCustomerFormValues,
 } from "@/lib/domain/crm/crm-forms.schema"
 import { toastFormErrors } from "@/lib/form-toast"
+
+const CUSTOMERS_PAGE_SIZE = 25
 
 type SearchHit =
   | {
@@ -106,18 +109,30 @@ function buildSearchHits(
   return hits
 }
 
+function totalPages(total: number, pageSize: number) {
+  return Math.max(1, Math.ceil(total / pageSize))
+}
+
 export function CustomersList({
-  initialCustomers,
+  initial,
   variant = "page",
 }: {
-  initialCustomers: CustomerListItem[]
+  initial: ListCustomerRecordsResponse
   variant?: "page" | "pane"
 }) {
   const router = useRouter()
   const pathname = usePathname()
   const [query, setQuery] = useState("")
   const [dialogOpen, setDialogOpen] = useState(false)
-  const [customers, setCustomers] = useState(initialCustomers)
+  const [customers, setCustomers] = useState(initial.customers)
+  const [pageSize] = useState(initial.pageSize || CUSTOMERS_PAGE_SIZE)
+  const [total, setTotal] = useState(initial.total)
+  const [loading, setLoading] = useState(false)
+  const [listQuery, setListQuery] = useState({
+    page: initial.page,
+    q: "",
+  })
+  const skipFetchRef = useRef(true)
 
   const createForm = useForm<CreateCustomerFormValues>({
     resolver: zodResolver(createCustomerFormSchema),
@@ -125,13 +140,79 @@ export function CustomersList({
   })
 
   useEffect(() => {
-    setCustomers(initialCustomers)
-  }, [initialCustomers])
+    setCustomers(initial.customers)
+    setTotal(initial.total)
+    setListQuery({ page: initial.page, q: "" })
+  }, [initial])
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      const nextQ = query.trim()
+      setListQuery((prev) =>
+        prev.q === nextQ ? prev : { page: 1, q: nextQ }
+      )
+    }, 300)
+    return () => window.clearTimeout(timer)
+  }, [query])
+
+  useEffect(() => {
+    if (skipFetchRef.current) {
+      skipFetchRef.current = false
+      return
+    }
+
+    let cancelled = false
+    async function load() {
+      setLoading(true)
+      try {
+        const params = new URLSearchParams({
+          detail: "1",
+          page: String(listQuery.page),
+          pageSize: String(pageSize),
+        })
+        if (listQuery.q) params.set("q", listQuery.q)
+        const response = await fetch(`/api/customers?${params}`)
+        const body = (await response.json().catch(() => null)) as
+          | (ListCustomerRecordsResponse & { error?: string })
+          | null
+        if (!response.ok || !body?.customers) {
+          if (!cancelled) {
+            toast.add({
+              type: "error",
+              title: "Unable to load customers",
+              description: body?.error ?? "Something went wrong. Try again.",
+            })
+          }
+          return
+        }
+        if (!cancelled) {
+          setCustomers(body.customers)
+          setTotal(body.total)
+        }
+      } catch {
+        if (!cancelled) {
+          toast.add({
+            type: "error",
+            title: "Unable to load customers",
+            description: "Something went wrong. Try again.",
+          })
+        }
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    }
+
+    void load()
+    return () => {
+      cancelled = true
+    }
+  }, [listQuery, pageSize])
 
   const hits = useMemo(
-    () => buildSearchHits(customers, query),
-    [customers, query]
+    () => buildSearchHits(customers, listQuery.q),
+    [customers, listQuery.q]
   )
+  const pages = totalPages(total, pageSize)
 
   async function onCreateCustomer(values: CreateCustomerFormValues) {
     try {
@@ -150,10 +231,6 @@ export function CustomersList({
         })
         return
       }
-      const created: CustomerListItem = { ...body, contacts: [] }
-      setCustomers((prev) =>
-        [...prev, created].sort((a, b) => a.name.localeCompare(b.name))
-      )
       createForm.reset({ name: "" })
       setDialogOpen(false)
       router.push(`/customers/${body.id}`)
@@ -180,7 +257,7 @@ export function CustomersList({
           <Button
             type="button"
             size="icon-sm"
-            variant={variant === "pane" ? "outline" : "default"}
+            variant={"outline"}
             aria-label="Add customer"
           />
         }
@@ -190,11 +267,12 @@ export function CustomersList({
       <DialogContent className="sm:max-w-sm">
         <form
           onSubmit={createForm.handleSubmit(onCreateCustomer, toastFormErrors)}
+          className="flex flex-col gap-4"
         >
           <DialogHeader>
             <DialogTitle>New customer</DialogTitle>
             <DialogDescription>
-              Create a customer with a company name. You can add details next.
+              Create a customer with a company name
             </DialogDescription>
           </DialogHeader>
           <FieldGroup>
@@ -235,6 +313,48 @@ export function CustomersList({
     </Dialog>
   )
 
+  const pagination = (
+    <div
+      className={cn(
+        "flex shrink-0 items-center justify-between gap-2 border-t",
+        variant === "page" ? "px-4 py-3" : "px-1 py-2"
+      )}
+    >
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        disabled={loading || listQuery.page <= 1}
+        onClick={() =>
+          setListQuery((prev) => ({
+            ...prev,
+            page: Math.max(1, prev.page - 1),
+          }))
+        }
+        aria-label="Previous page"
+      >
+        <CaretLeftIcon className="size-4" />
+        <span className="sr-only sm:not-sr-only">Prev</span>
+      </Button>
+      <span className="text-xs text-muted-foreground">
+        {total === 0 ? "0" : listQuery.page} / {total === 0 ? 0 : pages}
+      </span>
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        disabled={loading || listQuery.page >= pages || total === 0}
+        onClick={() =>
+          setListQuery((prev) => ({ ...prev, page: prev.page + 1 }))
+        }
+        aria-label="Next page"
+      >
+        <span className="sr-only sm:not-sr-only">Next</span>
+        <CaretRightIcon className="size-4" />
+      </Button>
+    </div>
+  )
+
   const list = (
     <ul className="min-h-0 flex-1 divide-y overflow-y-auto">
       {hits.length === 0 ? (
@@ -244,7 +364,7 @@ export function CustomersList({
             variant === "page" ? "px-4 py-6" : "px-3 py-4"
           )}
         >
-          No customers or contacts match.
+          {loading ? "Loading…" : "No customers or contacts match."}
         </li>
       ) : (
         hits.map((hit) => {
@@ -292,13 +412,15 @@ export function CustomersList({
                   !hit.customer.isActive && "opacity-60"
                 )}
               >
-                <span className="min-w-0">
-                  <span className="block truncate text-sm font-medium">
-                    {hit.customer.name}
-                  </span>
+                <span className="w-full min-w-0">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="block truncate text-sm font-medium">
+                      {hit.customer.name}
+                    </span>
+                    {!hit.customer.isActive && <PlugsIcon className="size-4" />}
+                  </div>
                   <span className="block truncate text-xs text-muted-foreground">
                     {[
-                      hit.customer.isActive ? null : "Inactive",
                       "Customer",
                       hit.customer.isVendor ? "Vendor" : null,
                       hit.customer.email,
@@ -333,8 +455,9 @@ export function CustomersList({
           placeholder="Search…"
           aria-label="Search customers and contacts"
         />
-        <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg">
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
           {list}
+          {pagination}
         </div>
       </div>
     )
@@ -359,8 +482,9 @@ export function CustomersList({
         aria-label="Search customers and contacts"
       />
 
-      <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border bg-card">
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border">
         {list}
+        {pagination}
       </div>
     </div>
   )

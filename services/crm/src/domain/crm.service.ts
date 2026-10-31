@@ -1,6 +1,7 @@
 import {
   createContactRequestSchema,
   createCustomerRequestSchema,
+  crmListQuerySchema,
   getCustomerNamesQuerySchema,
   updateContactRequestSchema,
   updateCustomerRequestSchema,
@@ -8,7 +9,9 @@ import {
   type CreateContactRequest,
   type CreateCustomerRequestInput,
   type CreateCustomerResponse,
-  type CustomerListItem,
+  type CrmListQueryInput,
+  type ListContactsResponse,
+  type ListCustomerRecordsResponse,
   type FormOption,
   type UpdateContactRequest,
   type UpdateCustomerRequest,
@@ -51,9 +54,29 @@ function toContactRecord(row: {
   }
 }
 
+function normalizeListQuery(input?: CrmListQueryInput) {
+  const parsed = crmListQuerySchema.safeParse(input ?? {})
+  if (!parsed.success) {
+    throw new CrmValidationError(
+      parsed.error.issues[0]?.message ?? "Invalid list query"
+    )
+  }
+  const { page, pageSize, q } = parsed.data
+  return {
+    page,
+    pageSize,
+    q: q.trim(),
+    limit: pageSize,
+    offset: (page - 1) * pageSize,
+  }
+}
+
 export interface CrmService {
   list(organizationId: string): Promise<FormOption[]>
-  listRecords(organizationId: string): Promise<CustomerListItem[]>
+  listRecords(
+    organizationId: string,
+    query?: CrmListQueryInput
+  ): Promise<ListCustomerRecordsResponse>
   get(
     organizationId: string,
     customerId: string
@@ -73,8 +96,9 @@ export interface CrmService {
   ): Promise<Array<{ id: string; name: string }>>
   listContacts(
     organizationId: string,
-    customerId: string
-  ): Promise<ContactRecord[]>
+    customerId: string,
+    query?: CrmListQueryInput
+  ): Promise<ListContactsResponse>
   createContact(
     organizationId: string,
     customerId: string,
@@ -116,22 +140,36 @@ export class DefaultCrmService implements CrmService {
     return this.dao.listOptionsByOrganization(this.requireOrg(organizationId))
   }
 
-  async listRecords(organizationId: string): Promise<CustomerListItem[]> {
+  async listRecords(
+    organizationId: string,
+    query?: CrmListQueryInput
+  ): Promise<ListCustomerRecordsResponse> {
     const orgId = this.requireOrg(organizationId)
-    const [rows, contactRows] = await Promise.all([
-      this.dao.listRecordsByOrganization(orgId),
-      this.dao.listContactsByOrganization(orgId),
-    ])
+    const { page, pageSize, q, limit, offset } = normalizeListQuery(query)
+    const { rows, total } = await this.dao.listRecordsByOrganization(orgId, {
+      limit,
+      offset,
+      q,
+    })
+    const contactRows = await this.dao.listContactsByCustomerIds(
+      orgId,
+      rows.map((row) => row.id)
+    )
     const contactsByCustomer = new Map<string, ContactRecord[]>()
     for (const row of contactRows) {
       const list = contactsByCustomer.get(row.customerId) ?? []
       list.push(toContactRecord(row))
       contactsByCustomer.set(row.customerId, list)
     }
-    return rows.map((row) => ({
-      ...toCustomerRecord(row),
-      contacts: contactsByCustomer.get(row.id) ?? [],
-    }))
+    return {
+      customers: rows.map((row) => ({
+        ...toCustomerRecord(row),
+        contacts: contactsByCustomer.get(row.id) ?? [],
+      })),
+      page,
+      pageSize,
+      total,
+    }
   }
 
   async get(
@@ -219,12 +257,23 @@ export class DefaultCrmService implements CrmService {
 
   async listContacts(
     organizationId: string,
-    customerId: string
-  ): Promise<ContactRecord[]> {
+    customerId: string,
+    query?: CrmListQueryInput
+  ): Promise<ListContactsResponse> {
     const orgId = this.requireOrg(organizationId)
     await this.requireCustomer(orgId, customerId)
-    const rows = await this.dao.listContacts(orgId, customerId)
-    return rows.map(toContactRecord)
+    const { page, pageSize, q, limit, offset } = normalizeListQuery(query)
+    const { rows, total } = await this.dao.listContacts(orgId, customerId, {
+      limit,
+      offset,
+      q,
+    })
+    return {
+      contacts: rows.map(toContactRecord),
+      page,
+      pageSize,
+      total,
+    }
   }
 
   async createContact(
