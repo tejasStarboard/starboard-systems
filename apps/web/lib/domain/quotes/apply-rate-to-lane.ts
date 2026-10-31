@@ -19,7 +19,7 @@ export type SpotOffer = {
 }
 
 export type SpotSearchWorkflowResult = {
-  status: "completed" | "error"
+  status: "completed" | "failed" | "error"
   rates: SpotOffer[]
   error?: { code?: string; message?: string } | null
 }
@@ -59,7 +59,7 @@ function isSpotOffer(value: unknown): value is SpotOffer {
 
 /**
  * Parse a polled spot job `result` after Temporal status is `completed`.
- * Workflow may still return `status: "error"` or an empty `rates` list.
+ * Workflow may still return `status: "failed"` / `"error"` or an empty `rates` list.
  */
 export function parseSpotSearchResult(result: unknown): ParseSpotSearchResult {
   if (result == null || typeof result !== "object") {
@@ -69,7 +69,7 @@ export function parseSpotSearchResult(result: unknown): ParseSpotSearchResult {
   const body = result as Record<string, unknown>
   const status = body.status
 
-  if (status === "error") {
+  if (status === "failed" || status === "error") {
     const err = body.error
     if (err != null && typeof err === "object") {
       const message = (err as { message?: unknown }).message

@@ -87,7 +87,7 @@ describe("parseSpotSearchResult", () => {
 
   test("surfaces workflow error message", () => {
     const parsed = parseSpotSearchResult({
-      status: "error",
+      status: "failed",
       rates: [],
       error: {
         code: "missing_credentials",

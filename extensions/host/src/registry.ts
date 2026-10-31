@@ -116,6 +116,16 @@ const stubManifests = [
       jobs: [{ type: "spot.search", carrier: "cma" }],
       api: [{ pathPrefix: "/api/extensions/spot.cma" }],
       uiSlots: ["quote.rateSources"],
+      settings: [
+        {
+          key: "live_strategy",
+          label: "Live strategy",
+          description: "Use the live carrier strategy instead of the fixture.",
+          type: "boolean",
+          default: false,
+          scope: "platform",
+        },
+      ],
     },
     worker: {
       kind: "python-temporal",

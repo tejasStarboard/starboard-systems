@@ -49,7 +49,7 @@ class SpotSearchWorkflow:
         error = result.get("error")
         if error:
             return SearchWorkflowResult(
-                status="error",
+                status="failed",
                 rates=[],
                 error=dict(error) if isinstance(error, dict) else {"message": str(error)},
             )

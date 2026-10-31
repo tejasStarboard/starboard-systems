@@ -36,12 +36,18 @@ describe("extension-settings-runtime", () => {
     ).toEqual({})
   })
 
-  test("spotJobSettingsFromResolved maps live_strategy for maersk", () => {
+  test("spotJobSettingsFromResolved maps live_strategy for maersk and cma", () => {
     expect(
       spotJobSettingsFromResolved("spot.maersk", { live_strategy: true })
     ).toEqual({ liveStrategy: true })
     expect(
       spotJobSettingsFromResolved("spot.maersk", { live_strategy: false })
+    ).toEqual({ liveStrategy: false })
+    expect(
+      spotJobSettingsFromResolved("spot.cma", { live_strategy: true })
+    ).toEqual({ liveStrategy: true })
+    expect(
+      spotJobSettingsFromResolved("spot.cma", { live_strategy: false })
     ).toEqual({ liveStrategy: false })
     expect(spotJobSettingsFromResolved("spot.fake", {})).toEqual({})
   })

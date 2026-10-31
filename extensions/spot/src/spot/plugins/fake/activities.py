@@ -6,9 +6,11 @@ from temporalio import activity
 
 from spot.plugins.base import NoopCredentialPort, SearchRequest, SpotSearchError
 from spot.plugins.cma.credentials import EnvCmaCredentialPort
+from spot.plugins.cma.plugin import CmaSpotPlugin
+from spot.plugins.cma.strategy import resolve_strategy as resolve_cma_strategy
 from spot.plugins.maersk.credentials import EnvMaerskCredentialPort
 from spot.plugins.maersk.plugin import MaerskSpotPlugin
-from spot.plugins.maersk.strategy import resolve_strategy
+from spot.plugins.maersk.strategy import resolve_strategy as resolve_maersk_strategy
 from spot.plugins.registry import get_plugin
 
 
@@ -21,10 +23,13 @@ def _load_credentials(plugin_id: str, organization_id: str) -> dict[str, str] | 
 
 
 def _resolve_plugin(plugin_id: str, live_strategy: bool | None):
-    if plugin_id == "maersk" and live_strategy is not None:
-        return MaerskSpotPlugin(
-            strategy=resolve_strategy("live" if live_strategy else "fixture")
-        )
+    if live_strategy is None:
+        return get_plugin(plugin_id)
+    mode = "live" if live_strategy else "fixture"
+    if plugin_id == "maersk":
+        return MaerskSpotPlugin(strategy=resolve_maersk_strategy(mode))
+    if plugin_id == "cma":
+        return CmaSpotPlugin(strategy=resolve_cma_strategy(mode))
     return get_plugin(plugin_id)
 
 

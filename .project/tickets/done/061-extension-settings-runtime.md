@@ -2,7 +2,7 @@
 id: 061
 wave: 06-product
 title: Extension settings runtime consumption
-status: in_progress
+status: done
 depends_on: [057, 058, 055]
 epic: SYS-EXT-HOST
 docs:
@@ -19,7 +19,7 @@ Admin-saved extension settings (057/058) must reach workers and BFF dispatch —
 ## Non-goals
 
 - New setting types
-- Org-scoped settings UI / carrier credentials page ([069](./069-org-carrier-credentials-settings.md))
+- Org-scoped settings UI / carrier credentials page ([069](../todo/069-org-carrier-credentials-settings.md))
 - Implementing full live Maersk API (062)
 
 ## Acceptance criteria
