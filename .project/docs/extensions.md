@@ -2,6 +2,8 @@
 
 Shell discovers extensions via `extensions/host` (`@starboard/ext-host`; see ticket 001). UI and BFF must not hard-code optional features.
 
+**Foundation first:** [ADR 0005](adr/0005-extension-foundation.md) + tickets [055](../tickets/todo/055-extension-foundation-hardening.md) / [056](../tickets/todo/056-extension-dev-workflow-docs.md). Do not start new product extensions until 055 hardens BFF/job/UI integration.
+
 ## Manifest schema (sketch)
 
 ```ts

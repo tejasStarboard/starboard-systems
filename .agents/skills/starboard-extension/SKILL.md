@@ -12,8 +12,11 @@ description: >-
 ## Read first
 
 - [extensions.md](../../../.project/docs/extensions.md)
+- [adr/0005-extension-foundation.md](../../../.project/docs/adr/0005-extension-foundation.md) — **foundation before new product extensions**
 - [adr/0003-extension-host.md](../../../.project/docs/adr/0003-extension-host.md)
 - [adr/0002-python-temporal-extensions.md](../../../.project/docs/adr/0002-python-temporal-extensions.md)
+
+If tickets `055` / `056` are still open, prefer implementing those over new `spot.*` / ingest modes.
 
 ## Rules
 
