@@ -6,7 +6,7 @@ import {
 
 import { requireApiSession } from "@/lib/auth/session"
 import { ServiceClientError } from "@/lib/clients/http"
-import { getRatesManager } from "@/lib/domain/rates.manager"
+import { getRatesManager } from "@/lib/domain/rates/rates.manager"
 
 export async function GET(request: Request) {
   const authResult = await requireApiSession()

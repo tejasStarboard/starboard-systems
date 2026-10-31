@@ -9,7 +9,7 @@ import { cn } from "@workspace/ui/lib/utils"
 import type {
   LaneFormValues,
   QuoteFormValues,
-} from "@/lib/domain/quotes.schema"
+} from "@/lib/domain/quotes/quotes.schema"
 
 function laneListLabel(lane: LaneFormValues | undefined, index: number) {
   if (!lane) {

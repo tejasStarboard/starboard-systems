@@ -29,7 +29,7 @@ Mirror `services/quotes` or `services/geography`:
 - [ ] `packages/contracts/src/<name>.ts` schemas
 - [ ] `packages/database` `pgSchema("<name>")` + drizzle `schemaFilter`
 - [ ] Workspace / turbo / `.env.example` URL + port
-- [ ] `apps/web/lib/domain/<name>.client.ts` + `<name>.manager.ts` (shell skill)
+- [ ] `apps/web/lib/domain/<name>/<name>.client.ts` + `<name>.manager.ts` (shell skill)
 - [ ] Domain stub update in `.project/docs/domains/`
 
 ## Detail

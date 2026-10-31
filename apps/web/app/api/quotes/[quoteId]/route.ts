@@ -3,7 +3,7 @@ import { quoteFormSchema } from "@starboard/contracts"
 
 import { requireApiSession } from "@/lib/auth/session"
 import { ServiceClientError } from "@/lib/clients/http"
-import { getQuotesManager } from "@/lib/domain/quotes.manager"
+import { getQuotesManager } from "@/lib/domain/quotes/quotes.manager"
 
 export async function GET(
   _request: Request,

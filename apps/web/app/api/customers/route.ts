@@ -3,7 +3,7 @@ import { createCustomerRequestSchema } from "@starboard/contracts"
 
 import { requireApiSession } from "@/lib/auth/session"
 import { ServiceClientError } from "@/lib/clients/http"
-import { getCrmManager } from "@/lib/domain/crm.manager"
+import { getCrmManager } from "@/lib/domain/crm/crm.manager"
 
 export async function POST(request: Request) {
   const authResult = await requireApiSession()

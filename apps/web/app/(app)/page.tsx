@@ -5,7 +5,7 @@ import { columns } from "@/components/quotes/columns"
 import { CreateQuoteButton } from "@/components/quotes/create-quote-button"
 import { QuotesDataTable } from "@/components/quotes/quotes-data-table"
 import { auth } from "@/lib/auth"
-import { getQuotesManager } from "@/lib/domain/quotes.manager"
+import { getQuotesManager } from "@/lib/domain/quotes/quotes.manager"
 
 export default async function HomePage() {
   const session = await auth.api.getSession({

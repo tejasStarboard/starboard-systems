@@ -2,7 +2,7 @@ import "server-only"
 
 import type { CreateCustomerResponse, FormOption } from "@starboard/contracts"
 
-import { type CrmClient, getCrmClient } from "@/lib/domain/crm.client"
+import { type CrmClient, getCrmClient } from "@/lib/domain/crm/crm.client"
 
 export class CrmManager {
   constructor(private readonly crmClient: CrmClient = getCrmClient()) {}

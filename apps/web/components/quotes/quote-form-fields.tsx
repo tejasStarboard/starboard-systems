@@ -26,7 +26,7 @@ import {
   quoteStatusSchema,
   type QuoteFormOption,
   type QuoteFormValues,
-} from "@/lib/domain/quotes.schema"
+} from "@/lib/domain/quotes/quotes.schema"
 
 const quoteStatusOptions = quoteStatusSchema.options
 

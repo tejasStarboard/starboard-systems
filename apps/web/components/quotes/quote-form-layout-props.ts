@@ -10,7 +10,7 @@ import type {
   LaneFormValues,
   QuoteFormOption,
   QuoteFormValues,
-} from "@/lib/domain/quotes.schema"
+} from "@/lib/domain/quotes/quotes.schema"
 
 export type QuoteFormLayoutProps = {
   quoteId: string

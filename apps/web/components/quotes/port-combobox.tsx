@@ -9,7 +9,7 @@ import {
   ComboboxList,
 } from "@workspace/ui/components/combobox"
 
-import { type QuoteFormOption } from "@/lib/domain/quotes.schema"
+import { type QuoteFormOption } from "@/lib/domain/quotes/quotes.schema"
 
 export function PortCombobox({
   options,

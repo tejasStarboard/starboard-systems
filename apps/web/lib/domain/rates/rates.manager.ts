@@ -8,7 +8,7 @@ import type {
   Rate,
 } from "@starboard/contracts"
 
-import { getRatesClient, type RatesClient } from "@/lib/domain/rates.client"
+import { getRatesClient, type RatesClient } from "@/lib/domain/rates/rates.client"
 
 export class RatesManager {
   constructor(private readonly ratesClient: RatesClient = getRatesClient()) {}

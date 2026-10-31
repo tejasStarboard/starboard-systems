@@ -19,9 +19,9 @@ description: >-
 ## Layering
 
 - **Call site** (`route.ts` / `page.tsx`): auth/session only; call `getXManager().method(...)`.
-- **Manager** (`lib/domain/<domain>.manager.ts`): cross-client orchestration / enrichment; injectable deps + module `get`/`set`.
-- **HTTP client** (`lib/domain/<domain>.client.ts`): thin typed fetch to Bun services; constructor `{ baseUrl }`, singleton `get`/`set`. Shared fetch helpers live in `lib/clients/http.ts`.
-- **Local DAO** (e.g. `lib/domain/organizations.dao.ts`): shell DB reads that are not a remote service.
+- **Manager** (`lib/domain/<domain>/<domain>.manager.ts`): cross-client orchestration / enrichment; injectable deps + module `get`/`set`.
+- **HTTP client** (`lib/domain/<domain>/<domain>.client.ts`): thin typed fetch to Bun services; constructor `{ baseUrl }`, singleton `get`/`set`. Shared fetch helpers live in `lib/clients/http.ts`.
+- **Local DAO** (e.g. `lib/domain/organizations/organizations.dao.ts`): shell DB reads that are not a remote service.
 - No free-function domain APIs and no thin wrappers around managers.
 - Domain Bun services remain `dao → service → controller`.
 
