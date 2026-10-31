@@ -33,7 +33,11 @@ export interface CrmClient {
 }
 
 class HttpCrmClient implements CrmClient {
-  constructor(private readonly options: { baseUrl: string } = { baseUrl: env.CRM_SERVICE_URL }) {}
+  constructor(
+    private readonly options: { baseUrl: string } = {
+      baseUrl: env.CRM_SERVICE_URL,
+    }
+  ) {}
 
   async listCustomers(
     organizationId: string,

@@ -35,7 +35,10 @@ export class OrganizationsDao {
       .select({ id: member.id })
       .from(member)
       .where(
-        and(eq(member.userId, userId), eq(member.organizationId, organizationId))
+        and(
+          eq(member.userId, userId),
+          eq(member.organizationId, organizationId)
+        )
       )
       .limit(1)
 
