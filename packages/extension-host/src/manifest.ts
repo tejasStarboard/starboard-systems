@@ -26,7 +26,7 @@ export const extensionContributesSchema = z.object({
 })
 
 export const extensionWorkerSchema = z.object({
-  kind: z.literal("python-dbos"),
+  kind: z.literal("python-temporal"),
   service: z.enum(["ingestion", "messaging", "spot"]),
   plugin: z.string().min(1),
 })

@@ -46,7 +46,10 @@ describe("entitlement filter", () => {
   })
 
   test("disabled registry stubs are excluded from active contributions even when plan matches", () => {
-    const manifests = listManifests()
+    const manifests = listManifests().map((manifest) => ({
+      ...manifest,
+      enabled: false,
+    }))
     expect(manifests.every((m) => m.enabled === false)).toBe(true)
 
     const creditCapable = manifests.filter((m) =>
@@ -62,6 +65,19 @@ describe("entitlement filter", () => {
     expect(contributions.jobs).toHaveLength(0)
     expect(contributions.api).toHaveLength(0)
     expect(contributions.uiSlots).toHaveLength(0)
+  })
+
+  test("enabled ingestion.fcl_v6 contributes rates.upload for credit plan", () => {
+    const contributions = getActiveContributions("credit", listManifests())
+    expect(contributions.uiSlots).toContain("rates.upload")
+    expect(
+      contributions.nav.some((item) => item.href === "/rates/upload")
+    ).toBe(true)
+    expect(
+      contributions.api.some((item) =>
+        item.pathPrefix.includes("ingestion.fcl_v6")
+      )
+    ).toBe(true)
   })
 
   test("enabled entitled extensions contribute nav and slots", () => {

@@ -1,6 +1,7 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "ui": "tui",
+  "concurrency": "25",
   "globalPassThroughEnv": [
     "CI",
     "POSTGRES_URL",
@@ -19,6 +20,11 @@
     "GEOGRAPHY_SERVICE_URL",
     "CRM_SERVICE_URL",
     "RATES_SERVICE_URL",
+    "INGESTION_SERVICE_URL",
+    "INGESTION_SERVICE_PORT",
+    "TEMPORAL_ADDRESS",
+    "TEMPORAL_NAMESPACE",
+    "TEMPORAL_TASK_QUEUE",
     "INTERNAL_SERVICE_TOKEN",
     "SKIP_ENV_VALIDATION",
     "VERCEL_URL",

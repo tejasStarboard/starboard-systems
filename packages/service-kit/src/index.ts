@@ -118,7 +118,13 @@ export async function serviceFetch(
   if (options.organizationId) {
     headers.set(ORG_ID_HEADER, options.organizationId)
   }
-  if (!headers.has("content-type") && init.body) {
+  // FormData needs the runtime multipart boundary; do not force JSON.
+  if (
+    !headers.has("content-type") &&
+    init.body &&
+    typeof FormData !== "undefined" &&
+    !(init.body instanceof FormData)
+  ) {
     headers.set("content-type", "application/json")
   }
 

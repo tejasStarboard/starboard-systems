@@ -17,16 +17,16 @@ Cursor skills: [../../.agents/README.md](../../.agents/README.md).
 
 ## Wave 1 — Quoting parity
 
-| Ticket                                                | Title                       | Status      |
-| ----------------------------------------------------- | --------------------------- | ----------- |
-| [010](../tickets/in_progress/010-packages-pricing.md) | `packages/pricing` ONE MATH | in_progress |
+| Ticket                                         | Title                       | Status |
+| ---------------------------------------------- | --------------------------- | ------ |
+| [010](../tickets/done/010-packages-pricing.md) | `packages/pricing` ONE MATH | done   |
 
 ## Wave 2 — Rates + FCL v6 ingestion
 
-| Ticket                                             | Title                        | Status |
-| -------------------------------------------------- | ---------------------------- | ------ |
-| [020](../tickets/todo/020-services-rates.md)       | `services/rates` catalog     | open   |
-| [021](../tickets/todo/021-ext-ingestion-fcl-v6.md) | Extension `ingestion.fcl_v6` | open   |
+| Ticket                                                    | Title                                       | Status      |
+| --------------------------------------------------------- | ------------------------------------------- | ----------- |
+| [020](../tickets/done/020-services-rates.md)              | `services/rates` catalog                    | done        |
+| [021](../tickets/in_progress/021-ext-ingestion-fcl-v6.md) | Extension `ingestion.fcl_v6` (Temporal OSS) | in_progress |
 
 ## Wave 3 — Messaging
 
@@ -36,11 +36,11 @@ Cursor skills: [../../.agents/README.md](../../.agents/README.md).
 
 ## Wave 4 — Spot
 
-| Ticket                                            | Title                        | Status |
-| ------------------------------------------------- | ---------------------------- | ------ |
-| [040](../tickets/todo/040-spot-extension-host.md) | Spot worker / extension host | open   |
-| [041](../tickets/todo/041-ext-spot-maersk.md)     | Extension `spot.maersk`      | open   |
-| [042](../tickets/todo/042-ext-spot-cma.md)        | Extension `spot.cma`         | open   |
+| Ticket                                            | Title                       | Status |
+| ------------------------------------------------- | --------------------------- | ------ |
+| [040](../tickets/todo/040-spot-extension-host.md) | Spot worker / Temporal host | open   |
+| [041](../tickets/todo/041-ext-spot-maersk.md)     | Extension `spot.maersk`     | open   |
+| [042](../tickets/todo/042-ext-spot-cma.md)        | Extension `spot.cma`        | open   |
 
 ## Later (no tickets yet)
 

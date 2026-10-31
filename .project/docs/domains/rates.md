@@ -10,7 +10,8 @@
 
 Normalized contract / ad-hoc rate catalog with validity windows. Soft port
 UN/LOCODEs and CRM customer ids (opaque text, no cross-schema FKs). Written by
-manual UI (and later by ingestion/spot extensions via `source`).
+manual UI and by ingestion/spot extensions via `source` (HTTP into this
+service — workers never dual-write `rates.*`).
 
 ## API
 
@@ -25,6 +26,8 @@ Service-token + `X-Organization-Id`:
 BFF: `apps/web/lib/clients/rates-client.ts`, `/api/rates`, quote
 `RatesSearchSheet` lists matches for the selected lane.
 
-## Next tickets
+## Ingestion writes
 
-[021](../../tickets/todo/021-ext-ingestion-fcl-v6.md) (writes via ingestion)
+Extension `ingestion.fcl_v6` (Temporal OSS workflow) POSTs rates with
+`source: "ingestion"` after a blocking gate. See
+[021](../../tickets/in_progress/021-ext-ingestion-fcl-v6.md).

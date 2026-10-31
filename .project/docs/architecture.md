@@ -28,7 +28,9 @@ Runtime deploy details for the monorepo live in [docs/architecture.md](../../doc
 
 Examples: `ingestion.fcl_v6`, `messaging.msgraph`, `spot.maersk`, `spot.cma`.
 
-Each extension may contribute nav, API proxies, UI slots, and/or a Python+DBOS worker. Shell must remain usable with all extensions disabled (manual quote still works).
+Each extension may contribute nav, API proxies, UI slots, and/or a Python +
+Temporal OSS worker. Shell must remain usable with all extensions disabled
+(manual quote still works).
 
 ## Process topology
 
@@ -37,7 +39,7 @@ Browser --cookie--> Next shell/BFF --service token--> Bun domain services --> Ne
                          |
                          +--> extension-host (entitlements + manifests)
                          |
-                         +--202--> Python workers (ingest / messaging / spot) --> DBOS
+                         +--202--> Python workers (ingest / messaging / spot) --> Temporal OSS
 ```
 
 ## Data ownership
@@ -50,6 +52,6 @@ Browser --cookie--> Next shell/BFF --service token--> Bun domain services --> Ne
 | `quotes.*`                          | `services/quotes`                |
 | `rates.*`                           | `services/rates`                 |
 | `crm.*`                             | `services/crm`                   |
-| Extension job state                 | Python worker / DBOS             |
+| Extension job / workflow state      | Python worker / Temporal OSS     |
 
 Cross-domain FKs are opaque text IDs; BFF enforces integrity.

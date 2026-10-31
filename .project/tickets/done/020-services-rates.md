@@ -2,7 +2,7 @@
 id: 020
 wave: 02-rates-ingest
 title: services/rates catalog
-status: in_progress
+status: done
 depends_on: [002, 003]
 epic: SYS-RATES
 docs:
