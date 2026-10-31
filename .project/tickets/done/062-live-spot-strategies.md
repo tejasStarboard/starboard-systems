@@ -2,7 +2,7 @@
 id: 062
 wave: 06-product
 title: Live spot strategies (Maersk, then CMA)
-status: in_progress
+status: done
 depends_on: [061, 069, 041, 042]
 epic: SYS-EXT-SPOT
 docs:

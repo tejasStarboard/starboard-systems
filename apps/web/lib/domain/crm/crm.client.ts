@@ -3,9 +3,18 @@ import "server-only"
 import {
   createCustomerResponseSchema,
   getCustomerNamesResponseSchema,
+  getCustomerResponseSchema,
+  listContactsResponseSchema,
+  listCustomerRecordsResponseSchema,
   listCustomersResponseSchema,
+  contactRecordSchema,
+  type ContactRecord,
+  type CreateContactRequest,
+  type CreateCustomerRequestInput,
   type CreateCustomerResponse,
   type FormOption,
+  type UpdateContactRequest,
+  type UpdateCustomerRequest,
 } from "@starboard/lib-contracts"
 
 import { env } from "@/env"
@@ -20,9 +29,24 @@ export interface CrmClient {
     organizationId: string,
     requestId?: string
   ): Promise<FormOption[]>
+  listCustomerRecords(
+    organizationId: string,
+    requestId?: string
+  ): Promise<CreateCustomerResponse[]>
+  getCustomer(
+    organizationId: string,
+    customerId: string,
+    requestId?: string
+  ): Promise<CreateCustomerResponse>
   createCustomer(
     organizationId: string,
-    name: string,
+    input: CreateCustomerRequestInput,
+    requestId?: string
+  ): Promise<CreateCustomerResponse>
+  updateCustomer(
+    organizationId: string,
+    customerId: string,
+    input: UpdateCustomerRequest,
     requestId?: string
   ): Promise<CreateCustomerResponse>
   getCustomerNamesByIds(
@@ -30,6 +54,30 @@ export interface CrmClient {
     ids: string[],
     requestId?: string
   ): Promise<Map<string, string>>
+  listContacts(
+    organizationId: string,
+    customerId: string,
+    requestId?: string
+  ): Promise<ContactRecord[]>
+  createContact(
+    organizationId: string,
+    customerId: string,
+    input: CreateContactRequest,
+    requestId?: string
+  ): Promise<ContactRecord>
+  updateContact(
+    organizationId: string,
+    customerId: string,
+    contactId: string,
+    input: UpdateContactRequest,
+    requestId?: string
+  ): Promise<ContactRecord>
+  deleteContact(
+    organizationId: string,
+    customerId: string,
+    contactId: string,
+    requestId?: string
+  ): Promise<void>
 }
 
 class HttpCrmClient implements CrmClient {
@@ -61,9 +109,54 @@ class HttpCrmClient implements CrmClient {
     return parsed.data.customers
   }
 
+  async listCustomerRecords(
+    organizationId: string,
+    requestId?: string
+  ): Promise<CreateCustomerResponse[]> {
+    const options = createServiceOptions({
+      baseUrl: this.options.baseUrl,
+      organizationId,
+      requestId,
+    })
+    const response = await serviceFetch(
+      "/customers?detail=1",
+      { method: "GET" },
+      options
+    )
+    const body = await parseJsonResponse(response, "Failed to list customers")
+    const parsed = listCustomerRecordsResponseSchema.safeParse(body)
+    if (!parsed.success) {
+      throw new Error("Failed to list customers: invalid response")
+    }
+    return parsed.data.customers
+  }
+
+  async getCustomer(
+    organizationId: string,
+    customerId: string,
+    requestId?: string
+  ): Promise<CreateCustomerResponse> {
+    const options = createServiceOptions({
+      baseUrl: this.options.baseUrl,
+      organizationId,
+      requestId,
+    })
+    const response = await serviceFetch(
+      `/customers/${encodeURIComponent(customerId)}`,
+      { method: "GET" },
+      options
+    )
+    const body = await parseJsonResponse(response, "Failed to get customer")
+    const parsed = getCustomerResponseSchema.safeParse(body)
+    if (!parsed.success) {
+      throw new Error("Failed to get customer: invalid response")
+    }
+    return parsed.data
+  }
+
   async createCustomer(
     organizationId: string,
-    name: string,
+    input: CreateCustomerRequestInput,
     requestId?: string
   ): Promise<CreateCustomerResponse> {
     const options = createServiceOptions({
@@ -75,7 +168,7 @@ class HttpCrmClient implements CrmClient {
       "/customers",
       {
         method: "POST",
-        body: JSON.stringify({ name }),
+        body: JSON.stringify(input),
       },
       options
     )
@@ -83,6 +176,33 @@ class HttpCrmClient implements CrmClient {
     const parsed = createCustomerResponseSchema.safeParse(body)
     if (!parsed.success) {
       throw new Error("Failed to create customer: invalid response")
+    }
+    return parsed.data
+  }
+
+  async updateCustomer(
+    organizationId: string,
+    customerId: string,
+    input: UpdateCustomerRequest,
+    requestId?: string
+  ): Promise<CreateCustomerResponse> {
+    const options = createServiceOptions({
+      baseUrl: this.options.baseUrl,
+      organizationId,
+      requestId,
+    })
+    const response = await serviceFetch(
+      `/customers/${encodeURIComponent(customerId)}`,
+      {
+        method: "PATCH",
+        body: JSON.stringify(input),
+      },
+      options
+    )
+    const body = await parseJsonResponse(response, "Failed to update customer")
+    const parsed = createCustomerResponseSchema.safeParse(body)
+    if (!parsed.success) {
+      throw new Error("Failed to update customer: invalid response")
     }
     return parsed.data
   }
@@ -117,6 +237,105 @@ class HttpCrmClient implements CrmClient {
       throw new Error("Failed to resolve customer names: invalid response")
     }
     return new Map(parsed.data.customers.map((row) => [row.id, row.name]))
+  }
+
+  async listContacts(
+    organizationId: string,
+    customerId: string,
+    requestId?: string
+  ): Promise<ContactRecord[]> {
+    const options = createServiceOptions({
+      baseUrl: this.options.baseUrl,
+      organizationId,
+      requestId,
+    })
+    const response = await serviceFetch(
+      `/customers/${encodeURIComponent(customerId)}/contacts`,
+      { method: "GET" },
+      options
+    )
+    const body = await parseJsonResponse(response, "Failed to list contacts")
+    const parsed = listContactsResponseSchema.safeParse(body)
+    if (!parsed.success) {
+      throw new Error("Failed to list contacts: invalid response")
+    }
+    return parsed.data.contacts
+  }
+
+  async createContact(
+    organizationId: string,
+    customerId: string,
+    input: CreateContactRequest,
+    requestId?: string
+  ): Promise<ContactRecord> {
+    const options = createServiceOptions({
+      baseUrl: this.options.baseUrl,
+      organizationId,
+      requestId,
+    })
+    const response = await serviceFetch(
+      `/customers/${encodeURIComponent(customerId)}/contacts`,
+      {
+        method: "POST",
+        body: JSON.stringify(input),
+      },
+      options
+    )
+    const body = await parseJsonResponse(response, "Failed to create contact")
+    const parsed = contactRecordSchema.safeParse(body)
+    if (!parsed.success) {
+      throw new Error("Failed to create contact: invalid response")
+    }
+    return parsed.data
+  }
+
+  async updateContact(
+    organizationId: string,
+    customerId: string,
+    contactId: string,
+    input: UpdateContactRequest,
+    requestId?: string
+  ): Promise<ContactRecord> {
+    const options = createServiceOptions({
+      baseUrl: this.options.baseUrl,
+      organizationId,
+      requestId,
+    })
+    const response = await serviceFetch(
+      `/customers/${encodeURIComponent(customerId)}/contacts/${encodeURIComponent(contactId)}`,
+      {
+        method: "PATCH",
+        body: JSON.stringify(input),
+      },
+      options
+    )
+    const body = await parseJsonResponse(response, "Failed to update contact")
+    const parsed = contactRecordSchema.safeParse(body)
+    if (!parsed.success) {
+      throw new Error("Failed to update contact: invalid response")
+    }
+    return parsed.data
+  }
+
+  async deleteContact(
+    organizationId: string,
+    customerId: string,
+    contactId: string,
+    requestId?: string
+  ): Promise<void> {
+    const options = createServiceOptions({
+      baseUrl: this.options.baseUrl,
+      organizationId,
+      requestId,
+    })
+    const response = await serviceFetch(
+      `/customers/${encodeURIComponent(customerId)}/contacts/${encodeURIComponent(contactId)}`,
+      { method: "DELETE" },
+      options
+    )
+    if (!response.ok) {
+      await parseJsonResponse(response, "Failed to delete contact")
+    }
   }
 }
 

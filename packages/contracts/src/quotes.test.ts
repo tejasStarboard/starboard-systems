@@ -1,9 +1,11 @@
 import { describe, expect, test } from "bun:test"
 
 import {
+  createContactRequestSchema,
   createCustomerRequestSchema,
   getCustomerNamesQuerySchema,
   listCustomersResponseSchema,
+  updateCustomerRequestSchema,
 } from "./crm"
 import {
   ensureCurrencyRequestSchema,
@@ -143,5 +145,31 @@ describe("crm contracts", () => {
       "c",
     ])
     expect(getCustomerNamesQuerySchema.parse({}).ids).toEqual([])
+  })
+
+  test("createCustomerRequestSchema accepts lean freight fields", () => {
+    const parsed = createCustomerRequestSchema.parse({
+      name: "Acme Freight",
+      email: "ops@acme.test",
+      phone: "555",
+      address: "1 Pier",
+      isVendor: true,
+    })
+    expect(parsed.isCustomer).toBe(true)
+    expect(parsed.isVendor).toBe(true)
+    expect(parsed.email).toBe("ops@acme.test")
+  })
+
+  test("updateCustomerRequestSchema clears blank email", () => {
+    expect(updateCustomerRequestSchema.parse({ email: "  " }).email).toBe(null)
+  })
+
+  test("createContactRequestSchema requires name", () => {
+    expect(createContactRequestSchema.safeParse({ name: "Pat" }).success).toBe(
+      true
+    )
+    expect(createContactRequestSchema.safeParse({ name: "" }).success).toBe(
+      false
+    )
   })
 })
