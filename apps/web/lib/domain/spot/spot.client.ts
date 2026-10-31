@@ -22,8 +22,12 @@ export type SpotSearchInput = {
 
 function isSpotExtensionId(
   extensionId: string
-): extensionId is "spot.fake" | "spot.maersk" {
-  return extensionId === "spot.fake" || extensionId === "spot.maersk"
+): extensionId is "spot.fake" | "spot.maersk" | "spot.cma" {
+  return (
+    extensionId === "spot.fake" ||
+    extensionId === "spot.maersk" ||
+    extensionId === "spot.cma"
+  )
 }
 
 export interface SpotClient {

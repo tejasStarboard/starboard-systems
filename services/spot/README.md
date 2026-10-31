@@ -1,8 +1,7 @@
 # services/spot
 
 Python + **Temporal OSS** worker for spot / carrier rate-search extensions.
-Host plugin interface, deterministic `fake` plugin, and fixture-backed
-`maersk` plugin. `spot.cma` lands in a later ticket.
+Host plugin interface plus fixture-backed `fake`, `maersk`, and `cma` plugins.
 
 Managed by the root **uv** workspace (`pyproject.toml` → `packages/*`,
 `services/*`).
@@ -43,6 +42,17 @@ export SPOT_MAERSK_CREDENTIALS='{"org_id":{"username":"u","password":"p"}}'
 Default strategy is recorded fixtures (`SPOT_MAERSK_STRATEGY=fixture`). Live
 browser scrape is not enabled in this build.
 
+## CMA credentials
+
+Org credentials for `spot.cma` (JSON map):
+
+```bash
+export SPOT_CMA_CREDENTIALS='{"org_id":{"apiKey":"k","clientId":"c"}}'
+```
+
+Default strategy is recorded Instant Quoting API fixtures
+(`SPOT_CMA_STRATEGY=fixture`). Live API is not enabled in this build.
+
 ## Tests
 
 ```bash
@@ -59,3 +69,5 @@ Plugin unit tests need no Temporal server. Search workflow tests use
 - `fake` — deterministic rates for registry / Temporal durability tests.
 - `maersk` — normalizes recorded productoffers into spot `NormalizedRate`
   rows; missing credentials return a structured error.
+- `cma` — normalizes recorded Instant Quoting API quotes into
+  `NormalizedRate` rows; independently disableable via `spot.cma` manifest.
