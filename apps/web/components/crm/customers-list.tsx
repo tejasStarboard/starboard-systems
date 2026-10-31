@@ -58,7 +58,7 @@ export function CustomersList({
         [...prev, body].sort((a, b) => a.name.localeCompare(b.name))
       )
       setName("")
-      router.push(`/settings/customers/${body.id}`)
+      router.push(`/customers/${body.id}`)
       router.refresh()
     } catch {
       setError("Failed to create customer")
@@ -115,7 +115,7 @@ export function CustomersList({
             filtered.map((customer) => (
               <li key={customer.id}>
                 <Link
-                  href={`/settings/customers/${customer.id}`}
+                  href={`/customers/${customer.id}`}
                   className="flex items-center justify-between gap-3 px-4 py-3 transition-colors hover:bg-muted/50"
                 >
                   <span className="min-w-0">

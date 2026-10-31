@@ -5,7 +5,7 @@
 | Service | `services/crm`                                                             |
 | Schema  | `crm.*`                                                                    |
 | Auth    | Better Auth **organization** = tenant; CRM rows scoped by `organizationId` |
-| Status  | Customers + contacts live (lean fields); settings UI under shell           |
+| Status  | Customers + contacts live (lean fields); shell UI at `/customers`          |
 
 ## Owns
 

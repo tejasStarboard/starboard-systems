@@ -3,6 +3,7 @@
 import * as React from "react"
 import Link from "next/link"
 import {
+  AddressBookIcon,
   BuildingsIcon,
   FileTextIcon,
   GearIcon,
@@ -65,6 +66,11 @@ export function AppSidebar({
       title: "Quotes",
       url: "/",
       icon: <FileTextIcon />,
+    },
+    {
+      title: "Customers",
+      url: "/customers",
+      icon: <AddressBookIcon />,
     },
     ...extensionNav.map((item) => ({
       title: item.label,

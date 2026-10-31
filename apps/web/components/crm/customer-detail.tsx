@@ -118,7 +118,7 @@ export function CustomerDetail({
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-8 px-6 py-8">
       <div className="space-y-1">
         <Link
-          href="/settings/customers"
+          href="/customers"
           className="text-xs text-muted-foreground hover:text-foreground"
         >
           ← Customers
