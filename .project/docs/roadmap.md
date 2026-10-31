@@ -1,62 +1,39 @@
 # Roadmap
 
-Lexical order under [../tickets/todo/](../tickets/todo/) is execution order. Move tickets through `todo/` → `in_progress/` → `done/`.
+Lexical order under [../tickets/todo/](../tickets/todo/) is execution order **within a priority band**. See **[build priority 2026-11-01](reference/build-priority-2026-11-01.md)** for the ordered queue.
 
-Cursor skills: [../../.agents/README.md](../../.agents/README.md).
+**Reference:** [starboard-2 features](reference/starboard-2-features-2026-11-01.md) · [rewrite coverage](reference/rewrite-coverage-2026-11-01.md)
 
-**Priority:** harden the **extension foundation** ([ADR 0005](adr/0005-extension-foundation.md)) before more product extensions or quote-loop features that depend on contribution/job patterns.
+## Wave 0–5 — Complete
 
-## Wave 0 — Shell foundation
+Shell, geo, rates stub, pricing helpers, thin extensions, platform admin, extension foundation (055–058). See [tickets/done/](../tickets/done/).
 
-| Ticket                                                  | Title                                      | Status |
-| ------------------------------------------------------- | ------------------------------------------ | ------ |
-| [001](../tickets/done/001-extension-host-skeleton.md)   | Extension host skeleton                    | done   |
-| [002](../tickets/done/002-quote-lane-persistence.md)    | Quote lane/cargo/rate persistence          | done   |
-| [003](../tickets/done/003-geography-ports-api.md)       | Geography ports/locations API              | done   |
-| [004](../tickets/done/004-crm-under-org.md)             | CRM under Better Auth org                  | done   |
-| [005](../tickets/done/005-billing-plan-stubs.md)        | Billing plan stubs (credit + enterprise)   | done   |
-| [006](../tickets/done/006-fix-ui-phosphor-typecheck.md) | Fix UI Phosphor icons / full typecheck     | done   |
-| [007](../tickets/done/007-geo-facility-gazetteer.md)    | Geo facility gazetteer redesign (ADR 0004) | done   |
+## Wave 6 — Product loop (CURRENT)
 
-## Wave 1 — Quoting / pricing
+### P0 — Quote money path
 
-| Ticket                                         | Title                       | Status |
-| ---------------------------------------------- | --------------------------- | ------ |
-| [010](../tickets/done/010-packages-pricing.md) | `packages/pricing` ONE MATH | done   |
+| Ticket | Title | Status |
+|--------|-------|--------|
+| [060](../tickets/todo/060-apply-rate-to-quote-lane.md) | Apply catalog/spot rate → quote lane | open |
+| [061](../tickets/todo/061-extension-settings-runtime.md) | Extension settings → workers (parallel) | open |
+| [065](../tickets/todo/065-surcharge-data-model.md) | Surcharge data model + contracts | open |
+| [066](../tickets/todo/066-surcharge-pricing-engine.md) | Surcharge amount engine | open |
+| [067](../tickets/todo/067-surcharge-quote-ui.md) | Surcharges in quote UI | open |
 
-## Wave 2–4 — Extension vertical stubs (thin)
+### P1 — Extensions production-shaped
 
-| Ticket                                                                | Title                          | Status |
-| --------------------------------------------------------------------- | ------------------------------ | ------ |
-| [020](../tickets/done/020-services-rates.md)                          | `services/rates` catalog       | done   |
-| [021](../tickets/done/021-ext-ingestion-fcl-v6.md)                    | Extension `ingestion.fcl_v6`   | done   |
-| [030](../tickets/done/030-ext-messaging-msgraph.md)                   | Extension `messaging.msgraph`  | done   |
-| [040](../tickets/done/040-spot-extension-host.md)                     | Spot extension host            | done   |
-| [041](../tickets/done/041-ext-spot-maersk.md)                         | Extension `spot.maersk`        | done   |
-| [042](../tickets/done/042-ext-spot-cma.md)                            | Extension `spot.cma`           | done   |
-| [050](../tickets/done/050-platform-admin-extensions-impersonation.md) | Platform admin + impersonation | done   |
+| Ticket | Title | Status |
+|--------|-------|--------|
+| [068](../tickets/todo/068-global-charges-incoterm-scope.md) | Globals + incoterm/bucket scope | open |
+| [062](../tickets/todo/062-live-spot-strategies.md) | Live spot Maersk/CMA | open |
+| [063](../tickets/todo/063-messaging-production-path.md) | Messaging Graph OAuth + Neon | open |
 
-## Wave 5 — Extension foundation
+### P2 — Shell completeness
 
-| Ticket                                                       | Title                                                | Status |
-| ------------------------------------------------------------ | ---------------------------------------------------- | ------ |
-| [055](../tickets/done/055-extension-foundation-hardening.md) | Extension foundation hardening (UI / BFF / Temporal) | done   |
-| [056](../tickets/done/056-extension-dev-workflow-docs.md)    | Extension developer cookbook + skill sync            | done   |
-| [057](../tickets/done/057-extension-settings-schema.md)      | Extension settings schema + persistence              | done   |
-| [058](../tickets/done/058-admin-extension-settings-ui.md)    | Admin collapsible extension settings UI              | done   |
+| Ticket | Title | Status |
+|--------|-------|--------|
+| [064](../tickets/todo/064-crm-and-settings-shell.md) | CRM fields/contacts + settings pages | open |
 
-## Next product wave (after Wave 5)
+## Later (no tickets)
 
-**Depends on 055 + 056** (hardened host + developer cookbook). Draft only — create tickets when foundation lands:
-
-- Apply catalog/spot rate → quote lane (+ pricing)
-- Messaging production path (real Graph OAuth + Neon)
-- Settings / team shell pages
-- CRM contacts + richer customer fields
-- Live spot strategies; Excel/PDF ingest
-- Further ingest modes as separate extensions
-
-## Later
-
-- Outlook add-in / Gmail / Companion
-- Public API, ML, admin node-graph, ERP/OS
+Excel/PDF ingest · more carriers · Outlook/Gmail/Companion · Public API · Stripe Lite · analytics · RFR/agents · FFW OS · marketplace / ML

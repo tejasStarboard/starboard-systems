@@ -7,6 +7,7 @@ Greenfield rewrite of production Starboard (`../starboard-2`) into this monorepo
 | Path                                               | Purpose                                                 |
 | -------------------------------------------------- | ------------------------------------------------------- |
 | [docs/](docs/)                                     | Program architecture, ADRs, domain status, deprecations |
+| [docs/reference/](docs/reference/)                 | Dated starboard-2 inventory + rewrite coverage tracker |
 | [tickets/todo/](tickets/todo/)                     | Open tickets (lexical order = priority)                 |
 | [tickets/in_progress/](tickets/in_progress/)       | Actively being implemented                              |
 | [tickets/done/](tickets/done/)                     | Accepted / merged                                       |
@@ -23,7 +24,7 @@ Default loop: skill **starboard-dev-workflow** (sync `origin/dev`, reconcile `do
 3. After plan: `git checkout --no-track -b {id} origin/dev` (branch name = ticket id, e.g. `001`); move ticket to `in_progress/`.
 4. PR **into `dev` only** (auto-merge after CI); promote to `main` via cherry-pick PR when asked.
 
-**Current focus:** Wave 5 extension foundation is merged ([055](tickets/done/055-extension-foundation-hardening.md)–[058](tickets/done/058-admin-extension-settings-ui.md), [ADR 0005](docs/adr/0005-extension-foundation.md)). Next work is the product wave in [docs/roadmap.md](docs/roadmap.md).
+**Current focus:** [Build priority 2026-11-01](docs/reference/build-priority-2026-11-01.md) — start **060** (+ **061** parallel), then **065→067** surcharges. Roadmap: [docs/roadmap.md](docs/roadmap.md).
 
 ## Status legend
 
