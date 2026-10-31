@@ -5,11 +5,20 @@ from typing import Any
 
 from temporalio import activity
 
-from messaging.config import DEFAULT_DEV_MESSAGING_TOKEN_KEY
+from messaging.config import DEFAULT_DEV_MESSAGING_TOKEN_KEY, load_config
 from messaging.plugins.msgraph.connection import ConnectionService
-from messaging.plugins.msgraph.graph_client import FakeGraphClient, GraphMessage
-from messaging.plugins.msgraph.message_store import MessageStore, StoredMessage
-from messaging.plugins.msgraph.token_store import TokenStore
+from messaging.plugins.msgraph.graph_client import (
+    FakeGraphClient,
+    GraphMessage,
+    HttpGraphClient,
+)
+from messaging.plugins.msgraph.message_store import (
+    StoredMessage,
+    create_message_store,
+)
+from messaging.plugins.msgraph.token_store import create_token_store
+
+RECENT_MESSAGE_LIMIT = 25
 
 
 def _token_key() -> bytes:
@@ -50,21 +59,43 @@ async def sync_inbox_activity(payload: str | dict[str, Any]) -> dict[str, Any]:
             else 15
         )
 
-    store = TokenStore(data_dir=_data_dir(), token_key=_token_key())
-    connection = ConnectionService(store)
+    try:
+        cfg = load_config()
+        postgres_url = cfg.postgres_url
+        graph_mode = cfg.graph_mode
+    except ValueError:
+        postgres_url = (os.environ.get("POSTGRES_URL") or "").strip() or None
+        graph_mode = (
+            "live"
+            if (os.environ.get("MS_GRAPH_CLIENT_ID") or "").strip()
+            and (os.environ.get("MS_GRAPH_CLIENT_SECRET") or "").strip()
+            else "stub"
+        )
+        cfg = None
+
+    store = create_token_store(
+        token_key=_token_key(),
+        postgres_url=postgres_url,
+        data_dir=_data_dir(),
+    )
+    if cfg is not None:
+        connection = ConnectionService.from_config(store, cfg)
+    else:
+        connection = ConnectionService(store, graph_mode=graph_mode)
     access_token = connection.require_access_token(organization_id)
 
-    # Vertical slice uses FakeGraphClient with a fixed sample inbox.
-    # Swap for HttpGraphClient when Azure credentials are configured.
-    # sync_interval_minutes is job input for schedule wiring (063); also
-    # bounds how many recent messages we pull this run.
-    graph = FakeGraphClient(inbox=_default_inbox())
-    message_limit = max(1, min(50, sync_interval_minutes))
+    if graph_mode == "live":
+        graph = HttpGraphClient()
+    else:
+        graph = FakeGraphClient(inbox=_default_inbox())
+
     messages = graph.list_recent_messages(
-        access_token=access_token, limit=message_limit
+        access_token=access_token, limit=RECENT_MESSAGE_LIMIT
     )
 
-    message_store = MessageStore(data_dir=_data_dir())
+    message_store = create_message_store(
+        postgres_url=postgres_url, data_dir=_data_dir()
+    )
     ids: list[str] = []
     for item in messages:
         saved = message_store.append(

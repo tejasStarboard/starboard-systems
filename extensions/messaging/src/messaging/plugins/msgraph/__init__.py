@@ -6,7 +6,13 @@ from .graph_client import (
     SendMailRequest,
     SendMailResult,
 )
-from .message_store import MessageStore, StoredMessage
+from .message_store import (
+    FileMessageStore,
+    MessageStore,
+    NeonMessageStore,
+    StoredMessage,
+    create_message_store,
+)
 from .workflows import MsGraphSyncWorkflow, SyncWorkflowInput, SyncWorkflowResult
 
 # Connection / TokenStore import cryptography — keep them out of this package
@@ -14,14 +20,17 @@ from .workflows import MsGraphSyncWorkflow, SyncWorkflowInput, SyncWorkflowResul
 
 __all__ = [
     "FakeGraphClient",
+    "FileMessageStore",
     "GraphClient",
     "GraphMessage",
     "HttpGraphClient",
     "MessageStore",
     "MsGraphSyncWorkflow",
+    "NeonMessageStore",
     "SendMailRequest",
     "SendMailResult",
     "StoredMessage",
     "SyncWorkflowInput",
     "SyncWorkflowResult",
+    "create_message_store",
 ]

@@ -24,6 +24,12 @@ describe("matchExtensionRoute", () => {
     expect(matchExtensionRoute("messaging", "GET", ["connection"])).toBe(
       "messaging.connection.get"
     )
+    expect(
+      matchExtensionRoute("messaging", "GET", ["connection", "callback"])
+    ).toBe("messaging.connection.callback")
+    expect(matchExtensionRoute("messaging", "POST", ["connection"])).toBe(
+      "messaging.connection.post"
+    )
     expect(matchExtensionRoute("messaging", "POST", ["jobs"])).toBe(
       "messaging.enqueue"
     )

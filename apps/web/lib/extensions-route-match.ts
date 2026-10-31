@@ -34,6 +34,8 @@ export function matchExtensionRoute(
   if (service === "messaging") {
     if (method === "GET" && key === "GET:connection")
       return "messaging.connection.get"
+    if (method === "GET" && key === "GET:connection/callback")
+      return "messaging.connection.callback"
     if (method === "POST" && key === "POST:connection")
       return "messaging.connection.post"
     if (method === "DELETE" && key === "DELETE:connection")

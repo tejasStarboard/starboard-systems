@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Literal
 
 from cryptography.fernet import Fernet
 from dotenv import load_dotenv
@@ -16,6 +17,8 @@ DEFAULT_DEV_MESSAGING_TOKEN_KEY = (
     b"Ipf6jQffYSHyHrfFi3P7YyHc7SLzwKgoqfJ4zj20XOM="
 )
 
+GraphMode = Literal["stub", "live"]
+
 
 @dataclass(frozen=True)
 class MessagingConfig:
@@ -26,6 +29,12 @@ class MessagingConfig:
     temporal_task_queue: str
     data_dir: str
     token_key: bytes
+    postgres_url: str | None
+    graph_mode: GraphMode
+    ms_graph_client_id: str | None
+    ms_graph_client_secret: str | None
+    ms_graph_tenant_id: str
+    ms_graph_redirect_uri: str | None
 
 
 def load_config(env: dict[str, str] | None = None) -> MessagingConfig:
@@ -45,6 +54,12 @@ def load_config(env: dict[str, str] | None = None) -> MessagingConfig:
     # Validate key early so misconfig fails at boot.
     Fernet(token_key)
 
+    client_id = (source.get("MS_GRAPH_CLIENT_ID") or "").strip() or None
+    client_secret = (source.get("MS_GRAPH_CLIENT_SECRET") or "").strip() or None
+    graph_mode: GraphMode = (
+        "live" if client_id and client_secret else "stub"
+    )
+
     return MessagingConfig(
         port=int(source.get("MESSAGING_SERVICE_PORT", "3202")),
         service_token=service_token,
@@ -57,4 +72,14 @@ def load_config(env: dict[str, str] | None = None) -> MessagingConfig:
             "MESSAGING_DATA_DIR", "/tmp/starboard-messaging-data"
         ),
         token_key=token_key,
+        postgres_url=(source.get("POSTGRES_URL") or "").strip() or None,
+        graph_mode=graph_mode,
+        ms_graph_client_id=client_id,
+        ms_graph_client_secret=client_secret,
+        ms_graph_tenant_id=(
+            (source.get("MS_GRAPH_TENANT_ID") or "common").strip() or "common"
+        ),
+        ms_graph_redirect_uri=(
+            (source.get("MS_GRAPH_REDIRECT_URI") or "").strip() or None
+        ),
     )

@@ -10,8 +10,8 @@ from temporalio.worker import Worker
 from messaging.plugins.msgraph import MsGraphSyncWorkflow, SyncWorkflowInput
 from messaging.plugins.msgraph import activities
 from messaging.plugins.msgraph.connection import ConnectionService
-from messaging.plugins.msgraph.message_store import MessageStore
-from messaging.plugins.msgraph.token_store import TokenStore
+from messaging.plugins.msgraph.message_store import FileMessageStore
+from messaging.plugins.msgraph.token_store import FileTokenStore
 
 
 @pytest.mark.asyncio
@@ -21,13 +21,14 @@ async def test_sync_workflow_records_messages(
     key = Fernet.generate_key()
     monkeypatch.setenv("MESSAGING_DATA_DIR", str(tmp_path))
     monkeypatch.setenv("MESSAGING_TOKEN_KEY", key.decode("utf-8"))
+    monkeypatch.delenv("POSTGRES_URL", raising=False)
+    monkeypatch.delenv("MS_GRAPH_CLIENT_ID", raising=False)
+    monkeypatch.delenv("MS_GRAPH_CLIENT_SECRET", raising=False)
 
-    store = TokenStore(data_dir=tmp_path, token_key=key)
+    store = FileTokenStore(data_dir=tmp_path, token_key=key)
     ConnectionService(store).complete_callback(
         "org_sync", code="sync-code"
     )
-    # complete_callback from disconnected works; also ensure connecting path:
-    # already connected via callback after implicit disconnected.
 
     async with await WorkflowEnvironment.start_time_skipping() as env:
         async with Worker(
@@ -49,6 +50,6 @@ async def test_sync_workflow_records_messages(
     assert result.status == "completed"
     assert result.sync_interval_minutes == 30
     assert "msg_inbound_1" in result.message_ids
-    messages = MessageStore(data_dir=tmp_path).list("org_sync")
+    messages = FileMessageStore(data_dir=tmp_path).list("org_sync")
     assert len(messages) >= 1
     assert messages[0].subject.startswith("RFQ")

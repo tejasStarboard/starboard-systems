@@ -15,7 +15,15 @@ export default defineConfig({
   out: "./drizzle",
   dialect: "postgresql",
   // Required so push/migrate manage service-owned schemas (default is public-only).
-  schemaFilter: ["public", "geo", "quotes", "crm", "rates", "platform"],
+  schemaFilter: [
+    "public",
+    "geo",
+    "quotes",
+    "crm",
+    "rates",
+    "platform",
+    "messaging",
+  ],
   dbCredentials: {
     url: process.env.POSTGRES_URL,
   },
