@@ -63,6 +63,11 @@ jobs:
         with:
           bun-version: latest
 
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
       - name: Cache Turborepo
         uses: actions/cache@v4
         with:
@@ -74,6 +79,9 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Install Python workspace
+        run: uv sync --all-packages --group dev --frozen
 
       - name: Write CI env for Next
         working-directory: apps/web
