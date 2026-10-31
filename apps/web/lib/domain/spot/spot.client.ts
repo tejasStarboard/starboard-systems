@@ -1,5 +1,7 @@
 import "server-only"
 
+import { listManifests } from "@starboard/ext-host"
+
 import { env } from "@/env"
 import {
   createServiceOptions,
@@ -7,6 +9,7 @@ import {
   serviceFetch,
   ServiceClientError,
 } from "@/lib/clients/http"
+import type { ExtensionJobStatusResult } from "@/lib/domain/extension-job"
 
 export type EnqueueSpotSearchResult = {
   workflowId: string
@@ -20,14 +23,15 @@ export type SpotSearchInput = {
   mode?: string
 }
 
-function isSpotExtensionId(
-  extensionId: string
-): extensionId is "spot.fake" | "spot.maersk" | "spot.cma" {
-  return (
-    extensionId === "spot.fake" ||
-    extensionId === "spot.maersk" ||
-    extensionId === "spot.cma"
-  )
+function assertSpotExtension(extensionId: string) {
+  const manifest = listManifests().find((item) => item.id === extensionId)
+  if (manifest?.worker?.service !== "spot") {
+    throw new ServiceClientError(
+      `Unsupported spot extension: ${extensionId}`,
+      400,
+      "local"
+    )
+  }
 }
 
 export interface SpotClient {
@@ -36,6 +40,11 @@ export interface SpotClient {
     input: SpotSearchInput
   ): Promise<EnqueueSpotSearchResult>
   enqueueFakeSearch(input: SpotSearchInput): Promise<EnqueueSpotSearchResult>
+  getJobStatus(
+    extensionId: string,
+    workflowId: string,
+    organizationId: string
+  ): Promise<ExtensionJobStatusResult>
 }
 
 class HttpSpotClient implements SpotClient {
@@ -49,13 +58,7 @@ class HttpSpotClient implements SpotClient {
     extensionId: string,
     input: SpotSearchInput
   ): Promise<EnqueueSpotSearchResult> {
-    if (!isSpotExtensionId(extensionId)) {
-      throw new ServiceClientError(
-        `Unsupported spot extension: ${extensionId}`,
-        400,
-        "local"
-      )
-    }
+    assertSpotExtension(extensionId)
     const options = createServiceOptions({
       baseUrl: this.options.baseUrl,
       organizationId: input.organizationId,
@@ -90,6 +93,24 @@ class HttpSpotClient implements SpotClient {
 
   enqueueFakeSearch(input: SpotSearchInput): Promise<EnqueueSpotSearchResult> {
     return this.enqueueSearch("spot.fake", input)
+  }
+
+  async getJobStatus(
+    extensionId: string,
+    workflowId: string,
+    organizationId: string
+  ): Promise<ExtensionJobStatusResult> {
+    assertSpotExtension(extensionId)
+    const options = createServiceOptions({
+      baseUrl: this.options.baseUrl,
+      organizationId,
+    })
+    const response = await serviceFetch(
+      `/extensions/${extensionId}/jobs/${encodeURIComponent(workflowId)}`,
+      { method: "GET" },
+      options
+    )
+    return parseJsonResponse(response, "Failed to load spot job status")
   }
 }
 

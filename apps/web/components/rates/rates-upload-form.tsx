@@ -5,6 +5,14 @@ import { useState } from "react"
 
 import { Button } from "@starboard/lib-ui/components/button"
 
+import { extensionApiPath } from "@/lib/extension-api-path"
+import {
+  pollExtensionJob,
+  type PolledJobStatus,
+} from "@/lib/poll-extension-job"
+
+const INGESTION_EXTENSION_ID = "ingestion.fcl_v6"
+
 export function RatesUploadForm() {
   const [file, setFile] = useState<File | null>(null)
   const [pending, setPending] = useState(false)
@@ -12,6 +20,7 @@ export function RatesUploadForm() {
   const [job, setJob] = useState<{ workflowId: string; runId: string } | null>(
     null
   )
+  const [jobStatus, setJobStatus] = useState<PolledJobStatus | null>(null)
 
   async function onSubmit(event: React.FormEvent) {
     event.preventDefault()
@@ -22,13 +31,17 @@ export function RatesUploadForm() {
     setPending(true)
     setError(null)
     setJob(null)
+    setJobStatus(null)
     try {
       const body = new FormData()
       body.set("file", file)
-      const response = await fetch("/api/extensions/ingestion.fcl_v6/jobs", {
-        method: "POST",
-        body,
-      })
+      const response = await fetch(
+        extensionApiPath(INGESTION_EXTENSION_ID, "jobs"),
+        {
+          method: "POST",
+          body,
+        }
+      )
       const payload = (await response.json().catch(() => null)) as {
         error?: string
         workflowId?: string
@@ -43,6 +56,15 @@ export function RatesUploadForm() {
         return
       }
       setJob({ workflowId: payload.workflowId, runId: payload.runId })
+      setJobStatus({ status: "running" })
+      const status = await pollExtensionJob({
+        extensionId: INGESTION_EXTENSION_ID,
+        workflowId: payload.workflowId,
+      })
+      setJobStatus(status)
+      if (status.status === "failed" || status.status === "cancelled") {
+        setError(status.error ?? `Ingestion ${status.status}`)
+      }
     } catch {
       setError("Upload failed")
     } finally {
@@ -59,13 +81,21 @@ export function RatesUploadForm() {
         className="text-sm"
       />
       <Button type="submit" disabled={pending || !file}>
-        {pending ? "Uploading…" : "Enqueue ingestion"}
+        {pending ? "Working…" : "Enqueue ingestion"}
       </Button>
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
       {job ? (
-        <p className="font-mono text-xs text-muted-foreground">
-          Accepted 202 — workflowId={job.workflowId} runId={job.runId}
-        </p>
+        <div className="space-y-1 text-xs text-muted-foreground">
+          <p>
+            Job {job.workflowId}
+            {jobStatus ? ` — ${jobStatus.status}` : ""}
+          </p>
+          {jobStatus?.status === "completed" ? (
+            <p className="font-mono">
+              Result: {JSON.stringify(jobStatus.result ?? null)}
+            </p>
+          ) : null}
+        </div>
       ) : null}
     </form>
   )

@@ -1,5 +1,6 @@
 import "server-only"
 
+import type { ExtensionJobStatusResult } from "@/lib/domain/extension-job"
 import {
   getSpotClient,
   type EnqueueSpotSearchResult,
@@ -19,6 +20,14 @@ export class SpotManager {
 
   enqueueFakeSearch(input: SpotSearchInput): Promise<EnqueueSpotSearchResult> {
     return this.spotClient.enqueueFakeSearch(input)
+  }
+
+  getJobStatus(
+    extensionId: string,
+    workflowId: string,
+    organizationId: string
+  ): Promise<ExtensionJobStatusResult> {
+    return this.spotClient.getJobStatus(extensionId, workflowId, organizationId)
   }
 }
 

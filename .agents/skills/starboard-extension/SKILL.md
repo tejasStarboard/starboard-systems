@@ -16,25 +16,26 @@ description: >-
 - [adr/0003-extension-host.md](../../../.project/docs/adr/0003-extension-host.md)
 - [adr/0002-python-temporal-extensions.md](../../../.project/docs/adr/0002-python-temporal-extensions.md)
 
-If tickets `055` / `056` are still open, prefer implementing those over new `spot.*` / ingest modes.
+If ticket `056` is still open, prefer finishing the cookbook over new product carriers.
 
 ## Rules
 
-1. Shell must work with the extension **disabled**.
-2. Contribute nav / UI slots / API prefixes via **manifest only** — no hardcoded feature branches in unrelated shell components.
-3. Long work: start Temporal workflow; BFF returns **202 + workflow / run id**.
-4. One plugin per carrier (`spot.maersk`) or ingest mode (`ingestion.fcl_v6`).
-5. Ocean FCL = **v6 only**. Never port v3–v5.
-6. Entitlements: `requiredPlan: ["credit"|"enterprise"]` via extension-host + billing stubs.
-7. Unplug: disable manifest → hide UI → stop worker → optional schema drop. Zero surgical shell edits.
+1. Shell must work with the extension **disabled** (and when rollout map read fails — fail closed).
+2. Contribute nav / UI slots / API prefixes via **manifest only** — no `if (extensionId === "…")` in unrelated shell components.
+3. Long work: start Temporal workflow; BFF returns **202 + workflow / run id**; expose **GET job status** `{ status, result?, error? }`.
+4. BFF is **generic** (`/api/extensions/[extensionId]/[[...path]]`) — never add a new per-id Next `route.ts` tree.
+5. One plugin per carrier (`spot.maersk`) or ingest mode (`ingestion.fcl_v6`).
+6. Ocean FCL = **v6 only**. Never port v3–v5.
+7. Entitlements: `requiredPlan: ["credit"|"enterprise"]` via extension-host + billing stubs. Missing rollout row = **on**.
+8. Unplug: disable manifest / rollout off → hide UI → stop worker → optional schema drop. Zero surgical shell edits.
 
 ## Typical files
 
 - `extensions/host` — types, registry, entitlement filter (`@starboard/ext-host`)
-- `apps/web` — list contributions; `/api/extensions/<id>/*` proxy
+- `apps/web` — `lib/extensions.ts`, `lib/extensions-api-dispatch.ts`, generic extensions API route
 - `extensions/ingestion|messaging|spot` (Python) + plugin folder + Temporal worker
+- `packages/python-kit` — `describe_job` shared status helper
 - `extensions/temporal` — Temporal OSS via Docker (`@starboard/ext-temporal`)
-- Manifest stub entry in registry
 
 ## More
 

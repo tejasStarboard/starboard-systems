@@ -4,6 +4,10 @@ import { useState, type FormEvent } from "react"
 
 import { Button } from "@starboard/lib-ui/components/button"
 
+import { extensionApiPath } from "@/lib/extension-api-path"
+
+const MESSAGING_EXTENSION_ID = "messaging.msgraph"
+
 type Message = {
   id: string
   subject: string
@@ -32,9 +36,12 @@ export function InboxPanel({
     setError(null)
     setJob(null)
     try {
-      const response = await fetch("/api/extensions/messaging.msgraph/jobs", {
-        method: "POST",
-      })
+      const response = await fetch(
+        extensionApiPath(MESSAGING_EXTENSION_ID, "jobs"),
+        {
+          method: "POST",
+        }
+      )
       const payload = (await response.json().catch(() => null)) as {
         error?: string
         workflowId?: string
@@ -51,7 +58,7 @@ export function InboxPanel({
       setJob({ workflowId: payload.workflowId, runId: payload.runId })
 
       const listResponse = await fetch(
-        "/api/extensions/messaging.msgraph/messages"
+        extensionApiPath(MESSAGING_EXTENSION_ID, "messages")
       )
       if (listResponse.ok) {
         const listed = (await listResponse.json()) as Message[]
@@ -70,11 +77,14 @@ export function InboxPanel({
     setError(null)
     setSendStatus(null)
     try {
-      const response = await fetch("/api/extensions/messaging.msgraph/send", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ toAddress, subject, body }),
-      })
+      const response = await fetch(
+        extensionApiPath(MESSAGING_EXTENSION_ID, "send"),
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ toAddress, subject, body }),
+        }
+      )
       const payload = (await response.json().catch(() => null)) as {
         error?: string
         status?: string

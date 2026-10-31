@@ -7,6 +7,7 @@ import {
   serviceFetch,
   ServiceClientError,
 } from "@/lib/clients/http"
+import type { ExtensionJobStatusResult } from "@/lib/domain/extension-job"
 
 export type EnqueueIngestionJobResult = {
   workflowId: string
@@ -20,6 +21,11 @@ export interface IngestionClient {
     filename: string,
     requestId?: string
   ): Promise<EnqueueIngestionJobResult>
+  getJobStatus(
+    organizationId: string,
+    workflowId: string,
+    requestId?: string
+  ): Promise<ExtensionJobStatusResult>
 }
 
 class HttpIngestionClient implements IngestionClient {
@@ -68,6 +74,24 @@ class HttpIngestionClient implements IngestionClient {
     }
 
     return { workflowId: body.workflowId, runId: body.runId }
+  }
+
+  async getJobStatus(
+    organizationId: string,
+    workflowId: string,
+    requestId?: string
+  ): Promise<ExtensionJobStatusResult> {
+    const options = createServiceOptions({
+      baseUrl: this.options.baseUrl,
+      organizationId,
+      requestId,
+    })
+    const response = await serviceFetch(
+      `/extensions/ingestion.fcl_v6/jobs/${encodeURIComponent(workflowId)}`,
+      { method: "GET" },
+      options
+    )
+    return parseJsonResponse(response, "Failed to load ingestion job status")
   }
 }
 

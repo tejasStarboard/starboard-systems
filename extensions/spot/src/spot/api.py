@@ -6,6 +6,7 @@ from typing import AsyncIterator
 
 from fastapi import Depends, FastAPI, Header, HTTPException
 from pydantic import BaseModel, Field
+from starboard_python_kit import describe_job
 from temporalio.client import Client
 
 from spot.config import SpotConfig, load_config
@@ -16,6 +17,12 @@ from spot.plugins.registry import get_plugin
 class EnqueueResponse(BaseModel):
     workflowId: str
     runId: str
+
+
+class JobStatusResponse(BaseModel):
+    status: str
+    result: object | None = None
+    error: str | None = None
 
 
 class SearchJobBody(BaseModel):
@@ -114,5 +121,25 @@ def create_app(
     )
     async def enqueue_cma_search(body: SearchJobBody) -> EnqueueResponse:
         return await enqueue_search("cma", body)
+
+    @app.get(
+        "/extensions/{extension_id}/jobs/{workflow_id}",
+        response_model=JobStatusResponse,
+        dependencies=[Depends(require_service_token)],
+    )
+    async def get_job_status(extension_id: str, workflow_id: str) -> JobStatusResponse:
+        try:
+            get_plugin(extension_id.removeprefix("spot."))
+        except KeyError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        client: Client | None = getattr(app.state, "temporal_client", None)
+        if client is None:
+            raise HTTPException(status_code=503, detail="Temporal client not ready")
+        payload = await describe_job(client, workflow_id)
+        return JobStatusResponse(
+            status=payload["status"],
+            result=payload.get("result"),
+            error=payload.get("error"),
+        )
 
     return app

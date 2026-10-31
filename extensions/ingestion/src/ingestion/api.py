@@ -7,6 +7,7 @@ from typing import AsyncIterator
 
 from fastapi import Depends, FastAPI, File, Form, Header, HTTPException, UploadFile
 from pydantic import BaseModel
+from starboard_python_kit import describe_job
 from temporalio.client import Client
 
 from ingestion.config import IngestionConfig, load_config
@@ -16,6 +17,12 @@ from ingestion.plugins.fcl_v6.workflows import FclV6IngestWorkflow, IngestWorkfl
 class EnqueueResponse(BaseModel):
     workflowId: str
     runId: str
+
+
+class JobStatusResponse(BaseModel):
+    status: str
+    result: object | None = None
+    error: str | None = None
 
 
 def create_app(
@@ -91,5 +98,21 @@ def create_app(
         )
         run_id = handle.first_execution_run_id or ""
         return EnqueueResponse(workflowId=handle.id, runId=run_id)
+
+    @app.get(
+        "/extensions/ingestion.fcl_v6/jobs/{workflow_id}",
+        response_model=JobStatusResponse,
+        dependencies=[Depends(require_service_token)],
+    )
+    async def get_fcl_v6_job_status(workflow_id: str) -> JobStatusResponse:
+        client: Client | None = getattr(app.state, "temporal_client", None)
+        if client is None:
+            raise HTTPException(status_code=503, detail="Temporal client not ready")
+        payload = await describe_job(client, workflow_id)
+        return JobStatusResponse(
+            status=payload["status"],
+            result=payload.get("result"),
+            error=payload.get("error"),
+        )
 
     return app
