@@ -27,7 +27,7 @@ carrier-specific logic beyond a no-op or fake plugin for tests.
 
 ## Files to touch
 
-- `services/spot` (or `services/carriers`) Python
+- `extensions/spot` (or `services/carriers`) Python
 - Plugin interface: `search(request) -> rates`
 - BFF enqueue `POST` → 202 + workflow id
 - Extension-host job contribution type `spot.search`

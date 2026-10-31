@@ -9,7 +9,7 @@ import {
   type ExtensionManifest,
   type ExtensionNavContribution,
   type Plan,
-} from "@starboard/extension-host"
+} from "@starboard/ext-host"
 
 import { getPlatformManager } from "@/lib/domain/platform/platform.manager"
 import type { SpotRateSource } from "@/lib/spot-rate-source"

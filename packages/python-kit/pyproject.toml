@@ -1,5 +1,5 @@
 [project]
-name = "starboard-python-kit"
+name = "starboard-lib-python-kit"
 version = "0.0.1"
 description = "Shared Python helpers for Starboard extension workers (HTTP, Temporal)."
 requires-python = ">=3.12"

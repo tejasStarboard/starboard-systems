@@ -1,5 +1,6 @@
 import { z } from "zod"
 
+import { doorAddressSchema } from "./door-address.js"
 import { formOptionSchema } from "./quotes.js"
 
 export const currencyCodeSchema = z
@@ -69,3 +70,40 @@ export const facilityInputSchema = z
   })
 
 export type FacilityInput = z.infer<typeof facilityInputSchema>
+
+/** Google Places autocomplete hit for door pickup/delivery. */
+export const addressPredictionSchema = z.object({
+  placeId: z.string().min(1),
+  description: z.string(),
+  mainText: z.string(),
+  secondaryText: z.string(),
+})
+
+export type AddressPrediction = z.infer<typeof addressPredictionSchema>
+
+export const listAddressesQuerySchema = z.object({
+  q: z.string().optional().default(""),
+  limit: z.coerce.number().int().min(1).max(10).optional().default(5),
+})
+
+export type ListAddressesQuery = z.infer<typeof listAddressesQuerySchema>
+
+export const listAddressesResponseSchema = z.object({
+  addresses: z.array(addressPredictionSchema),
+})
+
+export type ListAddressesResponse = z.infer<typeof listAddressesResponseSchema>
+
+export const addressDetailsQuerySchema = z.object({
+  placeId: z.string().min(1),
+})
+
+export type AddressDetailsQuery = z.infer<typeof addressDetailsQuerySchema>
+
+export const addressDetailsResponseSchema = z.object({
+  address: doorAddressSchema,
+})
+
+export type AddressDetailsResponse = z.infer<
+  typeof addressDetailsResponseSchema
+>

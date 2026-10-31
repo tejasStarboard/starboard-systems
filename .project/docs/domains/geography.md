@@ -4,7 +4,7 @@
 | --------- | -------------------------------------------------------- |
 | Service   | `services/geography`                                     |
 | Schema    | `geo.*`                                                  |
-| Contracts | `@starboard/contracts` geography                         |
+| Contracts | `@starboard/lib-contracts` geography                         |
 | Status    | Currencies + facility gazetteer search; locations unused |
 
 ## Owns
@@ -15,6 +15,7 @@ Countries / states / cities (reference), **facilities** (UN/LOCODE and/or IATA g
 
 - `GET/POST /currencies` — list / ensure currency codes (service token)
 - `GET /ports?q=` — search facilities by UN/LOCODE or IATA prefix, name, or alias (service token); empty `q` returns capped list. Response: `{ ports: FacilityOption[] }` (`value`, `label`, optional `types`, `country`)
+- `GET /locations?q=` — search **places** (city/locality gazetteer) for quote pickup/delivery; min 2 chars. `?ids=` resolves soft ids to labels. Response: `{ locations: FormOption[] }` (`value` = place id, `label` e.g. `Mississauga, ON, CA`)
 - `GET /health` — open
 
 ## Schema notes (ADR 0004)
@@ -26,12 +27,16 @@ Countries / states / cities (reference), **facilities** (UN/LOCODE and/or IATA g
 
 ## Migration (007)
 
-Early rewrite had seed-only `geo.port` data (required zip + state FK). **Clear-and-reseed:** drop `geo.port`, create `geo.facility`, run `pnpm --filter @starboard/db db:push` then `db:seed`. Soft codes already stored on quotes/rates are unchanged.
+Early rewrite had seed-only `geo.port` data (required zip + state FK). **Clear-and-reseed:** drop `geo.port`, create `geo.facility`, run `pnpm --filter @starboard/lib-db db:push` then `db:seed`. Soft codes already stored on quotes/rates are unchanged.
 
-### Import path (later)
+### Neon (primary)
 
-Ingest UN/LOCODE (+ IATA) dumps into `geo.facility` without inventing fake cities/zips. Do not load a full world dump in CI — keep a small seed set.
+App `POSTGRES_URL` points at Neon. Facility search uses the seeded/imported `geo.facility` rows that fit Free tier. Full city-boundary / place dumps are not loaded on Neon.
+
+Door pickup/delivery use **Google Places** (not a local gazetteer); snapshots persist on `quotes.lane.pickup_address` / `delivery_address`.
+
+`createDb` uses **@neondatabase/serverless** for Neon hosts (override with `DATABASE_DRIVER=pg` if needed).
 
 ## Next tickets
 
-Door addresses, learned mappings, Elasticsearch (derived only) deferred.
+Learned mappings, Elasticsearch (derived only), optional city-boundary cartage data deferred.

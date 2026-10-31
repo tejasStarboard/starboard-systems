@@ -30,7 +30,7 @@ upload UI appears only when enabled.
 
 ## Files to touch
 
-- `services/ingestion` (Python) + fcl_v6 plugin + Temporal worker
+- `extensions/ingestion` (Python) + fcl_v6 plugin + Temporal worker
 - `packages/python-kit` if needed (Temporal client helpers, service token)
 - Extension manifest `worker.kind: python-temporal` + `enabled` path + BFF
   `/api/extensions/ingestion.fcl_v6/*`

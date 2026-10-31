@@ -10,16 +10,16 @@ import {
   type UseFormSetValue,
 } from "react-hook-form"
 
-import { Button } from "@workspace/ui/components/button"
-import { Field, FieldGroup, FieldLabel } from "@workspace/ui/components/field"
-import { Input } from "@workspace/ui/components/input"
+import { Button } from "@starboard/lib-ui/components/button"
+import { Field, FieldGroup, FieldLabel } from "@starboard/lib-ui/components/field"
+import { Input } from "@starboard/lib-ui/components/input"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@workspace/ui/components/select"
+} from "@starboard/lib-ui/components/select"
 import {
   Table,
   TableBody,
@@ -27,12 +27,13 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@workspace/ui/components/table"
+} from "@starboard/lib-ui/components/table"
 import {
   ToggleGroup,
   ToggleGroupItem,
-} from "@workspace/ui/components/toggle-group"
+} from "@starboard/lib-ui/components/toggle-group"
 
+import { AddressCombobox } from "@/components/quotes/address-combobox"
 import { PortCombobox } from "@/components/quotes/port-combobox"
 import {
   createContainerLine,
@@ -100,7 +101,8 @@ export function LaneFields({
   const originLabel = mode === "air" ? "Origin airport" : "Origin port"
   const destinationLabel =
     mode === "air" ? "Destination airport" : "Destination port"
-  const codePlaceholder = mode === "air" ? "IATA / UNLOCODE" : "UNLOCODE"
+  const codePlaceholder =
+    mode === "air" ? "IATA / UNLOCODE" : "UNLOCODE"
   const fieldId = (name: string) => `lane-${laneIndex}-${name}`
 
   return (
@@ -132,14 +134,21 @@ export function LaneFields({
       />
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field>
-          <FieldLabel htmlFor={fieldId("pickup")}>Pickup</FieldLabel>
-          <Input
-            id={fieldId("pickup")}
-            placeholder="Door / warehouse"
-            {...register(`${prefix}.pickup`)}
-          />
-        </Field>
+        <Controller
+          control={control}
+          name={`${prefix}.pickup`}
+          render={({ field }) => (
+            <Field>
+              <FieldLabel htmlFor={fieldId("pickup")}>Pickup</FieldLabel>
+              <AddressCombobox
+                id={fieldId("pickup")}
+                value={field.value}
+                onChange={field.onChange}
+                placeholder="Search pickup address…"
+              />
+            </Field>
+          )}
+        />
         <Controller
           control={control}
           name={`${prefix}.origin`}
@@ -214,14 +223,21 @@ export function LaneFields({
             </Field>
           )}
         />
-        <Field>
-          <FieldLabel htmlFor={fieldId("delivery")}>Delivery</FieldLabel>
-          <Input
-            id={fieldId("delivery")}
-            placeholder="Door / warehouse"
-            {...register(`${prefix}.delivery`)}
-          />
-        </Field>
+        <Controller
+          control={control}
+          name={`${prefix}.delivery`}
+          render={({ field }) => (
+            <Field>
+              <FieldLabel htmlFor={fieldId("delivery")}>Delivery</FieldLabel>
+              <AddressCombobox
+                id={fieldId("delivery")}
+                value={field.value}
+                onChange={field.onChange}
+                placeholder="Search delivery address…"
+              />
+            </Field>
+          )}
+        />
       </div>
 
       {mode === "fcl" ? (

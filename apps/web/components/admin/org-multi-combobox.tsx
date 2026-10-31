@@ -12,7 +12,7 @@ import {
   ComboboxItem,
   ComboboxList,
   useComboboxAnchor,
-} from "@workspace/ui/components/combobox"
+} from "@starboard/lib-ui/components/combobox"
 
 export type OrgOption = {
   id: string

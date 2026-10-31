@@ -6,24 +6,18 @@ requires-python = ">=3.12"
 dependencies = []
 
 [tool.uv.workspace]
-# Python packages live under ./packages and ./services (alongside JS/Bun packages).
+# Python packages live under ./packages and ./extensions (alongside JS/Bun packages).
 # Only directories with a pyproject.toml are workspace members; exclude JS/Bun trees.
-members = ["packages/*", "services/*"]
+members = ["packages/*", "extensions/*"]
 exclude = [
   "packages/contracts",
   "packages/database",
   "packages/email",
-  "packages/eslint-config",
-  "packages/extension-host",
   "packages/pricing",
   "packages/service-kit",
-  "packages/typescript-config",
   "packages/ui",
-  "services/crm",
-  "services/geography",
-  "services/quotes",
-  "services/rates",
-  "services/temporal",
+  "extensions/host",
+  "extensions/temporal",
 ]
 
 [dependency-groups]

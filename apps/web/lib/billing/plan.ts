@@ -1,7 +1,7 @@
 import "server-only"
 
-import { organization } from "@starboard/db/schema"
-import { parsePlan, type Plan } from "@starboard/extension-host"
+import { organization } from "@starboard/lib-db/schema"
+import { parsePlan, type Plan } from "@starboard/ext-host"
 import { eq } from "drizzle-orm"
 
 import { db } from "@/lib/db"

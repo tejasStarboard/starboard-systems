@@ -4,7 +4,7 @@ import type {
   QuoteFormValues,
   QuoteListItemView,
   QuoteSource,
-} from "@starboard/contracts"
+} from "@starboard/lib-contracts"
 
 import {
   type GeographyClient,

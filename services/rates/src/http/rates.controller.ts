@@ -2,12 +2,12 @@ import { Hono } from "hono"
 import {
   createRateRequestSchema,
   listRatesQuerySchema,
-} from "@starboard/contracts"
+} from "@starboard/lib-contracts"
 import {
   logError,
   logInfo,
   type ServiceVariables,
-} from "@starboard/service-kit"
+} from "@starboard/lib-service-kit"
 
 import type { RatesService } from "../domain/rates.service"
 import {

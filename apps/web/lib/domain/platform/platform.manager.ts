@@ -3,7 +3,7 @@ import "server-only"
 import type {
   ExtensionRolloutState,
   RolloutMode,
-} from "@starboard/extension-host"
+} from "@starboard/ext-host"
 
 import {
   clearImpersonationCookie,

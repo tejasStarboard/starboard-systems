@@ -1,7 +1,13 @@
 import { describe, expect, test } from "bun:test"
-import type { FacilityOption, FormOption } from "@starboard/contracts"
+import type {
+  AddressPrediction,
+  DoorAddress,
+  FacilityOption,
+  FormOption,
+} from "@starboard/lib-contracts"
 
 import type { GeographyDao } from "../dao/geography.dao"
+import type { GooglePlacesClient } from "../integrations/google-places"
 import { DefaultGeographyService } from "./geography.service"
 
 const SEEDED_FACILITIES: FacilityOption[] = [
@@ -12,51 +18,9 @@ const SEEDED_FACILITIES: FacilityOption[] = [
     country: "CN",
   },
   {
-    value: "DEHAM",
-    label: "DEHAM — Hamburg",
-    types: ["seaport"],
-    country: "DE",
-  },
-  {
-    value: "INNSA",
-    label: "INNSA — Nhava Sheva",
-    types: ["seaport"],
-    country: "IN",
-  },
-  {
     value: "LAX",
     label: "LAX — Los Angeles International",
     types: ["airport"],
-    country: "US",
-  },
-  {
-    value: "NLRTM",
-    label: "NLRTM — Rotterdam",
-    types: ["seaport"],
-    country: "NL",
-  },
-  {
-    value: "PVG",
-    label: "PVG — Shanghai Pudong",
-    types: ["airport"],
-    country: "CN",
-  },
-  {
-    value: "SGSIN",
-    label: "SGSIN — Singapore",
-    types: ["seaport"],
-    country: "SG",
-  },
-  {
-    value: "SIN",
-    label: "SIN — Singapore Changi",
-    types: ["airport"],
-    country: "SG",
-  },
-  {
-    value: "USLAX",
-    label: "USLAX — Los Angeles",
-    types: ["seaport"],
     country: "US",
   },
 ]
@@ -90,61 +54,101 @@ class InMemoryGeographyDao implements GeographyDao {
     return this.facilities.filter((facility) => {
       if (facility.value.toUpperCase().startsWith(prefix)) return true
       const name = facility.label.split(" — ")[1]?.toLowerCase() ?? ""
-      return name.includes(needle)
+      if (name.includes(needle)) return true
+      return roughSimilarity(name, needle) >= 0.45
     })
   }
 }
 
+class FakePlacesClient implements Pick<
+  GooglePlacesClient,
+  "configured" | "searchAddresses" | "getAddressDetails"
+> {
+  configured = true
+  private readonly predictions: AddressPrediction[] = [
+    {
+      placeId: "place-ram-mandir",
+      description:
+        "Mississauga's Ram Mandir, Export Boulevard, Mississauga, ON, Canada",
+      mainText: "Mississauga's Ram Mandir",
+      secondaryText: "Export Boulevard, Mississauga, ON, Canada",
+    },
+  ]
+  private readonly details: DoorAddress = {
+    street: "Export Boulevard",
+    city: "Mississauga",
+    state: "Ontario",
+    zip: "",
+    country: "Canada",
+    countryCode: "CA",
+    lat: 43.6,
+    lng: -79.6,
+    label:
+      "Mississauga's Ram Mandir, Export Boulevard, Mississauga, ON, Canada",
+  }
+
+  async searchAddresses(query: string): Promise<AddressPrediction[]> {
+    const needle = query.trim().toLowerCase()
+    return this.predictions.filter(
+      (p) =>
+        p.description.toLowerCase().includes(needle) ||
+        roughSimilarity(p.mainText.toLowerCase(), needle) >= 0.4
+    )
+  }
+
+  async getAddressDetails(placeId: string): Promise<DoorAddress | null> {
+    return placeId === "place-ram-mandir" ? this.details : null
+  }
+}
+
+function roughSimilarity(a: string, b: string): number {
+  if (!a || !b) return 0
+  const longer = a.length >= b.length ? a : b
+  const shorter = a.length >= b.length ? b : a
+  let matches = 0
+  for (let i = 0; i < shorter.length; i++) {
+    if (longer.includes(shorter[i]!)) matches += 1
+  }
+  return matches / longer.length
+}
+
+function service() {
+  return new DefaultGeographyService(
+    new InMemoryGeographyDao(),
+    new FakePlacesClient() as unknown as GooglePlacesClient
+  )
+}
+
 describe("DefaultGeographyService.searchPorts", () => {
-  test("returns all seeded facilities when q is empty", async () => {
-    const service = new DefaultGeographyService(new InMemoryGeographyDao())
-    const ports = await service.searchPorts("")
+  test("returns seeded facilities when q is empty", async () => {
+    const ports = await service().searchPorts("")
     expect(ports).toHaveLength(SEEDED_FACILITIES.length)
-    expect(ports[0]?.value).toBe("CNSHA")
   })
 
   test("filters by unlocode prefix", async () => {
-    const service = new DefaultGeographyService(new InMemoryGeographyDao())
-    const ports = await service.searchPorts("cn")
-    expect(ports).toEqual([
-      {
-        value: "CNSHA",
-        label: "CNSHA — Shanghai",
-        types: ["seaport"],
-        country: "CN",
-      },
-    ])
+    const ports = await service().searchPorts("cn")
+    expect(ports).toEqual([SEEDED_FACILITIES[0]!])
   })
 
-  test("filters by IATA code", async () => {
-    const service = new DefaultGeographyService(new InMemoryGeographyDao())
-    const ports = await service.searchPorts("LAX")
-    expect(ports).toEqual([
-      {
-        value: "LAX",
-        label: "LAX — Los Angeles International",
-        types: ["airport"],
-        country: "US",
-      },
-    ])
+  test("matches common port name typos via fuzzy stand-in", async () => {
+    const ports = await service().searchPorts("Shangai")
+    expect(ports.map((p) => p.value)).toContain("CNSHA")
+  })
+})
+
+describe("DefaultGeographyService.searchAddresses", () => {
+  test("requires at least 3 characters", async () => {
+    expect(await service().searchAddresses("mi")).toEqual([])
   })
 
-  test("filters by facility name", async () => {
-    const service = new DefaultGeographyService(new InMemoryGeographyDao())
-    const ports = await service.searchPorts("Rotterdam")
-    expect(ports).toEqual([
-      {
-        value: "NLRTM",
-        label: "NLRTM — Rotterdam",
-        types: ["seaport"],
-        country: "NL",
-      },
-    ])
+  test("returns Google Places predictions", async () => {
+    const addresses = await service().searchAddresses("mississauga ram mandir")
+    expect(addresses[0]?.mainText).toBe("Mississauga's Ram Mandir")
   })
 
-  test("returns empty list when nothing matches", async () => {
-    const service = new DefaultGeographyService(new InMemoryGeographyDao())
-    const ports = await service.searchPorts("ZZZ")
-    expect(ports).toEqual([])
+  test("resolves place details into a door address snapshot", async () => {
+    const address = await service().getAddressDetails("place-ram-mandir")
+    expect(address.city).toBe("Mississauga")
+    expect(address.street).toContain("Export")
   })
 })

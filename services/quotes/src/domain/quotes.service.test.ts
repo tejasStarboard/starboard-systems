@@ -8,7 +8,7 @@ import {
   type LaneFormValues,
   type QuoteFormValues,
   type QuoteListItem,
-} from "@starboard/contracts"
+} from "@starboard/lib-contracts"
 
 import {
   laneFormToRows,
@@ -162,8 +162,28 @@ describe("DefaultQuotesService.save", () => {
     lane.id = "lane-1"
     lane.origin = "CNSHA"
     lane.destination = "USLAX"
-    lane.pickup = "wh-a"
-    lane.delivery = "wh-b"
+    lane.pickup = {
+      street: "Warehouse A",
+      city: "Mississauga",
+      state: "ON",
+      zip: "",
+      country: "Canada",
+      countryCode: "CA",
+      lat: null,
+      lng: null,
+      label: "Warehouse A, Mississauga, ON, Canada",
+    }
+    lane.delivery = {
+      street: "Warehouse B",
+      city: "Brambleton",
+      state: "VA",
+      zip: "",
+      country: "United States",
+      countryCode: "US",
+      lat: null,
+      lng: null,
+      label: "Warehouse B, Brambleton, VA, USA",
+    }
     lane.containers = [
       createContainerLine({
         id: "ctr-1",
@@ -197,8 +217,8 @@ describe("DefaultQuotesService.save", () => {
       id: "lane-1",
       origin: "CNSHA",
       destination: "USLAX",
-      pickup: "wh-a",
-      delivery: "wh-b",
+      pickup: expect.objectContaining({ city: "Mississauga" }),
+      delivery: expect.objectContaining({ city: "Brambleton" }),
       markupType: "amount",
       markupValue: 50,
       containers: [

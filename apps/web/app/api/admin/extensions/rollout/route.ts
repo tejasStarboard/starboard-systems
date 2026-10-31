@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { listManifests, type RolloutMode } from "@starboard/extension-host"
+import { listManifests, type RolloutMode } from "@starboard/ext-host"
 import { z } from "zod"
 
 import { requireStaffApiSession } from "@/lib/auth/session"

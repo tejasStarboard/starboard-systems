@@ -9,7 +9,7 @@ import {
   ComboboxInput,
   ComboboxItem,
   ComboboxList,
-} from "@workspace/ui/components/combobox"
+} from "@starboard/lib-ui/components/combobox"
 
 import { type QuoteFormOption } from "@/lib/domain/quotes/quotes.schema"
 

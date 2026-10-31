@@ -1,6 +1,6 @@
 import { and, asc, eq, gte, ilike, lte, or, SQL } from "drizzle-orm"
-import { rateCatalog } from "@starboard/db/schema"
-import type { LaneMode, RateSource } from "@starboard/contracts"
+import { rateCatalog } from "@starboard/lib-db/schema"
+import type { LaneMode, RateSource } from "@starboard/lib-contracts"
 
 import type { RatesDb } from "./db"
 

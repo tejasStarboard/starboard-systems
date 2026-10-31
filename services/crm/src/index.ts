@@ -4,7 +4,7 @@ import {
   createServiceTokenMiddleware,
   logInfo,
   type ServiceVariables,
-} from "@starboard/service-kit"
+} from "@starboard/lib-service-kit"
 
 import { loadConfig } from "./config"
 import { createContainer } from "./container"

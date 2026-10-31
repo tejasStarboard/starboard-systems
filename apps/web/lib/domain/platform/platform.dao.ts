@@ -7,12 +7,12 @@ import {
   organization,
   platformAuditLog,
   platformCommonBetaOrg,
-} from "@starboard/db/schema"
+} from "@starboard/lib-db/schema"
 import {
   parseRolloutMode,
   type ExtensionRolloutState,
   type RolloutMode,
-} from "@starboard/extension-host"
+} from "@starboard/ext-host"
 
 import { db } from "@/lib/db"
 

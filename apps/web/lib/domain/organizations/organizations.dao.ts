@@ -1,7 +1,7 @@
 import "server-only"
 
 import { and, eq, inArray } from "drizzle-orm"
-import { member, user } from "@starboard/db/schema"
+import { member, user } from "@starboard/lib-db/schema"
 
 import { db } from "@/lib/db"
 

@@ -27,9 +27,10 @@ description: >-
 
 ## Typical files
 
-- `packages/extension-host` — types, registry, entitlement filter
+- `extensions/host` — types, registry, entitlement filter (`@starboard/ext-host`)
 - `apps/web` — list contributions; `/api/extensions/<id>/*` proxy
-- `services/ingestion|messaging|spot` (Python) + plugin folder + Temporal worker
+- `extensions/ingestion|messaging|spot` (Python) + plugin folder + Temporal worker
+- `extensions/temporal` — Temporal OSS via Docker (`@starboard/ext-temporal`)
 - Manifest stub entry in registry
 
 ## More

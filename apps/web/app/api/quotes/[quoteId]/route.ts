@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { quoteFormSchema } from "@starboard/contracts"
+import { quoteFormSchema } from "@starboard/lib-contracts"
 
 import { requireApiSession } from "@/lib/auth/session"
 import { ServiceClientError } from "@/lib/clients/http"

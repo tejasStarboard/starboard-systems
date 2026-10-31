@@ -1,5 +1,27 @@
 # Architecture
 
+## Monorepo layout
+
+| Directory | Responsibility |
+| --- | --- |
+| `apps/` | Product apps (Next.js shell BFF) |
+| `packages/` | Shared product libraries (`contracts`, `db`, `pricing`, `ui`, …) |
+| `tooling/` | Monorepo toolchain (`eslint-config`, `typescript-config`) |
+| `services/` | Domain Bun + Hono HTTP APIs (quotes, geography, crm, rates) |
+| `extensions/` | Extension host, Python+Temporal workers, Temporal OSS |
+
+### Package naming
+
+| Layer | npm / pnpm name | Python project name |
+| --- | --- | --- |
+| App | `@starboard/app-<name>` | — |
+| Shared lib | `@starboard/lib-<name>` | `starboard-lib-<name>` |
+| Tool | `@starboard/tool-<name>` | — |
+| Domain service | `@starboard/svc-<name>` | — |
+| Extension | `@starboard/ext-<name>` | `starboard-ext-<name>` |
+
+All packages are `private: true`, `license: UNLICENSED`, and should set a one-line `description` plus `repository.directory` pointing at their folder.
+
 ## Overview
 
 Starboard uses a **BFF + domain microservices** layout:
@@ -37,7 +59,7 @@ Cross-domain foreign keys are **softened** to opaque text IDs. Integrity for `ow
 
 ### Path to DB-per-service
 
-1. Keep API contracts stable (`@starboard/contracts`).
+1. Keep API contracts stable (`@starboard/lib-contracts`).
 2. Point the service at its own `POSTGRES_URL` (Neon project/branch).
 3. Migrate only that service’s schema (`geo` or `quotes`).
 4. Drop leftover same-instance assumptions (none required at the HTTP boundary today).
@@ -47,13 +69,13 @@ Cross-domain foreign keys are **softened** to opaque text IDs. Integrity for `ow
 ```bash
 # root .env — see .env.example
 pnpm install
-uv sync --all-packages --group dev   # Python workspace: packages/* + services/*
-pnpm --filter @starboard/contracts build
-pnpm --filter @starboard/service-kit build
-pnpm --filter @starboard/db build
+uv sync --all-packages --group dev   # Python workspace: packages/* + extensions/*
+pnpm --filter @starboard/lib-contracts build
+pnpm --filter @starboard/lib-service-kit build
+pnpm --filter @starboard/lib-db build
 # drizzle.config schemaFilter includes public + geo + quotes (default is public-only)
-pnpm --filter @starboard/db db:push
-pnpm --filter @starboard/db db:seed
+pnpm --filter @starboard/lib-db db:push
+pnpm --filter @starboard/lib-db db:seed
 pnpm dev   # turbo: web + Bun services + Temporal OSS (Docker) + ingestion
 ```
 
@@ -74,4 +96,5 @@ Default ports: web `3000`, geography `3101`, quotes `3102`, crm `3103`, rates
 
 - **Next** — Vercel (or any Node host)
 - **Bun services** — Dockerfiles under `services/*/Dockerfile` (Fly, Railway, Render, etc.)
+- **Extensions** — Python workers under `extensions/*` + Temporal OSS (`extensions/temporal`)
 - Share `INTERNAL_SERVICE_TOKEN` and each service’s `POSTGRES_URL` (same Neon until split)

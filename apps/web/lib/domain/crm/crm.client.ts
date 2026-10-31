@@ -6,7 +6,7 @@ import {
   listCustomersResponseSchema,
   type CreateCustomerResponse,
   type FormOption,
-} from "@starboard/contracts"
+} from "@starboard/lib-contracts"
 
 import { env } from "@/env"
 import {

@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import type { Rate } from "@starboard/contracts"
+import type { Rate } from "@starboard/lib-contracts"
 
 import {
   Sheet,
@@ -9,7 +9,7 @@ import {
   SheetDescription,
   SheetHeader,
   SheetTitle,
-} from "@workspace/ui/components/sheet"
+} from "@starboard/lib-ui/components/sheet"
 
 import type { SpotRateSource } from "@/lib/spot-rate-source"
 

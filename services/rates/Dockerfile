@@ -8,9 +8,10 @@ COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
 COPY packages/contracts/package.json packages/contracts/
 COPY packages/database/package.json packages/database/
 COPY packages/service-kit/package.json packages/service-kit/
-COPY packages/typescript-config packages/typescript-config
+COPY tooling/eslint-config/package.json tooling/eslint-config/
+COPY tooling/typescript-config/package.json tooling/typescript-config/
 COPY services/rates/package.json services/rates/
-RUN corepack enable && pnpm install --frozen-lockfile --filter @starboard/rates-service...
+RUN corepack enable && pnpm install --frozen-lockfile --filter @starboard/svc-rates...
 
 FROM base AS build
 COPY --from=deps /app/node_modules ./node_modules
@@ -22,9 +23,9 @@ COPY packages/service-kit packages/service-kit
 COPY services/rates services/rates
 WORKDIR /app
 RUN corepack enable \
-  && pnpm --filter @starboard/contracts build \
-  && pnpm --filter @starboard/service-kit build \
-  && pnpm --filter @starboard/db build
+  && pnpm --filter @starboard/lib-contracts build \
+  && pnpm --filter @starboard/lib-service-kit build \
+  && pnpm --filter @starboard/lib-db build
 
 FROM oven/bun:1.3.11-alpine AS runner
 WORKDIR /app

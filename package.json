@@ -1,8 +1,13 @@
 {
   "name": "starboard-systems",
   "version": "0.0.1",
+  "description": "Starboard Systems monorepo \u2014 shell BFF, domain services, and extensions",
   "private": true,
   "license": "UNLICENSED",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tejasStarboard/starboard-systems.git"
+  },
   "scripts": {
     "build": "turbo build",
     "dev": "turbo dev --concurrency=25",
@@ -15,8 +20,8 @@
     "ci:affected": "turbo run lint typecheck test build --filter=...[origin/dev]"
   },
   "devDependencies": {
-    "@workspace/eslint-config": "workspace:*",
-    "@workspace/typescript-config": "workspace:*",
+    "@starboard/tool-eslint-config": "workspace:*",
+    "@starboard/tool-typescript-config": "workspace:*",
     "prettier": "^3.9.10",
     "prettier-plugin-tailwindcss": "^0.8.1",
     "turbo": "^2.11.10",

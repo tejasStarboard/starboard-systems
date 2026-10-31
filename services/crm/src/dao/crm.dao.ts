@@ -1,6 +1,6 @@
 import { and, asc, eq, inArray } from "drizzle-orm"
-import { customer } from "@starboard/db/schema"
-import type { FormOption } from "@starboard/contracts"
+import { customer } from "@starboard/lib-db/schema"
+import type { FormOption } from "@starboard/lib-contracts"
 
 import type { CrmDb } from "./db"
 

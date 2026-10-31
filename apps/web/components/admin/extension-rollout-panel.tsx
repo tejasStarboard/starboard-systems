@@ -7,8 +7,8 @@ import {
   OrgMultiCombobox,
   type OrgOption,
 } from "@/components/admin/org-multi-combobox"
-import { Button } from "@workspace/ui/components/button"
-import type { RolloutMode } from "@starboard/extension-host"
+import { Button } from "@starboard/lib-ui/components/button"
+import type { RolloutMode } from "@starboard/ext-host"
 
 export type ExtensionRolloutRow = {
   id: string

@@ -6,7 +6,7 @@ import type {
   GetRateResponse,
   ListRatesQuery,
   Rate,
-} from "@starboard/contracts"
+} from "@starboard/lib-contracts"
 
 import {
   getRatesClient,

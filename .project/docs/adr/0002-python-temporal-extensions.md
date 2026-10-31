@@ -28,7 +28,7 @@ pipelines (plan → extract → gate → save).
 - Shared Python bootstrap lives in `packages/python-kit` (service token, logging,
   Temporal client/worker helpers).
 - Extension manifest `worker.kind` is **`python-temporal`**.
-- Local uses Temporal OSS via Docker (`@starboard/temporal` in `pnpm dev`;
+- Local uses Temporal OSS via Docker (`@starboard/ext-temporal` in `pnpm dev`;
   UI on `:8233`, gRPC on `:7233`) plus the Python worker
   (`starboard-ingestion-dev`).
 

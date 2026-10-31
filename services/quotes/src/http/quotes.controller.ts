@@ -2,12 +2,12 @@ import { Hono } from "hono"
 import {
   createQuoteRequestSchema,
   saveQuoteRequestSchema,
-} from "@starboard/contracts"
+} from "@starboard/lib-contracts"
 import {
   logError,
   logInfo,
   type ServiceVariables,
-} from "@starboard/service-kit"
+} from "@starboard/lib-service-kit"
 
 import type { QuotesService } from "../domain/quotes.service"
 import {

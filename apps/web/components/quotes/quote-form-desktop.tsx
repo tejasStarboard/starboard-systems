@@ -1,7 +1,7 @@
 "use client"
 
-import { Button } from "@workspace/ui/components/button"
-import { Separator } from "@workspace/ui/components/separator"
+import { Button } from "@starboard/lib-ui/components/button"
+import { Separator } from "@starboard/lib-ui/components/separator"
 
 import {
   QuoteCurrencyField,

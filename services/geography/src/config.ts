@@ -10,6 +10,7 @@ export type GeographyConfig = {
   postgresUrl: string
   serviceToken: string
   serviceName: string
+  googleGeocodeApiKey: string | undefined
 }
 
 export function loadConfig(
@@ -30,5 +31,9 @@ export function loadConfig(
     postgresUrl,
     serviceToken,
     serviceName: "geography",
+    googleGeocodeApiKey:
+      env.GOOGLE_GEOCODE_API_KEY?.trim() ||
+      env.GOOGLE_MAPS_API_KEY?.trim() ||
+      undefined,
   }
 }

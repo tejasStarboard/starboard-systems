@@ -3,8 +3,8 @@
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 
-import { Button } from "@workspace/ui/components/button"
-import { Input } from "@workspace/ui/components/input"
+import { Button } from "@starboard/lib-ui/components/button"
+import { Input } from "@starboard/lib-ui/components/input"
 
 type OrgRow = {
   id: string

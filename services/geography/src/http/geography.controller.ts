@@ -1,6 +1,6 @@
 import { Hono } from "hono"
-import type { ServiceVariables } from "@starboard/service-kit"
-import { logError, logInfo } from "@starboard/service-kit"
+import type { ServiceVariables } from "@starboard/lib-service-kit"
+import { logError, logInfo } from "@starboard/lib-service-kit"
 
 import type { GeographyService } from "../domain/geography.service"
 import { GeographyValidationError } from "../domain/geography.service"
@@ -67,6 +67,49 @@ export function createGeographyController(service: GeographyService) {
         return c.json({ error: error.message }, error.status)
       }
       logError("geography", requestId, "search_ports_failed", {
+        error: error instanceof Error ? error.message : String(error),
+      })
+      return c.json({ error: "Internal server error" }, 500)
+    }
+  })
+
+  app.get("/addresses", async (c) => {
+    const requestId = c.get("requestId")
+    try {
+      const q = c.req.query("q") ?? ""
+      const limit = c.req.query("limit")
+      const addresses = await service.searchAddresses(
+        q,
+        limit ? Number(limit) : undefined
+      )
+      logInfo("geography", requestId, "search_addresses", {
+        q,
+        count: addresses.length,
+      })
+      return c.json({ addresses })
+    } catch (error) {
+      if (error instanceof GeographyValidationError) {
+        return c.json({ error: error.message }, error.status)
+      }
+      logError("geography", requestId, "search_addresses_failed", {
+        error: error instanceof Error ? error.message : String(error),
+      })
+      return c.json({ error: "Internal server error" }, 500)
+    }
+  })
+
+  app.get("/addresses/details", async (c) => {
+    const requestId = c.get("requestId")
+    try {
+      const placeId = c.req.query("placeId") ?? ""
+      const address = await service.getAddressDetails(placeId)
+      logInfo("geography", requestId, "address_details", { placeId })
+      return c.json({ address })
+    } catch (error) {
+      if (error instanceof GeographyValidationError) {
+        return c.json({ error: error.message }, error.status)
+      }
+      logError("geography", requestId, "address_details_failed", {
         error: error instanceof Error ? error.message : String(error),
       })
       return c.json({ error: "Internal server error" }, 500)

@@ -4,10 +4,10 @@ requires-python = ">=3.12"
 
 [manifest]
 members = [
-    "starboard-ingestion",
-    "starboard-messaging",
-    "starboard-python-kit",
-    "starboard-spot",
+    "starboard-ext-ingestion",
+    "starboard-ext-messaging",
+    "starboard-ext-spot",
+    "starboard-lib-python-kit",
     "starboard-systems",
 ]
 
@@ -665,16 +665,16 @@ wheels = [
 ]
 
 [[package]]
-name = "starboard-ingestion"
+name = "starboard-ext-ingestion"
 version = "0.0.1"
-source = { editable = "services/ingestion" }
+source = { editable = "extensions/ingestion" }
 dependencies = [
     { name = "fastapi" },
     { name = "httpx" },
     { name = "pydantic" },
     { name = "python-dotenv" },
     { name = "python-multipart" },
-    { name = "starboard-python-kit" },
+    { name = "starboard-lib-python-kit" },
     { name = "temporalio" },
     { name = "uvicorn", extra = ["standard"] },
 ]
@@ -686,22 +686,22 @@ requires-dist = [
     { name = "pydantic", specifier = ">=2.10.0" },
     { name = "python-dotenv", specifier = ">=1.0.0" },
     { name = "python-multipart", specifier = ">=0.0.17" },
-    { name = "starboard-python-kit", editable = "packages/python-kit" },
+    { name = "starboard-lib-python-kit", editable = "packages/python-kit" },
     { name = "temporalio", specifier = ">=1.9.0" },
     { name = "uvicorn", extras = ["standard"], specifier = ">=0.32.0" },
 ]
 
 [[package]]
-name = "starboard-messaging"
+name = "starboard-ext-messaging"
 version = "0.0.1"
-source = { editable = "services/messaging" }
+source = { editable = "extensions/messaging" }
 dependencies = [
     { name = "cryptography" },
     { name = "fastapi" },
     { name = "httpx" },
     { name = "pydantic" },
     { name = "python-dotenv" },
-    { name = "starboard-python-kit" },
+    { name = "starboard-lib-python-kit" },
     { name = "temporalio" },
     { name = "uvicorn", extra = ["standard"] },
 ]
@@ -713,13 +713,38 @@ requires-dist = [
     { name = "httpx", specifier = ">=0.28.0" },
     { name = "pydantic", specifier = ">=2.10.0" },
     { name = "python-dotenv", specifier = ">=1.0.0" },
-    { name = "starboard-python-kit", editable = "packages/python-kit" },
+    { name = "starboard-lib-python-kit", editable = "packages/python-kit" },
     { name = "temporalio", specifier = ">=1.9.0" },
     { name = "uvicorn", extras = ["standard"], specifier = ">=0.32.0" },
 ]
 
 [[package]]
-name = "starboard-python-kit"
+name = "starboard-ext-spot"
+version = "0.0.1"
+source = { editable = "extensions/spot" }
+dependencies = [
+    { name = "fastapi" },
+    { name = "httpx" },
+    { name = "pydantic" },
+    { name = "python-dotenv" },
+    { name = "starboard-lib-python-kit" },
+    { name = "temporalio" },
+    { name = "uvicorn", extra = ["standard"] },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "fastapi", specifier = ">=0.115.0" },
+    { name = "httpx", specifier = ">=0.28.0" },
+    { name = "pydantic", specifier = ">=2.10.0" },
+    { name = "python-dotenv", specifier = ">=1.0.0" },
+    { name = "starboard-lib-python-kit", editable = "packages/python-kit" },
+    { name = "temporalio", specifier = ">=1.9.0" },
+    { name = "uvicorn", extras = ["standard"], specifier = ">=0.32.0" },
+]
+
+[[package]]
+name = "starboard-lib-python-kit"
 version = "0.0.1"
 source = { editable = "packages/python-kit" }
 dependencies = [
@@ -731,31 +756,6 @@ dependencies = [
 requires-dist = [
     { name = "httpx", specifier = ">=0.28.0" },
     { name = "temporalio", specifier = ">=1.9.0" },
-]
-
-[[package]]
-name = "starboard-spot"
-version = "0.0.1"
-source = { editable = "services/spot" }
-dependencies = [
-    { name = "fastapi" },
-    { name = "httpx" },
-    { name = "pydantic" },
-    { name = "python-dotenv" },
-    { name = "starboard-python-kit" },
-    { name = "temporalio" },
-    { name = "uvicorn", extra = ["standard"] },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "fastapi", specifier = ">=0.115.0" },
-    { name = "httpx", specifier = ">=0.28.0" },
-    { name = "pydantic", specifier = ">=2.10.0" },
-    { name = "python-dotenv", specifier = ">=1.0.0" },
-    { name = "starboard-python-kit", editable = "packages/python-kit" },
-    { name = "temporalio", specifier = ">=1.9.0" },
-    { name = "uvicorn", extras = ["standard"], specifier = ">=0.32.0" },
 ]
 
 [[package]]

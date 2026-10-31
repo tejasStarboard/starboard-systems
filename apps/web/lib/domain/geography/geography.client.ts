@@ -1,6 +1,13 @@
 import "server-only"
 
-import { listPortsResponseSchema, type FormOption } from "@starboard/contracts"
+import {
+  addressDetailsResponseSchema,
+  listAddressesResponseSchema,
+  listPortsResponseSchema,
+  type AddressPrediction,
+  type DoorAddress,
+  type FormOption,
+} from "@starboard/lib-contracts"
 
 import { env } from "@/env"
 import {
@@ -13,6 +20,14 @@ export interface GeographyClient {
   listCurrencyOptions(requestId?: string): Promise<FormOption[]>
   ensureCurrency(code: string, requestId?: string): Promise<void>
   searchPorts(q?: string, requestId?: string): Promise<FormOption[]>
+  searchAddresses(
+    q?: string,
+    requestId?: string
+  ): Promise<AddressPrediction[]>
+  getAddressDetails(
+    placeId: string,
+    requestId?: string
+  ): Promise<DoorAddress>
 }
 
 class HttpGeographyClient implements GeographyClient {
@@ -74,8 +89,52 @@ class HttpGeographyClient implements GeographyClient {
     if (!parsed.success) {
       throw new Error("Failed to search ports: invalid response")
     }
-    // Soft codes only for quote pickers — ignore facility metadata.
     return parsed.data.ports.map(({ value, label }) => ({ value, label }))
+  }
+
+  async searchAddresses(
+    q = "",
+    requestId?: string
+  ): Promise<AddressPrediction[]> {
+    const options = createServiceOptions({
+      baseUrl: this.options.baseUrl,
+      requestId,
+    })
+    const params = new URLSearchParams()
+    if (q.trim()) params.set("q", q.trim())
+    const path = params.size > 0 ? `/addresses?${params}` : "/addresses"
+    const response = await serviceFetch(path, { method: "GET" }, options)
+    const body = await parseJsonResponse(response, "Failed to search addresses")
+    const parsed = listAddressesResponseSchema.safeParse(body)
+    if (!parsed.success) {
+      throw new Error("Failed to search addresses: invalid response")
+    }
+    return parsed.data.addresses
+  }
+
+  async getAddressDetails(
+    placeId: string,
+    requestId?: string
+  ): Promise<DoorAddress> {
+    const options = createServiceOptions({
+      baseUrl: this.options.baseUrl,
+      requestId,
+    })
+    const params = new URLSearchParams({ placeId })
+    const response = await serviceFetch(
+      `/addresses/details?${params}`,
+      { method: "GET" },
+      options
+    )
+    const body = await parseJsonResponse(
+      response,
+      "Failed to load address details"
+    )
+    const parsed = addressDetailsResponseSchema.safeParse(body)
+    if (!parsed.success) {
+      throw new Error("Failed to load address details: invalid response")
+    }
+    return parsed.data.address
   }
 }
 

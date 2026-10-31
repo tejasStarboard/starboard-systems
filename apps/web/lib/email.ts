@@ -3,7 +3,7 @@ import {
   sendEmail as sendEmailBase,
   type EmailSender,
   type SendEmailOptions,
-} from "@starboard/email"
+} from "@starboard/lib-email"
 
 import { env } from "@/env"
 

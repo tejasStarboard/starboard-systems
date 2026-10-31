@@ -1,7 +1,9 @@
 packages:
   - "apps/*"
   - "packages/*"
+  - "tooling/*"
   - "services/*"
+  - "extensions/*"
 
 allowBuilds:
   esbuild: true

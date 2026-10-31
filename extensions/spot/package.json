@@ -1,0 +1,19 @@
+{
+  "name": "@starboard/ext-spot",
+  "version": "0.0.1",
+  "description": "Carrier spot-search extension worker (Python + Temporal)",
+  "private": true,
+  "license": "UNLICENSED",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tejasStarboard/starboard-systems.git",
+    "directory": "extensions/spot"
+  },
+  "scripts": {
+    "dev": "uv run --package starboard-ext-spot starboard-spot-dev",
+    "start": "uv run --package starboard-ext-spot starboard-spot",
+    "worker": "uv run --package starboard-ext-spot starboard-spot-worker",
+    "test": "uv run --package starboard-ext-spot pytest",
+    "build": "echo \"Python service \u2014 no compile step\""
+  }
+}

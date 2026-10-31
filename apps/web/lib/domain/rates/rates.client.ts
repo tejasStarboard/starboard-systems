@@ -9,7 +9,7 @@ import {
   type GetRateResponse,
   type ListRatesQuery,
   type Rate,
-} from "@starboard/contracts"
+} from "@starboard/lib-contracts"
 
 import { env } from "@/env"
 import {

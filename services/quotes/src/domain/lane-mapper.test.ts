@@ -3,7 +3,7 @@ import {
   createContainerLine,
   createManualRateLine,
   emptyLaneFormValues,
-} from "@starboard/contracts"
+} from "@starboard/lib-contracts"
 
 import {
   cargoFromLaneForm,
@@ -15,10 +15,30 @@ import {
 describe("lane-mapper", () => {
   test("fcl lane cargo and manual rates round-trip", () => {
     const lane = emptyLaneFormValues("fcl")
-    lane.pickup = "pickup-1"
+    lane.pickup = {
+      street: "1 Export Blvd",
+      city: "Mississauga",
+      state: "ON",
+      zip: "L5T",
+      country: "Canada",
+      countryCode: "CA",
+      lat: 43.6,
+      lng: -79.6,
+      label: "1 Export Blvd, Mississauga, ON, Canada",
+    }
     lane.origin = "CNSHA"
     lane.destination = "USLAX"
-    lane.delivery = "delivery-1"
+    lane.delivery = {
+      street: "100 Main St",
+      city: "Brambleton",
+      state: "VA",
+      zip: "20148",
+      country: "United States",
+      countryCode: "US",
+      lat: 38.9,
+      lng: -77.5,
+      label: "100 Main St, Brambleton, VA, USA",
+    }
     lane.containers = [
       createContainerLine({
         id: "ctr-1",
@@ -44,8 +64,8 @@ describe("lane-mapper", () => {
     const mapped = laneFormToRows(lane, "quote-1", "usd", validity)
     const restored = rowsToLaneForm(mapped.lane, mapped.rates)
 
-    expect(mapped.lane.pickupId).toBe("pickup-1")
-    expect(mapped.lane.deliveryId).toBe("delivery-1")
+    expect(mapped.lane.pickupAddress?.city).toBe("Mississauga")
+    expect(mapped.lane.deliveryAddress?.city).toBe("Brambleton")
     expect(mapped.lane.cargo).toHaveLength(1)
     expect(mapped.lane.cargo[0]).toMatchObject({
       mode: "fcl",
@@ -62,10 +82,10 @@ describe("lane-mapper", () => {
     expect(restored).toMatchObject({
       id: lane.id,
       mode: "fcl",
-      pickup: "pickup-1",
+      pickup: expect.objectContaining({ city: "Mississauga" }),
       origin: "CNSHA",
       destination: "USLAX",
-      delivery: "delivery-1",
+      delivery: expect.objectContaining({ city: "Brambleton" }),
       markupType: "percent",
       markupValue: 10,
       containers: [

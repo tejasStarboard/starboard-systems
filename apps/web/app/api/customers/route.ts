@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { createCustomerRequestSchema } from "@starboard/contracts"
+import { createCustomerRequestSchema } from "@starboard/lib-contracts"
 
 import { requireApiSession } from "@/lib/auth/session"
 import { ServiceClientError } from "@/lib/clients/http"

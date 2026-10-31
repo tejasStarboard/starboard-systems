@@ -14,8 +14,8 @@
     "components": "@/components",
     "hooks": "@/hooks",
     "lib": "@/lib",
-    "utils": "@workspace/ui/lib/utils",
-    "ui": "@workspace/ui/components"
+    "utils": "@starboard/lib-ui/lib/utils",
+    "ui": "@starboard/lib-ui/components"
   },
   "rtl": false,
   "menuColor": "default",

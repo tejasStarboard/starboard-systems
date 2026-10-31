@@ -2,7 +2,7 @@
 
 |         |                                           |
 | ------- | ----------------------------------------- |
-| Package | `packages/pricing` (`@starboard/pricing`) |
+| Package | `packages/pricing` (`@starboard/lib-pricing`) |
 | Status  | Started — ticket 010 ONE MATH core        |
 
 ## Owns
@@ -23,7 +23,7 @@ Single implementation + fixture conformance suite. No TS/Python/add-in twins.
 | `isIncludedInTotal`         | Surcharge inclusion predicate (sell / buy / rollup_buy) |
 | `getEffectiveUsageAmount`   | free → min → max usage → billable qty                   |
 
-Schemas for quote forms stay in `@starboard/contracts`. Consumers: `apps/web` quote form (manual rate totals).
+Schemas for quote forms stay in `@starboard/lib-contracts`. Consumers: `apps/web` quote form (manual rate totals).
 
 ## Fixtures
 

@@ -2,7 +2,7 @@
 
 import { AdminSidebar } from "@/components/admin/admin-sidebar"
 import { AdminSiteHeader } from "@/components/admin/admin-site-header"
-import { SidebarInset, SidebarProvider } from "@workspace/ui/components/sidebar"
+import { SidebarInset, SidebarProvider } from "@starboard/lib-ui/components/sidebar"
 
 type AdminShellUser = {
   name: string

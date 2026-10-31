@@ -2,7 +2,7 @@
 
 |                 |                                          |
 | --------------- | ---------------------------------------- |
-| Service         | `services/messaging` (Python + Temporal) |
+| Service         | `extensions/messaging` (Python + Temporal) |
 | First extension | `messaging.msgraph`                      |
 | Status          | Vertical slice (ticket 030)              |
 

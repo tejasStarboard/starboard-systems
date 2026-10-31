@@ -8,14 +8,14 @@ import {
   type QuoteListItem,
   type QuoteSource,
   type QuoteStatus,
-} from "@starboard/contracts"
+} from "@starboard/lib-contracts"
 import {
   containerType,
   lane,
   palletType,
   quote,
   rate,
-} from "@starboard/db/schema"
+} from "@starboard/lib-db/schema"
 
 import {
   laneFormToRows,
@@ -144,12 +144,12 @@ export class DrizzleQuotesDao implements QuotesDao {
       .select({
         id: lane.id,
         mode: lane.mode,
-        pickupId: lane.pickupId,
+        pickupAddress: lane.pickupAddress,
         origin: lane.origin,
         originVia: lane.originVia,
         destinationVia: lane.destinationVia,
         destination: lane.destination,
-        deliveryId: lane.deliveryId,
+        deliveryAddress: lane.deliveryAddress,
         quoteId: lane.quoteId,
         cargo: lane.cargo,
         markupType: lane.markupType,
@@ -281,12 +281,12 @@ export class DrizzleQuotesDao implements QuotesDao {
       await this.db.insert(lane).values({
         id: mapped.lane.id,
         mode: mapped.lane.mode,
-        pickupId: mapped.lane.pickupId,
+        pickupAddress: mapped.lane.pickupAddress,
         origin: mapped.lane.origin,
         originVia: mapped.lane.originVia,
         destinationVia: mapped.lane.destinationVia,
         destination: mapped.lane.destination,
-        deliveryId: mapped.lane.deliveryId,
+        deliveryAddress: mapped.lane.deliveryAddress,
         quoteId: mapped.lane.quoteId,
         cargo: mapped.lane.cargo,
         markupType: mapped.lane.markupType,

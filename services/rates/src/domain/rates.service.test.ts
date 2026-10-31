@@ -4,7 +4,7 @@ import {
   listRatesResponseSchema,
   type CreateRateRequest,
   type Rate,
-} from "@starboard/contracts"
+} from "@starboard/lib-contracts"
 
 import { DefaultRatesService, RatesNotFoundError } from "./rates.service"
 import type {

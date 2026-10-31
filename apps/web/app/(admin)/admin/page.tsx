@@ -1,6 +1,6 @@
 import Link from "next/link"
 
-import { buttonVariants } from "@workspace/ui/components/button"
+import { buttonVariants } from "@starboard/lib-ui/components/button"
 
 export default function AdminHomePage() {
   return (

@@ -6,7 +6,7 @@ import {
   type QuoteFormValues,
   type QuoteListItem,
   type QuoteSource,
-} from "@starboard/contracts"
+} from "@starboard/lib-contracts"
 
 import type { QuotesDao } from "../dao/quotes.dao"
 
