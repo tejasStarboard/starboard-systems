@@ -2,12 +2,12 @@
 id: 058
 wave: 05-foundation
 title: Admin extensions page — collapsible per-extension settings
-status: open
+status: in_progress
 depends_on: [057]
 epic: SYS-PLATFORM-ADMIN
 docs:
   - .project/docs/extensions.md
-  - .project/tickets/todo/057-extension-settings-schema.md
+  - .project/tickets/in_progress/057-extension-settings-schema.md
 ---
 
 # Admin extensions page — collapsible per-extension settings
@@ -43,12 +43,12 @@ Extensions with zero `contributes.settings` still collapse/expand but show only 
 
 ## Acceptance criteria
 
-- [ ] Collapsed by default (or remember open id in local state only — no persistence required)
-- [ ] Expanding shows settings fields for extensions that declared them
-- [ ] Toggle/input changes persist via PUT and survive refresh
-- [ ] Extension with no settings still has rollout UI inside the collapsible
-- [ ] Non-staff still cannot reach `/admin/extensions`
-- [ ] No crash if settings GET fails — show error inside panel
+- [x] Collapsed by default (or remember open id in local state only — no persistence required)
+- [x] Expanding shows settings fields for extensions that declared them
+- [x] Toggle/input changes persist via PUT and survive refresh
+- [x] Extension with no settings still has rollout UI inside the collapsible
+- [x] Non-staff still cannot reach `/admin/extensions`
+- [x] No crash if settings GET fails — show error inside panel
 
 ## Files to touch
 

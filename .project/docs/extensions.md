@@ -2,7 +2,7 @@
 
 Shell discovers extensions via `extensions/host` (`@starboard/ext-host`). UI and BFF must not hard-code optional features. **Foundation:** [ADR 0005](adr/0005-extension-foundation.md) (tickets **055** / **056**). Skill: [`starboard-extension`](../../.agents/skills/starboard-extension/SKILL.md).
 
-**Admin settings:** `contributes.settings` — per-extension values declared in the kit and stored in `platform.extension_setting`. Ticket [057](../tickets/in_progress/057-extension-settings-schema.md). Admin UI is [058](../tickets/todo/058-admin-extension-settings-ui.md). Separate from rollout on/off.
+**Admin settings:** `contributes.settings` — per-extension values declared in the kit and stored in `platform.extension_setting`. Ticket [057](../tickets/in_progress/057-extension-settings-schema.md). Admin UI is [058](../tickets/in_progress/058-admin-extension-settings-ui.md). Separate from rollout on/off.
 
 Product tickets (apply rates, live spot, CRM expansion, …) **depend on 055 + 056**. Prefer this cookbook over reading starboard-2.
 
