@@ -3,10 +3,7 @@ import { quoteFormSchema } from "@starboard/contracts"
 
 import { requireApiSession } from "@/lib/auth/session"
 import { ServiceClientError } from "@/lib/clients/http"
-import {
-  getQuoteFormValuesForOrg,
-  saveQuoteForSession,
-} from "@/lib/quotes/orchestrator"
+import { getQuotesManager } from "@/lib/quotes/manager"
 
 export async function GET(
   _request: Request,
@@ -20,7 +17,7 @@ export async function GET(
   const { quoteId } = await params
 
   try {
-    const quote = await getQuoteFormValuesForOrg(
+    const quote = await getQuotesManager().getQuoteFormValuesForOrg(
       quoteId,
       authResult.session.session.activeOrganizationId!
     )
@@ -72,7 +69,7 @@ export async function PUT(
   }
 
   try {
-    const quote = await saveQuoteForSession(parsed.data, {
+    const quote = await getQuotesManager().saveQuoteForSession(parsed.data, {
       ownerId: authResult.session.user.id,
       organizationId: authResult.session.session.activeOrganizationId!,
     })

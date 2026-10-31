@@ -40,12 +40,18 @@ export interface QuotesClient {
 }
 
 class HttpQuotesClient implements QuotesClient {
+  constructor(
+    private readonly options: { baseUrl: string } = {
+      baseUrl: env.QUOTES_SERVICE_URL,
+    }
+  ) {}
+
   async listQuotes(
     organizationId: string,
     requestId?: string
   ): Promise<QuoteListItem[]> {
     const options = createServiceOptions({
-      baseUrl: env.QUOTES_SERVICE_URL,
+      baseUrl: this.options.baseUrl,
       organizationId,
       requestId,
     })
@@ -63,7 +69,7 @@ class HttpQuotesClient implements QuotesClient {
     requestId?: string
   ): Promise<QuoteFormValues | null> {
     const options = createServiceOptions({
-      baseUrl: env.QUOTES_SERVICE_URL,
+      baseUrl: this.options.baseUrl,
       organizationId,
       requestId,
     })
@@ -91,7 +97,7 @@ class HttpQuotesClient implements QuotesClient {
     requestId?: string
   ): Promise<{ id: string }> {
     const options = createServiceOptions({
-      baseUrl: env.QUOTES_SERVICE_URL,
+      baseUrl: this.options.baseUrl,
       organizationId: input.organizationId,
       requestId,
     })
@@ -112,7 +118,7 @@ class HttpQuotesClient implements QuotesClient {
     requestId?: string
   ): Promise<{ id: string }> {
     const options = createServiceOptions({
-      baseUrl: env.QUOTES_SERVICE_URL,
+      baseUrl: this.options.baseUrl,
       organizationId: input.organizationId,
       requestId,
     })
@@ -150,7 +156,7 @@ class HttpQuotesClient implements QuotesClient {
 
   async listPalletTypeOptions(requestId?: string): Promise<FormOption[]> {
     const options = createServiceOptions({
-      baseUrl: env.QUOTES_SERVICE_URL,
+      baseUrl: this.options.baseUrl,
       requestId,
     })
     const response = await serviceFetch(

@@ -3,10 +3,7 @@ import { redirect } from "next/navigation"
 
 import { QuoteForm } from "@/components/quotes/quote-form"
 import { auth } from "@/lib/auth"
-import {
-  getQuoteFormValuesForOrg,
-  loadQuoteFormOptions,
-} from "@/lib/quotes/orchestrator"
+import { getQuotesManager } from "@/lib/quotes/manager"
 import { emptyQuoteFormValues } from "@/lib/quotes/schema"
 
 export default async function QuotePage({
@@ -24,9 +21,10 @@ export default async function QuotePage({
     redirect("/select-org")
   }
 
+  const quotesManager = getQuotesManager()
   const [savedQuote, options] = await Promise.all([
-    getQuoteFormValuesForOrg(quoteId, organizationId),
-    loadQuoteFormOptions(organizationId),
+    quotesManager.getQuoteFormValuesForOrg(quoteId, organizationId),
+    quotesManager.loadQuoteFormOptions(organizationId),
   ])
 
   const {

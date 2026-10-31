@@ -23,6 +23,12 @@ export interface IngestionClient {
 }
 
 class HttpIngestionClient implements IngestionClient {
+  constructor(
+    private readonly options: { baseUrl: string } = {
+      baseUrl: env.INGESTION_SERVICE_URL,
+    }
+  ) {}
+
   async enqueueFclV6Job(
     organizationId: string,
     file: Blob,
@@ -30,7 +36,7 @@ class HttpIngestionClient implements IngestionClient {
     requestId?: string
   ): Promise<EnqueueIngestionJobResult> {
     const options = createServiceOptions({
-      baseUrl: env.INGESTION_SERVICE_URL,
+      baseUrl: this.options.baseUrl,
       organizationId,
       requestId,
     })
@@ -65,6 +71,12 @@ class HttpIngestionClient implements IngestionClient {
   }
 }
 
+let ingestionClient: IngestionClient = new HttpIngestionClient()
+
 export function getIngestionClient(): IngestionClient {
-  return new HttpIngestionClient()
+  return ingestionClient
+}
+
+export function setIngestionClient(client: IngestionClient) {
+  ingestionClient = client
 }

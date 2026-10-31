@@ -4,7 +4,7 @@ import { requireApiSession } from "@/lib/auth/session"
 import { getOrganizationPlan } from "@/lib/billing/plan"
 import { ServiceClientError } from "@/lib/clients/http"
 import { isExtensionActive } from "@/lib/extensions"
-import { enqueueFclV6Upload } from "@/lib/ingestion/orchestrator"
+import { getIngestionManager } from "@/lib/ingestion/manager"
 
 export async function POST(request: Request) {
   const authResult = await requireApiSession()
@@ -37,7 +37,10 @@ export async function POST(request: Request) {
   }
 
   try {
-    const result = await enqueueFclV6Upload(organizationId, file)
+    const result = await getIngestionManager().enqueueFclV6Upload(
+      organizationId,
+      file
+    )
     return NextResponse.json(result, { status: 202 })
   } catch (error) {
     if (error instanceof ServiceClientError) {

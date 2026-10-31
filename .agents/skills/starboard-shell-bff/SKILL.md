@@ -2,8 +2,8 @@
 name: starboard-shell-bff
 description: >-
   Next.js shell BFF patterns for Starboard Systems: Better Auth organization
-  tenancy, requireApiSession, orchestrators, service clients, entitlements.
-  Use when editing apps/web lib/clients, orchestrators, auth, settings, or
+  tenancy, requireApiSession, domain managers, service clients, entitlements.
+  Use when editing apps/web lib/clients, managers, auth, settings, or
   quote/CRM UI that calls domain services.
 ---
 
@@ -16,16 +16,14 @@ description: >-
 - API routes: `requireApiSession()` → 401 without session, 400 without active org.
 - Pass `organizationId` / `userId` into service clients via `createServiceOptions`.
 
-## Orchestration
+## Layering
 
-- Keep route handlers thin; put aggregation in `lib/*/orchestrator.ts`.
-- Enrich across domains in the BFF (e.g. owner name from auth, customer name from CRM).
-- Timeouts + normalized errors via `@starboard/service-kit` / existing `ServiceClientError`.
-- Optional features: ask extension-host what’s enabled — don’t hardcode extension ids in random components.
-
-## Next.js note
-
-This repo’s Next may differ from training data. Before new App Router APIs, check `apps/web/node_modules/next/dist/docs/` (or workspace Next package docs).
+- **Call site** (`route.ts` / `page.tsx`): auth/session only; call `getXManager().method(...)`.
+- **Manager** (`lib/*/manager.ts`): cross-client orchestration / enrichment; injectable deps + module `get`/`set`.
+- **HTTP client** (`lib/clients/*-client.ts`): thin typed fetch to Bun services; constructor `{ baseUrl }`, singleton `get`/`set`.
+- **Local DAO** (e.g. `lib/organizations/dao.ts`): shell DB reads that are not a remote service.
+- No free-function domain APIs and no thin wrappers around managers.
+- Domain Bun services remain `dao → service → controller`.
 
 ## Related skills
 

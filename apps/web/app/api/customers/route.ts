@@ -3,7 +3,7 @@ import { createCustomerRequestSchema } from "@starboard/contracts"
 
 import { requireApiSession } from "@/lib/auth/session"
 import { ServiceClientError } from "@/lib/clients/http"
-import { createCustomerForOrg } from "@/lib/crm/orchestrator"
+import { getCrmManager } from "@/lib/crm/manager"
 
 export async function POST(request: Request) {
   const authResult = await requireApiSession()
@@ -27,7 +27,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const created = await createCustomerForOrg(
+    const created = await getCrmManager().createCustomerForOrg(
       authResult.session.session.activeOrganizationId!,
       parsed.data.name
     )

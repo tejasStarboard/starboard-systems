@@ -6,7 +6,7 @@ import {
 
 import { requireApiSession } from "@/lib/auth/session"
 import { ServiceClientError } from "@/lib/clients/http"
-import { createRateForOrg, listRatesForOrg } from "@/lib/rates/orchestrator"
+import { getRatesManager } from "@/lib/rates/manager"
 
 export async function GET(request: Request) {
   const authResult = await requireApiSession()
@@ -30,7 +30,7 @@ export async function GET(request: Request) {
   }
 
   try {
-    const rates = await listRatesForOrg(
+    const rates = await getRatesManager().listRatesForOrg(
       authResult.session.session.activeOrganizationId!,
       parsed.data
     )
@@ -68,7 +68,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const created = await createRateForOrg(
+    const created = await getRatesManager().createRateForOrg(
       authResult.session.session.activeOrganizationId!,
       parsed.data
     )

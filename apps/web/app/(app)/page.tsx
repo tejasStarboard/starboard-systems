@@ -5,7 +5,7 @@ import { columns } from "@/components/quotes/columns"
 import { CreateQuoteButton } from "@/components/quotes/create-quote-button"
 import { QuotesDataTable } from "@/components/quotes/quotes-data-table"
 import { auth } from "@/lib/auth"
-import { listQuotesForOrg } from "@/lib/quotes/orchestrator"
+import { getQuotesManager } from "@/lib/quotes/manager"
 
 export default async function HomePage() {
   const session = await auth.api.getSession({
@@ -17,7 +17,7 @@ export default async function HomePage() {
     redirect("/select-org")
   }
 
-  const quotes = await listQuotesForOrg(organizationId)
+  const quotes = await getQuotesManager().listQuotesForOrg(organizationId)
 
   return (
     <div className="flex flex-1 flex-col gap-4 p-4">
