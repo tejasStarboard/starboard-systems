@@ -57,6 +57,28 @@ def create_app(
         if token != cfg.service_token:
             raise HTTPException(status_code=401, detail="Unauthorized")
 
+    async def enqueue_search(plugin_id: str, body: SearchJobBody) -> EnqueueResponse:
+        get_plugin(plugin_id)
+        client: Client | None = getattr(app.state, "temporal_client", None)
+        if client is None:
+            raise HTTPException(status_code=503, detail="Temporal client not ready")
+
+        workflow_id = f"spot.search.{plugin_id}-{uuid.uuid4()}"
+        handle = await client.start_workflow(
+            SpotSearchWorkflow.run,
+            SearchWorkflowInput(
+                organization_id=body.organizationId,
+                plugin_id=plugin_id,
+                origin=body.origin,
+                destination=body.destination,
+                mode=body.mode,
+            ),
+            id=workflow_id,
+            task_queue=cfg.temporal_task_queue,
+        )
+        run_id = handle.first_execution_run_id or ""
+        return EnqueueResponse(workflowId=handle.id, runId=run_id)
+
     @app.get("/health")
     async def health() -> dict[str, str]:
         ready = getattr(app.state, "temporal_client", None) is not None
@@ -73,26 +95,15 @@ def create_app(
         dependencies=[Depends(require_service_token)],
     )
     async def enqueue_fake_search(body: SearchJobBody) -> EnqueueResponse:
-        # Ensure registry knows the plugin before starting work.
-        get_plugin("fake")
-        client: Client | None = getattr(app.state, "temporal_client", None)
-        if client is None:
-            raise HTTPException(status_code=503, detail="Temporal client not ready")
+        return await enqueue_search("fake", body)
 
-        workflow_id = f"spot.search.fake-{uuid.uuid4()}"
-        handle = await client.start_workflow(
-            SpotSearchWorkflow.run,
-            SearchWorkflowInput(
-                organization_id=body.organizationId,
-                plugin_id="fake",
-                origin=body.origin,
-                destination=body.destination,
-                mode=body.mode,
-            ),
-            id=workflow_id,
-            task_queue=cfg.temporal_task_queue,
-        )
-        run_id = handle.first_execution_run_id or ""
-        return EnqueueResponse(workflowId=handle.id, runId=run_id)
+    @app.post(
+        "/extensions/spot.maersk/jobs",
+        response_model=EnqueueResponse,
+        status_code=202,
+        dependencies=[Depends(require_service_token)],
+    )
+    async def enqueue_maersk_search(body: SearchJobBody) -> EnqueueResponse:
+        return await enqueue_search("maersk", body)
 
     return app

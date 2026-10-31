@@ -1,8 +1,8 @@
 # services/spot
 
 Python + **Temporal OSS** worker for spot / carrier rate-search extensions.
-Host plugin interface plus a deterministic `fake` plugin for tests. Real
-carriers (`spot.maersk`, `spot.cma`) land in later tickets.
+Host plugin interface, deterministic `fake` plugin, and fixture-backed
+`maersk` plugin. `spot.cma` lands in a later ticket.
 
 Managed by the root **uv** workspace (`pyproject.toml` → `packages/*`,
 `services/*`).
@@ -32,6 +32,17 @@ is still booting.
 
 Default HTTP port: `3203`. Task queue: `spot.search`.
 
+## Maersk credentials
+
+Org credentials for `spot.maersk` (JSON map):
+
+```bash
+export SPOT_MAERSK_CREDENTIALS='{"org_id":{"username":"u","password":"p"}}'
+```
+
+Default strategy is recorded fixtures (`SPOT_MAERSK_STRATEGY=fixture`). Live
+browser scrape is not enabled in this build.
+
 ## Tests
 
 ```bash
@@ -40,11 +51,11 @@ pnpm --filter @starboard/spot-service test
 uv run --package starboard-spot pytest
 ```
 
-Fake plugin unit tests need no Temporal server. Search workflow tests use
+Plugin unit tests need no Temporal server. Search workflow tests use
 `WorkflowEnvironment`.
 
-## Plugin
+## Plugins
 
-`fake` — deterministic rates for registry / Temporal durability tests. Shell
-lists active spot sources via extension-host `quote.rateSources` (manifest
-`spot.fake`).
+- `fake` — deterministic rates for registry / Temporal durability tests.
+- `maersk` — normalizes recorded productoffers into spot `NormalizedRate`
+  rows; missing credentials return a structured error.

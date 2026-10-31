@@ -85,7 +85,7 @@ const stubManifests = [
       plugin: "maersk",
     },
     healthPath: "/health",
-    enabled: false,
+    enabled: true,
   },
   {
     id: "spot.cma",

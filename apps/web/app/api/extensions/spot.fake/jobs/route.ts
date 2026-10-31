@@ -28,7 +28,7 @@ export async function POST(request: Request) {
   } | null
 
   try {
-    const result = await getSpotManager().enqueueFakeSearch({
+    const result = await getSpotManager().enqueueSearch("spot.fake", {
       organizationId,
       origin: body?.origin,
       destination: body?.destination,

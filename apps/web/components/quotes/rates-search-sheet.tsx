@@ -78,12 +78,12 @@ export function RatesSearchSheet({
     return () => controller.abort()
   }, [open, origin, destination])
 
-  async function enqueueFakeSpotSearch() {
+  async function enqueueSpotSearch(extensionId: string) {
     setSpotPending(true)
     setSpotError(null)
     setSpotJob(null)
     try {
-      const response = await fetch("/api/extensions/spot.fake/jobs", {
+      const response = await fetch(`/api/extensions/${extensionId}/jobs`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ origin, destination, mode: "fcl" }),
@@ -109,10 +109,6 @@ export function RatesSearchSheet({
     }
   }
 
-  const hasFakeSpot = spotRateSources.some(
-    (source) => source.id === "spot.fake"
-  )
-
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="sm:max-w-md">
@@ -132,41 +128,38 @@ export function RatesSearchSheet({
               <p className="text-xs font-medium text-muted-foreground">
                 Spot sources
               </p>
-              <ul className="space-y-1">
+              <ul className="space-y-2">
                 {spotRateSources.map((source) => (
-                  <li
-                    key={source.id}
-                    className="flex items-center justify-between gap-2 text-sm"
-                  >
-                    <span>{source.displayName}</span>
-                    {source.carrier ? (
-                      <span className="text-xs text-muted-foreground">
-                        {source.carrier}
-                      </span>
-                    ) : null}
+                  <li key={source.id} className="space-y-1 text-sm">
+                    <div className="flex items-center justify-between gap-2">
+                      <span>{source.displayName}</span>
+                      {source.carrier ? (
+                        <span className="text-xs text-muted-foreground">
+                          {source.carrier}
+                        </span>
+                      ) : null}
+                    </div>
+                    <button
+                      type="button"
+                      className="text-xs font-medium underline-offset-2 hover:underline disabled:opacity-50"
+                      disabled={spotPending}
+                      onClick={() => void enqueueSpotSearch(source.id)}
+                    >
+                      {spotPending
+                        ? "Enqueueing…"
+                        : `Search ${source.displayName}`}
+                    </button>
                   </li>
                 ))}
               </ul>
-              {hasFakeSpot ? (
-                <div className="space-y-1 pt-1">
-                  <button
-                    type="button"
-                    className="text-xs font-medium underline-offset-2 hover:underline disabled:opacity-50"
-                    disabled={spotPending}
-                    onClick={() => void enqueueFakeSpotSearch()}
-                  >
-                    {spotPending ? "Enqueueing…" : "Search fake spot"}
-                  </button>
-                  {spotJob ? (
-                    <p className="text-xs text-muted-foreground">
-                      Accepted 202 — workflowId={spotJob.workflowId} runId=
-                      {spotJob.runId}
-                    </p>
-                  ) : null}
-                  {spotError ? (
-                    <p className="text-xs text-destructive">{spotError}</p>
-                  ) : null}
-                </div>
+              {spotJob ? (
+                <p className="text-xs text-muted-foreground">
+                  Accepted 202 — workflowId={spotJob.workflowId} runId=
+                  {spotJob.runId}
+                </p>
+              ) : null}
+              {spotError ? (
+                <p className="text-xs text-destructive">{spotError}</p>
               ) : null}
             </div>
           ) : null}

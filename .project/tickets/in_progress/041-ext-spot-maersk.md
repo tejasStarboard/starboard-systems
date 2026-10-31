@@ -2,7 +2,7 @@
 id: 041
 wave: 04-spot
 title: Extension spot.maersk
-status: open
+status: in_progress
 depends_on: [040]
 epic: SYS-EXT-SPOT
 docs:
@@ -31,9 +31,9 @@ Implement `spot.maersk` plugin with API and/or scraper strategies behind the spo
 
 ## Acceptance criteria
 
-- [ ] Search job for a sample lane returns structured rates or a clear structured error
-- [ ] Extension can be disabled without code changes in shell
-- [ ] No imports from starboard-2 at runtime
+- [x] Search job for a sample lane returns structured rates or a clear structured error
+- [x] Extension can be disabled without code changes in shell
+- [x] No imports from starboard-2 at runtime
 
 ## Fixtures / tests
 

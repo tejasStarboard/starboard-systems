@@ -10,6 +10,13 @@ import {
 export class SpotManager {
   constructor(private readonly spotClient: SpotClient = getSpotClient()) {}
 
+  enqueueSearch(
+    extensionId: string,
+    input: SpotSearchInput
+  ): Promise<EnqueueSpotSearchResult> {
+    return this.spotClient.enqueueSearch(extensionId, input)
+  }
+
   enqueueFakeSearch(input: SpotSearchInput): Promise<EnqueueSpotSearchResult> {
     return this.spotClient.enqueueFakeSearch(input)
   }

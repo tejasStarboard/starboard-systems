@@ -54,6 +54,18 @@ class NoopCredentialPort:
         return None
 
 
+class SpotSearchError(Exception):
+    """Structured plugin failure returned to the workflow (not a crash)."""
+
+    def __init__(self, code: str, message: str) -> None:
+        super().__init__(message)
+        self.code = code
+        self.message = message
+
+    def to_dict(self) -> dict[str, str]:
+        return {"code": self.code, "message": self.message}
+
+
 class SpotPlugin(Protocol):
     id: str
 

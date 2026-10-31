@@ -2,7 +2,7 @@
 id: 040
 wave: 04-spot
 title: Spot extension host (Temporal OSS)
-status: in_progress
+status: done
 depends_on: [001, 020]
 epic: SYS-EXT-SPOT
 docs:
