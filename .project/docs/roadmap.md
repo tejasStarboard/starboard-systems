@@ -38,16 +38,16 @@ Cursor skills: [../../.agents/README.md](../../.agents/README.md).
 
 ## Wave 5 — Extension foundation (CURRENT)
 
-| Ticket | Title | Status |
-|--------|-------|--------|
-| [055](../tickets/in_progress/055-extension-foundation-hardening.md) | Extension foundation hardening (UI / BFF / Temporal) | in_progress |
-| [056](../tickets/todo/056-extension-dev-workflow-docs.md) | Extension developer cookbook + skill sync | open |
-| [057](../tickets/todo/057-extension-settings-schema.md) | Extension settings schema + persistence | open |
-| [058](../tickets/todo/058-admin-extension-settings-ui.md) | Admin collapsible extension settings UI | open |
+| Ticket                                                           | Title                                                | Status      |
+| ---------------------------------------------------------------- | ---------------------------------------------------- | ----------- |
+| [055](../tickets/done/055-extension-foundation-hardening.md)     | Extension foundation hardening (UI / BFF / Temporal) | done        |
+| [056](../tickets/in_progress/056-extension-dev-workflow-docs.md) | Extension developer cookbook + skill sync            | in_progress |
+| [057](../tickets/todo/057-extension-settings-schema.md)          | Extension settings schema + persistence              | open        |
+| [058](../tickets/todo/058-admin-extension-settings-ui.md)        | Admin collapsible extension settings UI              | open        |
 
 ## Next product wave (after Wave 5)
 
-Draft only — create tickets when foundation lands:
+**Depends on 055 + 056** (hardened host + developer cookbook). Draft only — create tickets when foundation lands:
 
 - Apply catalog/spot rate → quote lane (+ pricing)
 - Messaging production path (real Graph OAuth + Neon)
