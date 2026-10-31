@@ -146,10 +146,7 @@ function doorAddressOrNull(address: DoorAddress): DoorAddress | null {
   return isDoorAddressEmpty(address) ? null : address
 }
 
-function surchargeLineToRow(
-  line: SurchargeLine,
-  rateId: string
-): SurchargeRow {
+function surchargeLineToRow(line: SurchargeLine, rateId: string): SurchargeRow {
   return {
     id: line.id,
     rateId,
@@ -264,16 +261,14 @@ export function rowsToLaneForm(
     volume: scalars.volume,
     palletCount: scalars.palletCount,
     palletType: scalars.palletType,
-    manualRates: rates.map(
-      (rate): ManualRateLine => ({
-        id: rate.id,
-        label: rate.label,
-        amount: rate.rate,
-        surcharges: (surchargesByRateId.get(rate.id) ?? []).map(
-          surchargeRowToLine
-        ),
-      })
-    ),
+    manualRates: rates.map((rate): ManualRateLine => ({
+      id: rate.id,
+      label: rate.label,
+      amount: rate.rate,
+      surcharges: (surchargesByRateId.get(rate.id) ?? []).map(
+        surchargeRowToLine
+      ),
+    })),
     markupType: row.markupType,
     markupValue: row.markupValue,
   }

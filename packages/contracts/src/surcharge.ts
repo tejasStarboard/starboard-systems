@@ -1,11 +1,7 @@
 import { z } from "zod"
 
 /** Leg bucket for charge lines (globals live in ticket 068). */
-export const surchargeLegSchema = z.enum([
-  "origin",
-  "freight",
-  "destination",
-])
+export const surchargeLegSchema = z.enum(["origin", "freight", "destination"])
 export type SurchargeLeg = z.infer<typeof surchargeLegSchema>
 
 /**

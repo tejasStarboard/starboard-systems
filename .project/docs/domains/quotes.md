@@ -1,11 +1,11 @@
 # Domain: quotes
 
-|           |                                                                  |
-| --------- | ---------------------------------------------------------------- |
-| Service   | `services/quotes`                                                |
-| Schema    | `quotes.*`                                                       |
-| Contracts | `@starboard/lib-contracts` quotes                                |
-| Status    | Partial — header + lanes/cargo/rates + surcharge lines persist   |
+|           |                                                                |
+| --------- | -------------------------------------------------------------- |
+| Service   | `services/quotes`                                              |
+| Schema    | `quotes.*`                                                     |
+| Contracts | `@starboard/lib-contracts` quotes                              |
+| Status    | Partial — header + lanes/cargo/rates + surcharge lines persist |
 
 ## Owns
 
