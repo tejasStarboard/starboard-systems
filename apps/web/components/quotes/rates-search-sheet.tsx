@@ -11,20 +11,30 @@ import {
   SheetTitle,
 } from "@workspace/ui/components/sheet"
 
+import type { SpotRateSource } from "@/lib/spot-rate-source"
+
 export function RatesSearchSheet({
   open,
   onOpenChange,
   origin,
   destination,
+  spotRateSources = [],
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
   origin?: string
   destination?: string
+  spotRateSources?: SpotRateSource[]
 }) {
   const [rates, setRates] = useState<Rate[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [spotJob, setSpotJob] = useState<{
+    workflowId: string
+    runId: string
+  } | null>(null)
+  const [spotPending, setSpotPending] = useState(false)
+  const [spotError, setSpotError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!open) {
@@ -68,6 +78,41 @@ export function RatesSearchSheet({
     return () => controller.abort()
   }, [open, origin, destination])
 
+  async function enqueueFakeSpotSearch() {
+    setSpotPending(true)
+    setSpotError(null)
+    setSpotJob(null)
+    try {
+      const response = await fetch("/api/extensions/spot.fake/jobs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ origin, destination, mode: "fcl" }),
+      })
+      const payload = (await response.json().catch(() => null)) as {
+        workflowId?: string
+        runId?: string
+        error?: string
+      } | null
+      if (!response.ok) {
+        throw new Error(payload?.error ?? "Failed to enqueue spot search")
+      }
+      if (!payload?.workflowId || !payload.runId) {
+        throw new Error("Invalid spot search response")
+      }
+      setSpotJob({ workflowId: payload.workflowId, runId: payload.runId })
+    } catch (err: unknown) {
+      setSpotError(
+        err instanceof Error ? err.message : "Failed to enqueue spot search"
+      )
+    } finally {
+      setSpotPending(false)
+    }
+  }
+
+  const hasFakeSpot = spotRateSources.some(
+    (source) => source.id === "spot.fake"
+  )
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="sm:max-w-md">
@@ -82,6 +127,49 @@ export function RatesSearchSheet({
           </SheetDescription>
         </SheetHeader>
         <div className="flex flex-1 flex-col gap-3 overflow-y-auto px-4 pb-8">
+          {spotRateSources.length > 0 ? (
+            <div className="space-y-2 border-b border-border pb-3">
+              <p className="text-xs font-medium text-muted-foreground">
+                Spot sources
+              </p>
+              <ul className="space-y-1">
+                {spotRateSources.map((source) => (
+                  <li
+                    key={source.id}
+                    className="flex items-center justify-between gap-2 text-sm"
+                  >
+                    <span>{source.displayName}</span>
+                    {source.carrier ? (
+                      <span className="text-xs text-muted-foreground">
+                        {source.carrier}
+                      </span>
+                    ) : null}
+                  </li>
+                ))}
+              </ul>
+              {hasFakeSpot ? (
+                <div className="space-y-1 pt-1">
+                  <button
+                    type="button"
+                    className="text-xs font-medium underline-offset-2 hover:underline disabled:opacity-50"
+                    disabled={spotPending}
+                    onClick={() => void enqueueFakeSpotSearch()}
+                  >
+                    {spotPending ? "Enqueueing…" : "Search fake spot"}
+                  </button>
+                  {spotJob ? (
+                    <p className="text-xs text-muted-foreground">
+                      Accepted 202 — workflowId={spotJob.workflowId} runId=
+                      {spotJob.runId}
+                    </p>
+                  ) : null}
+                  {spotError ? (
+                    <p className="text-xs text-destructive">{spotError}</p>
+                  ) : null}
+                </div>
+              ) : null}
+            </div>
+          ) : null}
           {loading ? (
             <p className="text-center text-xs text-muted-foreground">
               Loading rates…

@@ -2,7 +2,7 @@
 id: 030
 wave: 03-messaging
 title: Extension messaging.msgraph
-status: in_progress
+status: done
 depends_on: [001, 002, 005]
 epic: SYS-EXT-MSGRAPH
 docs:
@@ -32,10 +32,10 @@ First messaging provider: Microsoft Graph (Outlook). Connect mailbox (OAuth), re
 
 ## Acceptance criteria
 
-- [ ] Org can connect MS Graph when extension enabled
-- [ ] Inbound path records a message or job (minimal)
-- [ ] Outbound send API exists (even if UI is minimal)
-- [ ] Disabled extension hides connect UI
+- [x] Org can connect MS Graph when extension enabled
+- [x] Inbound path records a message or job (minimal)
+- [x] Outbound send API exists (even if UI is minimal)
+- [x] Disabled extension hides connect UI
 
 ## Fixtures / tests
 

@@ -2,7 +2,7 @@
 id: 040
 wave: 04-spot
 title: Spot extension host (Temporal OSS)
-status: open
+status: in_progress
 depends_on: [001, 020]
 epic: SYS-EXT-SPOT
 docs:
@@ -34,10 +34,10 @@ carrier-specific logic beyond a no-op or fake plugin for tests.
 
 ## Acceptance criteria
 
-- [ ] Plugin registry loads carrier plugins by id
-- [ ] Fake plugin returns deterministic rates in tests
-- [ ] Job durability via Temporal OSS
-- [ ] Shell rate-source slot can list spot extensions from manifests
+- [x] Plugin registry loads carrier plugins by id
+- [x] Fake plugin returns deterministic rates in tests
+- [x] Job durability via Temporal OSS
+- [x] Shell rate-source slot can list spot extensions from manifests
 
 ## Fixtures / tests
 

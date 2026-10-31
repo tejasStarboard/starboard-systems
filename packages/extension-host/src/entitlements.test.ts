@@ -106,4 +106,22 @@ describe("entitlement filter", () => {
       { type: "spot.search", carrier: "maersk" },
     ])
   })
+
+  test("enabled spot.fake contributes quote.rateSources and spot.search for credit", () => {
+    const contributions = getActiveContributions("credit", listManifests())
+    expect(contributions.uiSlots).toContain("quote.rateSources")
+    expect(
+      contributions.jobs.some(
+        (job) => job.type === "spot.search" && job.carrier === "fake"
+      )
+    ).toBe(true)
+    expect(
+      contributions.api.some((item) => item.pathPrefix.includes("spot.fake"))
+    ).toBe(true)
+    expect(
+      listActiveExtensions("credit", listManifests()).some(
+        (m) => m.id === "spot.fake"
+      )
+    ).toBe(true)
+  })
 })
