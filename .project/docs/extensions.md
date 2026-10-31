@@ -29,12 +29,13 @@ type ExtensionManifest = {
 
 ## Registered extensions (stubs)
 
-| id                  | Wave | Worker                | Notes                           |
-| ------------------- | ---- | --------------------- | ------------------------------- |
-| `ingestion.fcl_v6`  | 2    | Python + Temporal OSS | Ocean FCL only; gate-first save |
-| `messaging.msgraph` | 3    | Python + Temporal OSS | First email provider            |
-| `spot.maersk`       | 4    | Python + Temporal OSS | API and/or scraper strategies   |
-| `spot.cma`          | 4    | Python + Temporal OSS | API and/or scraper strategies   |
+| id                  | Wave | Worker                | Notes                            |
+| ------------------- | ---- | --------------------- | -------------------------------- |
+| `ingestion.fcl_v6`  | 2    | Python + Temporal OSS | Ocean FCL only; gate-first save  |
+| `messaging.msgraph` | 3    | Python + Temporal OSS | First email provider             |
+| `spot.fake`         | 4    | Python + Temporal OSS | Host test plugin (deterministic) |
+| `spot.maersk`       | 4    | Python + Temporal OSS | API and/or scraper strategies    |
+| `spot.cma`          | 4    | Python + Temporal OSS | API and/or scraper strategies    |
 
 ## Planned later (not registered yet)
 

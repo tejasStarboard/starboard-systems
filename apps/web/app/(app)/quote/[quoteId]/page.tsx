@@ -3,8 +3,10 @@ import { redirect } from "next/navigation"
 
 import { QuoteForm } from "@/components/quotes/quote-form"
 import { auth } from "@/lib/auth"
+import { getOrganizationPlan } from "@/lib/billing/plan"
 import { getQuotesManager } from "@/lib/domain/quotes/quotes.manager"
 import { emptyQuoteFormValues } from "@/lib/domain/quotes/quotes.schema"
+import { listActiveSpotRateSources } from "@/lib/extensions"
 
 export default async function QuotePage({
   params,
@@ -22,10 +24,12 @@ export default async function QuotePage({
   }
 
   const quotesManager = getQuotesManager()
-  const [savedQuote, options] = await Promise.all([
+  const [savedQuote, options, plan] = await Promise.all([
     quotesManager.getQuoteFormValuesForOrg(quoteId, organizationId),
     quotesManager.loadQuoteFormOptions(organizationId),
+    getOrganizationPlan(organizationId),
   ])
+  const spotRateSources = listActiveSpotRateSources(plan)
 
   const {
     customerOptions,
@@ -89,6 +93,7 @@ export default async function QuotePage({
         portOptions={ports}
         containerTypeOptions={containerTypeOptions}
         palletTypeOptions={palletTypeOptions}
+        spotRateSources={spotRateSources}
       />
     </div>
   )

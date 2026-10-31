@@ -25,6 +25,7 @@ export const env = createEnv({
     RATES_SERVICE_URL: z.url(),
     INGESTION_SERVICE_URL: z.url(),
     MESSAGING_SERVICE_URL: z.url(),
+    SPOT_SERVICE_URL: z.url(),
     INTERNAL_SERVICE_TOKEN: z.string().min(16),
   },
   client: {
@@ -54,6 +55,7 @@ export const env = createEnv({
     RATES_SERVICE_URL: process.env.RATES_SERVICE_URL,
     INGESTION_SERVICE_URL: process.env.INGESTION_SERVICE_URL,
     MESSAGING_SERVICE_URL: process.env.MESSAGING_SERVICE_URL,
+    SPOT_SERVICE_URL: process.env.SPOT_SERVICE_URL,
     INTERNAL_SERVICE_TOKEN: process.env.INTERNAL_SERVICE_TOKEN,
   },
   emptyStringAsUndefined: true,

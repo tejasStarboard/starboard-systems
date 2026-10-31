@@ -52,6 +52,24 @@ const stubManifests = [
     enabled: true,
   },
   {
+    id: "spot.fake",
+    version: "0.0.0",
+    displayName: "Fake spot rates",
+    requiredPlan: ["credit", "enterprise"],
+    contributes: {
+      jobs: [{ type: "spot.search", carrier: "fake" }],
+      api: [{ pathPrefix: "/api/extensions/spot.fake" }],
+      uiSlots: ["quote.rateSources"],
+    },
+    worker: {
+      kind: "python-temporal",
+      service: "spot",
+      plugin: "fake",
+    },
+    healthPath: "/health",
+    enabled: true,
+  },
+  {
     id: "spot.maersk",
     version: "0.0.0",
     displayName: "Maersk spot rates",

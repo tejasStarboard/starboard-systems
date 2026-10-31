@@ -4,13 +4,18 @@ import {
   DEFAULT_PLAN,
   getActiveContributions,
   isActive,
+  listActiveExtensions,
   listManifests,
   type ExtensionManifest,
   type ExtensionNavContribution,
   type Plan,
 } from "@starboard/extension-host"
 
+import type { SpotRateSource } from "@/lib/spot-rate-source"
+
 export const DEFAULT_ORG_PLAN: Plan = DEFAULT_PLAN
+
+export type { SpotRateSource }
 
 export function listRegisteredExtensions(): ExtensionManifest[] {
   return listManifests()
@@ -24,6 +29,27 @@ export function listActiveExtensionNav(
 
 export function listActiveUiSlots(plan: Plan = DEFAULT_ORG_PLAN): string[] {
   return getActiveContributions(plan).uiSlots
+}
+
+export function listActiveSpotRateSources(
+  plan: Plan = DEFAULT_ORG_PLAN
+): SpotRateSource[] {
+  return listActiveExtensions(plan)
+    .filter(
+      (manifest) =>
+        manifest.contributes.uiSlots?.includes("quote.rateSources") ||
+        manifest.contributes.jobs?.some((job) => job.type === "spot.search")
+    )
+    .map((manifest) => {
+      const searchJob = manifest.contributes.jobs?.find(
+        (job) => job.type === "spot.search"
+      )
+      return {
+        id: manifest.id,
+        displayName: manifest.displayName,
+        carrier: searchJob?.carrier,
+      }
+    })
 }
 
 export function isExtensionActive(
