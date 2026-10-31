@@ -16,3 +16,17 @@ export {
   type TotalKind,
 } from "./total-inclusion"
 export { getEffectiveUsageAmount } from "./usage"
+export {
+  findBaseFreightRow,
+  isBaseFreightRow,
+  isBaseSurchargeName,
+  isBaseSurchargeRow,
+  vetoesBaseName,
+  type BaseFreightRowInput,
+} from "./base-freight"
+export {
+  calculateSurchargeAmount,
+  type CalculateSurchargeAmountInput,
+  type SurchargeAmounts,
+  type SurchargeUsageUnit,
+} from "./surcharge-amount"

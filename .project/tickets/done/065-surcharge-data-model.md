@@ -2,7 +2,7 @@
 id: 065
 wave: 06-product
 title: Surcharge data model + contracts
-status: in_progress
+status: done
 depends_on: [002, 020, 010]
 epic: SYS-PRICING
 docs:

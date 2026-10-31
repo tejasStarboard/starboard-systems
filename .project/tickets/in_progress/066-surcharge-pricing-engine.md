@@ -2,7 +2,7 @@
 id: 066
 wave: 06-product
 title: Surcharge amount engine in packages/pricing
-status: open
+status: in_progress
 depends_on: [065, 010]
 epic: SYS-PRICING
 docs:
@@ -24,10 +24,10 @@ Compute buy/sell surcharge amounts from unit + quantity + % of freight, reusing 
 
 ## Acceptance criteria
 
-- [ ] `calculateSurchargeAmount` (or equivalent) for main units + percentage of base freight
-- [ ] Base freight discovery helper (is_base_freight / name allowlist lean version)
-- [ ] Fixture tests green
-- [ ] Exported from `@starboard/lib-pricing`
+- [x] `calculateSurchargeAmount` (or equivalent) for main units + percentage of base freight
+- [x] Base freight discovery helper (is_base_freight / name allowlist lean version)
+- [x] Fixture tests green
+- [x] Exported from `@starboard/lib-pricing`
 
 ## Out of scope
 

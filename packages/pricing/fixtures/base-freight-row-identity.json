@@ -1,0 +1,172 @@
+{
+  "_meta": {
+    "ticket": "SB-6190",
+    "rule": "A row is a base-freight candidate when source != 'global' AND (is_base_freight === true OR (NOT vetoesBaseName(row) AND isBaseSurcharge(name))). vetoesBaseName: source in veto_sources OR lower(leg) in veto_leg_tags. The stamp wins over the veto (SB-5501); globals never claim the freight slot (SB-2854).",
+    "why": "A broker's manual charge named like a base row ('Drayage', 'Ocean Freight', 'Freight') or a charge the save path tagged to an accessorial bucket is an add-on, never the freight row. Name-only, the webapp hid it and dropped it from the total while the add-in billed it (W4201Y, ETV1I0, 21a88608, 72a7ecbd, 7e174a48). The add-in never anchors freight on a manual (buildManualSurchargeSaveRow).",
+    "consumers": "apps/webapp/lib/constants/__tests__/surchargeCategories.test.ts (vetoesBaseName / isBaseFreightRow), apps/backend/tests/unit/internal/rfq_v2/test_leg_freight_price.py (vetoes_base_name / is_base_surcharge_row), apps/public-api/domain/base_freight_test.go (IsBaseFreightLine). Edit a case here and every twin must agree."
+  },
+  "veto_sources": ["manual", "global"],
+  "veto_leg_tags": ["origin", "destination", "globals"],
+  "cases": [
+    {
+      "desc": "global never claims the freight slot",
+      "source": "global",
+      "leg": null,
+      "is_base_freight": false,
+      "name": "ocean_freight",
+      "want": false
+    },
+    {
+      "desc": "global loses even when stamped",
+      "source": "global",
+      "leg": "freight",
+      "is_base_freight": true,
+      "name": "ocean_freight",
+      "want": false
+    },
+    {
+      "desc": "global named like a base row",
+      "source": "global",
+      "leg": null,
+      "is_base_freight": false,
+      "name": "Drayage",
+      "want": false
+    },
+    {
+      "desc": "stamp wins over a non-matching name (vendor-named base, SB-5501)",
+      "source": "carrier",
+      "leg": null,
+      "is_base_freight": true,
+      "name": "Trucking",
+      "want": true
+    },
+    {
+      "desc": "stamp wins over the veto",
+      "source": "manual",
+      "leg": "origin",
+      "is_base_freight": true,
+      "name": "Trucking",
+      "want": true
+    },
+    {
+      "desc": "name allowlist as the fallback",
+      "source": "carrier",
+      "leg": null,
+      "is_base_freight": false,
+      "name": "ocean_freight",
+      "want": true
+    },
+    {
+      "desc": "prefix match",
+      "source": "carrier",
+      "leg": null,
+      "is_base_freight": false,
+      "name": "Ocean Freight (LCL)",
+      "want": true
+    },
+    {
+      "desc": "'surcharge' in the name is never base",
+      "source": "carrier",
+      "leg": null,
+      "is_base_freight": false,
+      "name": "ocean freight surcharge",
+      "want": false
+    },
+    {
+      "desc": "ordinary surcharge",
+      "source": "carrier",
+      "leg": null,
+      "is_base_freight": false,
+      "name": "fuel_surcharge",
+      "want": false
+    },
+    {
+      "desc": "untagged bare Drayage stays the base row",
+      "source": "carrier",
+      "leg": null,
+      "is_base_freight": false,
+      "name": "Drayage",
+      "want": true
+    },
+    {
+      "desc": "leg freight does not veto",
+      "source": "breakdown",
+      "leg": "freight",
+      "is_base_freight": false,
+      "name": "Drayage",
+      "want": true
+    },
+    {
+      "desc": "leg surcharges does not veto",
+      "source": "breakdown",
+      "leg": "surcharges",
+      "is_base_freight": false,
+      "name": "ocean_freight",
+      "want": true
+    },
+    {
+      "desc": "W4201Y: manual Drayage tagged origin",
+      "source": "manual",
+      "leg": "origin",
+      "is_base_freight": false,
+      "name": "Drayage",
+      "want": false
+    },
+    {
+      "desc": "destination tag vetoes whatever the source",
+      "source": "carrier",
+      "leg": "destination",
+      "is_base_freight": false,
+      "name": "Drayage",
+      "want": false
+    },
+    {
+      "desc": "globals tag vetoes whatever the source",
+      "source": "breakdown",
+      "leg": "globals",
+      "is_base_freight": false,
+      "name": "DRAYAGE",
+      "want": false
+    },
+    {
+      "desc": "tag match ignores case",
+      "source": "carrier",
+      "leg": "Origin",
+      "is_base_freight": false,
+      "name": "Drayage",
+      "want": false
+    },
+    {
+      "desc": "manual Air Freight tagged globals on a cartage rate",
+      "source": "manual",
+      "leg": "globals",
+      "is_base_freight": false,
+      "name": "Air Freight",
+      "want": false
+    },
+    {
+      "desc": "7e174a48: manual Ocean Freight with no leg",
+      "source": "manual",
+      "leg": null,
+      "is_base_freight": false,
+      "name": "Ocean Freight",
+      "want": false
+    },
+    {
+      "desc": "72a7ecbd: manual Freight under Organization = Freight",
+      "source": "manual",
+      "leg": "freight",
+      "is_base_freight": false,
+      "name": "Freight",
+      "want": false
+    },
+    {
+      "desc": "21a88608: manual OCEAN FREIGHT under Organization = Freight",
+      "source": "manual",
+      "leg": "freight",
+      "is_base_freight": false,
+      "name": "OCEAN FREIGHT",
+      "want": false
+    }
+  ]
+}

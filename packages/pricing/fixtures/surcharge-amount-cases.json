@@ -1,0 +1,201 @@
+{
+  "description": "Lean rewrite golden cases for calculateSurchargeAmount (066). Not a full port of starboard-2 surcharge_matrix.json — FX, tiers, and dollar charge clamps deferred.",
+  "cases": [
+    {
+      "id": "flat-no-usage",
+      "input": {
+        "usageUnit": "flat",
+        "rate": 125.5,
+        "ratePercentage": null,
+        "rawUsage": null,
+        "freeUsage": null,
+        "minUsage": null,
+        "maxUsage": null,
+        "baseFreightAmount": 1000
+      },
+      "expected": { "buy": 125.5, "sell": 125.5, "effectiveUsage": null }
+    },
+    {
+      "id": "per-container-qty-2",
+      "input": {
+        "usageUnit": "container",
+        "rate": 50,
+        "ratePercentage": null,
+        "rawUsage": 2,
+        "freeUsage": null,
+        "minUsage": null,
+        "maxUsage": null,
+        "baseFreightAmount": null
+      },
+      "expected": { "buy": 100, "sell": 100, "effectiveUsage": 2 }
+    },
+    {
+      "id": "per-teu-with-min-mechanics",
+      "input": {
+        "usageUnit": "teu",
+        "rate": 50,
+        "ratePercentage": null,
+        "rawUsage": 6,
+        "freeUsage": 3,
+        "minUsage": 2,
+        "maxUsage": 10,
+        "baseFreightAmount": null
+      },
+      "expected": { "buy": 150, "sell": 150, "effectiveUsage": 3 }
+    },
+    {
+      "id": "per-cbm",
+      "input": {
+        "usageUnit": "cbm",
+        "rate": 12.345,
+        "ratePercentage": null,
+        "rawUsage": 3,
+        "freeUsage": null,
+        "minUsage": null,
+        "maxUsage": null,
+        "baseFreightAmount": null
+      },
+      "expected": { "buy": 37.04, "sell": 37.04, "effectiveUsage": 3 }
+    },
+    {
+      "id": "per-kg",
+      "input": {
+        "usageUnit": "kg",
+        "rate": 0.5,
+        "ratePercentage": null,
+        "rawUsage": 100,
+        "freeUsage": null,
+        "minUsage": null,
+        "maxUsage": null,
+        "baseFreightAmount": null
+      },
+      "expected": { "buy": 50, "sell": 50, "effectiveUsage": 100 }
+    },
+    {
+      "id": "per-ton",
+      "input": {
+        "usageUnit": "ton",
+        "rate": 20,
+        "ratePercentage": null,
+        "rawUsage": 2.5,
+        "freeUsage": null,
+        "minUsage": null,
+        "maxUsage": null,
+        "baseFreightAmount": null
+      },
+      "expected": { "buy": 50, "sell": 50, "effectiveUsage": 2.5 }
+    },
+    {
+      "id": "per-wm",
+      "input": {
+        "usageUnit": "wm",
+        "rate": 40,
+        "ratePercentage": null,
+        "rawUsage": 1.25,
+        "freeUsage": null,
+        "minUsage": null,
+        "maxUsage": null,
+        "baseFreightAmount": null
+      },
+      "expected": { "buy": 50, "sell": 50, "effectiveUsage": 1.25 }
+    },
+    {
+      "id": "per-pallet",
+      "input": {
+        "usageUnit": "pallet",
+        "rate": 15,
+        "ratePercentage": null,
+        "rawUsage": 4,
+        "freeUsage": null,
+        "minUsage": null,
+        "maxUsage": null,
+        "baseFreightAmount": null
+      },
+      "expected": { "buy": 60, "sell": 60, "effectiveUsage": 4 }
+    },
+    {
+      "id": "per-time",
+      "input": {
+        "usageUnit": "per_time",
+        "rate": 75,
+        "ratePercentage": null,
+        "rawUsage": 2,
+        "freeUsage": null,
+        "minUsage": null,
+        "maxUsage": null,
+        "baseFreightAmount": null
+      },
+      "expected": { "buy": 150, "sell": 150, "effectiveUsage": 2 }
+    },
+    {
+      "id": "percentage-whole-number-of-base",
+      "input": {
+        "usageUnit": "percentage",
+        "rate": null,
+        "ratePercentage": 20,
+        "rawUsage": null,
+        "freeUsage": null,
+        "minUsage": null,
+        "maxUsage": null,
+        "baseFreightAmount": 1500
+      },
+      "expected": { "buy": 300, "sell": 300, "effectiveUsage": null }
+    },
+    {
+      "id": "percentage-decimal-of-base",
+      "input": {
+        "usageUnit": "percentage",
+        "rate": null,
+        "ratePercentage": 0.15,
+        "rawUsage": null,
+        "freeUsage": null,
+        "minUsage": null,
+        "maxUsage": null,
+        "baseFreightAmount": 2000
+      },
+      "expected": { "buy": 300, "sell": 300, "effectiveUsage": null }
+    },
+    {
+      "id": "percentage-prefers-pct-over-rate",
+      "input": {
+        "usageUnit": "flat",
+        "rate": 999,
+        "ratePercentage": 10,
+        "rawUsage": null,
+        "freeUsage": null,
+        "minUsage": null,
+        "maxUsage": null,
+        "baseFreightAmount": 800
+      },
+      "expected": { "buy": 80, "sell": 80, "effectiveUsage": null }
+    },
+    {
+      "id": "unknown-never-bills",
+      "input": {
+        "usageUnit": "unknown",
+        "rate": 100,
+        "ratePercentage": 50,
+        "rawUsage": 5,
+        "freeUsage": null,
+        "minUsage": null,
+        "maxUsage": null,
+        "baseFreightAmount": 1000
+      },
+      "expected": { "buy": 0, "sell": 0, "effectiveUsage": null }
+    },
+    {
+      "id": "flat-with-usage-clamps-implicit-1",
+      "input": {
+        "usageUnit": "flat",
+        "rate": 50,
+        "ratePercentage": null,
+        "rawUsage": null,
+        "freeUsage": 3,
+        "minUsage": 2,
+        "maxUsage": 10,
+        "baseFreightAmount": null
+      },
+      "expected": { "buy": 100, "sell": 100, "effectiveUsage": 2 }
+    }
+  ]
+}

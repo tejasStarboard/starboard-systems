@@ -3,7 +3,7 @@
 |         |                                               |
 | ------- | --------------------------------------------- |
 | Package | `packages/pricing` (`@starboard/lib-pricing`) |
-| Status  | Started — ticket 010 ONE MATH core            |
+| Status  | Started — tickets 010 + 066 ONE MATH          |
 
 ## Owns
 
@@ -13,7 +13,7 @@ ONE MATH: buy/sell, surcharge inclusion, FX, margin, rounding, incoterm scope he
 
 Single implementation + fixture conformance suite. No TS/Python/add-in twins.
 
-## Exported API (010)
+## Exported API
 
 | Export                      | Role                                                    |
 | --------------------------- | ------------------------------------------------------- |
@@ -22,6 +22,9 @@ Single implementation + fixture conformance suite. No TS/Python/add-in twins.
 | `calculateManualRateTotals` | UI alias `{ subtotal, markup, total }`                  |
 | `isIncludedInTotal`         | Surcharge inclusion predicate (sell / buy / rollup_buy) |
 | `getEffectiveUsageAmount`   | free → min → max usage → billable qty                   |
+| `calculateSurchargeAmount`  | Unit / flat / % of base freight → `{ buy, sell }`       |
+| `isBaseFreightRow`          | Stamp or name-allowlist base-freight predicate          |
+| `findBaseFreightRow`        | Elect base freight from a surcharge list                |
 
 Schemas for quote/catalog charge lines live in `@starboard/lib-contracts` (`surchargeLineSchema`). Persistence: ticket **065** (`quotes.surcharge`, prepared `rates.surcharge`). Amount engine: **066**.
 
@@ -32,6 +35,8 @@ Under `packages/pricing/fixtures/`:
 - `manual-rate-totals.json` — rewrite golden cases for lane totals
 - `total-inclusion-test-cases.json` — copied from legacy `shared-fixtures/qv2`
 - `surcharge-min-mechanics.json` — copied from legacy `shared-fixtures/qv2` (rows 1–10)
+- `base-freight-row-identity.json` — copied from legacy `shared-fixtures/qv2` (SB-6190)
+- `surcharge-amount-cases.json` — lean rewrite cases for unit / flat / % freight
 
 ## Schema push (surcharge tables)
 
@@ -44,11 +49,11 @@ Creates/updates `quotes.surcharge` and `rates.surcharge` (drizzle-kit push; no v
 ## Deferred
 
 - FX converters / display-currency paths
-- Full surcharge row engine (`surcharge_matrix.json`) — **066**
+- Full `surcharge_matrix.json` parity (tiers, dollar min/max/free charge, user overrides)
 - Incoterm scope helpers beyond inclusion flags already in `isIncludedInTotal` — **068**
 - Auto-margin / tier constraints
 - Quote UI for charge lines — **067**
 
 ## Next tickets
 
-**066** surcharge amount engine; **067** quote UI; **068** globals / incoterm scope. Spot/carrier quirks stay out of ONE MATH.
+**067** quote UI; **068** globals / incoterm scope. Spot/carrier quirks stay out of ONE MATH.
