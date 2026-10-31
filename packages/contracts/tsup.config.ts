@@ -4,6 +4,7 @@ export default defineConfig((options) => ({
   entry: {
     index: "src/index.ts",
     quotes: "src/quotes.ts",
+    surcharge: "src/surcharge.ts",
     geography: "src/geography.ts",
     crm: "src/crm.ts",
     rates: "src/rates.ts",

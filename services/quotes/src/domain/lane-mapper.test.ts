@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test"
 import {
   createContainerLine,
   createManualRateLine,
+  createSurchargeLine,
   emptyLaneFormValues,
 } from "@starboard/lib-contracts"
 
@@ -10,6 +11,7 @@ import {
   laneFormToRows,
   resolveRateValidity,
   rowsToLaneForm,
+  type SurchargeRow,
 } from "./lane-mapper"
 
 describe("lane-mapper", () => {
@@ -52,6 +54,25 @@ describe("lane-mapper", () => {
         id: "rate-1",
         label: "Ocean freight",
         amount: 1500,
+        surcharges: [
+          createSurchargeLine({
+            id: "sch-1",
+            name: "Origin THC",
+            leg: "origin",
+            usageUnit: "container",
+            rate: 120,
+            currencyCode: "USD",
+            source: "manual",
+            isIncludedInTotal: true,
+            isRemoved: false,
+            isVisible: true,
+            freeUsage: null,
+            minUsage: 1,
+            maxUsage: null,
+            buyAmount: 100,
+            sellAmount: 120,
+          }),
+        ],
       }),
     ]
     lane.markupType = "percent"
@@ -62,7 +83,17 @@ describe("lane-mapper", () => {
       expiryAt: new Date("2026-12-31"),
     })
     const mapped = laneFormToRows(lane, "quote-1", "usd", validity)
-    const restored = rowsToLaneForm(mapped.lane, mapped.rates)
+    const surchargesByRateId = new Map<string, SurchargeRow[]>()
+    for (const row of mapped.surcharges) {
+      const list = surchargesByRateId.get(row.rateId) ?? []
+      list.push(row)
+      surchargesByRateId.set(row.rateId, list)
+    }
+    const restored = rowsToLaneForm(
+      mapped.lane,
+      mapped.rates,
+      surchargesByRateId
+    )
 
     expect(mapped.lane.pickupAddress?.city).toBe("Mississauga")
     expect(mapped.lane.deliveryAddress?.city).toBe("Brambleton")
@@ -78,6 +109,16 @@ describe("lane-mapper", () => {
       label: "Ocean freight",
       rate: 1500,
       currencyCode: "USD",
+    })
+    expect(mapped.surcharges).toHaveLength(1)
+    expect(mapped.surcharges[0]).toMatchObject({
+      id: "sch-1",
+      rateId: "rate-1",
+      name: "Origin THC",
+      leg: "origin",
+      usageUnit: "container",
+      buyAmount: 100,
+      sellAmount: 120,
     })
     expect(restored).toMatchObject({
       id: lane.id,
@@ -96,7 +137,24 @@ describe("lane-mapper", () => {
           count: 2,
         },
       ],
-      manualRates: [{ id: "rate-1", label: "Ocean freight", amount: 1500 }],
+      manualRates: [
+        {
+          id: "rate-1",
+          label: "Ocean freight",
+          amount: 1500,
+          surcharges: [
+            {
+              id: "sch-1",
+              name: "Origin THC",
+              leg: "origin",
+              usageUnit: "container",
+              rate: 120,
+              buyAmount: 100,
+              sellAmount: 120,
+            },
+          ],
+        },
+      ],
     })
   })
 

@@ -1,6 +1,7 @@
 import { z } from "zod"
 
 import { doorAddressSchema, emptyDoorAddress } from "./door-address.js"
+import { surchargeLineSchema } from "./surcharge.js"
 
 export const quoteSourceSchema = z.enum(["email", "manual"])
 export type QuoteSource = z.infer<typeof quoteSourceSchema>
@@ -75,6 +76,8 @@ export const manualRateLineSchema = z.object({
   id: z.string(),
   label: z.string(),
   amount: z.number(),
+  /** Always present on form values; factories default to []. */
+  surcharges: z.array(surchargeLineSchema),
 })
 
 export type ManualRateLine = z.infer<typeof manualRateLineSchema>
@@ -267,6 +270,7 @@ export function createManualRateLine(
     id: crypto.randomUUID(),
     label: "",
     amount: 0,
+    surcharges: [],
     ...overrides,
   }
 }

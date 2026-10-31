@@ -146,6 +146,7 @@ function toRateDto(row: RateRow): Rate {
     source: row.source,
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
+    surcharges: [] as Rate["surcharges"],
   }
   const parsed = rateSchema.safeParse(dto)
   if (!parsed.success) {

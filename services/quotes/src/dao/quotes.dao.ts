@@ -25,6 +25,7 @@ import {
   palletType,
   quote,
   rate,
+  surcharge,
 } from "@starboard/lib-db/schema"
 
 import {
@@ -33,6 +34,7 @@ import {
   rowsToLaneForm,
   type LaneRow,
   type RateRow,
+  type SurchargeRow,
 } from "../domain/lane-mapper"
 import type { QuotesDb } from "./db"
 
@@ -235,11 +237,47 @@ export class DrizzleQuotesDao implements QuotesDao {
             .where(inArray(rate.laneId, laneIds))
             .orderBy(asc(rate.createdAt))
 
+    const rateIds = rateRows.map((entry) => entry.id)
+    const surchargeRows =
+      rateIds.length === 0
+        ? []
+        : await this.db
+            .select({
+              id: surcharge.id,
+              rateId: surcharge.rateId,
+              name: surcharge.name,
+              leg: surcharge.leg,
+              usageUnit: surcharge.usageUnit,
+              rate: surcharge.rate,
+              ratePercentage: surcharge.ratePercentage,
+              currencyCode: surcharge.currencyCode,
+              source: surcharge.source,
+              isIncludedInTotal: surcharge.isIncludedInTotal,
+              isRemoved: surcharge.isRemoved,
+              isVisible: surcharge.isVisible,
+              freeUsage: surcharge.freeUsage,
+              minUsage: surcharge.minUsage,
+              maxUsage: surcharge.maxUsage,
+              buyAmount: surcharge.buyAmount,
+              sellAmount: surcharge.sellAmount,
+              scopeOverride: surcharge.scopeOverride,
+            })
+            .from(surcharge)
+            .where(inArray(surcharge.rateId, rateIds))
+            .orderBy(asc(surcharge.createdAt))
+
     const ratesByLane = new Map<string, RateRow[]>()
     for (const rateRow of rateRows) {
       const list = ratesByLane.get(rateRow.laneId) ?? []
       list.push(rateRow)
       ratesByLane.set(rateRow.laneId, list)
+    }
+
+    const surchargesByRateId = new Map<string, SurchargeRow[]>()
+    for (const surchargeRow of surchargeRows) {
+      const list = surchargesByRateId.get(surchargeRow.rateId) ?? []
+      list.push(surchargeRow as SurchargeRow)
+      surchargesByRateId.set(surchargeRow.rateId, list)
     }
 
     const lanes =
@@ -248,7 +286,8 @@ export class DrizzleQuotesDao implements QuotesDao {
         : laneRows.map((laneRow) =>
             rowsToLaneForm(
               laneRow as LaneRow,
-              ratesByLane.get(laneRow.id) ?? []
+              ratesByLane.get(laneRow.id) ?? [],
+              surchargesByRateId
             )
           )
 
@@ -362,6 +401,31 @@ export class DrizzleQuotesDao implements QuotesDao {
             rate: rateRow.rate,
             validFrom: rateRow.validFrom,
             validTo: rateRow.validTo,
+          }))
+        )
+      }
+
+      if (mapped.surcharges.length > 0) {
+        await this.db.insert(surcharge).values(
+          mapped.surcharges.map((surchargeRow) => ({
+            id: surchargeRow.id,
+            rateId: surchargeRow.rateId,
+            name: surchargeRow.name,
+            leg: surchargeRow.leg,
+            usageUnit: surchargeRow.usageUnit,
+            rate: surchargeRow.rate,
+            ratePercentage: surchargeRow.ratePercentage,
+            currencyCode: surchargeRow.currencyCode,
+            source: surchargeRow.source,
+            isIncludedInTotal: surchargeRow.isIncludedInTotal,
+            isRemoved: surchargeRow.isRemoved,
+            isVisible: surchargeRow.isVisible,
+            freeUsage: surchargeRow.freeUsage,
+            minUsage: surchargeRow.minUsage,
+            maxUsage: surchargeRow.maxUsage,
+            buyAmount: surchargeRow.buyAmount,
+            sellAmount: surchargeRow.sellAmount,
+            scopeOverride: surchargeRow.scopeOverride,
           }))
         )
       }

@@ -23,7 +23,7 @@ Single implementation + fixture conformance suite. No TS/Python/add-in twins.
 | `isIncludedInTotal`         | Surcharge inclusion predicate (sell / buy / rollup_buy) |
 | `getEffectiveUsageAmount`   | free → min → max usage → billable qty                   |
 
-Schemas for quote forms stay in `@starboard/lib-contracts`. Consumers: `apps/web` quote form (manual rate totals).
+Schemas for quote/catalog charge lines live in `@starboard/lib-contracts` (`surchargeLineSchema`). Persistence: ticket **065** (`quotes.surcharge`, prepared `rates.surcharge`). Amount engine: **066**.
 
 ## Fixtures
 
@@ -33,14 +33,22 @@ Under `packages/pricing/fixtures/`:
 - `total-inclusion-test-cases.json` — copied from legacy `shared-fixtures/qv2`
 - `surcharge-min-mechanics.json` — copied from legacy `shared-fixtures/qv2` (rows 1–10)
 
+## Schema push (surcharge tables)
+
+```bash
+pnpm --filter @starboard/lib-db db:push
+```
+
+Creates/updates `quotes.surcharge` and `rates.surcharge` (drizzle-kit push; no versioned SQL migrations).
+
 ## Deferred
 
 - FX converters / display-currency paths
-- Full surcharge row engine (`surcharge_matrix.json`)
-- Incoterm scope helpers beyond inclusion flags already in `isIncludedInTotal`
+- Full surcharge row engine (`surcharge_matrix.json`) — **066**
+- Incoterm scope helpers beyond inclusion flags already in `isIncludedInTotal` — **068**
 - Auto-margin / tier constraints
-- Quotes service buy/sell persistence (when rates domain lands)
+- Quote UI for charge lines — **067**
 
 ## Next tickets
 
-Rates catalog (`020`) will consume more of this package; spot/carrier quirks stay out of ONE MATH.
+**066** surcharge amount engine; **067** quote UI; **068** globals / incoterm scope. Spot/carrier quirks stay out of ONE MATH.

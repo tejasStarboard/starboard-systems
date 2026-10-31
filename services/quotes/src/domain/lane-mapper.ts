@@ -4,6 +4,7 @@ import type {
   DoorAddress,
   LaneFormValues,
   ManualRateLine,
+  SurchargeLine,
 } from "@starboard/lib-contracts"
 import { emptyDoorAddress, isDoorAddressEmpty } from "@starboard/lib-contracts"
 
@@ -30,6 +31,27 @@ export type RateRow = {
   rate: number
   validFrom: Date
   validTo: Date
+}
+
+export type SurchargeRow = {
+  id: string
+  rateId: string
+  name: string
+  leg: SurchargeLine["leg"]
+  usageUnit: SurchargeLine["usageUnit"]
+  rate: number | null
+  ratePercentage: number | null
+  currencyCode: string
+  source: SurchargeLine["source"]
+  isIncludedInTotal: boolean
+  isRemoved: boolean
+  isVisible: boolean
+  freeUsage: number | null
+  minUsage: number | null
+  maxUsage: number | null
+  buyAmount: number | null
+  sellAmount: number | null
+  scopeOverride: SurchargeLine["scopeOverride"]
 }
 
 export type RateValidity = {
@@ -124,13 +146,75 @@ function doorAddressOrNull(address: DoorAddress): DoorAddress | null {
   return isDoorAddressEmpty(address) ? null : address
 }
 
+function surchargeLineToRow(line: SurchargeLine, rateId: string): SurchargeRow {
+  return {
+    id: line.id,
+    rateId,
+    name: line.name,
+    leg: line.leg,
+    usageUnit: line.usageUnit,
+    rate: line.rate,
+    ratePercentage: line.ratePercentage,
+    currencyCode: line.currencyCode,
+    source: line.source,
+    isIncludedInTotal: line.isIncludedInTotal,
+    isRemoved: line.isRemoved,
+    isVisible: line.isVisible,
+    freeUsage: line.freeUsage,
+    minUsage: line.minUsage,
+    maxUsage: line.maxUsage,
+    buyAmount: line.buyAmount,
+    sellAmount: line.sellAmount,
+    scopeOverride: line.scopeOverride,
+  }
+}
+
+function surchargeRowToLine(row: SurchargeRow): SurchargeLine {
+  return {
+    id: row.id,
+    name: row.name,
+    leg: row.leg,
+    usageUnit: row.usageUnit,
+    rate: row.rate,
+    ratePercentage: row.ratePercentage,
+    currencyCode: row.currencyCode,
+    source: row.source,
+    isIncludedInTotal: row.isIncludedInTotal,
+    isRemoved: row.isRemoved,
+    isVisible: row.isVisible,
+    freeUsage: row.freeUsage,
+    minUsage: row.minUsage,
+    maxUsage: row.maxUsage,
+    buyAmount: row.buyAmount,
+    sellAmount: row.sellAmount,
+    scopeOverride: row.scopeOverride,
+  }
+}
+
 export function laneFormToRows(
   lane: LaneFormValues,
   quoteId: string,
   currencyCode: string,
   validity: RateValidity
-): { lane: LaneRow; rates: RateRow[] } {
+): { lane: LaneRow; rates: RateRow[]; surcharges: SurchargeRow[] } {
   const currency = currencyCode.trim().toUpperCase() || "USD"
+  const rates: RateRow[] = []
+  const surcharges: SurchargeRow[] = []
+
+  for (const line of lane.manualRates) {
+    rates.push({
+      id: line.id,
+      laneId: lane.id,
+      currencyCode: currency,
+      label: line.label,
+      rate: line.amount,
+      validFrom: validity.validFrom,
+      validTo: validity.validTo,
+    })
+    for (const surcharge of line.surcharges ?? []) {
+      surcharges.push(surchargeLineToRow(surcharge, line.id))
+    }
+  }
 
   return {
     lane: {
@@ -147,19 +231,16 @@ export function laneFormToRows(
       markupType: lane.markupType,
       markupValue: lane.markupValue,
     },
-    rates: lane.manualRates.map((line) => ({
-      id: line.id,
-      laneId: lane.id,
-      currencyCode: currency,
-      label: line.label,
-      rate: line.amount,
-      validFrom: validity.validFrom,
-      validTo: validity.validTo,
-    })),
+    rates,
+    surcharges,
   }
 }
 
-export function rowsToLaneForm(row: LaneRow, rates: RateRow[]): LaneFormValues {
+export function rowsToLaneForm(
+  row: LaneRow,
+  rates: RateRow[],
+  surchargesByRateId: Map<string, SurchargeRow[]> = new Map()
+): LaneFormValues {
   const scalars = scalarsFromCargo(row.cargo)
   const containers =
     row.mode === "fcl"
@@ -184,6 +265,9 @@ export function rowsToLaneForm(row: LaneRow, rates: RateRow[]): LaneFormValues {
       id: rate.id,
       label: rate.label,
       amount: rate.rate,
+      surcharges: (surchargesByRateId.get(rate.id) ?? []).map(
+        surchargeRowToLine
+      ),
     })),
     markupType: row.markupType,
     markupValue: row.markupValue,

@@ -19,6 +19,35 @@ import {
   quoteFormSchema,
   quoteListItemSchema,
 } from "./quotes"
+import {
+  createSurchargeLine,
+  surchargeLegSchema,
+  surchargeLineSchema,
+  usageUnitSchema,
+} from "./surcharge"
+
+describe("surcharge contracts", () => {
+  test("surchargeLineSchema accepts a lean charge row", () => {
+    const parsed = surchargeLineSchema.safeParse(
+      createSurchargeLine({
+        id: "sch-1",
+        name: "BAF",
+        leg: "freight",
+        usageUnit: "percentage",
+        rate: null,
+        ratePercentage: 12.5,
+        currencyCode: "USD",
+        source: "carrier",
+      })
+    )
+    expect(parsed.success).toBe(true)
+  })
+
+  test("rejects invalid leg and usage unit", () => {
+    expect(surchargeLegSchema.safeParse("globals").success).toBe(false)
+    expect(usageUnitSchema.safeParse("box").success).toBe(false)
+  })
+})
 
 describe("quote contracts", () => {
   test("emptyQuoteFormValues produces a valid draft form", () => {

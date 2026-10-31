@@ -2,7 +2,7 @@
 id: 064
 wave: 06-product
 title: CRM fields/contacts + settings shell pages
-status: in_progress
+status: done
 depends_on: [004]
 epic: SYS-CRM
 docs:

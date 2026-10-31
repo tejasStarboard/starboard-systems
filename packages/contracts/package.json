@@ -23,6 +23,12 @@
       "import": "./dist/quotes.js",
       "default": "./dist/quotes.js"
     },
+    "./surcharge": {
+      "types": "./src/surcharge.ts",
+      "bun": "./src/surcharge.ts",
+      "import": "./dist/surcharge.js",
+      "default": "./dist/surcharge.js"
+    },
     "./geography": {
       "types": "./src/geography.ts",
       "bun": "./src/geography.ts",

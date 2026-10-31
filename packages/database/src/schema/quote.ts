@@ -4,9 +4,14 @@ import type {
   LegMode,
   QuoteSource,
   QuoteStatus,
+  ScopeOverride,
+  SurchargeLeg,
+  SurchargeSource,
+  UsageUnit,
 } from "@starboard/lib-contracts"
 import { relations } from "drizzle-orm"
 import {
+  boolean,
   doublePrecision,
   index,
   jsonb,
@@ -147,6 +152,47 @@ export const rate = quotesSchema.table(
   ]
 )
 
+/** Lean charge line under a quote rate (prod qv2_surcharge subset). */
+export const surcharge = quotesSchema.table(
+  "surcharge",
+  {
+    id: text("id").primaryKey(),
+    rateId: text("rate_id")
+      .notNull()
+      .references(() => rate.id, { onDelete: "cascade" }),
+    name: text("name").notNull().default(""),
+    leg: varchar("leg", { length: 16 }).$type<SurchargeLeg>().notNull(),
+    usageUnit: varchar("usage_unit", { length: 16 })
+      .$type<UsageUnit>()
+      .notNull()
+      .default("flat"),
+    rate: doublePrecision("rate"),
+    ratePercentage: doublePrecision("rate_percentage"),
+    currencyCode: varchar("currency_code", { length: 3 }).notNull(),
+    source: varchar("source", { length: 16 })
+      .$type<SurchargeSource>()
+      .notNull()
+      .default("manual"),
+    isIncludedInTotal: boolean("is_included_in_total").notNull().default(true),
+    isRemoved: boolean("is_removed").notNull().default(false),
+    isVisible: boolean("is_visible").notNull().default(true),
+    freeUsage: doublePrecision("free_usage"),
+    minUsage: doublePrecision("min_usage"),
+    maxUsage: doublePrecision("max_usage"),
+    buyAmount: doublePrecision("buy_amount"),
+    sellAmount: doublePrecision("sell_amount"),
+    scopeOverride: varchar("scope_override", {
+      length: 16,
+    }).$type<ScopeOverride | null>(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+      .defaultNow()
+      .$onUpdate(() => /* @__PURE__ */ new Date())
+      .notNull(),
+  },
+  (table) => [index("quote_surcharge_rate_id_idx").on(table.rateId)]
+)
+
 export const quoteRelations = relations(quote, ({ many }) => ({
   lanes: many(lane),
 }))
@@ -159,9 +205,17 @@ export const laneRelations = relations(lane, ({ one, many }) => ({
   rates: many(rate),
 }))
 
-export const rateRelations = relations(rate, ({ one }) => ({
+export const rateRelations = relations(rate, ({ one, many }) => ({
   lane: one(lane, {
     fields: [rate.laneId],
     references: [lane.id],
+  }),
+  surcharges: many(surcharge),
+}))
+
+export const surchargeRelations = relations(surcharge, ({ one }) => ({
+  rate: one(rate, {
+    fields: [surcharge.rateId],
+    references: [rate.id],
   }),
 }))
