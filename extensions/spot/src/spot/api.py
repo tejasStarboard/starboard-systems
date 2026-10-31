@@ -30,6 +30,7 @@ class SearchJobBody(BaseModel):
     origin: str | None = None
     destination: str | None = None
     mode: str = Field(default="fcl")
+    liveStrategy: bool | None = None
 
 
 def create_app(
@@ -79,6 +80,7 @@ def create_app(
                 origin=body.origin,
                 destination=body.destination,
                 mode=body.mode,
+                live_strategy=body.liveStrategy,
             ),
             id=workflow_id,
             task_queue=cfg.temporal_task_queue,

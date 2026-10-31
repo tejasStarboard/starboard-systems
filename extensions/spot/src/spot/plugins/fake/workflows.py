@@ -18,6 +18,7 @@ class SearchWorkflowInput:
     origin: str | None = None
     destination: str | None = None
     mode: str = "fcl"
+    live_strategy: bool | None = None
 
 
 @dataclass
@@ -40,6 +41,7 @@ class SpotSearchWorkflow:
                 "origin": input.origin,
                 "destination": input.destination,
                 "mode": input.mode,
+                "liveStrategy": input.live_strategy,
             },
             start_to_close_timeout=timedelta(seconds=60),
             retry_policy=short,

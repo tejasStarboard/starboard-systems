@@ -5,7 +5,7 @@ from contextlib import asynccontextmanager
 from typing import AsyncIterator
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Query
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from temporalio.client import Client
 
 from messaging.config import MessagingConfig, load_config
@@ -28,6 +28,11 @@ class EnqueueResponse(BaseModel):
 
 class ConnectionBody(BaseModel):
     organizationId: str
+
+
+class SyncJobBody(BaseModel):
+    organizationId: str
+    syncIntervalMinutes: int = Field(default=15, ge=1)
 
 
 class CallbackBody(BaseModel):
@@ -187,7 +192,7 @@ def create_app(
         status_code=202,
         dependencies=[Depends(require_service_token)],
     )
-    async def enqueue_sync(body: ConnectionBody) -> EnqueueResponse:
+    async def enqueue_sync(body: SyncJobBody) -> EnqueueResponse:
         client: Client | None = getattr(app.state, "temporal_client", None)
         if client is None:
             raise HTTPException(status_code=503, detail="Temporal client not ready")
@@ -199,7 +204,10 @@ def create_app(
         workflow_id = f"messaging.msgraph.sync-{uuid.uuid4()}"
         handle = await client.start_workflow(
             MsGraphSyncWorkflow.run,
-            SyncWorkflowInput(organization_id=body.organizationId),
+            SyncWorkflowInput(
+                organization_id=body.organizationId,
+                sync_interval_minutes=body.syncIntervalMinutes,
+            ),
             id=workflow_id,
             task_queue=cfg.temporal_task_queue,
         )

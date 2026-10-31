@@ -21,6 +21,8 @@ export type SpotSearchInput = {
   origin?: string
   destination?: string
   mode?: string
+  /** From admin `live_strategy` setting (spot.maersk). */
+  liveStrategy?: boolean
 }
 
 function assertSpotExtension(extensionId: string) {
@@ -73,6 +75,9 @@ class HttpSpotClient implements SpotClient {
           origin: input.origin,
           destination: input.destination,
           mode: input.mode ?? "fcl",
+          ...(typeof input.liveStrategy === "boolean"
+            ? { liveStrategy: input.liveStrategy }
+            : {}),
         }),
       },
       options

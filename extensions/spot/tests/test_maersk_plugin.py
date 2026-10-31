@@ -53,3 +53,46 @@ def test_maersk_search_requires_credentials() -> None:
     with pytest.raises(MaerskSearchError, match="credentials") as exc_info:
         plugin.search(request, credentials=None)
     assert exc_info.value.code == "missing_credentials"
+
+
+@pytest.mark.asyncio
+async def test_search_activity_live_strategy_returns_live_unavailable(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import json
+
+    from spot.plugins.fake import activities
+
+    monkeypatch.setenv(
+        "SPOT_MAERSK_CREDENTIALS",
+        json.dumps(
+            {"org_test": {"username": "demo", "password": "secret"}}
+        ),
+    )
+    monkeypatch.setenv("SPOT_MAERSK_FIXTURE_PATH", str(_FIXTURE))
+
+    live = await activities.search_activity(
+        {
+            "organizationId": "org_test",
+            "pluginId": "maersk",
+            "origin": "CNSHA",
+            "destination": "NLRTM",
+            "mode": "fcl",
+            "liveStrategy": True,
+        }
+    )
+    assert live["rates"] == []
+    assert live["error"]["code"] == "live_unavailable"
+
+    fixture = await activities.search_activity(
+        {
+            "organizationId": "org_test",
+            "pluginId": "maersk",
+            "origin": "CNSHA",
+            "destination": "NLRTM",
+            "mode": "fcl",
+            "liveStrategy": False,
+        }
+    )
+    assert len(fixture["rates"]) >= 1
+    assert fixture.get("error") is None

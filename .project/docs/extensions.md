@@ -135,7 +135,7 @@ Declared on `contributes.settings`. v1 `scope` is `"platform"` only. Stored in P
 | Auth                                 | No session → **401**. Signed-in non-staff → **404** (`requireStaffApiSession`).                                                                                                   |
 | Audit                                | `platform_audit_log` action `extension_setting.update` records the changed keys, not secret values.                                                                               |
 
-Workers read saved values, including secrets, through `getExtensionSettings(extensionId)` on the platform manager. Temporal workers are not wired to that helper yet.
+**Runtime read path (061):** BFF managers call `getPlatformManager().getExtensionSettings(extensionId)` when enqueueing jobs. Missing DB rows use the manifest `default` via `resolveExtensionSettingValues`. Non-secret values are forwarded on the worker job body (`liveStrategy` for `spot.maersk`, `syncIntervalMinutes` for `messaging.msgraph`). `settingsForJobInput` strips `type: "secret"` keys so secrets never land in Temporal history or logs. Workers do **not** read Postgres directly.
 
 ### 8. Unplug checklist (verified post-055)
 

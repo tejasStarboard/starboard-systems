@@ -38,12 +38,16 @@ async def test_sync_workflow_records_messages(
         ):
             result = await env.client.execute_workflow(
                 MsGraphSyncWorkflow.run,
-                SyncWorkflowInput(organization_id="org_sync"),
+                SyncWorkflowInput(
+                    organization_id="org_sync",
+                    sync_interval_minutes=30,
+                ),
                 id="test-sync",
                 task_queue="test-msgraph-sync",
             )
 
     assert result.status == "completed"
+    assert result.sync_interval_minutes == 30
     assert "msg_inbound_1" in result.message_ids
     messages = MessageStore(data_dir=tmp_path).list("org_sync")
     assert len(messages) >= 1
