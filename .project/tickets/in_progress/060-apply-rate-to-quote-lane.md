@@ -2,7 +2,7 @@
 id: 060
 wave: 06-product
 title: Apply catalog/spot rate to quote lane
-status: open
+status: in_progress
 depends_on: [002, 010, 020, 055]
 epic: SYS-QUOTES
 docs:

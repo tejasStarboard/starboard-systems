@@ -12,27 +12,27 @@ Shell, geo, rates stub, pricing helpers, thin extensions, platform admin, extens
 
 ### P0 — Quote money path
 
-| Ticket | Title | Status |
-|--------|-------|--------|
-| [060](../tickets/todo/060-apply-rate-to-quote-lane.md) | Apply catalog/spot rate → quote lane | open |
-| [061](../tickets/todo/061-extension-settings-runtime.md) | Extension settings → workers (parallel) | open |
-| [065](../tickets/todo/065-surcharge-data-model.md) | Surcharge data model + contracts | open |
-| [066](../tickets/todo/066-surcharge-pricing-engine.md) | Surcharge amount engine | open |
-| [067](../tickets/todo/067-surcharge-quote-ui.md) | Surcharges in quote UI | open |
+| Ticket                                                   | Title                                   | Status |
+| -------------------------------------------------------- | --------------------------------------- | ------ |
+| [060](../tickets/todo/060-apply-rate-to-quote-lane.md)   | Apply catalog/spot rate → quote lane    | open   |
+| [061](../tickets/todo/061-extension-settings-runtime.md) | Extension settings → workers (parallel) | open   |
+| [065](../tickets/todo/065-surcharge-data-model.md)       | Surcharge data model + contracts        | open   |
+| [066](../tickets/todo/066-surcharge-pricing-engine.md)   | Surcharge amount engine                 | open   |
+| [067](../tickets/todo/067-surcharge-quote-ui.md)         | Surcharges in quote UI                  | open   |
 
 ### P1 — Extensions production-shaped
 
-| Ticket | Title | Status |
-|--------|-------|--------|
-| [068](../tickets/todo/068-global-charges-incoterm-scope.md) | Globals + incoterm/bucket scope | open |
-| [062](../tickets/todo/062-live-spot-strategies.md) | Live spot Maersk/CMA | open |
-| [063](../tickets/todo/063-messaging-production-path.md) | Messaging Graph OAuth + Neon | open |
+| Ticket                                                      | Title                           | Status |
+| ----------------------------------------------------------- | ------------------------------- | ------ |
+| [068](../tickets/todo/068-global-charges-incoterm-scope.md) | Globals + incoterm/bucket scope | open   |
+| [062](../tickets/todo/062-live-spot-strategies.md)          | Live spot Maersk/CMA            | open   |
+| [063](../tickets/todo/063-messaging-production-path.md)     | Messaging Graph OAuth + Neon    | open   |
 
 ### P2 — Shell completeness
 
-| Ticket | Title | Status |
-|--------|-------|--------|
-| [064](../tickets/todo/064-crm-and-settings-shell.md) | CRM fields/contacts + settings pages | open |
+| Ticket                                               | Title                                | Status |
+| ---------------------------------------------------- | ------------------------------------ | ------ |
+| [064](../tickets/todo/064-crm-and-settings-shell.md) | CRM fields/contacts + settings pages | open   |
 
 ## Later (no tickets)
 

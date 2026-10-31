@@ -7,7 +7,7 @@ Greenfield rewrite of production Starboard (`../starboard-2`) into this monorepo
 | Path                                               | Purpose                                                 |
 | -------------------------------------------------- | ------------------------------------------------------- |
 | [docs/](docs/)                                     | Program architecture, ADRs, domain status, deprecations |
-| [docs/reference/](docs/reference/)                 | Dated starboard-2 inventory + rewrite coverage tracker |
+| [docs/reference/](docs/reference/)                 | Dated starboard-2 inventory + rewrite coverage tracker  |
 | [tickets/todo/](tickets/todo/)                     | Open tickets (lexical order = priority)                 |
 | [tickets/in_progress/](tickets/in_progress/)       | Actively being implemented                              |
 | [tickets/done/](tickets/done/)                     | Accepted / merged                                       |
