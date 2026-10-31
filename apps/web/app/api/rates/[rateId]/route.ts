@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 
 import { requireApiSession } from "@/lib/auth/session"
 import { ServiceClientError } from "@/lib/clients/http"
-import { getRateForOrg } from "@/lib/rates/orchestrator"
+import { getRatesManager } from "@/lib/domain/rates/rates.manager"
 
 export async function GET(
   _request: Request,
@@ -16,7 +16,7 @@ export async function GET(
   const { rateId } = await context.params
 
   try {
-    const rate = await getRateForOrg(
+    const rate = await getRatesManager().getRateForOrg(
       authResult.session.session.activeOrganizationId!,
       rateId
     )

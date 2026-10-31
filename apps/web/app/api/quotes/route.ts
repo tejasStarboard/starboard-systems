@@ -1,10 +1,7 @@
 import { NextResponse } from "next/server"
 
 import { requireApiSession } from "@/lib/auth/session"
-import {
-  createQuoteForSession,
-  listQuotesForOrg,
-} from "@/lib/quotes/orchestrator"
+import { getQuotesManager } from "@/lib/domain/quotes/quotes.manager"
 import { ServiceClientError } from "@/lib/clients/http"
 
 export async function GET() {
@@ -14,7 +11,7 @@ export async function GET() {
   }
 
   try {
-    const quotes = await listQuotesForOrg(
+    const quotes = await getQuotesManager().listQuotesForOrg(
       authResult.session.session.activeOrganizationId!
     )
     return NextResponse.json({ quotes })
@@ -36,7 +33,7 @@ export async function POST() {
   }
 
   try {
-    const created = await createQuoteForSession({
+    const created = await getQuotesManager().createQuoteForSession({
       ownerId: authResult.session.user.id,
       organizationId: authResult.session.session.activeOrganizationId!,
     })

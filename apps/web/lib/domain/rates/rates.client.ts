@@ -48,13 +48,19 @@ function buildListPath(query: Partial<ListRatesQuery> = {}): string {
 }
 
 class HttpRatesClient implements RatesClient {
+  constructor(
+    private readonly options: { baseUrl: string } = {
+      baseUrl: env.RATES_SERVICE_URL,
+    }
+  ) {}
+
   async listRates(
     organizationId: string,
     query: Partial<ListRatesQuery> = {},
     requestId?: string
   ): Promise<Rate[]> {
     const options = createServiceOptions({
-      baseUrl: env.RATES_SERVICE_URL,
+      baseUrl: this.options.baseUrl,
       organizationId,
       requestId,
     })
@@ -77,7 +83,7 @@ class HttpRatesClient implements RatesClient {
     requestId?: string
   ): Promise<CreateRateResponse> {
     const options = createServiceOptions({
-      baseUrl: env.RATES_SERVICE_URL,
+      baseUrl: this.options.baseUrl,
       organizationId,
       requestId,
     })
@@ -103,7 +109,7 @@ class HttpRatesClient implements RatesClient {
     requestId?: string
   ): Promise<GetRateResponse> {
     const options = createServiceOptions({
-      baseUrl: env.RATES_SERVICE_URL,
+      baseUrl: this.options.baseUrl,
       organizationId,
       requestId,
     })
@@ -121,6 +127,12 @@ class HttpRatesClient implements RatesClient {
   }
 }
 
+let ratesClient: RatesClient = new HttpRatesClient()
+
 export function getRatesClient(): RatesClient {
-  return new HttpRatesClient()
+  return ratesClient
+}
+
+export function setRatesClient(client: RatesClient) {
+  ratesClient = client
 }

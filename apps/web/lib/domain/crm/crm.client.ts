@@ -33,12 +33,18 @@ export interface CrmClient {
 }
 
 class HttpCrmClient implements CrmClient {
+  constructor(
+    private readonly options: { baseUrl: string } = {
+      baseUrl: env.CRM_SERVICE_URL,
+    }
+  ) {}
+
   async listCustomers(
     organizationId: string,
     requestId?: string
   ): Promise<FormOption[]> {
     const options = createServiceOptions({
-      baseUrl: env.CRM_SERVICE_URL,
+      baseUrl: this.options.baseUrl,
       organizationId,
       requestId,
     })
@@ -61,7 +67,7 @@ class HttpCrmClient implements CrmClient {
     requestId?: string
   ): Promise<CreateCustomerResponse> {
     const options = createServiceOptions({
-      baseUrl: env.CRM_SERVICE_URL,
+      baseUrl: this.options.baseUrl,
       organizationId,
       requestId,
     })
@@ -92,7 +98,7 @@ class HttpCrmClient implements CrmClient {
     }
 
     const options = createServiceOptions({
-      baseUrl: env.CRM_SERVICE_URL,
+      baseUrl: this.options.baseUrl,
       organizationId,
       requestId,
     })

@@ -20,7 +20,7 @@ import {
   quoteFormSchema,
   type QuoteFormOption,
   type QuoteFormValues,
-} from "@/lib/quotes/schema"
+} from "@/lib/domain/quotes/quotes.schema"
 
 export function QuoteForm({
   defaultValues,

@@ -16,9 +16,15 @@ export interface GeographyClient {
 }
 
 class HttpGeographyClient implements GeographyClient {
+  constructor(
+    private readonly options: { baseUrl: string } = {
+      baseUrl: env.GEOGRAPHY_SERVICE_URL,
+    }
+  ) {}
+
   async listCurrencyOptions(requestId?: string): Promise<FormOption[]> {
     const options = createServiceOptions({
-      baseUrl: env.GEOGRAPHY_SERVICE_URL,
+      baseUrl: this.options.baseUrl,
       requestId,
     })
     const response = await serviceFetch(
@@ -38,7 +44,7 @@ class HttpGeographyClient implements GeographyClient {
     if (!normalized) return
 
     const options = createServiceOptions({
-      baseUrl: env.GEOGRAPHY_SERVICE_URL,
+      baseUrl: this.options.baseUrl,
       requestId,
     })
     const response = await serviceFetch(
@@ -54,7 +60,7 @@ class HttpGeographyClient implements GeographyClient {
 
   async searchPorts(q = "", requestId?: string): Promise<FormOption[]> {
     const options = createServiceOptions({
-      baseUrl: env.GEOGRAPHY_SERVICE_URL,
+      baseUrl: this.options.baseUrl,
       requestId,
     })
     const params = new URLSearchParams()
