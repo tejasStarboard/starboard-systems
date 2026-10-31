@@ -1,6 +1,11 @@
 "use client"
 
-import { CaretLeftIcon, CaretRightIcon, PlugsIcon, PlusIcon } from "@phosphor-icons/react"
+import {
+  CaretLeftIcon,
+  CaretRightIcon,
+  PlugsIcon,
+  PlusIcon,
+} from "@phosphor-icons/react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
@@ -148,9 +153,7 @@ export function CustomersList({
   useEffect(() => {
     const timer = window.setTimeout(() => {
       const nextQ = query.trim()
-      setListQuery((prev) =>
-        prev.q === nextQ ? prev : { page: 1, q: nextQ }
-      )
+      setListQuery((prev) => (prev.q === nextQ ? prev : { page: 1, q: nextQ }))
     }, 300)
     return () => window.clearTimeout(timer)
   }, [query])
@@ -173,8 +176,7 @@ export function CustomersList({
         if (listQuery.q) params.set("q", listQuery.q)
         const response = await fetch(`/api/customers?${params}`)
         const body = (await response.json().catch(() => null)) as
-          | (ListCustomerRecordsResponse & { error?: string })
-          | null
+          (ListCustomerRecordsResponse & { error?: string }) | null
         if (!response.ok || !body?.customers) {
           if (!cancelled) {
             toast.add({

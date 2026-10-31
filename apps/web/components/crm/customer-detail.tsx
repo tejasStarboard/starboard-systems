@@ -174,8 +174,7 @@ export function CustomerDetail({
           `/api/customers/${initialCustomer.id}/contacts?${params}`
         )
         const body = (await response.json().catch(() => null)) as
-          | (ListContactsResponse & { error?: string })
-          | null
+          (ListContactsResponse & { error?: string }) | null
         if (!response.ok || !body?.contacts) {
           if (!cancelled) {
             toast.add({
@@ -222,8 +221,7 @@ export function CustomerDetail({
         body: JSON.stringify({ isActive: nextActive }),
       })
       const body = (await response.json().catch(() => null)) as
-        | (CustomerRecord & { error?: string })
-        | null
+        (CustomerRecord & { error?: string }) | null
       if (!response.ok || !body) {
         toast.add({
           type: "error",
@@ -245,7 +243,9 @@ export function CustomerDetail({
       form.reset(customerToFormValues(parsed.data))
       toast.add({
         type: "success",
-        title: parsed.data.isActive ? "Customer activated" : "Customer deactivated",
+        title: parsed.data.isActive
+          ? "Customer activated"
+          : "Customer deactivated",
       })
       router.refresh()
     } catch {
@@ -268,8 +268,7 @@ export function CustomerDetail({
         body: JSON.stringify({ ...values, isActive: true }),
       })
       const body = (await response.json().catch(() => null)) as
-        | (CustomerRecord & { error?: string })
-        | null
+        (CustomerRecord & { error?: string }) | null
       if (!response.ok || !body) {
         toast.add({
           type: "error",
@@ -313,8 +312,7 @@ export function CustomerDetail({
       `/api/customers/${initialCustomer.id}/contacts?${params}`
     )
     const body = (await response.json().catch(() => null)) as
-      | (ListContactsResponse & { error?: string })
-      | null
+      (ListContactsResponse & { error?: string }) | null
     if (!response.ok || !body?.contacts) {
       throw new Error(body?.error ?? "Unable to load contacts")
     }

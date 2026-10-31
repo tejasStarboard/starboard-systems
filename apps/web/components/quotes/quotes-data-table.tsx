@@ -68,8 +68,7 @@ export function QuotesDataTable<TData extends RowData & { id: string }>({
         if (listQuery.q) params.set("q", listQuery.q)
         const response = await fetch(`/api/quotes?${params}`)
         const body = (await response.json().catch(() => null)) as
-          | (ListQuotesViewResponse & { error?: string })
-          | null
+          (ListQuotesViewResponse & { error?: string }) | null
         if (!response.ok || !body?.quotes) {
           if (!cancelled) {
             toast.add({

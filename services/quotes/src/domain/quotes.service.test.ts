@@ -48,21 +48,19 @@ class InMemoryQuotesDao implements QuotesDao {
           row.source.toLowerCase().includes(q)
         )
       })
-      .map(
-        (row): QuoteListItem => ({
-          id: row.id,
-          quoteId: row.quoteId,
-          source: row.source,
-          status: row.status,
-          customerId: row.customerId,
-          currencyCode: row.currencyCode,
-          ownerId: row.ownerId,
-          organizationId: row.organizationId,
-          effectiveFrom: row.effectiveFrom?.toISOString() ?? null,
-          expiryAt: row.expiryAt?.toISOString() ?? null,
-          createdAt: new Date().toISOString(),
-        })
-      )
+      .map((row): QuoteListItem => ({
+        id: row.id,
+        quoteId: row.quoteId,
+        source: row.source,
+        status: row.status,
+        customerId: row.customerId,
+        currencyCode: row.currencyCode,
+        ownerId: row.ownerId,
+        organizationId: row.organizationId,
+        effectiveFrom: row.effectiveFrom?.toISOString() ?? null,
+        expiryAt: row.expiryAt?.toISOString() ?? null,
+        createdAt: new Date().toISOString(),
+      }))
 
     return {
       rows: filtered.slice(params.offset, params.offset + params.limit),
@@ -279,7 +277,10 @@ describe("DefaultQuotesService.save", () => {
     const service = new DefaultQuotesService(dao)
 
     for (const id of ["quote-a", "quote-b", "quote-c"]) {
-      const values = emptyQuoteFormValues({ id, quoteId: id.slice(-6).toUpperCase() })
+      const values = emptyQuoteFormValues({
+        id,
+        quoteId: id.slice(-6).toUpperCase(),
+      })
       values.lanes = [emptyLaneFormValues("fcl")]
       await service.save(values, {
         ownerId: "user-1",
