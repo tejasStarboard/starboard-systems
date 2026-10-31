@@ -21,7 +21,9 @@ class InMemoryCrmDao implements CrmDao {
     organizationId: string
   ): Promise<FormOption[]> {
     return this.customers
-      .filter((row) => row.organizationId === organizationId)
+      .filter(
+        (row) => row.organizationId === organizationId && row.isActive
+      )
       .sort((a, b) => a.name.localeCompare(b.name))
       .map((row) => ({ value: row.id, label: row.name }))
   }
@@ -87,6 +89,14 @@ class InMemoryCrmDao implements CrmDao {
         (row) =>
           row.organizationId === organizationId && row.customerId === customerId
       )
+      .sort((a, b) => a.name.localeCompare(b.name))
+  }
+
+  async listContactsByOrganization(
+    organizationId: string
+  ): Promise<ContactRow[]> {
+    return this.contacts
+      .filter((row) => row.organizationId === organizationId)
       .sort((a, b) => a.name.localeCompare(b.name))
   }
 
@@ -188,22 +198,49 @@ describe("DefaultCrmService org isolation", () => {
       email: "ops@acme.test",
       phone: "+1-555-0100",
       address: "1 Harbor Way",
+      city: "Oakland",
+      state: "CA",
+      countryCode: "US",
+      zip: "94607",
       isVendor: true,
     })
 
     expect(created.email).toBe("ops@acme.test")
+    expect(created.city).toBe("Oakland")
+    expect(created.state).toBe("CA")
+    expect(created.countryCode).toBe("US")
+    expect(created.zip).toBe("94607")
     expect(created.isCustomer).toBe(true)
     expect(created.isVendor).toBe(true)
+    expect(created.isActive).toBe(true)
 
     const updated = await service.update("org-a", created.id, {
       phone: "+1-555-0199",
+      city: "San Francisco",
       isVendor: false,
     })
     expect(updated.phone).toBe("+1-555-0199")
+    expect(updated.city).toBe("San Francisco")
     expect(updated.isVendor).toBe(false)
 
     const options = await service.list("org-a")
     expect(options).toEqual([{ value: created.id, label: "Acme" }])
+  })
+
+  test("inactive customers stay in records but leave quote picker options", async () => {
+    const service = new DefaultCrmService(new InMemoryCrmDao())
+    const created = await service.create("org-a", { name: "Acme" })
+
+    await service.update("org-a", created.id, { isActive: false })
+
+    expect(await service.list("org-a")).toEqual([])
+    expect(await service.listRecords("org-a")).toEqual([
+      expect.objectContaining({
+        id: created.id,
+        name: "Acme",
+        isActive: false,
+      }),
+    ])
   })
 
   test("contacts CRUD is org and customer scoped", async () => {

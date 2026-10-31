@@ -11,8 +11,13 @@ export type CustomerRow = {
   email: string | null
   phone: string | null
   address: string | null
+  city: string | null
+  state: string | null
+  countryCode: string | null
+  zip: string | null
   isCustomer: boolean
   isVendor: boolean
+  isActive: boolean
 }
 
 export type CustomerInsert = {
@@ -22,8 +27,13 @@ export type CustomerInsert = {
   email: string | null
   phone: string | null
   address: string | null
+  city: string | null
+  state: string | null
+  countryCode: string | null
+  zip: string | null
   isCustomer: boolean
   isVendor: boolean
+  isActive: boolean
 }
 
 export type CustomerUpdate = {
@@ -31,8 +41,13 @@ export type CustomerUpdate = {
   email?: string | null
   phone?: string | null
   address?: string | null
+  city?: string | null
+  state?: string | null
+  countryCode?: string | null
+  zip?: string | null
   isCustomer?: boolean
   isVendor?: boolean
+  isActive?: boolean
 }
 
 export type CustomerNameRow = {
@@ -88,6 +103,7 @@ export interface CrmDao {
     organizationId: string,
     customerId: string
   ): Promise<ContactRow[]>
+  listContactsByOrganization(organizationId: string): Promise<ContactRow[]>
   getContactById(
     organizationId: string,
     customerId: string,
@@ -114,8 +130,13 @@ const customerColumns = {
   email: customer.email,
   phone: customer.phone,
   address: customer.address,
+  city: customer.city,
+  state: customer.state,
+  countryCode: customer.countryCode,
+  zip: customer.zip,
   isCustomer: customer.isCustomer,
   isVendor: customer.isVendor,
+  isActive: customer.isActive,
 } as const
 
 const contactColumns = {
@@ -140,7 +161,12 @@ export class DrizzleCrmDao implements CrmDao {
         name: customer.name,
       })
       .from(customer)
-      .where(eq(customer.organizationId, organizationId))
+      .where(
+        and(
+          eq(customer.organizationId, organizationId),
+          eq(customer.isActive, true)
+        )
+      )
       .orderBy(asc(customer.name))
 
     return rows.map((row) => ({
@@ -187,8 +213,13 @@ export class DrizzleCrmDao implements CrmDao {
         email: row.email,
         phone: row.phone,
         address: row.address,
+        city: row.city,
+        state: row.state,
+        countryCode: row.countryCode,
+        zip: row.zip,
         isCustomer: row.isCustomer,
         isVendor: row.isVendor,
+        isActive: row.isActive,
       })
       .returning(customerColumns)
 
@@ -257,6 +288,16 @@ export class DrizzleCrmDao implements CrmDao {
           eq(contact.customerId, customerId)
         )
       )
+      .orderBy(asc(contact.name))
+  }
+
+  async listContactsByOrganization(
+    organizationId: string
+  ): Promise<ContactRow[]> {
+    return this.db
+      .select(contactColumns)
+      .from(contact)
+      .where(eq(contact.organizationId, organizationId))
       .orderBy(asc(contact.name))
   }
 

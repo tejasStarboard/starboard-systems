@@ -5,6 +5,7 @@ import type {
   CreateContactRequest,
   CreateCustomerRequestInput,
   CreateCustomerResponse,
+  CustomerListItem,
   FormOption,
   UpdateContactRequest,
   UpdateCustomerRequest,
@@ -25,7 +26,7 @@ export class CrmManager {
   async listCustomerRecords(
     organizationId: string,
     requestId?: string
-  ): Promise<CreateCustomerResponse[]> {
+  ): Promise<CustomerListItem[]> {
     return this.crmClient.listCustomerRecords(organizationId, requestId)
   }
 

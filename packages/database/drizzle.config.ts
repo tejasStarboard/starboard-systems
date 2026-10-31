@@ -24,6 +24,9 @@ export default defineConfig({
     "platform",
     "messaging",
   ],
+  // Ignore PostGIS catalog tables so push does not prompt rename conflicts
+  // against spatial_ref_sys (breaks non-interactive CI).
+  extensionsFilters: ["postgis"],
   dbCredentials: {
     url: process.env.POSTGRES_URL,
   },
