@@ -2,9 +2,11 @@ from __future__ import annotations
 
 from spot.plugins.base import SpotPlugin
 from spot.plugins.fake.plugin import FakeSpotPlugin
+from spot.plugins.maersk.plugin import MaerskSpotPlugin
 
 _PLUGIN_REGISTRY: dict[str, SpotPlugin] = {
     FakeSpotPlugin.id: FakeSpotPlugin(),
+    MaerskSpotPlugin.id: MaerskSpotPlugin(),
 }
 
 

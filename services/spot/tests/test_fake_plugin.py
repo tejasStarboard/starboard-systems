@@ -14,7 +14,7 @@ def test_registry_loads_fake_by_id() -> None:
 
 def test_registry_rejects_unknown_plugin() -> None:
     with pytest.raises(KeyError, match="Unknown spot plugin"):
-        get_plugin("maersk")
+        get_plugin("hapag")
 
 
 def test_fake_plugin_returns_deterministic_rates() -> None:

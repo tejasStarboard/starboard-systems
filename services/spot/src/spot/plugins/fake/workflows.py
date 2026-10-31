@@ -24,6 +24,7 @@ class SearchWorkflowInput:
 class SearchWorkflowResult:
     status: str
     rates: list[dict[str, Any]]
+    error: dict[str, str] | None = None
 
 
 @workflow.defn(name="spot.search")
@@ -43,6 +44,13 @@ class SpotSearchWorkflow:
             start_to_close_timeout=timedelta(seconds=60),
             retry_policy=short,
         )
+        error = result.get("error")
+        if error:
+            return SearchWorkflowResult(
+                status="error",
+                rates=[],
+                error=dict(error) if isinstance(error, dict) else {"message": str(error)},
+            )
         return SearchWorkflowResult(
             status="completed",
             rates=list(result.get("rates") or []),

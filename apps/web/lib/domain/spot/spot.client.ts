@@ -20,7 +20,17 @@ export type SpotSearchInput = {
   mode?: string
 }
 
+function isSpotExtensionId(
+  extensionId: string
+): extensionId is "spot.fake" | "spot.maersk" {
+  return extensionId === "spot.fake" || extensionId === "spot.maersk"
+}
+
 export interface SpotClient {
+  enqueueSearch(
+    extensionId: string,
+    input: SpotSearchInput
+  ): Promise<EnqueueSpotSearchResult>
   enqueueFakeSearch(input: SpotSearchInput): Promise<EnqueueSpotSearchResult>
 }
 
@@ -31,15 +41,23 @@ class HttpSpotClient implements SpotClient {
     }
   ) {}
 
-  async enqueueFakeSearch(
+  async enqueueSearch(
+    extensionId: string,
     input: SpotSearchInput
   ): Promise<EnqueueSpotSearchResult> {
+    if (!isSpotExtensionId(extensionId)) {
+      throw new ServiceClientError(
+        `Unsupported spot extension: ${extensionId}`,
+        400,
+        "local"
+      )
+    }
     const options = createServiceOptions({
       baseUrl: this.options.baseUrl,
       organizationId: input.organizationId,
     })
     const response = await serviceFetch(
-      "/extensions/spot.fake/jobs",
+      `/extensions/${extensionId}/jobs`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -64,6 +82,10 @@ class HttpSpotClient implements SpotClient {
       )
     }
     return { workflowId: body.workflowId, runId: body.runId }
+  }
+
+  enqueueFakeSearch(input: SpotSearchInput): Promise<EnqueueSpotSearchResult> {
+    return this.enqueueSearch("spot.fake", input)
   }
 }
 
