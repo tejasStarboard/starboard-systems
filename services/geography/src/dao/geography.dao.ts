@@ -95,30 +95,48 @@ export class DrizzleGeographyDao implements GeographyDao {
       return rows.map(toFacilityOption)
     }
 
-    // Split predicates so btree/GIN indexes apply; merge + rank by trigram score.
-    const [byCode, byName, byAlias] = await Promise.all([
-      this.db
-        .select({
-          ...selectCols,
-          rank: sql<number>`greatest(
+    const byCodeQuery = this.db
+      .select({
+        ...selectCols,
+        rank: sql<number>`greatest(
             similarity(coalesce(${facility.unlocode}, ''), ${prefix}),
             similarity(coalesce(${facility.iata}, ''), ${prefix})
           )`.as("rank"),
-        })
-        .from(facility)
-        .where(
-          and(
-            applyTrgmThresholds,
-            or(
-              ilike(facility.unlocode, `${prefix}%`),
-              ilike(facility.iata, `${prefix}%`),
-              sql`coalesce(${facility.unlocode}, '') % ${prefix}`,
-              sql`coalesce(${facility.iata}, '') % ${prefix}`
-            )
+      })
+      .from(facility)
+      .where(
+        and(
+          applyTrgmThresholds,
+          or(
+            ilike(facility.unlocode, `${prefix}%`),
+            ilike(facility.iata, `${prefix}%`),
+            sql`coalesce(${facility.unlocode}, '') % ${prefix}`,
+            sql`coalesce(${facility.iata}, '') % ${prefix}`
           )
         )
-        .orderBy(desc(sql`rank`), desc(facility.isPrimary), asc(facility.name))
-        .limit(PORT_SEARCH_LIMIT),
+      )
+      .orderBy(desc(sql`rank`), desc(facility.isPrimary), asc(facility.name))
+      .limit(PORT_SEARCH_LIMIT)
+
+    // Compact alphanumeric queries are usually codes — try that path alone first.
+    const looksLikeCode = /^[A-Za-z0-9]{2,5}$/.test(trimmed)
+    if (looksLikeCode) {
+      const byCodeOnly = (await byCodeQuery) as FacilityRow[]
+      if (byCodeOnly.length > 0) {
+        return byCodeOnly
+          .sort((a, b) => {
+            const rankDiff = (b.rank ?? 0) - (a.rank ?? 0)
+            if (rankDiff !== 0) return rankDiff
+            if (a.isPrimary !== b.isPrimary) return a.isPrimary ? -1 : 1
+            return a.name.localeCompare(b.name)
+          })
+          .map(toFacilityOption)
+      }
+    }
+
+    // Name / alias search (also when code path returned nothing).
+    const [byCode, byName, byAlias] = await Promise.all([
+      byCodeQuery,
       this.db
         .select({
           ...selectCols,

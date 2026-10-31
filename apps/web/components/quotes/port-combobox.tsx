@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 
 import {
   Combobox,
@@ -13,7 +13,7 @@ import {
 
 import { type QuoteFormOption } from "@/lib/domain/quotes/quotes.schema"
 
-const DEBOUNCE_MS = 250
+const DEBOUNCE_MS = 150
 
 export function PortCombobox({
   options: initialOptions = [],
@@ -40,6 +40,14 @@ export function PortCombobox({
     [options, value]
   )
 
+  // Keep merge inputs fresh without re-firing the search effect.
+  const selectedRef = useRef(selected)
+  const initialOptionsRef = useRef(initialOptions)
+  const valueRef = useRef(value)
+  selectedRef.current = selected
+  initialOptionsRef.current = initialOptions
+  valueRef.current = value
+
   useEffect(() => {
     if (initialOptions.length === 0) return
     setOptions((prev) => {
@@ -53,38 +61,51 @@ export function PortCombobox({
 
   useEffect(() => {
     const trimmed = query.trim()
+    const controller = new AbortController()
+    setLoading(true)
 
     const handle = window.setTimeout(async () => {
-      setLoading(true)
       try {
         const params = new URLSearchParams()
         if (trimmed) params.set("q", trimmed)
         const qs = params.size > 0 ? `?${params}` : ""
-        const response = await fetch(`/api/geography/ports${qs}`)
+        const response = await fetch(`/api/geography/ports${qs}`, {
+          signal: controller.signal,
+        })
         if (!response.ok) return
         const body = (await response.json()) as {
           ports?: QuoteFormOption[]
         }
         const next = body.ports ?? []
-        setOptions((prev) => {
+        const selectedOption = selectedRef.current
+        const seeds = initialOptionsRef.current
+        const currentValue = valueRef.current
+        setOptions(() => {
           const byValue = new Map(next.map((o) => [o.value, o]))
-          if (selected) {
-            byValue.set(selected.value, selected)
+          if (selectedOption) {
+            byValue.set(selectedOption.value, selectedOption)
           }
-          for (const option of initialOptions) {
-            if (option.value === value || !trimmed) {
+          for (const option of seeds) {
+            if (option.value === currentValue || !trimmed) {
               byValue.set(option.value, option)
             }
           }
           return [...byValue.values()]
         })
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") return
       } finally {
-        setLoading(false)
+        if (!controller.signal.aborted) {
+          setLoading(false)
+        }
       }
     }, DEBOUNCE_MS)
 
-    return () => window.clearTimeout(handle)
-  }, [query, selected, initialOptions, value])
+    return () => {
+      controller.abort()
+      window.clearTimeout(handle)
+    }
+  }, [query])
 
   return (
     <Combobox
@@ -99,7 +120,9 @@ export function PortCombobox({
       onInputValueChange={(next) => {
         setQuery(next)
       }}
-      itemToStringValue={(option) => option.label}
+      itemToStringLabel={(option) => option.label}
+      itemToStringValue={(option) => option.value}
+      isItemEqualToValue={(a, b) => a.value === b.value}
     >
       <ComboboxInput
         id={id}
@@ -107,6 +130,7 @@ export function PortCombobox({
         placeholder={placeholder}
         aria-invalid={invalid}
         showClear={!!selected}
+        loading={loading}
       />
       <ComboboxContent className="w-(--anchor-width)">
         <ComboboxEmpty>

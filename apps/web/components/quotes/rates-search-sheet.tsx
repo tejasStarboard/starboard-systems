@@ -183,7 +183,7 @@ export function RatesSearchSheet({
                   <div className="flex items-baseline justify-between gap-2">
                     <p className="text-sm font-medium">{rate.label}</p>
                     <p className="text-sm tabular-nums">
-                      {rate.amount.toLocaleString(undefined, {
+                      {rate.amount.toLocaleString("en-US", {
                         style: "currency",
                         currency: rate.currencyCode,
                       })}

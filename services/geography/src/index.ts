@@ -22,6 +22,8 @@ app.use("/currencies/*", createServiceTokenMiddleware(config.serviceToken))
 app.use("/currencies", createServiceTokenMiddleware(config.serviceToken))
 app.use("/ports/*", createServiceTokenMiddleware(config.serviceToken))
 app.use("/ports", createServiceTokenMiddleware(config.serviceToken))
+app.use("/addresses/*", createServiceTokenMiddleware(config.serviceToken))
+app.use("/addresses", createServiceTokenMiddleware(config.serviceToken))
 
 app.route("/", controller)
 
