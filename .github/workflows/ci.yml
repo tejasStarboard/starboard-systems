@@ -12,10 +12,118 @@ concurrency:
 
 permissions:
   contents: read
+  pull-requests: read
 
 jobs:
+  # Detect which areas of the monorepo changed so later steps can skip
+  # Bun/uv setup and Turbo can run only affected packages (+ dependents).
+  changes:
+    name: Detect changed scopes
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      quality: ${{ steps.filters.outputs.quality }}
+      web: ${{ steps.filters.outputs.web }}
+      bun: ${{ steps.filters.outputs.bun }}
+      python: ${{ steps.filters.outputs.python }}
+      tooling: ${{ steps.filters.outputs.tooling }}
+      base_sha: ${{ steps.base.outputs.sha }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve comparison base
+        id: base
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            SHA="${{ github.event.pull_request.base.sha }}"
+          else
+            BEFORE="${{ github.event.before }}"
+            if [ -n "$BEFORE" ] && [ "$BEFORE" != "0000000000000000000000000000000000000000" ]; then
+              SHA="$BEFORE"
+            else
+              SHA="$(git rev-parse HEAD^ 2>/dev/null || git rev-parse HEAD)"
+            fi
+          fi
+          echo "sha=$SHA" >> "$GITHUB_OUTPUT"
+          echo "Comparing against $SHA"
+
+      - name: Path filters
+        id: filters
+        uses: dorny/paths-filter@v3
+        with:
+          base: ${{ steps.base.outputs.sha }}
+          filters: |
+            tooling:
+              - 'package.json'
+              - 'pnpm-lock.yaml'
+              - 'pnpm-workspace.yaml'
+              - 'turbo.json'
+              - 'tsconfig*.json'
+              - '.npmrc'
+              - '.prettierrc'
+              - '.prettierrc.*'
+              - 'prettier.config.*'
+              - '.prettierignore'
+              - '.github/workflows/ci.yml'
+              - 'eslint.config.*'
+              - '**/eslint.config.*'
+
+            web:
+              - 'apps/web/**'
+
+            bun:
+              - 'apps/web/**'
+              - 'packages/contracts/**'
+              - 'packages/database/**'
+              - 'packages/email/**'
+              - 'packages/eslint-config/**'
+              - 'packages/extension-host/**'
+              - 'packages/pricing/**'
+              - 'packages/service-kit/**'
+              - 'packages/typescript-config/**'
+              - 'packages/ui/**'
+              - 'services/crm/**'
+              - 'services/geography/**'
+              - 'services/quotes/**'
+              - 'services/rates/**'
+
+            python:
+              - 'pyproject.toml'
+              - 'uv.lock'
+              - 'packages/python-kit/**'
+              - 'services/ingestion/**'
+              - 'services/messaging/**'
+              - 'services/spot/**'
+              - 'services/temporal/**'
+
+            quality:
+              - 'apps/**'
+              - 'packages/**'
+              - 'services/**'
+              - 'package.json'
+              - 'pnpm-lock.yaml'
+              - 'pnpm-workspace.yaml'
+              - 'turbo.json'
+              - 'tsconfig*.json'
+              - '.npmrc'
+              - '.prettierrc'
+              - '.prettierrc.*'
+              - 'prettier.config.*'
+              - '.prettierignore'
+              - '.github/workflows/ci.yml'
+              - 'eslint.config.*'
+              - '**/eslint.config.*'
+              - 'pyproject.toml'
+              - 'uv.lock'
+
   quality:
     name: Lint · typecheck · test · build
+    needs: changes
+    if: needs.changes.outputs.quality == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
@@ -42,12 +150,14 @@ jobs:
       MESSAGING_SERVICE_URL: http://127.0.0.1:3202
       SPOT_SERVICE_URL: http://127.0.0.1:3203
       INTERNAL_SERVICE_TOKEN: ci-internal-service-token
+      TURBO_SCM_BASE: ${{ needs.changes.outputs.base_sha }}
+      TURBO_SCM_HEAD: ${{ github.sha }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 2
+          fetch-depth: 0
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -61,11 +171,13 @@ jobs:
           cache: pnpm
 
       - name: Setup Bun
+        if: needs.changes.outputs.bun == 'true' || needs.changes.outputs.tooling == 'true'
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
 
       - name: Setup uv
+        if: needs.changes.outputs.python == 'true' || needs.changes.outputs.tooling == 'true'
         uses: astral-sh/setup-uv@v6
         with:
           enable-cache: true
@@ -83,9 +195,16 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Install Python workspace
+        if: needs.changes.outputs.python == 'true' || needs.changes.outputs.tooling == 'true'
         run: uv sync --all-packages --group dev --frozen
 
+      # Shared packages (contracts/db/ui/…) mark `bun` and may pull `web` into
+      # turbo --affected even when apps/web itself did not change.
       - name: Write CI env for Next
+        if: >
+          needs.changes.outputs.web == 'true' ||
+          needs.changes.outputs.bun == 'true' ||
+          needs.changes.outputs.tooling == 'true'
         working-directory: apps/web
         run: |
           {
@@ -112,16 +231,72 @@ jobs:
           } > .env
 
       - name: Format check
-        run: pnpm format:check
+        env:
+          FULL: ${{ needs.changes.outputs.tooling }}
+          BASE: ${{ needs.changes.outputs.base_sha }}
+        run: |
+          set -euo pipefail
+          if [ "$FULL" = "true" ]; then
+            pnpm format:check
+            exit 0
+          fi
+          # Scoped prettier: only files in the PR/push diff (much faster than repo-wide).
+          files="$(
+            git diff --name-only --diff-filter=ACMRT "$BASE"...HEAD -- \
+              '*.ts' '*.tsx' '*.js' '*.jsx' '*.mjs' '*.cjs' '*.json' '*.md' '*.css' \
+              || true
+          )"
+          if [ -z "$files" ]; then
+            echo "No formattable files in diff; skipping prettier."
+            exit 0
+          fi
+          echo "Checking changed files with prettier:"
+          echo "$files"
+          echo "$files" | tr '\n' '\0' | xargs -0 pnpm exec prettier --check --
 
-      - name: Lint
-        run: pnpm lint
+      - name: Lint · typecheck · test · build (affected)
+        if: needs.changes.outputs.tooling != 'true'
+        run: |
+          set -euo pipefail
+          echo "TURBO_SCM_BASE=$TURBO_SCM_BASE"
+          echo "TURBO_SCM_HEAD=$TURBO_SCM_HEAD"
+          pnpm exec turbo run lint typecheck test build --affected --summarize
 
-      - name: Typecheck
-        run: pnpm typecheck
+      - name: Lint · typecheck · test · build (full — tooling change)
+        if: needs.changes.outputs.tooling == 'true'
+        run: |
+          set -euo pipefail
+          echo "Root/tooling change detected — running full workspace CI"
+          pnpm lint
+          pnpm typecheck
+          pnpm test
+          pnpm build
 
-      - name: Test
-        run: pnpm test
-
-      - name: Build
-        run: pnpm build
+  # Keeps the workflow green for docs/ticket-only PRs so automerge can proceed
+  # without running the heavy quality job.
+  ci-gate:
+    name: CI gate
+    needs: [changes, quality]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Evaluate required jobs
+        run: |
+          set -euo pipefail
+          changes_result="${{ needs.changes.result }}"
+          quality_result="${{ needs.quality.result }}"
+          run_quality="${{ needs.changes.outputs.quality }}"
+          echo "changes=$changes_result quality_filter=$run_quality quality=$quality_result"
+          if [ "$changes_result" != "success" ]; then
+            echo "Detect-changed-scopes job did not succeed"
+            exit 1
+          fi
+          if [ "$run_quality" = "true" ]; then
+            if [ "$quality_result" != "success" ]; then
+              echo "Quality job did not succeed"
+              exit 1
+            fi
+          else
+            echo "No code/tooling changes — quality skipped (docs/tickets only)"
+          fi
