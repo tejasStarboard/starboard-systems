@@ -3,7 +3,7 @@
 import { CaretLeftIcon, CaretRightIcon } from "@phosphor-icons/react"
 import { useRouter } from "next/navigation"
 import { useEffect, useRef, useState } from "react"
-import { useTable, type ColumnDef, type RowData } from "@tanstack/react-table"
+import { useTable, type ColumnDef } from "@tanstack/react-table"
 
 import type { ListQuotesViewResponse } from "@starboard/lib-contracts"
 import { Button } from "@starboard/lib-ui/components/button"
@@ -21,6 +21,7 @@ import {
   features,
   type DataTableFeatures,
 } from "@/components/quotes/data-table-features"
+import { type QuoteListItem } from "@/lib/domain/quotes/quotes.schema"
 
 const QUOTES_PAGE_SIZE = 25
 
@@ -28,17 +29,14 @@ function totalPages(total: number, pageSize: number) {
   return Math.max(1, Math.ceil(total / pageSize))
 }
 
-interface QuotesDataTableProps<TData extends RowData & { id: string }> {
-  columns: ColumnDef<DataTableFeatures, TData>[]
+interface QuotesDataTableProps {
+  columns: ColumnDef<DataTableFeatures, QuoteListItem>[]
   initial: ListQuotesViewResponse
 }
 
-export function QuotesDataTable<TData extends RowData & { id: string }>({
-  columns,
-  initial,
-}: QuotesDataTableProps<TData>) {
+export function QuotesDataTable({ columns, initial }: QuotesDataTableProps) {
   const router = useRouter()
-  const [data, setData] = useState(initial.quotes as TData[])
+  const [data, setData] = useState<QuoteListItem[]>(initial.quotes)
   const [total, setTotal] = useState(initial.total)
   const [pageSize] = useState(initial.pageSize || QUOTES_PAGE_SIZE)
   const [listQuery, setListQuery] = useState({ page: initial.page, q: "" })
@@ -46,7 +44,7 @@ export function QuotesDataTable<TData extends RowData & { id: string }>({
   const skipFetchRef = useRef(true)
 
   useEffect(() => {
-    setData(initial.quotes as TData[])
+    setData(initial.quotes)
     setTotal(initial.total)
     setListQuery({ page: initial.page, q: "" })
   }, [initial])
@@ -68,7 +66,8 @@ export function QuotesDataTable<TData extends RowData & { id: string }>({
         if (listQuery.q) params.set("q", listQuery.q)
         const response = await fetch(`/api/quotes?${params}`)
         const body = (await response.json().catch(() => null)) as
-          (ListQuotesViewResponse & { error?: string }) | null
+          | (ListQuotesViewResponse & { error?: string })
+          | null
         if (!response.ok || !body?.quotes) {
           if (!cancelled) {
             toast.add({
@@ -80,7 +79,7 @@ export function QuotesDataTable<TData extends RowData & { id: string }>({
           return
         }
         if (!cancelled) {
-          setData(body.quotes as TData[])
+          setData(body.quotes)
           setTotal(body.total)
         }
       } catch {
