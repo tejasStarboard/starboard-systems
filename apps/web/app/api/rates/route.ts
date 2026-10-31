@@ -31,7 +31,7 @@ export async function GET(request: Request) {
 
   try {
     const rates = await getRatesManager().listRatesForOrg(
-      authResult.session.session.activeOrganizationId!,
+      authResult.organizationId,
       parsed.data
     )
     return NextResponse.json({ rates })
@@ -69,7 +69,7 @@ export async function POST(request: Request) {
 
   try {
     const created = await getRatesManager().createRateForOrg(
-      authResult.session.session.activeOrganizationId!,
+      authResult.organizationId,
       parsed.data
     )
     return NextResponse.json(created, { status: 201 })

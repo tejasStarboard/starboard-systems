@@ -3,7 +3,7 @@
 |         |                                              |
 | ------- | -------------------------------------------- |
 | Surface | `apps/web` route group `/admin` (staff only) |
-| Status  | Not started                                  |
+| Status  | In progress (ticket 050)                     |
 
 **Not** Better Auth organization role `admin` (customer org admins). This is
 **Starboard employee / platform ops** access.

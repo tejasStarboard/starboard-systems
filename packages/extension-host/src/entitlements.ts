@@ -5,6 +5,7 @@ import type {
   ExtensionNavContribution,
   Plan,
 } from "./manifest.js"
+import { isRolloutAllowed, type ExtensionRolloutState } from "./rollout.js"
 
 type ExtensionJobContribution = NonNullable<
   ExtensionContributes["jobs"]
@@ -18,26 +19,49 @@ export type ActiveContributions = {
   uiSlots: string[]
 }
 
+/** Optional staff rollout layer: activation = rollout ∩ enabled ∩ entitled. */
+export type RolloutContext = {
+  organizationId: string
+  rollouts: ReadonlyMap<string, ExtensionRolloutState>
+}
+
 export function isEntitled(manifest: ExtensionManifest, plan: Plan): boolean {
   return manifest.requiredPlan.includes(plan)
 }
 
-export function isActive(manifest: ExtensionManifest, plan: Plan): boolean {
-  return manifest.enabled === true && isEntitled(manifest, plan)
+export function isActive(
+  manifest: ExtensionManifest,
+  plan: Plan,
+  rolloutContext?: RolloutContext
+): boolean {
+  if (manifest.enabled !== true || !isEntitled(manifest, plan)) {
+    return false
+  }
+  if (!rolloutContext) {
+    return true
+  }
+  return isRolloutAllowed(
+    rolloutContext.rollouts.get(manifest.id),
+    rolloutContext.organizationId
+  )
 }
 
 export function listActiveExtensions(
   plan: Plan,
-  manifests: ExtensionManifest[] = listManifests()
+  manifests: ExtensionManifest[] = listManifests(),
+  rolloutContext?: RolloutContext
 ): ExtensionManifest[] {
-  return manifests.filter((manifest) => isActive(manifest, plan))
+  return manifests.filter((manifest) =>
+    isActive(manifest, plan, rolloutContext)
+  )
 }
 
 export function getActiveContributions(
   plan: Plan,
-  manifests: ExtensionManifest[] = listManifests()
+  manifests: ExtensionManifest[] = listManifests(),
+  rolloutContext?: RolloutContext
 ): ActiveContributions {
-  const active = listActiveExtensions(plan, manifests)
+  const active = listActiveExtensions(plan, manifests, rolloutContext)
 
   const nav: ExtensionNavContribution[] = []
   const jobs: ExtensionJobContribution[] = []

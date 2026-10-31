@@ -28,7 +28,7 @@ export async function POST(request: Request) {
 
   try {
     const created = await getCrmManager().createCustomerForOrg(
-      authResult.session.session.activeOrganizationId!,
+      authResult.organizationId,
       parsed.data.name
     )
     return NextResponse.json(created, { status: 201 })

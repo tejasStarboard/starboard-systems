@@ -12,7 +12,7 @@ export async function GET() {
 
   try {
     const quotes = await getQuotesManager().listQuotesForOrg(
-      authResult.session.session.activeOrganizationId!
+      authResult.organizationId
     )
     return NextResponse.json({ quotes })
   } catch (error) {
@@ -35,7 +35,7 @@ export async function POST() {
   try {
     const created = await getQuotesManager().createQuoteForSession({
       ownerId: authResult.session.user.id,
-      organizationId: authResult.session.session.activeOrganizationId!,
+      organizationId: authResult.organizationId,
     })
     return NextResponse.json(created, { status: 201 })
   } catch (error) {

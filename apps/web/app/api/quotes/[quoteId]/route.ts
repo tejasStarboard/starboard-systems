@@ -19,7 +19,7 @@ export async function GET(
   try {
     const quote = await getQuotesManager().getQuoteFormValuesForOrg(
       quoteId,
-      authResult.session.session.activeOrganizationId!
+      authResult.organizationId
     )
 
     if (!quote) {
@@ -71,7 +71,7 @@ export async function PUT(
   try {
     const quote = await getQuotesManager().saveQuoteForSession(parsed.data, {
       ownerId: authResult.session.user.id,
-      organizationId: authResult.session.session.activeOrganizationId!,
+      organizationId: authResult.organizationId,
     })
     return NextResponse.json(quote)
   } catch (error) {

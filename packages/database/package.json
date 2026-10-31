@@ -39,6 +39,12 @@
       "bun": "./src/schema/rates.ts",
       "import": "./dist/schema/rates.js",
       "default": "./dist/schema/rates.js"
+    },
+    "./schema/platform": {
+      "types": "./src/schema/platform.ts",
+      "bun": "./src/schema/platform.ts",
+      "import": "./dist/schema/platform.js",
+      "default": "./dist/schema/platform.js"
     }
   },
   "files": [

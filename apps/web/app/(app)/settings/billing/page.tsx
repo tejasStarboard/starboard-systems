@@ -1,7 +1,4 @@
-import { headers } from "next/headers"
-import { redirect } from "next/navigation"
-
-import { auth } from "@/lib/auth"
+import { requireOrganizationContext } from "@/lib/auth/organization-context"
 import { getOrganizationPlan } from "@/lib/billing/plan"
 
 const PLAN_LABELS = {
@@ -10,19 +7,7 @@ const PLAN_LABELS = {
 } as const
 
 export default async function BillingSettingsPage() {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  })
-
-  if (!session) {
-    redirect("/login")
-  }
-
-  const organizationId = session.session.activeOrganizationId
-  if (!organizationId) {
-    redirect("/select-org")
-  }
-
+  const { organizationId } = await requireOrganizationContext()
   const plan = await getOrganizationPlan(organizationId)
 
   return (

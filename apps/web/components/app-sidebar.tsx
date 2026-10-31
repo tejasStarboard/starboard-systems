@@ -8,6 +8,7 @@ import {
   GearIcon,
   LifebuoyIcon,
   PaperPlaneTiltIcon,
+  ShieldCheckIcon,
 } from "@phosphor-icons/react"
 
 import { NavMain } from "@/components/nav-main"
@@ -44,6 +45,7 @@ const navSecondary = [
 export function AppSidebar({
   user,
   extensionNav = [],
+  showAdminNav = false,
   ...props
 }: React.ComponentProps<typeof Sidebar> & {
   user: {
@@ -56,6 +58,7 @@ export function AppSidebar({
     label: string
     href: string
   }>
+  showAdminNav?: boolean
 }) {
   const navMain = [
     {
@@ -68,6 +71,15 @@ export function AppSidebar({
       url: item.href,
       icon: null,
     })),
+    ...(showAdminNav
+      ? [
+          {
+            title: "Platform admin",
+            url: "/admin",
+            icon: <ShieldCheckIcon />,
+          },
+        ]
+      : []),
   ]
 
   return (

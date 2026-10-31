@@ -20,6 +20,14 @@ export {
   listActiveExtensions,
   getActiveContributions,
   type ActiveContributions,
+  type RolloutContext,
 } from "./entitlements.js"
+
+export {
+  isRolloutAllowed,
+  parseRolloutMode,
+  type ExtensionRolloutState,
+  type RolloutMode,
+} from "./rollout.js"
 
 export { DEFAULT_PLAN, parsePlan } from "./plan.js"

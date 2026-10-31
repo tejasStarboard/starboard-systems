@@ -2,7 +2,7 @@
 id: 050
 wave: 05-platform-admin
 title: Platform admin — extension rollout + org impersonation
-status: open
+status: in_progress
 depends_on: [001, 005]
 epic: SYS-PLATFORM-ADMIN
 docs:

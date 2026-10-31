@@ -1,22 +1,11 @@
-import { headers } from "next/headers"
-import { redirect } from "next/navigation"
-
 import { columns } from "@/components/quotes/columns"
 import { CreateQuoteButton } from "@/components/quotes/create-quote-button"
 import { QuotesDataTable } from "@/components/quotes/quotes-data-table"
-import { auth } from "@/lib/auth"
+import { requireOrganizationContext } from "@/lib/auth/organization-context"
 import { getQuotesManager } from "@/lib/domain/quotes/quotes.manager"
 
 export default async function HomePage() {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  })
-
-  const organizationId = session?.session.activeOrganizationId
-  if (!organizationId) {
-    redirect("/select-org")
-  }
-
+  const { organizationId } = await requireOrganizationContext()
   const quotes = await getQuotesManager().listQuotesForOrg(organizationId)
 
   return (

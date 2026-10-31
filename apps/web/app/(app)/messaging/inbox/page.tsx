@@ -1,23 +1,15 @@
-import { headers } from "next/headers"
 import { redirect } from "next/navigation"
 
 import { InboxPanel } from "@/components/messaging/inbox-panel"
-import { auth } from "@/lib/auth"
+import { requireOrganizationContext } from "@/lib/auth/organization-context"
 import { getOrganizationPlan } from "@/lib/billing/plan"
 import { getMessagingManager } from "@/lib/domain/messaging/messaging.manager"
 import { listActiveUiSlots } from "@/lib/extensions"
 
 export default async function MessagingInboxPage() {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  })
-  if (!session?.session.activeOrganizationId) {
-    redirect("/login")
-  }
-
-  const organizationId = session.session.activeOrganizationId
+  const { organizationId } = await requireOrganizationContext()
   const plan = await getOrganizationPlan(organizationId)
-  const slots = listActiveUiSlots(plan)
+  const slots = await listActiveUiSlots(plan, organizationId)
   if (!slots.includes("messaging.inbox")) {
     redirect("/")
   }

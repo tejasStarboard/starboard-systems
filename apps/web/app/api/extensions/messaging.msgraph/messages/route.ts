@@ -1,25 +1,15 @@
 import { NextResponse } from "next/server"
 
-import { requireApiSession } from "@/lib/auth/session"
-import { getOrganizationPlan } from "@/lib/billing/plan"
+import { requireActiveExtension } from "@/lib/auth/require-active-extension"
 import { ServiceClientError } from "@/lib/clients/http"
 import { getMessagingManager } from "@/lib/domain/messaging/messaging.manager"
-import { isExtensionActive } from "@/lib/extensions"
 
 export async function GET() {
-  const authResult = await requireApiSession()
-  if (authResult.error) {
-    return authResult.error
+  const gate = await requireActiveExtension("messaging.msgraph")
+  if (gate.error) {
+    return gate.error
   }
-
-  const organizationId = authResult.session.session.activeOrganizationId!
-  const plan = await getOrganizationPlan(organizationId)
-  if (!isExtensionActive("messaging.msgraph", plan)) {
-    return NextResponse.json(
-      { error: "Extension messaging.msgraph is not enabled" },
-      { status: 404 }
-    )
-  }
+  const organizationId = gate.organizationId
 
   try {
     const result = await getMessagingManager().listMessages(organizationId)

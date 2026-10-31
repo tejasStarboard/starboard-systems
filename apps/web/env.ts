@@ -27,6 +27,9 @@ export const env = createEnv({
     MESSAGING_SERVICE_URL: z.url(),
     SPOT_SERVICE_URL: z.url(),
     INTERNAL_SERVICE_TOKEN: z.string().min(16),
+
+    /** Comma-separated Better Auth user ids allowed on /admin. Empty = nobody. */
+    PLATFORM_STAFF_USER_IDS: z.string().optional(),
   },
   client: {
     NEXT_PUBLIC_APP_URL: z.url(),
@@ -57,6 +60,7 @@ export const env = createEnv({
     MESSAGING_SERVICE_URL: process.env.MESSAGING_SERVICE_URL,
     SPOT_SERVICE_URL: process.env.SPOT_SERVICE_URL,
     INTERNAL_SERVICE_TOKEN: process.env.INTERNAL_SERVICE_TOKEN,
+    PLATFORM_STAFF_USER_IDS: process.env.PLATFORM_STAFF_USER_IDS,
   },
   emptyStringAsUndefined: true,
   // Allow `next build` in CI / local without a full .env when explicitly opted in.
