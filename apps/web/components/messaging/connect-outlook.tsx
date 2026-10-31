@@ -32,7 +32,15 @@ export function ConnectOutlook({ initialStatus }: { initialStatus: string }) {
         setError(payload?.error ?? "Connect failed")
         return
       }
-      setStatus(payload?.status ?? "connected")
+
+      const authUrl = payload?.authUrl?.trim()
+      if (authUrl) {
+        // Live: absolute Azure authorize URL. Stub: relative shell callback.
+        window.location.assign(authUrl)
+        return
+      }
+
+      setStatus(payload?.status ?? "connecting")
     } catch {
       setError("Connect failed")
     } finally {

@@ -2,7 +2,7 @@
 id: 063
 wave: 06-product
 title: Messaging production path (Graph OAuth + Neon)
-status: open
+status: in_progress
 depends_on: [030, 055, 061]
 epic: SYS-EXT-MSGRAPH
 docs:

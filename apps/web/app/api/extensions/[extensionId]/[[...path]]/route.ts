@@ -27,7 +27,7 @@ async function gateExtension(extensionId: string) {
   return requireActiveExtension(extensionId)
 }
 
-export async function GET(_request: Request, context: RouteContext) {
+export async function GET(request: Request, context: RouteContext) {
   const { extensionId, path = [] } = await context.params
   const gate = await gateExtension(extensionId)
   if (gate.error) {
@@ -37,6 +37,7 @@ export async function GET(_request: Request, context: RouteContext) {
     extensionId,
     path,
     organizationId: gate.organizationId,
+    request,
   })
 }
 

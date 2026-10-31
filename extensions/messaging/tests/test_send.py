@@ -6,22 +6,17 @@ from cryptography.fernet import Fernet
 from fastapi.testclient import TestClient
 
 from messaging.api import create_app
-from messaging.config import MessagingConfig
 from messaging.plugins.msgraph import FakeGraphClient
 from messaging.plugins.msgraph.connection import ConnectionService
-from messaging.plugins.msgraph.token_store import TokenStore
+from messaging.plugins.msgraph.token_store import FileTokenStore
+from helpers import make_config
 
 
-def _config(tmp_path: Path) -> MessagingConfig:
-    key = Fernet.generate_key()
-    return MessagingConfig(
-        port=3202,
+def _config(tmp_path: Path):
+    return make_config(
+        tmp_path,
         service_token="test-service-token-16",
-        temporal_address="localhost:7233",
-        temporal_namespace="default",
-        temporal_task_queue="messaging.msgraph",
-        data_dir=str(tmp_path),
-        token_key=key,
+        token_key=Fernet.generate_key(),
     )
 
 
@@ -47,6 +42,8 @@ def _connect(client: TestClient, org: str = "org_send") -> None:
         json={"organizationId": org},
     )
     assert start.status_code == 200
+    assert start.json()["status"] == "connecting"
+    assert start.json()["authUrl"]
     callback = client.post(
         "/extensions/messaging.msgraph/connection/callback",
         headers=_auth(),
@@ -121,7 +118,7 @@ def test_send_requires_connection(tmp_path: Path) -> None:
 
 def test_token_not_plaintext_after_connect(tmp_path: Path) -> None:
     config = _config(tmp_path)
-    store = TokenStore(data_dir=config.data_dir, token_key=config.token_key)
+    store = FileTokenStore(data_dir=config.data_dir, token_key=config.token_key)
     service = ConnectionService(store)
     service.start_connect("org_enc")
     service.complete_callback("org_enc", code="secret-code")

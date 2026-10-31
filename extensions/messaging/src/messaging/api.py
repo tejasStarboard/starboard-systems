@@ -11,19 +11,32 @@ from temporalio.client import Client
 from messaging.config import MessagingConfig, load_config
 from messaging.plugins.msgraph import (
     FakeGraphClient,
+    GraphClient,
     GraphMessage,
-    MessageStore,
+    HttpGraphClient,
     MsGraphSyncWorkflow,
     SendMailRequest,
     SyncWorkflowInput,
 )
 from messaging.plugins.msgraph.connection import ConnectionService
-from messaging.plugins.msgraph.token_store import TokenStore
+from messaging.plugins.msgraph.message_store import (
+    MessageStore,
+    create_message_store,
+)
+from messaging.plugins.msgraph.schedules import (
+    delete_sync_schedule,
+    upsert_sync_schedule,
+)
+from messaging.plugins.msgraph.token_store import (
+    TokenStore,
+    create_token_store,
+)
 
 
 class EnqueueResponse(BaseModel):
     workflowId: str
     runId: str
+    scheduleId: str | None = None
 
 
 class ConnectionBody(BaseModel):
@@ -68,18 +81,10 @@ class SendResponse(BaseModel):
     status: str
 
 
-def create_app(
-    *,
-    config: MessagingConfig | None = None,
-    temporal_client: Client | None = None,
-    connect_temporal_on_startup: bool = True,
-    graph_client: FakeGraphClient | None = None,
-) -> FastAPI:
-    cfg = config or load_config()
-    token_store = TokenStore(data_dir=cfg.data_dir, token_key=cfg.token_key)
-    connection_service = ConnectionService(token_store)
-    message_store = MessageStore(data_dir=cfg.data_dir)
-    graph = graph_client or FakeGraphClient(
+def _default_graph(config: MessagingConfig) -> GraphClient:
+    if config.graph_mode == "live":
+        return HttpGraphClient()
+    return FakeGraphClient(
         inbox=[
             GraphMessage(
                 id="msg_inbound_1",
@@ -90,12 +95,37 @@ def create_app(
         ]
     )
 
+
+def create_app(
+    *,
+    config: MessagingConfig | None = None,
+    temporal_client: Client | None = None,
+    connect_temporal_on_startup: bool = True,
+    graph_client: GraphClient | None = None,
+    token_store: TokenStore | None = None,
+    message_store: MessageStore | None = None,
+    connection_service: ConnectionService | None = None,
+) -> FastAPI:
+    cfg = config or load_config()
+    resolved_token_store = token_store or create_token_store(
+        token_key=cfg.token_key,
+        postgres_url=cfg.postgres_url,
+        data_dir=cfg.data_dir,
+    )
+    resolved_connection = connection_service or ConnectionService.from_config(
+        resolved_token_store, cfg
+    )
+    resolved_message_store = message_store or create_message_store(
+        postgres_url=cfg.postgres_url, data_dir=cfg.data_dir
+    )
+    graph = graph_client or _default_graph(cfg)
+
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         app.state.config = cfg
-        app.state.token_store = token_store
-        app.state.connection_service = connection_service
-        app.state.message_store = message_store
+        app.state.token_store = resolved_token_store
+        app.state.connection_service = resolved_connection
+        app.state.message_store = resolved_message_store
         app.state.graph_client = graph
         if temporal_client is not None:
             app.state.temporal_client = temporal_client
@@ -125,6 +155,7 @@ def create_app(
             "status": "ok",
             "service": "messaging",
             "temporal": "ready" if ready else "pending",
+            "graphMode": cfg.graph_mode,
         }
 
     @app.get(
@@ -135,7 +166,7 @@ def create_app(
     async def get_connection(
         organization_id: str = Query(..., alias="organizationId"),
     ) -> ConnectionResponse:
-        status = connection_service.status(organization_id)
+        status = resolved_connection.status(organization_id)
         return ConnectionResponse(
             organizationId=status.organization_id,
             status=status.status,
@@ -148,7 +179,10 @@ def create_app(
         dependencies=[Depends(require_service_token)],
     )
     async def start_connection(body: ConnectionBody) -> ConnectionResponse:
-        status = connection_service.start_connect(body.organizationId)
+        try:
+            status = resolved_connection.start_connect(body.organizationId)
+        except ValueError as error:
+            raise HTTPException(status_code=400, detail=str(error)) from error
         return ConnectionResponse(
             organizationId=status.organization_id,
             status=status.status,
@@ -162,11 +196,24 @@ def create_app(
     )
     async def connection_callback(body: CallbackBody) -> ConnectionResponse:
         try:
-            status = connection_service.complete_callback(
+            status = resolved_connection.complete_callback(
                 body.organizationId, code=body.code
             )
         except ValueError as error:
             raise HTTPException(status_code=400, detail=str(error)) from error
+
+        client: Client | None = getattr(app.state, "temporal_client", None)
+        if client is not None:
+            try:
+                await upsert_sync_schedule(
+                    client,
+                    organization_id=body.organizationId,
+                    sync_interval_minutes=15,
+                    task_queue=cfg.temporal_task_queue,
+                )
+            except Exception:  # noqa: BLE001 — connect still succeeds
+                pass
+
         return ConnectionResponse(
             organizationId=status.organization_id,
             status=status.status,
@@ -180,7 +227,15 @@ def create_app(
     async def disconnect(
         organization_id: str = Query(..., alias="organizationId"),
     ) -> ConnectionResponse:
-        status = connection_service.disconnect(organization_id)
+        status = resolved_connection.disconnect(organization_id)
+        client: Client | None = getattr(app.state, "temporal_client", None)
+        if client is not None:
+            try:
+                await delete_sync_schedule(
+                    client, organization_id=organization_id
+                )
+            except Exception:  # noqa: BLE001 — disconnect still succeeds
+                pass
         return ConnectionResponse(
             organizationId=status.organization_id,
             status=status.status,
@@ -197,9 +252,22 @@ def create_app(
         if client is None:
             raise HTTPException(status_code=503, detail="Temporal client not ready")
         try:
-            connection_service.require_access_token(body.organizationId)
+            resolved_connection.require_access_token(body.organizationId)
         except ValueError as error:
             raise HTTPException(status_code=400, detail=str(error)) from error
+
+        schedule_id: str | None = None
+        try:
+            schedule_id = await upsert_sync_schedule(
+                client,
+                organization_id=body.organizationId,
+                sync_interval_minutes=body.syncIntervalMinutes,
+                task_queue=cfg.temporal_task_queue,
+            )
+        except Exception as error:  # noqa: BLE001
+            raise HTTPException(
+                status_code=502, detail=f"schedule upsert failed: {error}"
+            ) from error
 
         workflow_id = f"messaging.msgraph.sync-{uuid.uuid4()}"
         handle = await client.start_workflow(
@@ -212,7 +280,9 @@ def create_app(
             task_queue=cfg.temporal_task_queue,
         )
         run_id = handle.first_execution_run_id or ""
-        return EnqueueResponse(workflowId=handle.id, runId=run_id)
+        return EnqueueResponse(
+            workflowId=handle.id, runId=run_id, scheduleId=schedule_id
+        )
 
     @app.get(
         "/extensions/messaging.msgraph/messages",
@@ -222,7 +292,7 @@ def create_app(
     async def list_messages(
         organization_id: str = Query(..., alias="organizationId"),
     ) -> list[MessageResponse]:
-        items = message_store.list(organization_id)
+        items = resolved_message_store.list(organization_id)
         return [
             MessageResponse(
                 id=item.id,
@@ -242,7 +312,7 @@ def create_app(
     )
     async def send_mail(body: SendBody) -> SendResponse:
         try:
-            access_token = connection_service.require_access_token(
+            access_token = resolved_connection.require_access_token(
                 body.organizationId
             )
         except ValueError as error:

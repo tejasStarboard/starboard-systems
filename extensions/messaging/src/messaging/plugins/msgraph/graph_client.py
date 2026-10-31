@@ -1,7 +1,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Protocol
+from typing import TYPE_CHECKING, Any, Protocol
+
+if TYPE_CHECKING:
+    import httpx
 
 
 @dataclass
@@ -72,24 +75,33 @@ class FakeGraphClient:
 
 
 class HttpGraphClient:
-    """Thin MS Graph HTTP client (production path; unused in unit tests)."""
+    """Thin MS Graph HTTP client for live mode."""
 
-    def __init__(self, *, base_url: str = "https://graph.microsoft.com/v1.0") -> None:
+    def __init__(
+        self,
+        *,
+        base_url: str = "https://graph.microsoft.com/v1.0",
+        transport: Any | None = None,
+    ) -> None:
         self._base_url = base_url.rstrip("/")
+        self._transport = transport
+
+    def _client(self) -> httpx.Client:
+        import httpx
+
+        return httpx.Client(transport=self._transport, timeout=30.0)
 
     def list_recent_messages(
         self, *, access_token: str, limit: int = 10
     ) -> list[GraphMessage]:
-        import httpx
-
-        response = httpx.get(
-            f"{self._base_url}/me/messages",
-            headers={"Authorization": f"Bearer {access_token}"},
-            params={"$top": str(limit)},
-            timeout=30.0,
-        )
-        response.raise_for_status()
-        value = response.json().get("value") or []
+        with self._client() as client:
+            response = client.get(
+                f"{self._base_url}/me/messages",
+                headers={"Authorization": f"Bearer {access_token}"},
+                params={"$top": str(limit)},
+            )
+            response.raise_for_status()
+            value = response.json().get("value") or []
         result: list[GraphMessage] = []
         for item in value:
             sender = (item.get("from") or {}).get("emailAddress") or {}
@@ -106,8 +118,6 @@ class HttpGraphClient:
     def send_mail(
         self, *, access_token: str, request: SendMailRequest
     ) -> SendMailResult:
-        import httpx
-
         payload = {
             "message": {
                 "subject": request.subject,
@@ -118,11 +128,11 @@ class HttpGraphClient:
             },
             "saveToSentItems": True,
         }
-        response = httpx.post(
-            f"{self._base_url}/me/sendMail",
-            headers={"Authorization": f"Bearer {access_token}"},
-            json=payload,
-            timeout=30.0,
-        )
-        response.raise_for_status()
+        with self._client() as client:
+            response = client.post(
+                f"{self._base_url}/me/sendMail",
+                headers={"Authorization": f"Bearer {access_token}"},
+                json=payload,
+            )
+            response.raise_for_status()
         return SendMailResult(id="graph_send", status="sent")

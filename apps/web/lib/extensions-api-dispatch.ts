@@ -17,8 +17,9 @@ export async function dispatchExtensionGet(input: {
   extensionId: string
   path: string[]
   organizationId: string
+  request?: Request
 }): Promise<NextResponse> {
-  const { extensionId, path, organizationId } = input
+  const { extensionId, path, organizationId, request } = input
   const manifest = listManifests().find((item) => item.id === extensionId)
   if (!manifest?.worker) {
     return NextResponse.json(
@@ -55,6 +56,42 @@ export async function dispatchExtensionGet(input: {
         path[1]
       )
       return NextResponse.json(result)
+    }
+
+    if (
+      service === "messaging" &&
+      path.length === 2 &&
+      path[0] === "connection" &&
+      path[1] === "callback"
+    ) {
+      const url = new URL(request?.url ?? "http://localhost")
+      const code = url.searchParams.get("code")?.trim() || ""
+      const state = url.searchParams.get("state")?.trim() || ""
+      const organizationFromQuery =
+        url.searchParams.get("organizationId")?.trim() || ""
+
+      let targetOrg = organizationFromQuery
+      if (state) {
+        const { decodeMessagingOAuthState } =
+          await import("@/lib/messaging-oauth-state")
+        const fromState = decodeMessagingOAuthState(state)
+        if (fromState) {
+          targetOrg = fromState
+        }
+      }
+      if (!code) {
+        return NextResponse.json({ error: "code is required" }, { status: 400 })
+      }
+      if (!targetOrg || targetOrg !== organizationId) {
+        return NextResponse.json(
+          { error: "organization mismatch" },
+          { status: 400 }
+        )
+      }
+      await getMessagingManager().completeConnection(organizationId, code)
+      return NextResponse.redirect(
+        new URL("/settings/integrations", url.origin)
+      )
     }
 
     if (
@@ -151,14 +188,7 @@ export async function dispatchExtensionPost(input: {
     ) {
       const started =
         await getMessagingManager().startConnection(organizationId)
-      const result = await getMessagingManager().completeConnection(
-        organizationId,
-        "stub"
-      )
-      return NextResponse.json({
-        ...result,
-        authUrl: started.authUrl ?? null,
-      })
+      return NextResponse.json(started)
     }
 
     if (service === "messaging" && path.length === 1 && path[0] === "send") {
