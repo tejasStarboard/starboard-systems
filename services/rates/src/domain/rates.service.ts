@@ -7,7 +7,7 @@ import {
   type GetRateResponse,
   type ListRatesQuery,
   type Rate,
-} from "@starboard/contracts"
+} from "@starboard/lib-contracts"
 
 import type { ListRatesFilters, RatesDao, RateRow } from "../dao/rates.dao"
 

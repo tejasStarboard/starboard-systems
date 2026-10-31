@@ -1,6 +1,9 @@
 import "server-only"
 
-import type { CreateCustomerResponse, FormOption } from "@starboard/contracts"
+import type {
+  CreateCustomerResponse,
+  FormOption,
+} from "@starboard/lib-contracts"
 
 import { type CrmClient, getCrmClient } from "@/lib/domain/crm/crm.client"
 

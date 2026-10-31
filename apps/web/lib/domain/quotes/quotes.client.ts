@@ -6,7 +6,7 @@ import type {
   QuoteFormValues,
   QuoteListItem,
   QuoteSource,
-} from "@starboard/contracts"
+} from "@starboard/lib-contracts"
 
 import { env } from "@/env"
 import {

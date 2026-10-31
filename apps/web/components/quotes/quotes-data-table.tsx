@@ -10,7 +10,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@workspace/ui/components/table"
+} from "@starboard/lib-ui/components/table"
 
 import {
   features,

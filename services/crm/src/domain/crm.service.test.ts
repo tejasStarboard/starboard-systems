@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test"
-import type { FormOption } from "@starboard/contracts"
+import type { FormOption } from "@starboard/lib-contracts"
 
 import { DefaultCrmService } from "./crm.service"
 import type { CrmDao, CustomerInsert, CustomerNameRow } from "../dao/crm.dao"

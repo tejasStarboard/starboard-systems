@@ -12,10 +12,10 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@workspace/ui/components/breadcrumb"
-import { Button } from "@workspace/ui/components/button"
-import { Separator } from "@workspace/ui/components/separator"
-import { useSidebar } from "@workspace/ui/components/sidebar"
+} from "@starboard/lib-ui/components/breadcrumb"
+import { Button } from "@starboard/lib-ui/components/button"
+import { Separator } from "@starboard/lib-ui/components/separator"
+import { useSidebar } from "@starboard/lib-ui/components/sidebar"
 
 function breadcrumbLabel(pathname: string) {
   if (pathname === "/") return "Quotes"

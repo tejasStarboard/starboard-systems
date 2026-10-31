@@ -4,8 +4,8 @@ import { useEffect, useMemo, useState, useTransition } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useFieldArray, useForm, useWatch } from "react-hook-form"
 
-import { useBreakpoint } from "@workspace/ui/hooks/use-breakpoint"
-import { toast } from "@workspace/ui/components/toast"
+import { useBreakpoint } from "@starboard/lib-ui/hooks/use-breakpoint"
+import { toast } from "@starboard/lib-ui/components/toast"
 
 import { QuoteFormDesktop } from "@/components/quotes/quote-form-desktop"
 import type { QuoteFormLayoutProps } from "@/components/quotes/quote-form-layout-props"

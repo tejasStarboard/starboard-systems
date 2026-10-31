@@ -1,8 +1,15 @@
 {
-  "name": "@starboard/pricing",
+  "name": "@starboard/lib-pricing",
   "version": "0.0.1",
+  "description": "ONE MATH \u2014 shared pricing calculations",
   "private": true,
+  "license": "UNLICENSED",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tejasStarboard/starboard-systems.git",
+    "directory": "packages/pricing"
+  },
   "exports": {
     ".": {
       "types": "./src/index.ts",
@@ -24,7 +31,7 @@
   },
   "devDependencies": {
     "@types/bun": "^1.3.5",
-    "@workspace/typescript-config": "workspace:*",
+    "@starboard/tool-typescript-config": "workspace:*",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3"
   }

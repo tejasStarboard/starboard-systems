@@ -1,0 +1,17 @@
+{
+  "name": "@starboard/ext-temporal",
+  "version": "0.0.1",
+  "description": "Local Temporal OSS Docker Compose for extension workers",
+  "private": true,
+  "license": "UNLICENSED",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tejasStarboard/starboard-systems.git",
+    "directory": "extensions/temporal"
+  },
+  "scripts": {
+    "dev": "docker compose -f docker-compose.yml up --remove-orphans",
+    "down": "docker compose -f docker-compose.yml down",
+    "build": "echo \"Temporal OSS via Docker \u2014 no compile step\""
+  }
+}

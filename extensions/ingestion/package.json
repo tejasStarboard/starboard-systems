@@ -1,0 +1,19 @@
+{
+  "name": "@starboard/ext-ingestion",
+  "version": "0.0.1",
+  "description": "Rate-doc ingestion extension worker (Python + Temporal)",
+  "private": true,
+  "license": "UNLICENSED",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tejasStarboard/starboard-systems.git",
+    "directory": "extensions/ingestion"
+  },
+  "scripts": {
+    "dev": "uv run --package starboard-ext-ingestion starboard-ingestion-dev",
+    "start": "uv run --package starboard-ext-ingestion starboard-ingestion",
+    "worker": "uv run --package starboard-ext-ingestion starboard-ingestion-worker",
+    "test": "uv run --package starboard-ext-ingestion pytest",
+    "build": "echo \"Python service \u2014 no compile step\""
+  }
+}

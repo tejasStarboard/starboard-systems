@@ -4,8 +4,8 @@ import { useRouter } from "next/navigation"
 import { useTransition } from "react"
 import { PlusIcon } from "@phosphor-icons/react"
 
-import { Button } from "@workspace/ui/components/button"
-import { toast } from "@workspace/ui/components/toast"
+import { Button } from "@starboard/lib-ui/components/button"
+import { toast } from "@starboard/lib-ui/components/toast"
 
 export function CreateQuoteButton() {
   const router = useRouter()

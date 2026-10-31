@@ -25,7 +25,7 @@ First messaging provider: Microsoft Graph (Outlook). Connect mailbox (OAuth), re
 
 ## Files to touch
 
-- `services/messaging` Python + `msgraph` plugin
+- `extensions/messaging` Python + `msgraph` plugin
 - Extension manifest + BFF proxy
 - Settings “Connect Outlook” when extension enabled
 - Token storage pattern (encrypted; document)

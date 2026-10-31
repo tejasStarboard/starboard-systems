@@ -1,27 +1,34 @@
 {
-  "name": "@starboard/rates-service",
+  "name": "@starboard/svc-rates",
   "version": "0.0.1",
+  "description": "Rates catalog domain HTTP service",
   "private": true,
+  "license": "UNLICENSED",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tejasStarboard/starboard-systems.git",
+    "directory": "services/rates"
+  },
   "scripts": {
     "dev": "bun run --watch src/index.ts",
     "start": "bun run src/index.ts",
     "typecheck": "tsc --noEmit",
     "test": "bun test",
-    "build": "echo \"Bun service — no compile step\""
+    "build": "echo \"Bun service \u2014 no compile step\""
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.2.0",
-    "@starboard/contracts": "workspace:*",
-    "@starboard/db": "workspace:*",
-    "@starboard/service-kit": "workspace:*",
+    "@starboard/lib-contracts": "workspace:*",
+    "@starboard/lib-db": "workspace:*",
+    "@starboard/lib-service-kit": "workspace:*",
     "dotenv": "^18.0.9",
     "drizzle-orm": "^0.45.4",
     "hono": "^4.11.3"
   },
   "devDependencies": {
     "@types/bun": "^1.3.5",
-    "@workspace/typescript-config": "workspace:*",
+    "@starboard/tool-typescript-config": "workspace:*",
     "typescript": "^5.9.3"
   }
 }

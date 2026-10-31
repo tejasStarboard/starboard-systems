@@ -1,10 +1,10 @@
 import { Geist, Geist_Mono, JetBrains_Mono } from "next/font/google"
 
-import "@workspace/ui/globals.css"
+import "@starboard/lib-ui/globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
-import { cn } from "@workspace/ui/lib/utils"
-import { TooltipProvider } from "@workspace/ui/components/tooltip"
-import { Toaster } from "@workspace/ui/components/toast"
+import { cn } from "@starboard/lib-ui/lib/utils"
+import { TooltipProvider } from "@starboard/lib-ui/components/tooltip"
+import { Toaster } from "@starboard/lib-ui/components/toast"
 
 const fontSans = Geist({
   subsets: ["latin"],

@@ -1,19 +1,21 @@
 import type {
   Cargo,
   ContainerLine,
+  DoorAddress,
   LaneFormValues,
   ManualRateLine,
-} from "@starboard/contracts"
+} from "@starboard/lib-contracts"
+import { emptyDoorAddress, isDoorAddressEmpty } from "@starboard/lib-contracts"
 
 export type LaneRow = {
   id: string
   mode: LaneFormValues["mode"]
-  pickupId: string | null
+  pickupAddress: DoorAddress | null
   origin: string | null
   originVia: string | null
   destinationVia: string | null
   destination: string | null
-  deliveryId: string | null
+  deliveryAddress: DoorAddress | null
   quoteId: string
   cargo: Cargo[]
   markupType: LaneFormValues["markupType"]
@@ -118,6 +120,10 @@ export function scalarsFromCargo(cargo: Cargo[]): {
   }
 }
 
+function doorAddressOrNull(address: DoorAddress): DoorAddress | null {
+  return isDoorAddressEmpty(address) ? null : address
+}
+
 export function laneFormToRows(
   lane: LaneFormValues,
   quoteId: string,
@@ -130,12 +136,12 @@ export function laneFormToRows(
     lane: {
       id: lane.id,
       mode: lane.mode,
-      pickupId: emptyToNull(lane.pickup),
+      pickupAddress: doorAddressOrNull(lane.pickup),
       origin: emptyToNull(lane.origin),
       originVia: emptyToNull(lane.originVia),
       destinationVia: emptyToNull(lane.destinationVia),
       destination: emptyToNull(lane.destination),
-      deliveryId: emptyToNull(lane.delivery),
+      deliveryAddress: doorAddressOrNull(lane.delivery),
       quoteId,
       cargo: cargoFromLaneForm(lane),
       markupType: lane.markupType,
@@ -163,12 +169,12 @@ export function rowsToLaneForm(row: LaneRow, rates: RateRow[]): LaneFormValues {
   return {
     id: row.id,
     mode: row.mode,
-    pickup: row.pickupId ?? "",
+    pickup: row.pickupAddress ?? emptyDoorAddress(),
     origin: row.origin ?? "",
     originVia: row.originVia ?? "",
     destinationVia: row.destinationVia ?? "",
     destination: row.destination ?? "",
-    delivery: row.deliveryId ?? "",
+    delivery: row.deliveryAddress ?? emptyDoorAddress(),
     containers,
     weight: scalars.weight,
     volume: scalars.volume,

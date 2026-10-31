@@ -2,7 +2,7 @@ import {
   REQUEST_ID_HEADER,
   serviceFetch,
   type ServiceFetchOptions,
-} from "@starboard/service-kit"
+} from "@starboard/lib-service-kit"
 
 import { env } from "@/env"
 

@@ -3,7 +3,7 @@
 import * as React from "react"
 import { useState } from "react"
 
-import { Button } from "@workspace/ui/components/button"
+import { Button } from "@starboard/lib-ui/components/button"
 
 export function RatesUploadForm() {
   const [file, setFile] = useState<File | null>(null)

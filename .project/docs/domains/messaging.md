@@ -1,10 +1,10 @@
 # Domain: messaging
 
-|                 |                                          |
-| --------------- | ---------------------------------------- |
-| Service         | `services/messaging` (Python + Temporal) |
-| First extension | `messaging.msgraph`                      |
-| Status          | Vertical slice (ticket 030)              |
+|                 |                                            |
+| --------------- | ------------------------------------------ |
+| Service         | `extensions/messaging` (Python + Temporal) |
+| First extension | `messaging.msgraph`                        |
+| Status          | Vertical slice (ticket 030)                |
 
 ## Owns
 

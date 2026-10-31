@@ -11,7 +11,7 @@ Starboard’s primary product is quoting (+ CRM). Spot search, rate ingestion, O
 ## Decision
 
 - Treat `apps/web` as a **shell**; optional capabilities are **extensions** with manifests.
-- `packages/extension-host` holds manifest types, registry load, and entitlement checks (`credit` | `enterprise`).
+- `extensions/host` (`@starboard/ext-host`) holds manifest types, registry load, and entitlement checks (`credit` | `enterprise`).
 - BFF exposes `/api/extensions/<id>/*` only for enabled + entitled extensions.
 - Nav, upload tabs, and rate-source slots render from contributions — not hardcoded feature flags scattered in components.
 - First extensions: `ingestion.fcl_v6`, `messaging.msgraph`, `spot.maersk`, `spot.cma`.

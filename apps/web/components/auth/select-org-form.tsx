@@ -4,16 +4,16 @@ import { Buildings, Plus } from "@phosphor-icons/react"
 import { useRouter } from "next/navigation"
 import { useCallback, useEffect, useState } from "react"
 
-import { Alert, AlertDescription } from "@workspace/ui/components/alert"
-import { Button } from "@workspace/ui/components/button"
+import { Alert, AlertDescription } from "@starboard/lib-ui/components/alert"
+import { Button } from "@starboard/lib-ui/components/button"
 import {
   Field,
   FieldGroup,
   FieldLabel,
   FieldSeparator,
-} from "@workspace/ui/components/field"
-import { Input } from "@workspace/ui/components/input"
-import { Spinner } from "@workspace/ui/components/spinner"
+} from "@starboard/lib-ui/components/field"
+import { Input } from "@starboard/lib-ui/components/input"
+import { Spinner } from "@starboard/lib-ui/components/spinner"
 
 import { authClient } from "@/lib/auth-client"
 

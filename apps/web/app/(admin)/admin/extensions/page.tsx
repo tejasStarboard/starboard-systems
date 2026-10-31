@@ -1,7 +1,7 @@
 import { ExtensionRolloutPanel } from "@/components/admin/extension-rollout-panel"
 import { getPlatformManager } from "@/lib/domain/platform/platform.manager"
 import { listRegisteredExtensions } from "@/lib/extensions"
-import { parseRolloutMode } from "@starboard/extension-host"
+import { parseRolloutMode } from "@starboard/ext-host"
 
 export default async function AdminExtensionsPage() {
   const manifests = listRegisteredExtensions()

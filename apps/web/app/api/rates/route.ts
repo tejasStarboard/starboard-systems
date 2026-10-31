@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 import {
   createRateRequestSchema,
   listRatesQuerySchema,
-} from "@starboard/contracts"
+} from "@starboard/lib-contracts"
 
 import { requireApiSession } from "@/lib/auth/session"
 import { ServiceClientError } from "@/lib/clients/http"

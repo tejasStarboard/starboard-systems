@@ -1,10 +1,10 @@
 import { Hono } from "hono"
-import { createCustomerRequestSchema } from "@starboard/contracts"
+import { createCustomerRequestSchema } from "@starboard/lib-contracts"
 import {
   logError,
   logInfo,
   type ServiceVariables,
-} from "@starboard/service-kit"
+} from "@starboard/lib-service-kit"
 
 import type { CrmService } from "../domain/crm.service"
 import { CrmValidationError } from "../domain/crm.service"

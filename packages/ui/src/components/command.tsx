@@ -10,11 +10,11 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@workspace/ui/components/dialog"
+} from "@starboard/lib-ui/components/dialog"
 import {
   InputGroup,
   InputGroupAddon,
-} from "@workspace/ui/components/input-group"
+} from "@starboard/lib-ui/components/input-group"
 import { MagnifyingGlassIcon, CheckIcon } from "@phosphor-icons/react"
 
 function Command({

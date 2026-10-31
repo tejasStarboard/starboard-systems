@@ -8,18 +8,22 @@ import {
   type UseFormRegister,
 } from "react-hook-form"
 
-import { Button } from "@workspace/ui/components/button"
-import { Field, FieldError, FieldLabel } from "@workspace/ui/components/field"
-import { Input } from "@workspace/ui/components/input"
+import { Button } from "@starboard/lib-ui/components/button"
+import {
+  Field,
+  FieldError,
+  FieldLabel,
+} from "@starboard/lib-ui/components/field"
+import { Input } from "@starboard/lib-ui/components/input"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@workspace/ui/components/select"
-import { toast } from "@workspace/ui/components/toast"
-import { cn } from "@workspace/ui/lib/utils"
+} from "@starboard/lib-ui/components/select"
+import { toast } from "@starboard/lib-ui/components/toast"
+import { cn } from "@starboard/lib-ui/lib/utils"
 
 import { CustomerCombobox } from "@/components/quotes/customer-combobox"
 import {

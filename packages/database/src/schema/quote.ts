@@ -1,12 +1,14 @@
 import type {
   Cargo,
+  DoorAddress,
   LegMode,
   QuoteSource,
   QuoteStatus,
-} from "@starboard/contracts"
+} from "@starboard/lib-contracts"
 import { relations } from "drizzle-orm"
 import {
   doublePrecision,
+  index,
   jsonb,
   pgSchema,
   text,
@@ -70,57 +72,80 @@ export const quote = quotesSchema.table(
       table.organizationId,
       table.quoteId
     ),
+    index("quote_organization_id_idx").on(table.organizationId),
+    index("quote_organization_created_idx").on(
+      table.organizationId,
+      table.createdAt
+    ),
+    index("quote_customer_id_idx").on(table.customerId),
+    index("quote_owner_id_idx").on(table.ownerId),
   ]
 )
 
-export const lane = quotesSchema.table("lane", {
-  id: text("id").primaryKey(),
-  mode: varchar("mode", { length: 10 })
-    .$type<LaneMode>()
-    .notNull()
-    .default("fcl"),
-  /** Opaque location id from geography. */
-  pickupId: text("pickup_id"),
-  /** Opaque port unlocode from geography. */
-  origin: varchar("origin", { length: 7 }),
-  originVia: varchar("origin_via", { length: 7 }),
-  destinationVia: varchar("destination_via", { length: 7 }),
-  destination: varchar("destination", { length: 7 }),
-  deliveryId: text("delivery_id"),
-  legOrder: jsonb("leg_order").$type<LegMode[]>().notNull().default([]),
-  quoteId: text("quote_id")
-    .notNull()
-    .references(() => quote.id, { onDelete: "cascade" }),
-  cargo: jsonb("cargo").$type<Cargo[]>().notNull().default([]),
-  markupType: varchar("markup_type", { length: 10 })
-    .$type<LaneMarkupType>()
-    .notNull()
-    .default("amount"),
-  markupValue: doublePrecision("markup_value").notNull().default(0),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at")
-    .defaultNow()
-    .$onUpdate(() => /* @__PURE__ */ new Date())
-    .notNull(),
-})
+export const lane = quotesSchema.table(
+  "lane",
+  {
+    id: text("id").primaryKey(),
+    mode: varchar("mode", { length: 10 })
+      .$type<LaneMode>()
+      .notNull()
+      .default("fcl"),
+    /** Door pickup snapshot from Google Places (not a gazetteer FK). */
+    pickupAddress: jsonb("pickup_address").$type<DoorAddress | null>(),
+    /** Opaque port unlocode from geography. */
+    origin: varchar("origin", { length: 7 }),
+    originVia: varchar("origin_via", { length: 7 }),
+    destinationVia: varchar("destination_via", { length: 7 }),
+    destination: varchar("destination", { length: 7 }),
+    /** Door delivery snapshot from Google Places (not a gazetteer FK). */
+    deliveryAddress: jsonb("delivery_address").$type<DoorAddress | null>(),
+    legOrder: jsonb("leg_order").$type<LegMode[]>().notNull().default([]),
+    quoteId: text("quote_id")
+      .notNull()
+      .references(() => quote.id, { onDelete: "cascade" }),
+    cargo: jsonb("cargo").$type<Cargo[]>().notNull().default([]),
+    markupType: varchar("markup_type", { length: 10 })
+      .$type<LaneMarkupType>()
+      .notNull()
+      .default("amount"),
+    markupValue: doublePrecision("markup_value").notNull().default(0),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+      .defaultNow()
+      .$onUpdate(() => /* @__PURE__ */ new Date())
+      .notNull(),
+  },
+  (table) => [
+    index("lane_quote_id_idx").on(table.quoteId),
+    index("lane_origin_idx").on(table.origin),
+    index("lane_destination_idx").on(table.destination),
+  ]
+)
 
-export const rate = quotesSchema.table("rate", {
-  id: text("id").primaryKey(),
-  laneId: text("lane_id")
-    .notNull()
-    .references(() => lane.id, { onDelete: "cascade" }),
-  /** Opaque currency code from geography. */
-  currencyCode: varchar("currency_code", { length: 3 }).notNull(),
-  label: text("label").notNull().default(""),
-  rate: doublePrecision("rate").notNull(),
-  validFrom: timestamp("valid_from").notNull(),
-  validTo: timestamp("valid_to").notNull(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at")
-    .defaultNow()
-    .$onUpdate(() => /* @__PURE__ */ new Date())
-    .notNull(),
-})
+export const rate = quotesSchema.table(
+  "rate",
+  {
+    id: text("id").primaryKey(),
+    laneId: text("lane_id")
+      .notNull()
+      .references(() => lane.id, { onDelete: "cascade" }),
+    /** Opaque currency code from geography. */
+    currencyCode: varchar("currency_code", { length: 3 }).notNull(),
+    label: text("label").notNull().default(""),
+    rate: doublePrecision("rate").notNull(),
+    validFrom: timestamp("valid_from").notNull(),
+    validTo: timestamp("valid_to").notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+      .defaultNow()
+      .$onUpdate(() => /* @__PURE__ */ new Date())
+      .notNull(),
+  },
+  (table) => [
+    index("quote_rate_lane_id_idx").on(table.laneId),
+    index("quote_rate_valid_range_idx").on(table.validFrom, table.validTo),
+  ]
+)
 
 export const quoteRelations = relations(quote, ({ many }) => ({
   lanes: many(lane),

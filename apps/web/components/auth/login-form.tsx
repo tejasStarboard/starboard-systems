@@ -4,15 +4,15 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 
-import { Alert, AlertDescription } from "@workspace/ui/components/alert"
-import { Button } from "@workspace/ui/components/button"
+import { Alert, AlertDescription } from "@starboard/lib-ui/components/alert"
+import { Button } from "@starboard/lib-ui/components/button"
 import {
   Field,
   FieldGroup,
   FieldLabel,
   FieldSeparator,
-} from "@workspace/ui/components/field"
-import { Input } from "@workspace/ui/components/input"
+} from "@starboard/lib-ui/components/field"
+import { Input } from "@starboard/lib-ui/components/input"
 
 import { GoogleButton } from "@/components/auth/google-button"
 import { authClient } from "@/lib/auth-client"

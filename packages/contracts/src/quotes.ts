@@ -1,5 +1,7 @@
 import { z } from "zod"
 
+import { doorAddressSchema, emptyDoorAddress } from "./door-address.js"
+
 export const quoteSourceSchema = z.enum(["email", "manual"])
 export type QuoteSource = z.infer<typeof quoteSourceSchema>
 
@@ -82,12 +84,14 @@ export const markupTypeSchema = z.enum(["amount", "percent"])
 export const laneFormSchema = z.object({
   id: z.string(),
   mode: laneModeSchema,
-  pickup: z.string(),
+  /** Door pickup — Google Places snapshot (empty label = unset). */
+  pickup: doorAddressSchema,
   origin: z.string(),
   originVia: z.string(),
   destinationVia: z.string(),
   destination: z.string(),
-  delivery: z.string(),
+  /** Door delivery — Google Places snapshot (empty label = unset). */
+  delivery: doorAddressSchema,
   containers: z.array(containerLineSchema),
   weight: z.number(),
   volume: z.number(),
@@ -205,12 +209,12 @@ export function emptyLaneFormValues(mode: LaneMode = "fcl"): LaneFormValues {
   return {
     id: crypto.randomUUID(),
     mode,
-    pickup: "",
+    pickup: emptyDoorAddress(),
     origin: "",
     originVia: "",
     destinationVia: "",
     destination: "",
-    delivery: "",
+    delivery: emptyDoorAddress(),
     containers: mode === "fcl" ? [createContainerLine()] : [],
     weight: 0,
     volume: 0,

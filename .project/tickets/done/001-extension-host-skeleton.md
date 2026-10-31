@@ -15,7 +15,7 @@ docs:
 
 ## Goal
 
-Add `packages/extension-host` with manifest types, an in-repo registry of stub manifests, entitlement helper (`credit` | `enterprise`), and wire the shell so nav/settings can read enabled extensions without hardcoding feature names.
+Add `extensions/host` with manifest types, an in-repo registry of stub manifests, entitlement helper (`credit` | `enterprise`), and wire the shell so nav/settings can read enabled extensions without hardcoding feature names.
 
 ## Non-goals
 
@@ -25,7 +25,7 @@ Add `packages/extension-host` with manifest types, an in-repo registry of stub m
 
 ## Files to touch
 
-- `packages/extension-host/**` (new)
+- `extensions/host/**` (new)
 - `apps/web` — thin client or server helper to list enabled extensions
 - Optional stub settings panel showing registered extensions
 - Root workspace / turbo if needed to include the package

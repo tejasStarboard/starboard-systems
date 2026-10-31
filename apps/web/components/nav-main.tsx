@@ -9,7 +9,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@workspace/ui/components/sidebar"
+} from "@starboard/lib-ui/components/sidebar"
 
 function isItemActive(pathname: string, url: string) {
   if (url === "/" || url === "/admin") {

@@ -31,7 +31,10 @@ export const session = pgTable(
       .references(() => user.id, { onDelete: "cascade" }),
     activeOrganizationId: text("active_organization_id"),
   },
-  (table) => [index("session_userId_idx").on(table.userId)]
+  (table) => [
+    index("session_userId_idx").on(table.userId),
+    index("session_active_organization_id_idx").on(table.activeOrganizationId),
+  ]
 )
 
 export const account = pgTable(
@@ -74,16 +77,20 @@ export const verification = pgTable(
   (table) => [index("verification_identifier_idx").on(table.identifier)]
 )
 
-export const organization = pgTable("organization", {
-  id: text("id").primaryKey(),
-  name: text("name").notNull(),
-  slug: text("slug").notNull().unique(),
-  logo: text("logo"),
-  createdAt: timestamp("created_at").notNull(),
-  metadata: text("metadata"),
-  /** Billing stub: credit | enterprise. Default credit. Not client-writable. */
-  plan: text("plan").default("credit").notNull(),
-})
+export const organization = pgTable(
+  "organization",
+  {
+    id: text("id").primaryKey(),
+    name: text("name").notNull(),
+    slug: text("slug").notNull().unique(),
+    logo: text("logo"),
+    createdAt: timestamp("created_at").notNull(),
+    metadata: text("metadata"),
+    /** Billing stub: credit | enterprise. Default credit. Not client-writable. */
+    plan: text("plan").default("credit").notNull(),
+  },
+  (table) => [index("organization_plan_idx").on(table.plan)]
+)
 
 export const member = pgTable(
   "member",

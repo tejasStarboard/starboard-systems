@@ -7,7 +7,7 @@ Runtime deploy details for the monorepo live in [docs/architecture.md](../../doc
 | VS Code                  | Starboard Systems                                                    |
 | ------------------------ | -------------------------------------------------------------------- |
 | Workbench / bare editor  | `apps/web` shell: quote editor, CRM, settings, org switcher          |
-| Extension Host           | `packages/extension-host` + BFF activation                           |
+| Extension Host           | `extensions/host` + BFF activation                                   |
 | Extension `package.json` | Extension **manifest** (see [extensions.md](extensions.md))          |
 | Built-ins                | Always-on packages/services (pricing, geography, quotes, rates, CRM) |
 | Disable extension        | Flag off → hide contributions → stop worker deploy                   |
@@ -22,7 +22,7 @@ Runtime deploy details for the monorepo live in [docs/architecture.md](../../doc
 - Rates catalog (manual + written by extensions)
 - Billing: **credit** and **enterprise** plans; entitlements gate extensions.
   Plan is stored on Better Auth `organization.plan` (default **`credit`**, not
-  client-writable). `packages/extension-host` filters manifests by `requiredPlan`.
+  client-writable). `extensions/host` filters manifests by `requiredPlan`.
 
 ## Extensions (optional)
 

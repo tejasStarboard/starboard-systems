@@ -1,32 +1,31 @@
 # Starboard Systems
 
-pnpm + Turborepo monorepo: Next.js BFF with Bun domain microservices.
+pnpm + Turborepo monorepo: Next.js BFF, Bun domain microservices, and Python+Temporal extensions.
 
-See [docs/architecture.md](docs/architecture.md) for the production layout (auth in Next, quotes + geography as stateless Bun services, shared Neon with `geo` / `quotes` schemas).
+See [docs/architecture.md](docs/architecture.md) for layout, package naming, and auth boundaries.
 
-## Apps & services
+## Layout
 
-| Path                   | Role                                            |
-| ---------------------- | ----------------------------------------------- |
-| `apps/web`             | Next.js orchestrator (Better Auth, UI)          |
-| `services/quotes`      | Quotes API (Bun + Hono)                         |
-| `services/geography`   | Geography / currency API (Bun + Hono)           |
-| `packages/contracts`   | Shared Zod API contracts                        |
-| `packages/database`    | Drizzle schemas + client                        |
-| `packages/service-kit` | Service token, request IDs, HTTP client helpers |
-| `packages/ui`          | Shared UI                                       |
-| `packages/email`       | Resend templates                                |
+| Path                | Package name              | Role                                   |
+| ------------------- | ------------------------- | -------------------------------------- |
+| `apps/web`          | `@starboard/app-web`      | Next.js orchestrator (Better Auth, UI) |
+| `services/<domain>` | `@starboard/svc-<domain>` | Bun + Hono domain APIs                 |
+| `extensions/<name>` | `@starboard/ext-<name>`   | Extension host / workers / Temporal    |
+| `packages/<lib>`    | `@starboard/lib-<name>`   | Shared libraries                       |
+| `tooling/<name>`    | `@starboard/tool-<name>`  | ESLint / TS configs                    |
+
+Python extension projects use `starboard-ext-<name>`; shared Python libs use `starboard-lib-<name>`.
 
 ## Develop
 
 ```bash
 pnpm install
 cp .env.example .env   # fill secrets + INTERNAL_SERVICE_TOKEN + service URLs
-pnpm --filter @starboard/contracts build
-pnpm --filter @starboard/service-kit build
-pnpm --filter @starboard/db build
-pnpm --filter @starboard/db db:push
-pnpm --filter @starboard/db db:seed
+pnpm --filter @starboard/lib-contracts build
+pnpm --filter @starboard/lib-service-kit build
+pnpm --filter @starboard/lib-db build
+pnpm --filter @starboard/lib-db db:push
+pnpm --filter @starboard/lib-db db:seed
 pnpm dev
 ```
 
@@ -36,4 +35,4 @@ pnpm dev
 pnpm dlx shadcn@latest add button -c apps/web
 ```
 
-Import from `@workspace/ui/components/button`.
+Import from `@starboard/lib-ui/components/button`.

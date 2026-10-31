@@ -4,10 +4,14 @@ import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useState } from "react"
 
-import { Alert, AlertDescription } from "@workspace/ui/components/alert"
-import { Button } from "@workspace/ui/components/button"
-import { Field, FieldGroup, FieldLabel } from "@workspace/ui/components/field"
-import { Input } from "@workspace/ui/components/input"
+import { Alert, AlertDescription } from "@starboard/lib-ui/components/alert"
+import { Button } from "@starboard/lib-ui/components/button"
+import {
+  Field,
+  FieldGroup,
+  FieldLabel,
+} from "@starboard/lib-ui/components/field"
+import { Input } from "@starboard/lib-ui/components/input"
 
 import { authClient } from "@/lib/auth-client"
 

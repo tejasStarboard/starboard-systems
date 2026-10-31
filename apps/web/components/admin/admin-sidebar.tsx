@@ -21,7 +21,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@workspace/ui/components/sidebar"
+} from "@starboard/lib-ui/components/sidebar"
 
 const navMain = [
   {

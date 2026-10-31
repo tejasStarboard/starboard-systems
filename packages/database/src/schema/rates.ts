@@ -50,5 +50,14 @@ export const rateCatalog = ratesSchema.table(
       table.origin,
       table.destination
     ),
+    index("rate_organization_customer_idx").on(
+      table.organizationId,
+      table.customerId
+    ),
+    index("rate_organization_carrier_idx").on(
+      table.organizationId,
+      table.carrier
+    ),
+    index("rate_valid_range_idx").on(table.validFrom, table.validTo),
   ]
 )

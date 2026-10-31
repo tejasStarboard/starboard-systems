@@ -4,8 +4,8 @@ import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useEffect, useState } from "react"
 
-import { Alert, AlertDescription } from "@workspace/ui/components/alert"
-import { Button } from "@workspace/ui/components/button"
+import { Alert, AlertDescription } from "@starboard/lib-ui/components/alert"
+import { Button } from "@starboard/lib-ui/components/button"
 
 import { authClient, useSession } from "@/lib/auth-client"
 

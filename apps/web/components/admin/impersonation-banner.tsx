@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 
-import { Button } from "@workspace/ui/components/button"
+import { Button } from "@starboard/lib-ui/components/button"
 
 export function ImpersonationBanner({
   organizationName,

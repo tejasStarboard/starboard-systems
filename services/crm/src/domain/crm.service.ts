@@ -3,7 +3,7 @@ import {
   getCustomerNamesQuerySchema,
   type CreateCustomerResponse,
   type FormOption,
-} from "@starboard/contracts"
+} from "@starboard/lib-contracts"
 
 import type { CrmDao } from "../dao/crm.dao"
 

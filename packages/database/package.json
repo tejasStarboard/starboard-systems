@@ -1,8 +1,15 @@
 {
-  "name": "@starboard/db",
+  "name": "@starboard/lib-db",
   "version": "0.0.1",
+  "description": "Drizzle schemas and DB client (Neon / node-postgres)",
   "private": true,
+  "license": "UNLICENSED",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tejasStarboard/starboard-systems.git",
+    "directory": "packages/database"
+  },
   "exports": {
     ".": {
       "types": "./src/index.ts",
@@ -63,12 +70,14 @@
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.2.0",
-    "@starboard/contracts": "workspace:*",
+    "@starboard/lib-contracts": "workspace:*",
     "drizzle-orm": "^0.45.4",
+    "pg": "^8.23.1",
     "zod": "^4.6.7"
   },
   "devDependencies": {
-    "@workspace/typescript-config": "workspace:*",
+    "@types/pg": "^8.23.1",
+    "@starboard/tool-typescript-config": "workspace:*",
     "dotenv": "^18.0.9",
     "drizzle-kit": "^0.31.11",
     "tsup": "^8.5.1",

@@ -15,7 +15,7 @@ import {
   Avatar,
   AvatarFallback,
   AvatarImage,
-} from "@workspace/ui/components/avatar"
+} from "@starboard/lib-ui/components/avatar"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,13 +24,13 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@workspace/ui/components/dropdown-menu"
+} from "@starboard/lib-ui/components/dropdown-menu"
 import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from "@workspace/ui/components/sidebar"
+} from "@starboard/lib-ui/components/sidebar"
 
 function initials(name: string) {
   return name

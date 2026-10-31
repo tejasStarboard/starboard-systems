@@ -1,9 +1,9 @@
 /**
  * Re-exports quote form contracts for UI convenience.
- * Canonical schemas live in `@starboard/contracts`.
- * Pricing math lives in `@starboard/pricing`.
+ * Canonical schemas live in `@starboard/lib-contracts`.
+ * Pricing math lives in `@starboard/lib-pricing`.
  */
-export { calculateManualRateTotals } from "@starboard/pricing"
+export { calculateManualRateTotals } from "@starboard/lib-pricing"
 export {
   createContainerLine,
   createManualRateLine,
@@ -26,4 +26,4 @@ export {
   type QuoteListItemView as QuoteListItem,
   type QuoteSource,
   type QuoteStatus,
-} from "@starboard/contracts"
+} from "@starboard/lib-contracts"

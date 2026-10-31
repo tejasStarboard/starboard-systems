@@ -1,0 +1,40 @@
+{
+  "name": "@starboard/ext-host",
+  "version": "0.0.1",
+  "description": "Extension manifests, registry, entitlements, and rollout",
+  "private": true,
+  "license": "UNLICENSED",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tejasStarboard/starboard-systems.git",
+    "directory": "extensions/host"
+  },
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "bun": "./src/index.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.3.5",
+    "@starboard/tool-typescript-config": "workspace:*",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3"
+  }
+}

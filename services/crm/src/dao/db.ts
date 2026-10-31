@@ -1,4 +1,4 @@
-import { createDb, type Database } from "@starboard/db"
+import { createDb, type Database } from "@starboard/lib-db"
 
 export type CrmDb = Database
 

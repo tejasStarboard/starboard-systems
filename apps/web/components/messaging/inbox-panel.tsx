@@ -2,7 +2,7 @@
 
 import { useState, type FormEvent } from "react"
 
-import { Button } from "@workspace/ui/components/button"
+import { Button } from "@starboard/lib-ui/components/button"
 
 type Message = {
   id: string

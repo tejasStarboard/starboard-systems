@@ -1,6 +1,6 @@
 # Extension host — manifests
 
-Shell discovers extensions via `packages/extension-host` (see ticket 001). UI and BFF must not hard-code optional features.
+Shell discovers extensions via `extensions/host` (`@starboard/ext-host`; see ticket 001). UI and BFF must not hard-code optional features.
 
 ## Manifest schema (sketch)
 

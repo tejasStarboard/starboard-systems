@@ -2,7 +2,7 @@
 
 |            |                                                                |
 | ---------- | -------------------------------------------------------------- |
-| Service    | `services/spot` (Python + Temporal OSS)                        |
+| Service    | `extensions/spot` (Python + Temporal OSS)                      |
 | Extensions | Host: `spot.fake`; carriers: `spot.maersk`, `spot.cma`, …      |
 | Status     | Host online (`040`); Maersk online (`041`); CMA online (`042`) |
 

@@ -25,7 +25,7 @@ Model two plans — `credit` and `enterprise` — on the org (or org metadata), 
 ## Files to touch
 
 - Better Auth org additional fields or `billing` table owned by shell
-- `packages/extension-host` entitlement integration
+- `extensions/host` entitlement integration
 - Settings UI stub for current plan
 - `.project/docs` note if plan storage location is decided
 

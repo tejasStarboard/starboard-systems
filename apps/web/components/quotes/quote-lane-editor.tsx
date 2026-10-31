@@ -9,9 +9,9 @@ import {
   type UseFormSetValue,
 } from "react-hook-form"
 
-import { Button } from "@workspace/ui/components/button"
-import { Field, FieldLabel } from "@workspace/ui/components/field"
-import { Input } from "@workspace/ui/components/input"
+import { Button } from "@starboard/lib-ui/components/button"
+import { Field, FieldLabel } from "@starboard/lib-ui/components/field"
+import { Input } from "@starboard/lib-ui/components/input"
 import {
   Table,
   TableBody,
@@ -19,12 +19,12 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@workspace/ui/components/table"
+} from "@starboard/lib-ui/components/table"
 import {
   ToggleGroup,
   ToggleGroupItem,
-} from "@workspace/ui/components/toggle-group"
-import { cn } from "@workspace/ui/lib/utils"
+} from "@starboard/lib-ui/components/toggle-group"
+import { cn } from "@starboard/lib-ui/lib/utils"
 
 import { LaneFields } from "@/components/quotes/lane-fields"
 import type {

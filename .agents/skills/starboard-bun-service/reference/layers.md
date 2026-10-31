@@ -6,7 +6,7 @@
 | -------------- | --------------------------------------------- |
 | Controller     | contracts, service-kit, service layer types   |
 | Service        | DAO interface, domain errors, contracts types |
-| DAO impl       | `@starboard/db`, drizzle                      |
+| DAO impl       | `@starboard/lib-db`, drizzle                  |
 | `container.ts` | wires concrete DAO → service → controllers    |
 
 ## Anti-patterns

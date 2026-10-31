@@ -1,7 +1,7 @@
 "use client"
 
-import { Label } from "@workspace/ui/components/label"
-import { SidebarInput } from "@workspace/ui/components/sidebar"
+import { Label } from "@starboard/lib-ui/components/label"
+import { SidebarInput } from "@starboard/lib-ui/components/sidebar"
 import { MagnifyingGlassIcon } from "@phosphor-icons/react"
 
 export function SearchForm({ ...props }: React.ComponentProps<"form">) {

@@ -3,9 +3,13 @@ import { resolve, dirname } from "node:path"
 import { fileURLToPath } from "node:url"
 
 import { createDb } from "../client"
-import { country, port, state } from "../schema/geography"
+import { country, facility, state } from "../schema/geography"
 import { containerType, palletType } from "../schema/quote"
-import { defaultCountries, defaultPorts, defaultStates } from "./geography-data"
+import {
+  defaultCountries,
+  defaultFacilities,
+  defaultStates,
+} from "./geography-data"
 import { defaultContainerTypes, defaultPalletTypes } from "./reference-data"
 
 const rootDir = resolve(dirname(fileURLToPath(import.meta.url)), "../../../..")
@@ -56,14 +60,30 @@ async function seed() {
     })
   }
 
-  for (const row of defaultPorts) {
-    await db.insert(port).values(row).onConflictDoNothing({
-      target: port.unlocode,
-    })
+  for (const row of defaultFacilities) {
+    await db
+      .insert(facility)
+      .values({
+        id: row.id,
+        unlocode: row.unlocode ?? null,
+        iata: row.iata ?? null,
+        name: row.name,
+        facilityTypes: row.facilityTypes,
+        countryCode: row.countryCode,
+        admin1: row.admin1 ?? null,
+        cityName: row.cityName ?? null,
+        aliases: row.aliases ?? [],
+        latitude: row.latitude ?? null,
+        longitude: row.longitude ?? null,
+        isPrimary: row.isPrimary ?? false,
+      })
+      .onConflictDoNothing({
+        target: facility.id,
+      })
   }
 
   console.log(
-    `Seeded ${defaultContainerTypes.length} container types, ${defaultPalletTypes.length} pallet types, and ${defaultPorts.length} ports`
+    `Seeded ${defaultContainerTypes.length} container types, ${defaultPalletTypes.length} pallet types, and ${defaultFacilities.length} facilities`
   )
 }
 

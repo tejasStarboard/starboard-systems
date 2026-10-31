@@ -1,7 +1,7 @@
 "use client"
 
 import { GoogleLogo } from "@phosphor-icons/react"
-import { Button } from "@workspace/ui/components/button"
+import { Button } from "@starboard/lib-ui/components/button"
 import { useState } from "react"
 
 import { authClient } from "@/lib/auth-client"

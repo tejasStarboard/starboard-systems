@@ -21,7 +21,8 @@ export default defineConfig((options) => ({
   external: [
     "drizzle-orm",
     "@neondatabase/serverless",
+    "pg",
     "zod",
-    "@starboard/contracts",
+    "@starboard/lib-contracts",
   ],
 }))

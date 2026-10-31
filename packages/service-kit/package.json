@@ -1,8 +1,15 @@
 {
-  "name": "@starboard/service-kit",
+  "name": "@starboard/lib-service-kit",
   "version": "0.0.1",
+  "description": "Bun/Hono service bootstrap, auth headers, logging",
   "private": true,
+  "license": "UNLICENSED",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tejasStarboard/starboard-systems.git",
+    "directory": "packages/service-kit"
+  },
   "exports": {
     ".": {
       "types": "./src/index.ts",
@@ -24,7 +31,7 @@
     "hono": "^4.11.3"
   },
   "devDependencies": {
-    "@workspace/typescript-config": "workspace:*",
+    "@starboard/tool-typescript-config": "workspace:*",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3"
   }

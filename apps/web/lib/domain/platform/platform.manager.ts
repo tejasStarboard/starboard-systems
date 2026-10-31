@@ -1,9 +1,6 @@
 import "server-only"
 
-import type {
-  ExtensionRolloutState,
-  RolloutMode,
-} from "@starboard/extension-host"
+import type { ExtensionRolloutState, RolloutMode } from "@starboard/ext-host"
 
 import {
   clearImpersonationCookie,

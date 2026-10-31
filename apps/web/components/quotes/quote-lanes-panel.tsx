@@ -3,8 +3,8 @@
 import { PlusIcon, TrashIcon } from "@phosphor-icons/react"
 import type { FieldArrayWithId } from "react-hook-form"
 
-import { Button } from "@workspace/ui/components/button"
-import { cn } from "@workspace/ui/lib/utils"
+import { Button } from "@starboard/lib-ui/components/button"
+import { cn } from "@starboard/lib-ui/lib/utils"
 
 import type {
   LaneFormValues,
