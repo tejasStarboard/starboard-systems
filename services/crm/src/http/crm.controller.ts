@@ -1,5 +1,10 @@
 import { Hono } from "hono"
-import { createCustomerRequestSchema } from "@starboard/lib-contracts"
+import {
+  createContactRequestSchema,
+  createCustomerRequestSchema,
+  updateContactRequestSchema,
+  updateCustomerRequestSchema,
+} from "@starboard/lib-contracts"
 import {
   logError,
   logInfo,
@@ -7,7 +12,7 @@ import {
 } from "@starboard/lib-service-kit"
 
 import type { CrmService } from "../domain/crm.service"
-import { CrmValidationError } from "../domain/crm.service"
+import { CrmNotFoundError, CrmValidationError } from "../domain/crm.service"
 
 export function createCrmController(service: CrmService) {
   const app = new Hono<{ Variables: ServiceVariables }>()
@@ -16,8 +21,18 @@ export function createCrmController(service: CrmService) {
     const requestId = c.get("requestId")
     const organizationId =
       c.get("organizationId") || c.req.query("organizationId") || ""
+    const detail = c.req.query("detail") === "1"
 
     try {
+      if (detail) {
+        const customers = await service.listRecords(organizationId)
+        logInfo("crm", requestId, "list_customer_records", {
+          organizationId,
+          count: customers.length,
+        })
+        return c.json({ customers })
+      }
+
       const customers = await service.list(organizationId)
       logInfo("crm", requestId, "list_customers", {
         organizationId,
@@ -50,7 +65,7 @@ export function createCrmController(service: CrmService) {
     }
 
     try {
-      const created = await service.create(organizationId, parsed.data.name)
+      const created = await service.create(organizationId, parsed.data)
       logInfo("crm", requestId, "create_customer", { id: created.id })
       return c.json(created, 201)
     } catch (error) {
@@ -82,6 +97,152 @@ export function createCrmController(service: CrmService) {
     }
   })
 
+  app.get("/customers/:customerId", async (c) => {
+    const requestId = c.get("requestId")
+    const organizationId =
+      c.get("organizationId") || c.req.query("organizationId") || ""
+    const customerId = c.req.param("customerId")
+
+    try {
+      const customer = await service.get(organizationId, customerId)
+      return c.json(customer)
+    } catch (error) {
+      return handleError(c, requestId, "get_customer_failed", error)
+    }
+  })
+
+  app.patch("/customers/:customerId", async (c) => {
+    const requestId = c.get("requestId")
+    const organizationId =
+      c.get("organizationId") || c.req.query("organizationId") || ""
+    const customerId = c.req.param("customerId")
+
+    let body: unknown
+    try {
+      body = await c.req.json()
+    } catch {
+      return c.json({ error: "Invalid JSON body" }, 400)
+    }
+
+    const parsed = updateCustomerRequestSchema.safeParse(body)
+    if (!parsed.success) {
+      return c.json(
+        { error: parsed.error.issues[0]?.message ?? "Invalid request" },
+        400
+      )
+    }
+
+    try {
+      const updated = await service.update(
+        organizationId,
+        customerId,
+        parsed.data
+      )
+      logInfo("crm", requestId, "update_customer", { id: updated.id })
+      return c.json(updated)
+    } catch (error) {
+      return handleError(c, requestId, "update_customer_failed", error)
+    }
+  })
+
+  app.get("/customers/:customerId/contacts", async (c) => {
+    const requestId = c.get("requestId")
+    const organizationId =
+      c.get("organizationId") || c.req.query("organizationId") || ""
+    const customerId = c.req.param("customerId")
+
+    try {
+      const contacts = await service.listContacts(organizationId, customerId)
+      return c.json({ contacts })
+    } catch (error) {
+      return handleError(c, requestId, "list_contacts_failed", error)
+    }
+  })
+
+  app.post("/customers/:customerId/contacts", async (c) => {
+    const requestId = c.get("requestId")
+    const organizationId =
+      c.get("organizationId") || c.req.query("organizationId") || ""
+    const customerId = c.req.param("customerId")
+
+    let body: unknown
+    try {
+      body = await c.req.json()
+    } catch {
+      return c.json({ error: "Invalid JSON body" }, 400)
+    }
+
+    const parsed = createContactRequestSchema.safeParse(body)
+    if (!parsed.success) {
+      return c.json(
+        { error: parsed.error.issues[0]?.message ?? "Invalid request" },
+        400
+      )
+    }
+
+    try {
+      const created = await service.createContact(
+        organizationId,
+        customerId,
+        parsed.data
+      )
+      logInfo("crm", requestId, "create_contact", { id: created.id })
+      return c.json(created, 201)
+    } catch (error) {
+      return handleError(c, requestId, "create_contact_failed", error)
+    }
+  })
+
+  app.patch("/customers/:customerId/contacts/:contactId", async (c) => {
+    const requestId = c.get("requestId")
+    const organizationId =
+      c.get("organizationId") || c.req.query("organizationId") || ""
+    const customerId = c.req.param("customerId")
+    const contactId = c.req.param("contactId")
+
+    let body: unknown
+    try {
+      body = await c.req.json()
+    } catch {
+      return c.json({ error: "Invalid JSON body" }, 400)
+    }
+
+    const parsed = updateContactRequestSchema.safeParse(body)
+    if (!parsed.success) {
+      return c.json(
+        { error: parsed.error.issues[0]?.message ?? "Invalid request" },
+        400
+      )
+    }
+
+    try {
+      const updated = await service.updateContact(
+        organizationId,
+        customerId,
+        contactId,
+        parsed.data
+      )
+      return c.json(updated)
+    } catch (error) {
+      return handleError(c, requestId, "update_contact_failed", error)
+    }
+  })
+
+  app.delete("/customers/:customerId/contacts/:contactId", async (c) => {
+    const requestId = c.get("requestId")
+    const organizationId =
+      c.get("organizationId") || c.req.query("organizationId") || ""
+    const customerId = c.req.param("customerId")
+    const contactId = c.req.param("contactId")
+
+    try {
+      await service.deleteContact(organizationId, customerId, contactId)
+      return c.body(null, 204)
+    } catch (error) {
+      return handleError(c, requestId, "delete_contact_failed", error)
+    }
+  })
+
   return app
 }
 
@@ -91,7 +252,10 @@ function handleError(
   event: string,
   error: unknown
 ) {
-  if (error instanceof CrmValidationError) {
+  if (
+    error instanceof CrmValidationError ||
+    error instanceof CrmNotFoundError
+  ) {
     return c.json({ error: error.message }, error.status)
   }
 

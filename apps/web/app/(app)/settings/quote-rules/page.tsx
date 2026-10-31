@@ -1,7 +1,5 @@
+import { QuoteRulesSettingsForm } from "@/components/settings/quote-rules-settings-form"
+
 export default function QuoteRulesSettingsPage() {
-  return (
-    <div className="p-6">
-      <h1 className="text-sm font-medium">Quote rules</h1>
-    </div>
-  )
+  return <QuoteRulesSettingsForm />
 }

@@ -2,21 +2,68 @@ import { describe, expect, test } from "bun:test"
 import type { FormOption } from "@starboard/lib-contracts"
 
 import { DefaultCrmService } from "./crm.service"
-import type { CrmDao, CustomerInsert, CustomerNameRow } from "../dao/crm.dao"
+import type {
+  ContactInsert,
+  ContactRow,
+  ContactUpdate,
+  CrmDao,
+  CustomerInsert,
+  CustomerNameRow,
+  CustomerRow,
+  CustomerUpdate,
+} from "../dao/crm.dao"
 
 class InMemoryCrmDao implements CrmDao {
-  private customers: Array<CustomerInsert> = []
+  private customers: CustomerRow[] = []
+  private contacts: ContactRow[] = []
 
-  async listByOrganization(organizationId: string): Promise<FormOption[]> {
+  async listOptionsByOrganization(
+    organizationId: string
+  ): Promise<FormOption[]> {
     return this.customers
       .filter((row) => row.organizationId === organizationId)
       .sort((a, b) => a.name.localeCompare(b.name))
       .map((row) => ({ value: row.id, label: row.name }))
   }
 
-  async insert(row: CustomerInsert): Promise<CustomerNameRow> {
-    this.customers.push(row)
-    return { id: row.id, name: row.name }
+  async listRecordsByOrganization(
+    organizationId: string
+  ): Promise<CustomerRow[]> {
+    return this.customers
+      .filter((row) => row.organizationId === organizationId)
+      .sort((a, b) => a.name.localeCompare(b.name))
+  }
+
+  async getById(
+    organizationId: string,
+    customerId: string
+  ): Promise<CustomerRow | null> {
+    return (
+      this.customers.find(
+        (row) => row.organizationId === organizationId && row.id === customerId
+      ) ?? null
+    )
+  }
+
+  async insert(row: CustomerInsert): Promise<CustomerRow> {
+    const created: CustomerRow = { ...row }
+    this.customers.push(created)
+    return created
+  }
+
+  async update(
+    organizationId: string,
+    customerId: string,
+    patch: CustomerUpdate
+  ): Promise<CustomerRow | null> {
+    const index = this.customers.findIndex(
+      (row) => row.organizationId === organizationId && row.id === customerId
+    )
+    if (index < 0) return null
+    const current = this.customers[index]!
+    const updated = { ...current, ...patch }
+    this.customers[index] = updated
+    return updated
   }
 
   async getNamesByIds(
@@ -30,6 +77,75 @@ class InMemoryCrmDao implements CrmDao {
       )
       .map((row) => ({ id: row.id, name: row.name }))
   }
+
+  async listContacts(
+    organizationId: string,
+    customerId: string
+  ): Promise<ContactRow[]> {
+    return this.contacts
+      .filter(
+        (row) =>
+          row.organizationId === organizationId && row.customerId === customerId
+      )
+      .sort((a, b) => a.name.localeCompare(b.name))
+  }
+
+  async getContactById(
+    organizationId: string,
+    customerId: string,
+    contactId: string
+  ): Promise<ContactRow | null> {
+    return (
+      this.contacts.find(
+        (row) =>
+          row.organizationId === organizationId &&
+          row.customerId === customerId &&
+          row.id === contactId
+      ) ?? null
+    )
+  }
+
+  async insertContact(row: ContactInsert): Promise<ContactRow> {
+    const created: ContactRow = { ...row }
+    this.contacts.push(created)
+    return created
+  }
+
+  async updateContact(
+    organizationId: string,
+    customerId: string,
+    contactId: string,
+    patch: ContactUpdate
+  ): Promise<ContactRow | null> {
+    const index = this.contacts.findIndex(
+      (row) =>
+        row.organizationId === organizationId &&
+        row.customerId === customerId &&
+        row.id === contactId
+    )
+    if (index < 0) return null
+    const current = this.contacts[index]!
+    const updated = { ...current, ...patch }
+    this.contacts[index] = updated
+    return updated
+  }
+
+  async deleteContact(
+    organizationId: string,
+    customerId: string,
+    contactId: string
+  ): Promise<boolean> {
+    const before = this.contacts.length
+    this.contacts = this.contacts.filter(
+      (row) =>
+        !(
+          row.organizationId === organizationId &&
+          row.customerId === customerId &&
+          row.id === contactId
+        )
+    )
+    return this.contacts.length < before
+  }
 }
 
 describe("DefaultCrmService org isolation", () => {
@@ -37,8 +153,8 @@ describe("DefaultCrmService org isolation", () => {
     const dao = new InMemoryCrmDao()
     const service = new DefaultCrmService(dao)
 
-    const orgA = await service.create("org-a", "Acme")
-    const orgB = await service.create("org-b", "Beta Co")
+    const orgA = await service.create("org-a", { name: "Acme" })
+    const orgB = await service.create("org-b", { name: "Beta Co" })
 
     const listA = await service.list("org-a")
     expect(listA).toEqual([{ value: orgA.id, label: "Acme" }])
@@ -60,8 +176,76 @@ describe("DefaultCrmService org isolation", () => {
     const service = new DefaultCrmService(new InMemoryCrmDao())
 
     await expect(service.list("")).rejects.toThrow("organizationId is required")
-    await expect(service.create("org-a", "  ")).rejects.toThrow(
+    await expect(service.create("org-a", { name: "  " })).rejects.toThrow(
       "Customer name is required"
     )
+  })
+
+  test("updates expanded fields and keeps quote picker label as name", async () => {
+    const service = new DefaultCrmService(new InMemoryCrmDao())
+    const created = await service.create("org-a", {
+      name: "Acme",
+      email: "ops@acme.test",
+      phone: "+1-555-0100",
+      address: "1 Harbor Way",
+      isVendor: true,
+    })
+
+    expect(created.email).toBe("ops@acme.test")
+    expect(created.isCustomer).toBe(true)
+    expect(created.isVendor).toBe(true)
+
+    const updated = await service.update("org-a", created.id, {
+      phone: "+1-555-0199",
+      isVendor: false,
+    })
+    expect(updated.phone).toBe("+1-555-0199")
+    expect(updated.isVendor).toBe(false)
+
+    const options = await service.list("org-a")
+    expect(options).toEqual([{ value: created.id, label: "Acme" }])
+  })
+
+  test("contacts CRUD is org and customer scoped", async () => {
+    const service = new DefaultCrmService(new InMemoryCrmDao())
+    const customerA = await service.create("org-a", { name: "Acme" })
+    const customerB = await service.create("org-b", { name: "Beta" })
+
+    const contact = await service.createContact("org-a", customerA.id, {
+      name: "Pat Ops",
+      email: "pat@acme.test",
+      role: "Buyer",
+    })
+
+    await expect(service.listContacts("org-b", customerA.id)).rejects.toThrow(
+      "Customer not found"
+    )
+
+    await expect(
+      service.createContact("org-a", customerB.id, { name: "Nope" })
+    ).rejects.toThrow("Customer not found")
+
+    const listed = await service.listContacts("org-a", customerA.id)
+    expect(listed).toEqual([
+      {
+        id: contact.id,
+        customerId: customerA.id,
+        name: "Pat Ops",
+        email: "pat@acme.test",
+        phone: null,
+        role: "Buyer",
+      },
+    ])
+
+    const updated = await service.updateContact(
+      "org-a",
+      customerA.id,
+      contact.id,
+      { phone: "555" }
+    )
+    expect(updated.phone).toBe("555")
+
+    await service.deleteContact("org-a", customerA.id, contact.id)
+    expect(await service.listContacts("org-a", customerA.id)).toEqual([])
   })
 })

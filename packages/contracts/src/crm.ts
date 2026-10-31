@@ -2,18 +2,69 @@ import { z } from "zod"
 
 import { formOptionSchema } from "./quotes.js"
 
+function emptyToNull(value: string | null | undefined): string | null {
+  if (value == null) {
+    return null
+  }
+  const trimmed = value.trim()
+  return trimmed.length > 0 ? trimmed : null
+}
+
+const optionalEmailSchema = z
+  .string()
+  .trim()
+  .nullish()
+  .transform(emptyToNull)
+  .refine(
+    (value) => value == null || z.string().email().safeParse(value).success,
+    {
+      message: "Invalid email",
+    }
+  )
+
+const optionalTextSchema = z.string().trim().nullish().transform(emptyToNull)
+
+export const customerRecordSchema = z.object({
+  id: z.string().min(1),
+  name: z.string().min(1),
+  email: z.string().nullable(),
+  phone: z.string().nullable(),
+  address: z.string().nullable(),
+  isCustomer: z.boolean(),
+  isVendor: z.boolean(),
+})
+
+export type CustomerRecord = z.infer<typeof customerRecordSchema>
+
 export const createCustomerRequestSchema = z.object({
   name: z.string().trim().min(1, "Customer name is required"),
+  email: optionalEmailSchema.optional(),
+  phone: optionalTextSchema.optional(),
+  address: optionalTextSchema.optional(),
+  isCustomer: z.boolean().optional().default(true),
+  isVendor: z.boolean().optional().default(false),
 })
 
 export type CreateCustomerRequest = z.infer<typeof createCustomerRequestSchema>
+/** Wire body before Zod defaults (name-only quote create is valid). */
+export type CreateCustomerRequestInput = z.input<
+  typeof createCustomerRequestSchema
+>
+
+export const updateCustomerRequestSchema = z.object({
+  name: z.string().trim().min(1, "Customer name is required").optional(),
+  email: optionalEmailSchema.optional(),
+  phone: optionalTextSchema.optional(),
+  address: optionalTextSchema.optional(),
+  isCustomer: z.boolean().optional(),
+  isVendor: z.boolean().optional(),
+})
+
+export type UpdateCustomerRequest = z.infer<typeof updateCustomerRequestSchema>
 
 export const customerOptionSchema = formOptionSchema
 
-export const createCustomerResponseSchema = z.object({
-  id: z.string().min(1),
-  name: z.string().min(1),
-})
+export const createCustomerResponseSchema = customerRecordSchema
 
 export type CreateCustomerResponse = z.infer<
   typeof createCustomerResponseSchema
@@ -24,6 +75,18 @@ export const listCustomersResponseSchema = z.object({
 })
 
 export type ListCustomersResponse = z.infer<typeof listCustomersResponseSchema>
+
+export const listCustomerRecordsResponseSchema = z.object({
+  customers: z.array(customerRecordSchema),
+})
+
+export type ListCustomerRecordsResponse = z.infer<
+  typeof listCustomerRecordsResponseSchema
+>
+
+export const getCustomerResponseSchema = customerRecordSchema
+
+export type GetCustomerResponse = z.infer<typeof getCustomerResponseSchema>
 
 export const getCustomerNamesQuerySchema = z.object({
   ids: z
@@ -52,3 +115,33 @@ export const getCustomerNamesResponseSchema = z.object({
 export type GetCustomerNamesResponse = z.infer<
   typeof getCustomerNamesResponseSchema
 >
+
+export const contactRecordSchema = z.object({
+  id: z.string().min(1),
+  customerId: z.string().min(1),
+  name: z.string().min(1),
+  email: z.string().nullable(),
+  phone: z.string().nullable(),
+  role: z.string().nullable(),
+})
+
+export type ContactRecord = z.infer<typeof contactRecordSchema>
+
+export const createContactRequestSchema = z.object({
+  name: z.string().trim().min(1, "Contact name is required"),
+  email: optionalEmailSchema.optional(),
+  phone: optionalTextSchema.optional(),
+  role: optionalTextSchema.optional(),
+})
+
+export type CreateContactRequest = z.infer<typeof createContactRequestSchema>
+
+export const updateContactRequestSchema = createContactRequestSchema.partial()
+
+export type UpdateContactRequest = z.infer<typeof updateContactRequestSchema>
+
+export const listContactsResponseSchema = z.object({
+  contacts: z.array(contactRecordSchema),
+})
+
+export type ListContactsResponse = z.infer<typeof listContactsResponseSchema>
