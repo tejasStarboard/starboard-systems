@@ -1,9 +1,14 @@
 import { z } from "zod"
 
 import { laneModeSchema } from "./quotes.js"
+import { surchargeLineSchema } from "./surcharge.js"
 
 export const rateSourceSchema = z.enum(["manual", "ingestion", "spot"])
 export type RateSource = z.infer<typeof rateSourceSchema>
+
+/** Catalog charge line — same lean shape as quote surcharges (persist prep). */
+export const catalogSurchargeSchema = surchargeLineSchema
+export type CatalogSurcharge = z.infer<typeof catalogSurchargeSchema>
 
 export const rateSchema = z.object({
   id: z.string().min(1),
@@ -21,6 +26,8 @@ export const rateSchema = z.object({
   source: rateSourceSchema,
   createdAt: z.string().min(1),
   updatedAt: z.string().min(1),
+  /** Prepared for catalog charge lines; not yet loaded by rates DAO. */
+  surcharges: z.array(catalogSurchargeSchema),
 })
 
 export type Rate = z.infer<typeof rateSchema>

@@ -1,4 +1,12 @@
+import type {
+  ScopeOverride,
+  SurchargeLeg,
+  SurchargeSource,
+  UsageUnit,
+} from "@starboard/lib-contracts"
+import { relations } from "drizzle-orm"
 import {
+  boolean,
   doublePrecision,
   index,
   pgSchema,
@@ -60,4 +68,59 @@ export const rateCatalog = ratesSchema.table(
     ),
     index("rate_valid_range_idx").on(table.validFrom, table.validTo),
   ]
+)
+
+/** Catalog charge lines — schema prep only (DAO/API wiring later). */
+export const rateCatalogSurcharge = ratesSchema.table(
+  "surcharge",
+  {
+    id: text("id").primaryKey(),
+    rateId: text("rate_id")
+      .notNull()
+      .references(() => rateCatalog.id, { onDelete: "cascade" }),
+    name: text("name").notNull().default(""),
+    leg: varchar("leg", { length: 16 }).$type<SurchargeLeg>().notNull(),
+    usageUnit: varchar("usage_unit", { length: 16 })
+      .$type<UsageUnit>()
+      .notNull()
+      .default("flat"),
+    rate: doublePrecision("rate"),
+    ratePercentage: doublePrecision("rate_percentage"),
+    currencyCode: varchar("currency_code", { length: 3 }).notNull(),
+    source: varchar("source", { length: 16 })
+      .$type<SurchargeSource>()
+      .notNull()
+      .default("manual"),
+    isIncludedInTotal: boolean("is_included_in_total").notNull().default(true),
+    isRemoved: boolean("is_removed").notNull().default(false),
+    isVisible: boolean("is_visible").notNull().default(true),
+    freeUsage: doublePrecision("free_usage"),
+    minUsage: doublePrecision("min_usage"),
+    maxUsage: doublePrecision("max_usage"),
+    buyAmount: doublePrecision("buy_amount"),
+    sellAmount: doublePrecision("sell_amount"),
+    scopeOverride: varchar("scope_override", {
+      length: 16,
+    }).$type<ScopeOverride | null>(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+      .defaultNow()
+      .$onUpdate(() => /* @__PURE__ */ new Date())
+      .notNull(),
+  },
+  (table) => [index("rates_surcharge_rate_id_idx").on(table.rateId)]
+)
+
+export const rateCatalogRelations = relations(rateCatalog, ({ many }) => ({
+  surcharges: many(rateCatalogSurcharge),
+}))
+
+export const rateCatalogSurchargeRelations = relations(
+  rateCatalogSurcharge,
+  ({ one }) => ({
+    rate: one(rateCatalog, {
+      fields: [rateCatalogSurcharge.rateId],
+      references: [rateCatalog.id],
+    }),
+  })
 )

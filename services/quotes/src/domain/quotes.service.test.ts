@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test"
 import {
   createContainerLine,
   createManualRateLine,
+  createSurchargeLine,
   emptyLaneFormValues,
   emptyQuoteFormValues,
   type FormOption,
@@ -16,6 +17,7 @@ import {
   rowsToLaneForm,
   type LaneRow,
   type RateRow,
+  type SurchargeRow,
 } from "./lane-mapper"
 import { DefaultQuotesService } from "./quotes.service"
 import type {
@@ -31,6 +33,7 @@ class InMemoryQuotesDao implements QuotesDao {
   private quotes = new Map<string, QuoteInsert & { organizationId: string }>()
   private lanesByQuote = new Map<string, LaneRow[]>()
   private ratesByLane = new Map<string, RateRow[]>()
+  private surchargesByRateId = new Map<string, SurchargeRow[]>()
 
   async listByOrganization(
     organizationId: string,
@@ -82,7 +85,11 @@ class InMemoryQuotesDao implements QuotesDao {
       laneRows.length === 0
         ? [emptyLaneFormValues()]
         : laneRows.map((laneRow) =>
-            rowsToLaneForm(laneRow, this.ratesByLane.get(laneRow.id) ?? [])
+            rowsToLaneForm(
+              laneRow,
+              this.ratesByLane.get(laneRow.id) ?? [],
+              this.surchargesByRateId
+            )
           )
 
     return {
@@ -141,6 +148,10 @@ class InMemoryQuotesDao implements QuotesDao {
 
     const previous = this.lanesByQuote.get(input.quoteId) ?? []
     for (const previousLane of previous) {
+      const previousRates = this.ratesByLane.get(previousLane.id) ?? []
+      for (const previousRate of previousRates) {
+        this.surchargesByRateId.delete(previousRate.id)
+      }
       this.ratesByLane.delete(previousLane.id)
     }
 
@@ -158,6 +169,11 @@ class InMemoryQuotesDao implements QuotesDao {
       )
       nextLanes.push(mapped.lane)
       this.ratesByLane.set(mapped.lane.id, mapped.rates)
+      for (const surchargeRow of mapped.surcharges) {
+        const list = this.surchargesByRateId.get(surchargeRow.rateId) ?? []
+        list.push(surchargeRow)
+        this.surchargesByRateId.set(surchargeRow.rateId, list)
+      }
     }
     this.lanesByQuote.set(input.quoteId, nextLanes)
     return true
@@ -213,7 +229,27 @@ describe("DefaultQuotesService.save", () => {
       }),
     ]
     lane.manualRates = [
-      createManualRateLine({ id: "rate-1", label: "Base", amount: 900 }),
+      createManualRateLine({
+        id: "rate-1",
+        label: "Base",
+        amount: 900,
+        surcharges: [
+          createSurchargeLine({
+            id: "sch-1",
+            name: "BAF",
+            leg: "freight",
+            usageUnit: "container",
+            rate: 50,
+            currencyCode: "USD",
+            source: "carrier",
+            freeUsage: 0,
+            minUsage: 1,
+            maxUsage: 10,
+            buyAmount: 40,
+            sellAmount: 50,
+          }),
+        ],
+      }),
       createManualRateLine({ id: "rate-2", label: "THC", amount: 150 }),
     ]
     lane.markupType = "amount"
@@ -250,8 +286,29 @@ describe("DefaultQuotesService.save", () => {
         },
       ],
       manualRates: [
-        { id: "rate-1", label: "Base", amount: 900 },
-        { id: "rate-2", label: "THC", amount: 150 },
+        {
+          id: "rate-1",
+          label: "Base",
+          amount: 900,
+          surcharges: [
+            {
+              id: "sch-1",
+              name: "BAF",
+              leg: "freight",
+              usageUnit: "container",
+              rate: 50,
+              buyAmount: 40,
+              sellAmount: 50,
+              freeUsage: 0,
+              minUsage: 1,
+              maxUsage: 10,
+              isIncludedInTotal: true,
+              isRemoved: false,
+              isVisible: true,
+            },
+          ],
+        },
+        { id: "rate-2", label: "THC", amount: 150, surcharges: [] },
       ],
     })
   })

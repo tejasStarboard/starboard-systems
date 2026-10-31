@@ -2,7 +2,7 @@
 id: 065
 wave: 06-product
 title: Surcharge data model + contracts
-status: open
+status: in_progress
 depends_on: [002, 020, 010]
 epic: SYS-PRICING
 docs:
@@ -26,11 +26,11 @@ Persist charge lines for quote rates (and prepare catalog rates): name, leg buck
 
 ## Acceptance criteria
 
-- [ ] Schema + Zod for surcharge rows linked to quote rates (and/or lane)
-- [ ] Usage unit enum (flat, container, teu, cbm, kg, ton, wm, pallet, per_time, percentage, …)
-- [ ] Leg + source + is_included_in_total / is_removed / is_visible fields
-- [ ] Migrations / db:push path documented
-- [ ] Domain docs updated
+- [x] Schema + Zod for surcharge rows linked to quote rates (and/or lane)
+- [x] Usage unit enum (flat, container, teu, cbm, kg, ton, wm, pallet, per_time, percentage, …)
+- [x] Leg + source + is_included_in_total / is_removed / is_visible fields
+- [x] Migrations / db:push path documented
+- [x] Domain docs updated
 
 ## Out of scope
 
