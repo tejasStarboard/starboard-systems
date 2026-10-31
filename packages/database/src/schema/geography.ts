@@ -1,9 +1,12 @@
-import { relations } from "drizzle-orm"
+import { relations, sql } from "drizzle-orm"
 import {
+  boolean,
+  check,
   doublePrecision,
   pgSchema,
   text,
   timestamp,
+  uniqueIndex,
   varchar,
 } from "drizzle-orm/pg-core"
 
@@ -38,16 +41,41 @@ export const city = geoSchema.table("city", {
     .references(() => country.id),
 })
 
-export const port = geoSchema.table("port", {
-  unlocode: varchar("unlocode", { length: 7 }).primaryKey(),
-  zipcode: varchar("zipcode", { length: 8 }).notNull(),
-  stateId: text("state_id")
-    .notNull()
-    .references(() => state.id),
-  countryId: text("country_id")
-    .notNull()
-    .references(() => country.id),
-})
+/**
+ * Facility gazetteer (ADR 0004). Replaces rigid geo.port + required zip/state.
+ * Clear-and-reseed from geo.port — no prod data yet.
+ */
+export const facility = geoSchema.table(
+  "facility",
+  {
+    id: text("id").primaryKey(),
+    unlocode: varchar("unlocode", { length: 7 }),
+    iata: varchar("iata", { length: 3 }),
+    name: text("name").notNull(),
+    facilityTypes: text("facility_types")
+      .array()
+      .notNull()
+      .default(sql`'{}'::text[]`),
+    countryCode: varchar("country_code", { length: 2 }).notNull(),
+    admin1: text("admin1"),
+    cityName: text("city_name"),
+    aliases: text("aliases")
+      .array()
+      .notNull()
+      .default(sql`'{}'::text[]`),
+    latitude: doublePrecision("latitude"),
+    longitude: doublePrecision("longitude"),
+    isPrimary: boolean("is_primary").notNull().default(false),
+  },
+  (table) => [
+    uniqueIndex("facility_unlocode_uidx").on(table.unlocode),
+    uniqueIndex("facility_iata_uidx").on(table.iata),
+    check(
+      "facility_has_code",
+      sql`${table.unlocode} is not null or ${table.iata} is not null`
+    ),
+  ]
+)
 
 export const location = geoSchema.table("location", {
   id: text("id").primaryKey(),
@@ -75,7 +103,6 @@ export const location = geoSchema.table("location", {
 export const countryRelations = relations(country, ({ many }) => ({
   states: many(state),
   cities: many(city),
-  ports: many(port),
   locations: many(location),
 }))
 
@@ -85,7 +112,6 @@ export const stateRelations = relations(state, ({ one, many }) => ({
     references: [country.id],
   }),
   cities: many(city),
-  ports: many(port),
   locations: many(location),
 }))
 
@@ -99,17 +125,6 @@ export const cityRelations = relations(city, ({ one, many }) => ({
     references: [country.id],
   }),
   locations: many(location),
-}))
-
-export const portRelations = relations(port, ({ one }) => ({
-  state: one(state, {
-    fields: [port.stateId],
-    references: [state.id],
-  }),
-  country: one(country, {
-    fields: [port.countryId],
-    references: [country.id],
-  }),
 }))
 
 export const locationRelations = relations(location, ({ one }) => ({

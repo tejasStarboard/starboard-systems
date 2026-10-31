@@ -30,5 +30,5 @@ This monorepo’s early `geo.*` schema used a strict `country → state → city
 ## References
 
 - Domain: `.project/docs/domains/geography.md`
-- Ticket: `.project/tickets/todo/007-geo-facility-gazetteer.md`
+- Ticket: `.project/tickets/in_progress/007-geo-facility-gazetteer.md`
 - Runtime: `docs/architecture.md` (BFF soft IDs)

@@ -2,7 +2,7 @@
 id: 007
 wave: 00-shell
 title: Geo facility gazetteer redesign
-status: open
+status: in_progress
 depends_on: [003]
 epic: SYS-GEO
 docs:

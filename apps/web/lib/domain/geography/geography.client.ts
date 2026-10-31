@@ -74,7 +74,8 @@ class HttpGeographyClient implements GeographyClient {
     if (!parsed.success) {
       throw new Error("Failed to search ports: invalid response")
     }
-    return parsed.data.ports
+    // Soft codes only for quote pickers — ignore facility metadata.
+    return parsed.data.ports.map(({ value, label }) => ({ value, label }))
   }
 }
 

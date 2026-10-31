@@ -1,6 +1,6 @@
-import { asc, eq, ilike } from "drizzle-orm"
-import { country, currency, port } from "@starboard/db/schema"
-import type { FormOption } from "@starboard/contracts"
+import { asc, desc, ilike, or, sql } from "drizzle-orm"
+import { currency, facility } from "@starboard/db/schema"
+import type { FacilityOption, FormOption } from "@starboard/contracts"
 
 import type { GeographyDb } from "./db"
 
@@ -9,7 +9,23 @@ const PORT_SEARCH_LIMIT = 50
 export interface GeographyDao {
   ensureCurrency(code: string): Promise<string>
   listCurrencies(): Promise<FormOption[]>
-  searchPorts(q: string): Promise<FormOption[]>
+  searchPorts(q: string): Promise<FacilityOption[]>
+}
+
+function toFacilityOption(row: {
+  unlocode: string | null
+  iata: string | null
+  name: string
+  facilityTypes: string[]
+  countryCode: string
+}): FacilityOption {
+  const value = (row.unlocode ?? row.iata ?? "").toUpperCase()
+  return {
+    value,
+    label: `${value} — ${row.name}`,
+    types: row.facilityTypes,
+    country: row.countryCode,
+  }
 }
 
 export class DrizzleGeographyDao implements GeographyDao {
@@ -36,27 +52,42 @@ export class DrizzleGeographyDao implements GeographyDao {
     }))
   }
 
-  async searchPorts(q: string): Promise<FormOption[]> {
-    const prefix = q.trim().toUpperCase()
+  async searchPorts(q: string): Promise<FacilityOption[]> {
+    const trimmed = q.trim()
+    const prefix = trimmed.toUpperCase()
+    const namePattern = `%${trimmed}%`
+
     const base = this.db
       .select({
-        unlocode: port.unlocode,
-        countryName: country.name,
+        unlocode: facility.unlocode,
+        iata: facility.iata,
+        name: facility.name,
+        facilityTypes: facility.facilityTypes,
+        countryCode: facility.countryCode,
+        isPrimary: facility.isPrimary,
       })
-      .from(port)
-      .innerJoin(country, eq(port.countryId, country.id))
+      .from(facility)
 
     const rows =
       prefix.length > 0
         ? await base
-            .where(ilike(port.unlocode, `${prefix}%`))
-            .orderBy(asc(port.unlocode))
+            .where(
+              or(
+                ilike(facility.unlocode, `${prefix}%`),
+                ilike(facility.iata, `${prefix}%`),
+                ilike(facility.name, namePattern),
+                sql`exists (
+                  select 1 from unnest(${facility.aliases}) as alias
+                  where alias ilike ${namePattern}
+                )`
+              )
+            )
+            .orderBy(desc(facility.isPrimary), asc(facility.name))
             .limit(PORT_SEARCH_LIMIT)
-        : await base.orderBy(asc(port.unlocode)).limit(PORT_SEARCH_LIMIT)
+        : await base
+            .orderBy(desc(facility.isPrimary), asc(facility.name))
+            .limit(PORT_SEARCH_LIMIT)
 
-    return rows.map((row) => ({
-      value: row.unlocode,
-      label: `${row.unlocode} — ${row.countryName}`,
-    }))
+    return rows.map(toFacilityOption)
   }
 }

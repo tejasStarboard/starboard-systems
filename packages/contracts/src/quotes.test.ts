@@ -7,6 +7,7 @@ import {
 } from "./crm"
 import {
   ensureCurrencyRequestSchema,
+  facilityInputSchema,
   listPortsQuerySchema,
   listPortsResponseSchema,
 } from "./geography"
@@ -71,15 +72,48 @@ describe("geography contracts", () => {
     expect(listPortsQuerySchema.parse({ q: "CNS" }).q).toBe("CNS")
   })
 
-  test("listPortsResponseSchema parses port options", () => {
+  test("listPortsResponseSchema parses facility options", () => {
     const parsed = listPortsResponseSchema.safeParse({
-      ports: [{ value: "CNSHA", label: "CNSHA — China" }],
+      ports: [
+        {
+          value: "CNSHA",
+          label: "CNSHA — Shanghai",
+          types: ["seaport"],
+          country: "CN",
+        },
+      ],
     })
     expect(parsed.success).toBe(true)
 
     expect(
       listPortsResponseSchema.safeParse({
         ports: [{ value: "CNSHA" }],
+      }).success
+    ).toBe(false)
+  })
+
+  test("facilityInputSchema requires unlocode or iata", () => {
+    expect(
+      facilityInputSchema.safeParse({
+        id: "CNSHA",
+        unlocode: "CNSHA",
+        name: "Shanghai",
+        countryCode: "CN",
+      }).success
+    ).toBe(true)
+    expect(
+      facilityInputSchema.safeParse({
+        id: "LAX",
+        iata: "LAX",
+        name: "Los Angeles International",
+        countryCode: "US",
+      }).success
+    ).toBe(true)
+    expect(
+      facilityInputSchema.safeParse({
+        id: "NOCODE",
+        name: "Missing codes",
+        countryCode: "US",
       }).success
     ).toBe(false)
   })

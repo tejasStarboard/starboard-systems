@@ -12,6 +12,7 @@ Anything listed here must not appear as tickets or PRs without an explicit orche
 | Legacy `job_scheduler` / non-Temporal queues                        | **Dead** — Temporal OSS for async extension workflows ([ADR 0002](adr/0002-python-temporal-extensions.md)) |
 | Modeling CRM customers as Better Auth organizations                 | **Dead** — org = tenant; CRM rows belong to org                                                            |
 | FCL v6 “includes” LCL/air/cartage                                   | **False** — those are separate pipelines → separate extensions later                                       |
+| Rigid `geo.port` with required zipcode + state/city FKs             | **Dead** — facility gazetteer (`geo.facility`, ADR 0004); soft codes on quotes/rates                       |
 
 ## Deferred (not deprecated)
 

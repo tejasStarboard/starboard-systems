@@ -1,6 +1,7 @@
 import {
   ensureCurrencyRequestSchema,
   listPortsQuerySchema,
+  type FacilityOption,
   type FormOption,
 } from "@starboard/contracts"
 
@@ -9,7 +10,7 @@ import type { GeographyDao } from "../dao/geography.dao"
 export interface GeographyService {
   ensureCurrency(code: string): Promise<{ code: string }>
   listCurrencies(): Promise<FormOption[]>
-  searchPorts(q?: string): Promise<FormOption[]>
+  searchPorts(q?: string): Promise<FacilityOption[]>
 }
 
 export class DefaultGeographyService implements GeographyService {
@@ -31,7 +32,7 @@ export class DefaultGeographyService implements GeographyService {
     return this.dao.listCurrencies()
   }
 
-  async searchPorts(q?: string): Promise<FormOption[]> {
+  async searchPorts(q?: string): Promise<FacilityOption[]> {
     const parsed = listPortsQuerySchema.safeParse({ q: q ?? "" })
     if (!parsed.success) {
       throw new GeographyValidationError(
