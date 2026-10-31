@@ -2,7 +2,7 @@
 id: 056
 wave: 05-foundation
 title: Extension developer workflow docs + skill sync
-status: in_progress
+status: done
 depends_on: [055]
 epic: SYS-EXT-HOST
 docs:

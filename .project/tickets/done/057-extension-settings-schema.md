@@ -2,7 +2,7 @@
 id: 057
 wave: 05-foundation
 title: Extension settings schema + persistence (ext-host kit)
-status: in_progress
+status: done
 depends_on: [050]
 epic: SYS-EXT-HOST
 docs:
