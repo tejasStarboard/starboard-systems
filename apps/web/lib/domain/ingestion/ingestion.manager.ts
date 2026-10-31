@@ -1,5 +1,6 @@
 import "server-only"
 
+import type { ExtensionJobStatusResult } from "@/lib/domain/extension-job"
 import {
   getIngestionClient,
   type IngestionClient,
@@ -19,6 +20,13 @@ export class IngestionManager {
       file,
       file.name || "sheet.csv"
     )
+  }
+
+  getJobStatus(
+    organizationId: string,
+    workflowId: string
+  ): Promise<ExtensionJobStatusResult> {
+    return this.ingestionClient.getJobStatus(organizationId, workflowId)
   }
 }
 

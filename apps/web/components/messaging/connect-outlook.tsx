@@ -4,6 +4,10 @@ import { useState } from "react"
 
 import { Button } from "@starboard/lib-ui/components/button"
 
+import { extensionApiPath } from "@/lib/extension-api-path"
+
+const MESSAGING_EXTENSION_ID = "messaging.msgraph"
+
 type ConnectionStatus = {
   status: string
   authUrl?: string | null
@@ -19,7 +23,7 @@ export function ConnectOutlook({ initialStatus }: { initialStatus: string }) {
     setError(null)
     try {
       const response = await fetch(
-        "/api/extensions/messaging.msgraph/connection",
+        extensionApiPath(MESSAGING_EXTENSION_ID, "connection"),
         { method: "POST" }
       )
       const payload = (await response.json().catch(() => null)) as
@@ -41,7 +45,7 @@ export function ConnectOutlook({ initialStatus }: { initialStatus: string }) {
     setError(null)
     try {
       const response = await fetch(
-        "/api/extensions/messaging.msgraph/connection",
+        extensionApiPath(MESSAGING_EXTENSION_ID, "connection"),
         { method: "DELETE" }
       )
       const payload = (await response.json().catch(() => null)) as

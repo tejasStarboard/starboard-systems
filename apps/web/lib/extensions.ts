@@ -11,6 +11,7 @@ import {
   type Plan,
 } from "@starboard/ext-host"
 
+import { loadRolloutContext } from "@/lib/extensions-rollout"
 import { getPlatformManager } from "@/lib/domain/platform/platform.manager"
 import type { SpotRateSource } from "@/lib/spot-rate-source"
 
@@ -22,9 +23,16 @@ export function listRegisteredExtensions(): ExtensionManifest[] {
   return listManifests()
 }
 
+function logRolloutFailure(error: unknown) {
+  console.error("[extensions] getRolloutMap failed; failing closed", error)
+}
+
 async function rolloutContext(organizationId: string) {
-  const rollouts = await getPlatformManager().getRolloutMap()
-  return { organizationId, rollouts }
+  return loadRolloutContext(
+    organizationId,
+    () => getPlatformManager().getRolloutMap(),
+    logRolloutFailure
+  )
 }
 
 export async function listActiveExtensionNav(
@@ -32,6 +40,9 @@ export async function listActiveExtensionNav(
   organizationId: string
 ): Promise<ExtensionNavContribution[]> {
   const context = await rolloutContext(organizationId)
+  if (!context) {
+    return []
+  }
   return getActiveContributions(plan, listManifests(), context).nav
 }
 
@@ -40,6 +51,9 @@ export async function listActiveUiSlots(
   organizationId: string
 ): Promise<string[]> {
   const context = await rolloutContext(organizationId)
+  if (!context) {
+    return []
+  }
   return getActiveContributions(plan, listManifests(), context).uiSlots
 }
 
@@ -48,6 +62,9 @@ export async function listActiveSpotRateSources(
   organizationId: string
 ): Promise<SpotRateSource[]> {
   const context = await rolloutContext(organizationId)
+  if (!context) {
+    return []
+  }
   return listActiveExtensions(plan, listManifests(), context)
     .filter(
       (manifest) =>
@@ -76,5 +93,8 @@ export async function isExtensionActive(
     return false
   }
   const context = await rolloutContext(organizationId)
+  if (!context) {
+    return false
+  }
   return isActive(manifest, plan, context)
 }

@@ -30,6 +30,16 @@ manifest (host registry)
 
 Activation remains: **rollout ∩ manifest.enabled ∩ requiredPlan**.
 
+**Rollout semantics:**
+
+- Missing rollout row = **on** (preserve deploy defaults for entitled orgs).
+- `getRolloutMap()` failure → **fail closed**: log, empty shell contributions, `isExtensionActive` false (APIs 404). Do **not** treat an empty map as “all on”. Shell Quotes stays up.
+
+**Job contract:**
+
+- Enqueue: `202` + `{ workflowId, runId }`
+- Status: `GET …/jobs/:workflowId` → `{ status, result?, error? }` with `status` ∈ `running | completed | failed | cancelled`
+
 Shell must remain usable with **all** extensions inactive.
 
 ## Non-goals (this foundation wave)
@@ -44,3 +54,4 @@ Shell must remain usable with **all** extensions inactive.
 - Ticket `055` (and follow-ups `056+` if split) block feature tickets that depend on extension UX.
 - Docs (`extensions.md`, skill `starboard-extension`) become the cookbook for new extensions.
 - Roadmap wave **05-foundation** comes before quote-rate-apply / CRM expansion.
+- New spot carriers add registry + plugin (+ Python POST if needed) — **not** a new Next `route.ts` tree.

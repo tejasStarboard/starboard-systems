@@ -17,7 +17,7 @@
     "lint": "eslint",
     "format": "prettier --write \"**/*.{ts,tsx}\"",
     "typecheck": "tsc --noEmit",
-    "test": "bun test lib/auth"
+    "test": "bun test lib/auth lib/extensions-rollout.test.ts lib/extension-api-path.test.ts lib/extensions-api-dispatch.test.ts lib/extensions-all-off.test.ts"
   },
   "dependencies": {
     "@better-auth/drizzle-adapter": "^1.7.14",

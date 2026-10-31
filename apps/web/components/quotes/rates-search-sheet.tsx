@@ -11,6 +11,11 @@ import {
   SheetTitle,
 } from "@starboard/lib-ui/components/sheet"
 
+import { extensionApiPath } from "@/lib/extension-api-path"
+import {
+  pollExtensionJob,
+  type PolledJobStatus,
+} from "@/lib/poll-extension-job"
 import type { SpotRateSource } from "@/lib/spot-rate-source"
 
 export function RatesSearchSheet({
@@ -33,6 +38,7 @@ export function RatesSearchSheet({
     workflowId: string
     runId: string
   } | null>(null)
+  const [spotStatus, setSpotStatus] = useState<PolledJobStatus | null>(null)
   const [spotPending, setSpotPending] = useState(false)
   const [spotError, setSpotError] = useState<string | null>(null)
 
@@ -82,8 +88,9 @@ export function RatesSearchSheet({
     setSpotPending(true)
     setSpotError(null)
     setSpotJob(null)
+    setSpotStatus(null)
     try {
-      const response = await fetch(`/api/extensions/${extensionId}/jobs`, {
+      const response = await fetch(extensionApiPath(extensionId, "jobs"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ origin, destination, mode: "fcl" }),
@@ -100,6 +107,15 @@ export function RatesSearchSheet({
         throw new Error("Invalid spot search response")
       }
       setSpotJob({ workflowId: payload.workflowId, runId: payload.runId })
+      setSpotStatus({ status: "running" })
+      const status = await pollExtensionJob({
+        extensionId,
+        workflowId: payload.workflowId,
+      })
+      setSpotStatus(status)
+      if (status.status === "failed" || status.status === "cancelled") {
+        setSpotError(status.error ?? `Spot search ${status.status}`)
+      }
     } catch (err: unknown) {
       setSpotError(
         err instanceof Error ? err.message : "Failed to enqueue spot search"
@@ -146,17 +162,24 @@ export function RatesSearchSheet({
                       onClick={() => void enqueueSpotSearch(source.id)}
                     >
                       {spotPending
-                        ? "Enqueueing…"
+                        ? "Searching…"
                         : `Search ${source.displayName}`}
                     </button>
                   </li>
                 ))}
               </ul>
               {spotJob ? (
-                <p className="text-xs text-muted-foreground">
-                  Accepted 202 — workflowId={spotJob.workflowId} runId=
-                  {spotJob.runId}
-                </p>
+                <div className="space-y-1 text-xs text-muted-foreground">
+                  <p>
+                    Job {spotJob.workflowId}
+                    {spotStatus ? ` — ${spotStatus.status}` : ""}
+                  </p>
+                  {spotStatus?.status === "completed" ? (
+                    <p className="font-mono">
+                      Result: {JSON.stringify(spotStatus.result ?? null)}
+                    </p>
+                  ) : null}
+                </div>
               ) : null}
               {spotError ? (
                 <p className="text-xs text-destructive">{spotError}</p>
