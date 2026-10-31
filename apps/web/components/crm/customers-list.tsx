@@ -138,8 +138,7 @@ export function CustomersList({
         body: JSON.stringify({ name: trimmed }),
       })
       const body = (await response.json().catch(() => null)) as
-        | (CustomerRecord & { error?: string })
-        | null
+        (CustomerRecord & { error?: string }) | null
       if (!response.ok || !body?.id) {
         setError(body?.error ?? "Failed to create customer")
         return

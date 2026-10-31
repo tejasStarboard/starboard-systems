@@ -21,9 +21,7 @@ class InMemoryCrmDao implements CrmDao {
     organizationId: string
   ): Promise<FormOption[]> {
     return this.customers
-      .filter(
-        (row) => row.organizationId === organizationId && row.isActive
-      )
+      .filter((row) => row.organizationId === organizationId && row.isActive)
       .sort((a, b) => a.name.localeCompare(b.name))
       .map((row) => ({ value: row.id, label: row.name }))
   }

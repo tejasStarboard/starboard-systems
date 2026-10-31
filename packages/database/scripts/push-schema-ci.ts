@@ -23,16 +23,12 @@ async function main() {
   await client.query(`CREATE EXTENSION IF NOT EXISTS postgis`)
   await client.query(`CREATE EXTENSION IF NOT EXISTS pg_trgm`)
 
-  const push = spawnSync(
-    "pnpm",
-    ["exec", "drizzle-kit", "push", "--force"],
-    {
-      cwd: resolve(import.meta.dirname, ".."),
-      env: process.env,
-      encoding: "utf8",
-      stdio: ["ignore", "pipe", "pipe"],
-    }
-  )
+  const push = spawnSync("pnpm", ["exec", "drizzle-kit", "push", "--force"], {
+    cwd: resolve(import.meta.dirname, ".."),
+    env: process.env,
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "pipe"],
+  })
 
   const combined = `${push.stdout ?? ""}\n${push.stderr ?? ""}`
   process.stdout.write(push.stdout ?? "")
