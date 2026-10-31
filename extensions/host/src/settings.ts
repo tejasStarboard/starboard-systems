@@ -19,6 +19,7 @@ export type StaffSettingView = {
   type: ExtensionSettingType
   scope: "platform"
   required: boolean
+  options?: Array<{ value: string; label: string }>
   value?: SettingScalar
   configured?: boolean
 }
@@ -74,6 +75,7 @@ export function resolveStaffSettings(
       type: setting.type,
       scope: setting.scope,
       required: setting.required ?? false,
+      ...(setting.options ? { options: setting.options } : {}),
     }
 
     if (setting.type === "secret") {

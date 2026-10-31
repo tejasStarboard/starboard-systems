@@ -147,6 +147,10 @@ describe("resolve settings", () => {
     expect(
       staff.find((setting) => setting.key === "live_strategy")?.value
     ).toBe(false)
+    expect(staff.find((setting) => setting.key === "region")?.options).toEqual([
+      { value: "eu", label: "EU" },
+      { value: "us", label: "US" },
+    ])
     expect(staff.find((setting) => setting.key === "api_token")).toEqual({
       key: "api_token",
       label: "API token",
