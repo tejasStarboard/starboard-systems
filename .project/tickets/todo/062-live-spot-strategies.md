@@ -3,7 +3,7 @@ id: 062
 wave: 06-product
 title: Live spot strategies (Maersk, then CMA)
 status: open
-depends_on: [061, 041, 042]
+depends_on: [061, 069, 041, 042]
 epic: SYS-EXT-SPOT
 docs:
   - .project/docs/domains/spot.md
@@ -14,7 +14,7 @@ docs:
 
 ## Goal
 
-Behind `live_strategy` (and credentials/settings), run real or near-real carrier search for Maersk first, then CMA. Keep fixture fallback when live is off or unavailable. Surface offers through existing job status/result for 060 apply.
+Behind `live_strategy` (and org credentials from [069](./069-org-carrier-credentials-settings.md)), run real or near-real carrier search for Maersk first, then CMA. Keep fixture fallback when live is off or unavailable. Surface offers through existing job status/result for 060 apply.
 
 ## Non-goals
 
