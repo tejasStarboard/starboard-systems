@@ -10,6 +10,7 @@ import {
   ComboboxItem,
   ComboboxList,
 } from "@starboard/lib-ui/components/combobox"
+import { toast } from "@starboard/lib-ui/components/toast"
 
 import { type QuoteFormOption } from "@/lib/domain/quotes/quotes.schema"
 
@@ -27,7 +28,6 @@ export function CustomerCombobox({
   const [options, setOptions] = useState(initialOptions)
   const [query, setQuery] = useState("")
   const [creating, setCreating] = useState(false)
-  const [createError, setCreateError] = useState<string | null>(null)
 
   const selected = options.find((option) => option.value === value) ?? null
   const trimmedQuery = query.trim()
@@ -41,7 +41,6 @@ export function CustomerCombobox({
     if (!canCreate || creating) return
 
     setCreating(true)
-    setCreateError(null)
     try {
       const response = await fetch("/api/customers", {
         method: "POST",
@@ -55,7 +54,11 @@ export function CustomerCombobox({
       } | null
 
       if (!response.ok || !body?.id || !body.name) {
-        setCreateError(body?.error ?? "Failed to create customer")
+        toast.add({
+          type: "error",
+          title: "Unable to create customer",
+          description: body?.error ?? "Something went wrong. Try again.",
+        })
         return
       }
 
@@ -66,7 +69,11 @@ export function CustomerCombobox({
       onChange(created.value)
       setQuery("")
     } catch {
-      setCreateError("Failed to create customer")
+      toast.add({
+        type: "error",
+        title: "Unable to create customer",
+        description: "Something went wrong. Try again.",
+      })
     } finally {
       setCreating(false)
     }
@@ -129,9 +136,6 @@ export function CustomerCombobox({
           ) : null}
         </ComboboxContent>
       </Combobox>
-      {createError ? (
-        <p className="text-xs text-destructive">{createError}</p>
-      ) : null}
     </div>
   )
 }

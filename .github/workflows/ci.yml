@@ -274,11 +274,63 @@ jobs:
           pnpm test
           pnpm build
 
+  # Empty Postgres + drizzle-kit push catches schema drift (missing columns/tables)
+  # before merge — same path as local `pnpm --filter @starboard/lib-db db:push`.
+  db-schema:
+    name: Push Drizzle schema
+    needs: changes
+    if: >
+      needs.changes.outputs.bun == 'true' ||
+      needs.changes.outputs.tooling == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    env:
+      CI: "true"
+      POSTGRES_URL: postgresql://ci:ci@127.0.0.1:5432/ci
+
+    services:
+      postgres:
+        # PostGIS required — geo.* uses geometry(MultiPolygon/Polygon,4326)
+        image: postgis/postgis:16-3.4
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_PASSWORD: ci
+          POSTGRES_DB: ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ci -d ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.25.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Push schema to CI Postgres
+        run: pnpm --filter @starboard/lib-db db:push:ci
+
   # Keeps the workflow green for docs/ticket-only PRs so automerge can proceed
   # without running the heavy quality job.
   ci-gate:
     name: CI gate
-    needs: [changes, quality]
+    needs: [changes, quality, db-schema]
     if: always()
     runs-on: ubuntu-latest
     timeout-minutes: 2
@@ -288,8 +340,11 @@ jobs:
           set -euo pipefail
           changes_result="${{ needs.changes.result }}"
           quality_result="${{ needs.quality.result }}"
+          db_schema_result="${{ needs.db-schema.result }}"
           run_quality="${{ needs.changes.outputs.quality }}"
+          run_db_schema="${{ needs.changes.outputs.bun == 'true' || needs.changes.outputs.tooling == 'true' }}"
           echo "changes=$changes_result quality_filter=$run_quality quality=$quality_result"
+          echo "db_schema_filter=$run_db_schema db_schema=$db_schema_result"
           if [ "$changes_result" != "success" ]; then
             echo "Detect-changed-scopes job did not succeed"
             exit 1
@@ -301,4 +356,12 @@ jobs:
             fi
           else
             echo "No code/tooling changes — quality skipped (docs/tickets only)"
+          fi
+          if [ "$run_db_schema" = "true" ]; then
+            if [ "$db_schema_result" != "success" ]; then
+              echo "Push Drizzle schema job did not succeed"
+              exit 1
+            fi
+          else
+            echo "No bun/tooling changes — db-schema skipped"
           fi

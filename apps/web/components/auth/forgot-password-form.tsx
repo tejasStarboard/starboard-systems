@@ -1,41 +1,46 @@
 "use client"
 
+import { zodResolver } from "@hookform/resolvers/zod"
 import Link from "next/link"
 import { useState } from "react"
+import { Controller, useForm } from "react-hook-form"
 
-import { Alert, AlertDescription } from "@starboard/lib-ui/components/alert"
 import { Button } from "@starboard/lib-ui/components/button"
 import {
   Field,
+  FieldError,
   FieldGroup,
   FieldLabel,
 } from "@starboard/lib-ui/components/field"
 import { Input } from "@starboard/lib-ui/components/input"
+import { toast } from "@starboard/lib-ui/components/toast"
 
+import {
+  forgotPasswordFormSchema,
+  type ForgotPasswordFormValues,
+} from "@/lib/domain/auth/auth-forms.schema"
+import { toastFormErrors } from "@/lib/form-toast"
 import { authClient } from "@/lib/auth-client"
 
 export function ForgotPasswordForm() {
-  const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
-  const [pending, setPending] = useState(false)
+  const form = useForm<ForgotPasswordFormValues>({
+    resolver: zodResolver(forgotPasswordFormSchema),
+    defaultValues: { email: "" },
+  })
 
-  async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    setError(null)
-    setPending(true)
-
-    const form = new FormData(event.currentTarget)
-    const email = String(form.get("email") ?? "")
-
+  async function onSubmit(values: ForgotPasswordFormValues) {
     const { error: resetError } = await authClient.requestPasswordReset({
-      email,
+      email: values.email,
       redirectTo: `${window.location.origin}/reset-password`,
     })
 
-    setPending(false)
-
     if (resetError) {
-      setError(resetError.message ?? "Unable to send reset email")
+      toast.add({
+        type: "error",
+        title: "Unable to send reset email",
+        description: resetError.message ?? "Something went wrong. Try again.",
+      })
       return
     }
 
@@ -71,29 +76,37 @@ export function ForgotPasswordForm() {
         </p>
       </div>
 
-      <form onSubmit={onSubmit} className="flex flex-col gap-4">
+      <form
+        onSubmit={form.handleSubmit(onSubmit, toastFormErrors)}
+        className="flex flex-col gap-4"
+      >
         <FieldGroup>
-          <Field>
-            <FieldLabel htmlFor="email">Email</FieldLabel>
-            <Input
-              id="email"
-              name="email"
-              type="email"
-              autoComplete="email"
-              required
-              placeholder="you@company.com"
-            />
-          </Field>
+          <Controller
+            control={form.control}
+            name="email"
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid || undefined}>
+                <FieldLabel htmlFor="email">Email</FieldLabel>
+                <Input
+                  id="email"
+                  type="email"
+                  autoComplete="email"
+                  placeholder="you@company.com"
+                  aria-invalid={fieldState.invalid}
+                  {...field}
+                />
+                <FieldError errors={[fieldState.error]} />
+              </Field>
+            )}
+          />
         </FieldGroup>
 
-        {error ? (
-          <Alert variant="destructive">
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        ) : null}
-
-        <Button type="submit" className="w-full" disabled={pending}>
-          {pending ? "Sending..." : "Send reset link"}
+        <Button
+          type="submit"
+          className="w-full"
+          disabled={form.formState.isSubmitting}
+        >
+          {form.formState.isSubmitting ? "Sending..." : "Send reset link"}
         </Button>
       </form>
 

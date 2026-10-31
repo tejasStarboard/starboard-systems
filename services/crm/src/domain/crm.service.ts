@@ -8,6 +8,7 @@ import {
   type CreateContactRequest,
   type CreateCustomerRequestInput,
   type CreateCustomerResponse,
+  type CustomerListItem,
   type FormOption,
   type UpdateContactRequest,
   type UpdateCustomerRequest,
@@ -22,8 +23,13 @@ function toCustomerRecord(row: CustomerRow): CreateCustomerResponse {
     email: row.email,
     phone: row.phone,
     address: row.address,
+    city: row.city,
+    state: row.state,
+    countryCode: row.countryCode,
+    zip: row.zip,
     isCustomer: row.isCustomer,
     isVendor: row.isVendor,
+    isActive: row.isActive,
   }
 }
 
@@ -47,7 +53,7 @@ function toContactRecord(row: {
 
 export interface CrmService {
   list(organizationId: string): Promise<FormOption[]>
-  listRecords(organizationId: string): Promise<CreateCustomerResponse[]>
+  listRecords(organizationId: string): Promise<CustomerListItem[]>
   get(
     organizationId: string,
     customerId: string
@@ -110,11 +116,22 @@ export class DefaultCrmService implements CrmService {
     return this.dao.listOptionsByOrganization(this.requireOrg(organizationId))
   }
 
-  async listRecords(organizationId: string): Promise<CreateCustomerResponse[]> {
-    const rows = await this.dao.listRecordsByOrganization(
-      this.requireOrg(organizationId)
-    )
-    return rows.map(toCustomerRecord)
+  async listRecords(organizationId: string): Promise<CustomerListItem[]> {
+    const orgId = this.requireOrg(organizationId)
+    const [rows, contactRows] = await Promise.all([
+      this.dao.listRecordsByOrganization(orgId),
+      this.dao.listContactsByOrganization(orgId),
+    ])
+    const contactsByCustomer = new Map<string, ContactRecord[]>()
+    for (const row of contactRows) {
+      const list = contactsByCustomer.get(row.customerId) ?? []
+      list.push(toContactRecord(row))
+      contactsByCustomer.set(row.customerId, list)
+    }
+    return rows.map((row) => ({
+      ...toCustomerRecord(row),
+      contacts: contactsByCustomer.get(row.id) ?? [],
+    }))
   }
 
   async get(
@@ -145,8 +162,13 @@ export class DefaultCrmService implements CrmService {
       email: parsed.data.email ?? null,
       phone: parsed.data.phone ?? null,
       address: parsed.data.address ?? null,
+      city: parsed.data.city ?? null,
+      state: parsed.data.state ?? null,
+      countryCode: parsed.data.countryCode ?? null,
+      zip: parsed.data.zip ?? null,
       isCustomer: parsed.data.isCustomer,
       isVendor: parsed.data.isVendor,
+      isActive: parsed.data.isActive,
     })
 
     return toCustomerRecord(created)

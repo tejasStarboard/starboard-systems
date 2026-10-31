@@ -5,11 +5,11 @@
 | Service | `services/crm`                                                             |
 | Schema  | `crm.*`                                                                    |
 | Auth    | Better Auth **organization** = tenant; CRM rows scoped by `organizationId` |
-| Status  | Customers + contacts live (lean fields); settings UI under shell           |
+| Status  | Customers + contacts live (lean fields); shell UI at `/customers`          |
 
 ## Owns
 
-Customers and contacts for the active org (address/email/phone, customer/vendor flags).
+Customers and contacts for the active org (address/city/state/country/zip, email/phone, customer/vendor flags).
 
 ## Does not own
 
@@ -19,7 +19,7 @@ Membership, roles, invitations (Better Auth organization plugin). Company/team/p
 
 - `GET /customers` — list options `{ value, label }` for quote picker (label = name)
 - `GET /customers?detail=1` — list full customer records
-- `POST /customers` — create (`name` required; email/phone/address/isCustomer/isVendor optional)
+- `POST /customers` — create (`name` required; email/phone/address/city/state/countryCode/zip/isCustomer/isVendor optional)
 - `GET /customers/:id` / `PATCH /customers/:id` — get/update expanded fields
 - `GET /customers/names?ids=` — resolve names (org-scoped)
 - `GET|POST /customers/:id/contacts` — list/create contacts

@@ -22,6 +22,7 @@ import {
 } from "@starboard/lib-ui/components/collapsible"
 import { Input } from "@starboard/lib-ui/components/input"
 import { Switch } from "@starboard/lib-ui/components/switch"
+import { toast } from "@starboard/lib-ui/components/toast"
 
 export type ExtensionRolloutRow = {
   id: string
@@ -58,8 +59,6 @@ export function ExtensionRolloutPanel({
   const [pendingSettingsId, setPendingSettingsId] = useState<string | null>(
     null
   )
-  const [error, setError] = useState<string | null>(null)
-  const [settingsError, setSettingsError] = useState<string | null>(null)
   const [settingsLoadError, setSettingsLoadError] = useState<string | null>(
     null
   )
@@ -93,9 +92,14 @@ export function ExtensionRolloutPanel({
         setFieldsById(next)
       } catch (err) {
         if (!cancelled) {
-          setSettingsLoadError(
+          const message =
             err instanceof Error ? err.message : "Failed to load settings"
-          )
+          setSettingsLoadError(message)
+          toast.add({
+            type: "error",
+            title: "Unable to load settings",
+            description: message,
+          })
         }
       } finally {
         if (!cancelled) setSettingsLoading(false)
@@ -110,7 +114,6 @@ export function ExtensionRolloutPanel({
 
   async function saveRollout(row: ExtensionRolloutRow) {
     setPendingId(row.id)
-    setError(null)
     try {
       const organizationIds =
         row.mode === "beta" ? row.organizations.map((org) => org.id) : []
@@ -129,9 +132,17 @@ export function ExtensionRolloutPanel({
         } | null
         throw new Error(body?.error ?? "Failed to save rollout")
       }
+      toast.add({ type: "success", title: "Rollout saved" })
       router.refresh()
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save")
+      toast.add({
+        type: "error",
+        title: "Unable to save rollout",
+        description:
+          err instanceof Error
+            ? err.message
+            : "Something went wrong. Try again.",
+      })
     } finally {
       setPendingId(null)
     }
@@ -141,12 +152,15 @@ export function ExtensionRolloutPanel({
     const fields = fieldsById[row.id] ?? []
     const built = buildExtensionSettingValues(fields)
     if (!built.ok) {
-      setSettingsError(built.message)
+      toast.add({
+        type: "error",
+        title: "Invalid settings",
+        description: built.message,
+      })
       return
     }
 
     setPendingSettingsId(row.id)
-    setSettingsError(null)
     try {
       const response = await fetch("/api/admin/extensions/settings", {
         method: "PUT",
@@ -169,11 +183,17 @@ export function ExtensionRolloutPanel({
           [row.id]: fieldsFromStaffSettings(body.settings ?? []),
         }))
       }
+      toast.add({ type: "success", title: "Settings saved" })
       router.refresh()
     } catch (err) {
-      setSettingsError(
-        err instanceof Error ? err.message : "Failed to save settings"
-      )
+      toast.add({
+        type: "error",
+        title: "Unable to save settings",
+        description:
+          err instanceof Error
+            ? err.message
+            : "Something went wrong. Try again.",
+      })
     } finally {
       setPendingSettingsId(null)
     }
@@ -194,10 +214,6 @@ export function ExtensionRolloutPanel({
 
   return (
     <div className="space-y-4">
-      {error ? <p className="text-sm text-destructive">{error}</p> : null}
-      {settingsLoadError ? (
-        <p className="text-sm text-destructive">{settingsLoadError}</p>
-      ) : null}
       <ul className="divide-y divide-border border">
         {rows.map((row) => {
           const open = openIds.has(row.id)
@@ -292,8 +308,8 @@ export function ExtensionRolloutPanel({
                         Loading settings…
                       </p>
                     ) : settingsLoadError ? (
-                      <p className="text-sm text-destructive">
-                        {settingsLoadError}
+                      <p className="text-xs text-muted-foreground">
+                        Settings unavailable. Try refreshing the page.
                       </p>
                     ) : !fields || fields.length === 0 ? (
                       <p className="text-xs text-muted-foreground">
@@ -310,11 +326,6 @@ export function ExtensionRolloutPanel({
                             }
                           />
                         ))}
-                        {settingsError ? (
-                          <p className="text-sm text-destructive">
-                            {settingsError}
-                          </p>
-                        ) : null}
                         <Button
                           type="button"
                           size="sm"

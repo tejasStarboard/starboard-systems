@@ -1,17 +1,25 @@
 "use client"
 
+import { zodResolver } from "@hookform/resolvers/zod"
 import { useCallback, useEffect, useState } from "react"
+import { Controller, useForm } from "react-hook-form"
 
-import { Alert, AlertDescription } from "@starboard/lib-ui/components/alert"
 import { Button } from "@starboard/lib-ui/components/button"
 import {
   Field,
+  FieldError,
   FieldGroup,
   FieldLabel,
 } from "@starboard/lib-ui/components/field"
 import { Input } from "@starboard/lib-ui/components/input"
+import { toast } from "@starboard/lib-ui/components/toast"
 
 import { authClient } from "@/lib/auth-client"
+import {
+  teamInviteFormSchema,
+  type TeamInviteFormValues,
+} from "@/lib/domain/settings/settings-forms.schema"
+import { toastFormErrors } from "@/lib/form-toast"
 
 type MemberRow = {
   id: string
@@ -32,20 +40,22 @@ type InvitationRow = {
 export function TeamSettingsForm() {
   const [members, setMembers] = useState<MemberRow[]>([])
   const [invitations, setInvitations] = useState<InvitationRow[]>([])
-  const [email, setEmail] = useState("")
-  const [role, setRole] = useState<"member" | "admin">("member")
   const [loading, setLoading] = useState(true)
-  const [inviting, setInviting] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [message, setMessage] = useState<string | null>(null)
+  const form = useForm<TeamInviteFormValues>({
+    resolver: zodResolver(teamInviteFormSchema),
+    defaultValues: { email: "", role: "member" },
+  })
 
   const load = useCallback(async () => {
     setLoading(true)
-    setError(null)
     const { data, error: orgError } =
       await authClient.organization.getFullOrganization()
     if (orgError || !data) {
-      setError(orgError?.message ?? "Failed to load team")
+      toast.add({
+        type: "error",
+        title: "Unable to load team",
+        description: orgError?.message ?? "Something went wrong. Try again.",
+      })
       setLoading(false)
       return
     }
@@ -76,23 +86,25 @@ export function TeamSettingsForm() {
     void load()
   }, [load])
 
-  async function invite() {
-    const trimmed = email.trim()
-    if (!trimmed || inviting) return
-    setInviting(true)
-    setError(null)
-    setMessage(null)
+  async function onInvite(values: TeamInviteFormValues) {
     const { error: inviteError } = await authClient.organization.inviteMember({
-      email: trimmed,
-      role,
+      email: values.email,
+      role: values.role,
     })
-    setInviting(false)
     if (inviteError) {
-      setError(inviteError.message ?? "Failed to invite member")
+      toast.add({
+        type: "error",
+        title: "Unable to invite member",
+        description: inviteError.message ?? "Something went wrong. Try again.",
+      })
       return
     }
-    setEmail("")
-    setMessage(`Invitation sent to ${trimmed}`)
+    form.reset({ email: "", role: "member" })
+    toast.add({
+      type: "success",
+      title: "Invitation sent",
+      description: values.email,
+    })
     await load()
   }
 
@@ -104,15 +116,6 @@ export function TeamSettingsForm() {
           Members and invitations for the active organization.
         </p>
       </div>
-
-      {error ? (
-        <Alert variant="destructive">
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      ) : null}
-      {message ? (
-        <p className="text-sm text-muted-foreground">{message}</p>
-      ) : null}
 
       <section className="space-y-3 rounded-xl border bg-card p-4">
         <h2 className="text-sm font-medium">Members</h2>
@@ -144,39 +147,55 @@ export function TeamSettingsForm() {
 
       <section className="space-y-3 rounded-xl border bg-card p-4">
         <h2 className="text-sm font-medium">Invite</h2>
-        <FieldGroup className="gap-3">
-          <Field>
-            <FieldLabel htmlFor="invite-email">Email</FieldLabel>
-            <Input
-              id="invite-email"
-              type="email"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              placeholder="teammate@company.com"
+        <form
+          className="space-y-3"
+          onSubmit={form.handleSubmit(onInvite, toastFormErrors)}
+        >
+          <FieldGroup className="gap-3">
+            <Controller
+              control={form.control}
+              name="email"
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid || undefined}>
+                  <FieldLabel htmlFor="invite-email">Email</FieldLabel>
+                  <Input
+                    id="invite-email"
+                    type="email"
+                    placeholder="teammate@company.com"
+                    aria-invalid={fieldState.invalid}
+                    {...field}
+                  />
+                  <FieldError errors={[fieldState.error]} />
+                </Field>
+              )}
             />
-          </Field>
-          <Field>
-            <FieldLabel htmlFor="invite-role">Role</FieldLabel>
-            <select
-              id="invite-role"
-              className="h-9 w-full rounded-md border bg-background px-3 text-sm"
-              value={role}
-              onChange={(event) =>
-                setRole(event.target.value as "member" | "admin")
-              }
-            >
-              <option value="member">Member</option>
-              <option value="admin">Admin</option>
-            </select>
-          </Field>
-          <Button
-            type="button"
-            disabled={inviting || !email.trim()}
-            onClick={() => void invite()}
-          >
-            {inviting ? "Sending…" : "Send invite"}
-          </Button>
-        </FieldGroup>
+            <Controller
+              control={form.control}
+              name="role"
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid || undefined}>
+                  <FieldLabel htmlFor="invite-role">Role</FieldLabel>
+                  <select
+                    id="invite-role"
+                    className="h-9 w-full rounded-md border bg-background px-3 text-sm"
+                    value={field.value}
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                    name={field.name}
+                    ref={field.ref}
+                  >
+                    <option value="member">Member</option>
+                    <option value="admin">Admin</option>
+                  </select>
+                  <FieldError errors={[fieldState.error]} />
+                </Field>
+              )}
+            />
+            <Button type="submit" disabled={form.formState.isSubmitting}>
+              {form.formState.isSubmitting ? "Sending…" : "Send invite"}
+            </Button>
+          </FieldGroup>
+        </form>
 
         {invitations.length > 0 ? (
           <div className="space-y-2 pt-2">

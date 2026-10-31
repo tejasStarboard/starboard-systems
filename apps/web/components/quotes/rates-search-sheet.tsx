@@ -10,6 +10,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@starboard/lib-ui/components/sheet"
+import { toast } from "@starboard/lib-ui/components/toast"
 
 import {
   catalogRateToManualLine,
@@ -46,14 +47,13 @@ export function RatesSearchSheet({
 }) {
   const [rates, setRates] = useState<Rate[]>([])
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [loadFailed, setLoadFailed] = useState(false)
   const [spotJob, setSpotJob] = useState<{
     workflowId: string
     runId: string
   } | null>(null)
   const [spotStatus, setSpotStatus] = useState<PolledJobStatus | null>(null)
   const [spotPending, setSpotPending] = useState(false)
-  const [spotError, setSpotError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!open) {
@@ -62,7 +62,7 @@ export function RatesSearchSheet({
 
     const controller = new AbortController()
     setLoading(true)
-    setError(null)
+    setLoadFailed(false)
 
     const params = new URLSearchParams()
     if (origin) params.set("origin", origin)
@@ -86,7 +86,15 @@ export function RatesSearchSheet({
           return
         }
         setRates([])
-        setError(err instanceof Error ? err.message : "Failed to load rates")
+        setLoadFailed(true)
+        toast.add({
+          type: "error",
+          title: "Unable to load rates",
+          description:
+            err instanceof Error
+              ? err.message
+              : "Something went wrong. Try again.",
+        })
       })
       .finally(() => {
         if (!controller.signal.aborted) {
@@ -107,7 +115,6 @@ export function RatesSearchSheet({
 
   async function enqueueSpotSearch(extensionId: string) {
     setSpotPending(true)
-    setSpotError(null)
     setSpotJob(null)
     setSpotStatus(null)
     try {
@@ -135,19 +142,32 @@ export function RatesSearchSheet({
       })
       setSpotStatus(status)
       if (status.status === "failed" || status.status === "cancelled") {
-        setSpotError(status.error ?? `Spot search ${status.status}`)
+        toast.add({
+          type: "error",
+          title: `Spot search ${status.status}`,
+          description: status.error ?? "Something went wrong. Try again.",
+        })
         return
       }
       if (status.status === "completed") {
         const parsed = parseSpotSearchResult(status.result)
         if (!parsed.ok) {
-          setSpotError(parsed.error)
+          toast.add({
+            type: "error",
+            title: "Spot search failed",
+            description: parsed.error,
+          })
         }
       }
     } catch (err: unknown) {
-      setSpotError(
-        err instanceof Error ? err.message : "Failed to enqueue spot search"
-      )
+      toast.add({
+        type: "error",
+        title: "Unable to start spot search",
+        description:
+          err instanceof Error
+            ? err.message
+            : "Something went wrong. Try again.",
+      })
     } finally {
       setSpotPending(false)
     }
@@ -254,17 +274,16 @@ export function RatesSearchSheet({
                   ) : null}
                 </div>
               ) : null}
-              {spotError ? (
-                <p className="text-xs text-destructive">{spotError}</p>
-              ) : null}
             </div>
           ) : null}
           {loading ? (
             <p className="text-center text-xs text-muted-foreground">
               Loading rates…
             </p>
-          ) : error ? (
-            <p className="text-center text-xs text-destructive">{error}</p>
+          ) : loadFailed ? (
+            <p className="text-center text-xs text-muted-foreground">
+              Couldn’t load catalog rates. Try again.
+            </p>
           ) : rates.length === 0 ? (
             <p className="text-center text-xs text-muted-foreground">
               No catalog rates found for this lane yet.

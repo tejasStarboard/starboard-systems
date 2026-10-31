@@ -9,11 +9,11 @@ import {
   FieldGroup,
   FieldLabel,
 } from "@starboard/lib-ui/components/field"
+import { toast } from "@starboard/lib-ui/components/toast"
 
 export function PreferencesSettingsForm() {
   const { theme, setTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
-  const [message, setMessage] = useState<string | null>(null)
 
   useEffect(() => {
     setMounted(true)
@@ -21,7 +21,11 @@ export function PreferencesSettingsForm() {
 
   function choose(next: string) {
     setTheme(next)
-    setMessage(`Theme set to ${next}`)
+    toast.add({
+      type: "success",
+      title: "Theme updated",
+      description: `Theme set to ${next}`,
+    })
   }
 
   return (
@@ -32,10 +36,6 @@ export function PreferencesSettingsForm() {
           Personal appearance settings for this browser.
         </p>
       </div>
-
-      {message ? (
-        <p className="text-sm text-muted-foreground">{message}</p>
-      ) : null}
 
       <section className="space-y-4 rounded-xl border bg-card p-4">
         <FieldGroup>

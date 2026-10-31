@@ -8,6 +8,7 @@ import {
   type OrgOption,
 } from "@/components/admin/org-multi-combobox"
 import { Button } from "@starboard/lib-ui/components/button"
+import { toast } from "@starboard/lib-ui/components/toast"
 
 export function CommonBetaSettingsPanel({
   initialOrganizations,
@@ -17,13 +18,9 @@ export function CommonBetaSettingsPanel({
   const router = useRouter()
   const [organizations, setOrganizations] = useState(initialOrganizations)
   const [pending, setPending] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [saved, setSaved] = useState(false)
 
   async function save() {
     setPending(true)
-    setError(null)
-    setSaved(false)
     try {
       const response = await fetch("/api/admin/settings/common-beta", {
         method: "PUT",
@@ -38,10 +35,17 @@ export function CommonBetaSettingsPanel({
         } | null
         throw new Error(body?.error ?? "Failed to save common beta list")
       }
-      setSaved(true)
+      toast.add({ type: "success", title: "Common beta list saved" })
       router.refresh()
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save")
+      toast.add({
+        type: "error",
+        title: "Unable to save",
+        description:
+          err instanceof Error
+            ? err.message
+            : "Something went wrong. Try again.",
+      })
     } finally {
       setPending(false)
     }
@@ -54,13 +58,9 @@ export function CommonBetaSettingsPanel({
         onChange={setOrganizations}
         placeholder="Search organizations by name…"
       />
-      <div className="flex items-center gap-3">
-        <Button type="button" disabled={pending} onClick={() => void save()}>
-          Save common beta list
-        </Button>
-        {saved ? <p className="text-xs text-muted-foreground">Saved.</p> : null}
-      </div>
-      {error ? <p className="text-sm text-destructive">{error}</p> : null}
+      <Button type="button" disabled={pending} onClick={() => void save()}>
+        Save common beta list
+      </Button>
     </div>
   )
 }

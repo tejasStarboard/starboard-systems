@@ -5,6 +5,7 @@ import { useState } from "react"
 
 import { Button } from "@starboard/lib-ui/components/button"
 import { Input } from "@starboard/lib-ui/components/input"
+import { toast } from "@starboard/lib-ui/components/toast"
 
 type OrgRow = {
   id: string
@@ -18,11 +19,9 @@ export function OrgSearchPanel() {
   const [query, setQuery] = useState("")
   const [rows, setRows] = useState<OrgRow[]>([])
   const [pending, setPending] = useState(false)
-  const [error, setError] = useState<string | null>(null)
 
   async function search() {
     setPending(true)
-    setError(null)
     try {
       const response = await fetch(
         `/api/admin/organizations?q=${encodeURIComponent(query)}`
@@ -33,7 +32,14 @@ export function OrgSearchPanel() {
       const body = (await response.json()) as { organizations: OrgRow[] }
       setRows(body.organizations)
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Search failed")
+      toast.add({
+        type: "error",
+        title: "Search failed",
+        description:
+          err instanceof Error
+            ? err.message
+            : "Something went wrong. Try again.",
+      })
     } finally {
       setPending(false)
     }
@@ -41,7 +47,6 @@ export function OrgSearchPanel() {
 
   async function switchInto(organizationId: string) {
     setPending(true)
-    setError(null)
     try {
       const response = await fetch("/api/admin/impersonation", {
         method: "POST",
@@ -57,7 +62,14 @@ export function OrgSearchPanel() {
       router.push("/")
       router.refresh()
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Switch failed")
+      toast.add({
+        type: "error",
+        title: "Unable to switch organization",
+        description:
+          err instanceof Error
+            ? err.message
+            : "Something went wrong. Try again.",
+      })
       setPending(false)
     }
   }
@@ -80,7 +92,6 @@ export function OrgSearchPanel() {
           Search
         </Button>
       </form>
-      {error ? <p className="text-sm text-destructive">{error}</p> : null}
       <ul className="divide-y divide-border border">
         {rows.map((row) => (
           <li

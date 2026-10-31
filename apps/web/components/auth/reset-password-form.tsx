@@ -1,61 +1,61 @@
 "use client"
 
+import { zodResolver } from "@hookform/resolvers/zod"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
-import { useState } from "react"
+import { Controller, useForm } from "react-hook-form"
 
-import { Alert, AlertDescription } from "@starboard/lib-ui/components/alert"
 import { Button } from "@starboard/lib-ui/components/button"
 import {
   Field,
+  FieldError,
   FieldGroup,
   FieldLabel,
 } from "@starboard/lib-ui/components/field"
 import { Input } from "@starboard/lib-ui/components/input"
+import { toast } from "@starboard/lib-ui/components/toast"
 
+import {
+  resetPasswordFormSchema,
+  type ResetPasswordFormValues,
+} from "@/lib/domain/auth/auth-forms.schema"
+import { toastFormErrors } from "@/lib/form-toast"
 import { authClient } from "@/lib/auth-client"
 
 export function ResetPasswordForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const token = searchParams.get("token")
+  const form = useForm<ResetPasswordFormValues>({
+    resolver: zodResolver(resetPasswordFormSchema),
+    defaultValues: { password: "", confirmPassword: "" },
+  })
 
-  const [error, setError] = useState<string | null>(null)
-  const [pending, setPending] = useState(false)
-
-  async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    setError(null)
-
+  async function onSubmit(values: ResetPasswordFormValues) {
     if (!token) {
-      setError("Reset token is missing or invalid")
-      return
-    }
-
-    setPending(true)
-
-    const form = new FormData(event.currentTarget)
-    const newPassword = String(form.get("password") ?? "")
-    const confirmPassword = String(form.get("confirmPassword") ?? "")
-
-    if (newPassword !== confirmPassword) {
-      setPending(false)
-      setError("Passwords do not match")
+      toast.add({
+        type: "error",
+        title: "Invalid reset link",
+        description: "Reset token is missing or invalid.",
+      })
       return
     }
 
     const { error: resetError } = await authClient.resetPassword({
-      newPassword,
+      newPassword: values.password,
       token,
     })
 
-    setPending(false)
-
     if (resetError) {
-      setError(resetError.message ?? "Unable to reset password")
+      toast.add({
+        type: "error",
+        title: "Unable to reset password",
+        description: resetError.message ?? "Something went wrong. Try again.",
+      })
       return
     }
 
+    toast.add({ type: "success", title: "Password updated" })
     router.push("/login")
     router.refresh()
   }
@@ -63,11 +63,12 @@ export function ResetPasswordForm() {
   if (!token) {
     return (
       <div className="flex flex-col gap-4">
-        <Alert variant="destructive">
-          <AlertDescription>
+        <div className="space-y-1">
+          <h1 className="text-sm font-medium">Invalid reset link</h1>
+          <p className="text-xs text-muted-foreground">
             This reset link is invalid or has expired.
-          </AlertDescription>
-        </Alert>
+          </p>
+        </div>
         <Link
           href="/forgot-password"
           className="text-center text-xs underline-offset-4 hover:underline"
@@ -87,40 +88,55 @@ export function ResetPasswordForm() {
         </p>
       </div>
 
-      <form onSubmit={onSubmit} className="flex flex-col gap-4">
+      <form
+        onSubmit={form.handleSubmit(onSubmit, toastFormErrors)}
+        className="flex flex-col gap-4"
+      >
         <FieldGroup>
-          <Field>
-            <FieldLabel htmlFor="password">New password</FieldLabel>
-            <Input
-              id="password"
-              name="password"
-              type="password"
-              autoComplete="new-password"
-              required
-              minLength={8}
-            />
-          </Field>
-          <Field>
-            <FieldLabel htmlFor="confirmPassword">Confirm password</FieldLabel>
-            <Input
-              id="confirmPassword"
-              name="confirmPassword"
-              type="password"
-              autoComplete="new-password"
-              required
-              minLength={8}
-            />
-          </Field>
+          <Controller
+            control={form.control}
+            name="password"
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid || undefined}>
+                <FieldLabel htmlFor="password">New password</FieldLabel>
+                <Input
+                  id="password"
+                  type="password"
+                  autoComplete="new-password"
+                  aria-invalid={fieldState.invalid}
+                  {...field}
+                />
+                <FieldError errors={[fieldState.error]} />
+              </Field>
+            )}
+          />
+          <Controller
+            control={form.control}
+            name="confirmPassword"
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid || undefined}>
+                <FieldLabel htmlFor="confirmPassword">
+                  Confirm password
+                </FieldLabel>
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  autoComplete="new-password"
+                  aria-invalid={fieldState.invalid}
+                  {...field}
+                />
+                <FieldError errors={[fieldState.error]} />
+              </Field>
+            )}
+          />
         </FieldGroup>
 
-        {error ? (
-          <Alert variant="destructive">
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        ) : null}
-
-        <Button type="submit" className="w-full" disabled={pending}>
-          {pending ? "Updating..." : "Update password"}
+        <Button
+          type="submit"
+          className="w-full"
+          disabled={form.formState.isSubmitting}
+        >
+          {form.formState.isSubmitting ? "Updating..." : "Update password"}
         </Button>
       </form>
     </div>

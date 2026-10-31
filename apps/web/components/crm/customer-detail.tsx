@@ -1,16 +1,88 @@
 "use client"
 
-import Link from "next/link"
-import { useState } from "react"
+import { TrashIcon } from "@phosphor-icons/react"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useRouter } from "next/navigation"
+import { useEffect, useMemo, useState } from "react"
+import { Controller, useForm } from "react-hook-form"
 
-import type { ContactRecord, CustomerRecord } from "@starboard/lib-contracts"
+import {
+  customerRecordSchema,
+  type ContactRecord,
+  type CustomerRecord,
+} from "@starboard/lib-contracts"
 import { Button } from "@starboard/lib-ui/components/button"
 import {
+  Card,
+  CardAction,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@starboard/lib-ui/components/card"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@starboard/lib-ui/components/dialog"
+import {
   Field,
+  FieldError,
   FieldGroup,
   FieldLabel,
 } from "@starboard/lib-ui/components/field"
 import { Input } from "@starboard/lib-ui/components/input"
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@starboard/lib-ui/components/sheet"
+import { Switch } from "@starboard/lib-ui/components/switch"
+import { Textarea } from "@starboard/lib-ui/components/textarea"
+import { toast } from "@starboard/lib-ui/components/toast"
+
+import {
+  contactFormSchema,
+  customerFormSchema,
+  customerToFormValues,
+  emptyContactFormValues,
+  type ContactFormValues,
+  type CustomerFormValues,
+} from "@/lib/domain/crm/crm-forms.schema"
+import { toastFormErrors } from "@/lib/form-toast"
+
+function SwitchRow({
+  title,
+  description,
+  checked,
+  onCheckedChange,
+}: {
+  title: string
+  description: string
+  checked: boolean
+  onCheckedChange: (checked: boolean) => void
+}) {
+  return (
+    <label className="flex cursor-pointer items-center justify-between gap-4 py-3">
+      <span className="min-w-0 space-y-0.5">
+        <span className="block text-sm font-medium">{title}</span>
+        <span className="block text-xs text-muted-foreground">
+          {description}
+        </span>
+      </span>
+      <Switch
+        checked={checked === true}
+        onCheckedChange={(value) => onCheckedChange(value === true)}
+        className="shrink-0"
+      />
+    </label>
+  )
+}
 
 export function CustomerDetail({
   initialCustomer,
@@ -19,288 +91,511 @@ export function CustomerDetail({
   initialCustomer: CustomerRecord
   initialContacts: ContactRecord[]
 }) {
-  const [customer, setCustomer] = useState(initialCustomer)
+  const router = useRouter()
   const [contacts, setContacts] = useState(initialContacts)
-  const [saving, setSaving] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [message, setMessage] = useState<string | null>(null)
+  const [contactsSheetOpen, setContactsSheetOpen] = useState(false)
+  const [contactQuery, setContactQuery] = useState("")
+  const [contactDialogOpen, setContactDialogOpen] = useState(false)
 
-  const [contactName, setContactName] = useState("")
-  const [contactEmail, setContactEmail] = useState("")
-  const [contactPhone, setContactPhone] = useState("")
-  const [contactRole, setContactRole] = useState("")
-  const [addingContact, setAddingContact] = useState(false)
+  const form = useForm<CustomerFormValues>({
+    resolver: zodResolver(customerFormSchema),
+    defaultValues: customerToFormValues(initialCustomer),
+  })
 
-  async function saveCustomer() {
-    setSaving(true)
-    setError(null)
-    setMessage(null)
+  const contactForm = useForm<ContactFormValues>({
+    resolver: zodResolver(contactFormSchema),
+    defaultValues: emptyContactFormValues,
+  })
+
+  const customerName = form.watch("name")
+
+  useEffect(() => {
+    form.reset(customerToFormValues(initialCustomer))
+    setContacts(initialContacts)
+  }, [form, initialCustomer, initialContacts])
+
+  const filteredContacts = useMemo(() => {
+    const q = contactQuery.trim().toLowerCase()
+    if (!q) return contacts
+    return contacts.filter(
+      (contact) =>
+        contact.name.toLowerCase().includes(q) ||
+        contact.email?.toLowerCase().includes(q) ||
+        contact.phone?.toLowerCase().includes(q) ||
+        contact.role?.toLowerCase().includes(q)
+    )
+  }, [contactQuery, contacts])
+
+  async function onSaveCustomer(values: CustomerFormValues) {
     try {
-      const response = await fetch(`/api/customers/${customer.id}`, {
+      const response = await fetch(`/api/customers/${initialCustomer.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: customer.name,
-          email: customer.email ?? "",
-          phone: customer.phone ?? "",
-          address: customer.address ?? "",
-          isCustomer: customer.isCustomer,
-          isVendor: customer.isVendor,
-        }),
+        body: JSON.stringify(values),
       })
       const body = (await response.json().catch(() => null)) as
         (CustomerRecord & { error?: string }) | null
-      if (!response.ok || !body?.id) {
-        setError(body?.error ?? "Failed to save customer")
+      if (!response.ok || !body) {
+        toast.add({
+          type: "error",
+          title: "Unable to save customer",
+          description: body?.error ?? "Something went wrong. Try again.",
+        })
         return
       }
-      setCustomer(body)
-      setMessage("Customer saved")
+      const parsed = customerRecordSchema.safeParse(body)
+      if (!parsed.success) {
+        toast.add({
+          type: "error",
+          title: "Unable to save customer",
+          description: "Invalid response from server.",
+        })
+        return
+      }
+      form.reset(customerToFormValues(parsed.data))
+      toast.add({ type: "success", title: "Customer saved" })
+      router.refresh()
     } catch {
-      setError("Failed to save customer")
-    } finally {
-      setSaving(false)
+      toast.add({
+        type: "error",
+        title: "Unable to save customer",
+        description: "Something went wrong. Try again.",
+      })
     }
   }
 
-  async function addContact() {
-    if (!contactName.trim() || addingContact) return
-    setAddingContact(true)
-    setError(null)
+  async function onAddContact(values: ContactFormValues) {
     try {
-      const response = await fetch(`/api/customers/${customer.id}/contacts`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: contactName,
-          email: contactEmail,
-          phone: contactPhone,
-          role: contactRole,
-        }),
-      })
+      const response = await fetch(
+        `/api/customers/${initialCustomer.id}/contacts`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(values),
+        }
+      )
       const body = (await response.json().catch(() => null)) as
         (ContactRecord & { error?: string }) | null
       if (!response.ok || !body?.id) {
-        setError(body?.error ?? "Failed to add contact")
+        toast.add({
+          type: "error",
+          title: "Unable to add contact",
+          description: body?.error ?? "Something went wrong. Try again.",
+        })
         return
       }
       setContacts((prev) =>
         [...prev, body].sort((a, b) => a.name.localeCompare(b.name))
       )
-      setContactName("")
-      setContactEmail("")
-      setContactPhone("")
-      setContactRole("")
+      contactForm.reset(emptyContactFormValues)
+      setContactDialogOpen(false)
+      toast.add({ type: "success", title: "Contact added" })
     } catch {
-      setError("Failed to add contact")
-    } finally {
-      setAddingContact(false)
+      toast.add({
+        type: "error",
+        title: "Unable to add contact",
+        description: "Something went wrong. Try again.",
+      })
     }
   }
 
   async function removeContact(contactId: string) {
-    setError(null)
     const response = await fetch(
-      `/api/customers/${customer.id}/contacts/${contactId}`,
+      `/api/customers/${initialCustomer.id}/contacts/${contactId}`,
       { method: "DELETE" }
     )
     if (!response.ok && response.status !== 204) {
       const body = (await response.json().catch(() => null)) as {
         error?: string
       } | null
-      setError(body?.error ?? "Failed to delete contact")
+      toast.add({
+        type: "error",
+        title: "Unable to remove contact",
+        description: body?.error ?? "Something went wrong. Try again.",
+      })
       return
     }
     setContacts((prev) => prev.filter((row) => row.id !== contactId))
   }
 
+  const { isDirty, isSubmitting } = form.formState
+  const contactSubmitting = contactForm.formState.isSubmitting
+
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-col gap-8 px-6 py-8">
-      <div className="space-y-1">
-        <Link
-          href="/settings/customers"
-          className="text-xs text-muted-foreground hover:text-foreground"
-        >
-          ← Customers
-        </Link>
-        <h1 className="text-2xl font-semibold tracking-tight">
-          {customer.name}
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          Edit account fields and manage contacts.
-        </p>
-      </div>
-
-      <section className="space-y-4 rounded-xl border bg-card p-4">
-        <h2 className="text-sm font-medium">Details</h2>
-        <FieldGroup className="gap-3">
-          <Field>
-            <FieldLabel htmlFor="customer-name">Name</FieldLabel>
-            <Input
-              id="customer-name"
-              value={customer.name}
-              onChange={(event) =>
-                setCustomer((prev) => ({ ...prev, name: event.target.value }))
-              }
-            />
-          </Field>
-          <Field>
-            <FieldLabel htmlFor="customer-email">Email</FieldLabel>
-            <Input
-              id="customer-email"
-              type="email"
-              value={customer.email ?? ""}
-              onChange={(event) =>
-                setCustomer((prev) => ({ ...prev, email: event.target.value }))
-              }
-            />
-          </Field>
-          <Field>
-            <FieldLabel htmlFor="customer-phone">Phone</FieldLabel>
-            <Input
-              id="customer-phone"
-              value={customer.phone ?? ""}
-              onChange={(event) =>
-                setCustomer((prev) => ({ ...prev, phone: event.target.value }))
-              }
-            />
-          </Field>
-          <Field>
-            <FieldLabel htmlFor="customer-address">Address</FieldLabel>
-            <Input
-              id="customer-address"
-              value={customer.address ?? ""}
-              onChange={(event) =>
-                setCustomer((prev) => ({
-                  ...prev,
-                  address: event.target.value,
-                }))
-              }
-            />
-          </Field>
-          <div className="flex flex-wrap gap-4 text-sm">
-            <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={customer.isCustomer}
-                onChange={(event) =>
-                  setCustomer((prev) => ({
-                    ...prev,
-                    isCustomer: event.target.checked,
-                  }))
-                }
-              />
-              Customer
-            </label>
-            <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={customer.isVendor}
-                onChange={(event) =>
-                  setCustomer((prev) => ({
-                    ...prev,
-                    isVendor: event.target.checked,
-                  }))
-                }
-              />
-              Vendor
-            </label>
-          </div>
-        </FieldGroup>
-        <div className="flex items-center gap-3">
-          <Button
-            type="button"
-            disabled={saving}
-            onClick={() => void saveCustomer()}
-          >
-            {saving ? "Saving…" : "Save"}
-          </Button>
-          {message ? (
-            <p className="text-xs text-muted-foreground">{message}</p>
-          ) : null}
-        </div>
-      </section>
-
-      <section className="space-y-4 rounded-xl border bg-card p-4">
-        <h2 className="text-sm font-medium">Contacts</h2>
-        <ul className="divide-y rounded-lg border">
-          {contacts.length === 0 ? (
-            <li className="px-3 py-4 text-sm text-muted-foreground">
-              No contacts yet.
-            </li>
-          ) : (
-            contacts.map((contact) => (
-              <li
-                key={contact.id}
-                className="flex items-start justify-between gap-3 px-3 py-3"
+    <div className="flex h-full min-h-0 w-full flex-col">
+      <form
+        className="flex h-full min-h-0 w-full flex-col"
+        onSubmit={form.handleSubmit(onSaveCustomer, toastFormErrors)}
+      >
+        <div className="min-h-0 flex-1 overflow-y-auto px-5 py-8 lg:px-8">
+          <div className="flex flex-col gap-8">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0 space-y-1">
+                <h1 className="text-2xl font-semibold tracking-tight">
+                  {customerName || initialCustomer.name}
+                </h1>
+                <p className="text-sm text-muted-foreground">
+                  Edit account fields and manage contacts.
+                </p>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="shrink-0"
+                onClick={() => setContactsSheetOpen(true)}
               >
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-medium">{contact.name}</p>
-                  <p className="truncate text-xs text-muted-foreground">
-                    {[contact.role, contact.email, contact.phone]
-                      .filter(Boolean)
-                      .join(" · ") || "No details"}
-                  </p>
-                </div>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => void removeContact(contact.id)}
-                >
-                  Remove
-                </Button>
-              </li>
-            ))
-          )}
-        </ul>
+                View contacts
+                {contacts.length > 0 ? (
+                  <span className="text-muted-foreground">
+                    ({contacts.length})
+                  </span>
+                ) : null}
+              </Button>
+            </div>
 
-        <FieldGroup className="gap-3">
-          <Field>
-            <FieldLabel htmlFor="contact-name">Name</FieldLabel>
-            <Input
-              id="contact-name"
-              value={contactName}
-              onChange={(event) => setContactName(event.target.value)}
-            />
-          </Field>
-          <div className="grid gap-3 sm:grid-cols-3">
-            <Field>
-              <FieldLabel htmlFor="contact-email">Email</FieldLabel>
-              <Input
-                id="contact-email"
-                value={contactEmail}
-                onChange={(event) => setContactEmail(event.target.value)}
-              />
-            </Field>
-            <Field>
-              <FieldLabel htmlFor="contact-phone">Phone</FieldLabel>
-              <Input
-                id="contact-phone"
-                value={contactPhone}
-                onChange={(event) => setContactPhone(event.target.value)}
-              />
-            </Field>
-            <Field>
-              <FieldLabel htmlFor="contact-role">Role</FieldLabel>
-              <Input
-                id="contact-role"
-                value={contactRole}
-                onChange={(event) => setContactRole(event.target.value)}
-              />
-            </Field>
+            <section className="space-y-4">
+              <FieldGroup className="gap-3">
+                <Controller
+                  control={form.control}
+                  name="name"
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid || undefined}>
+                      <FieldLabel htmlFor="customer-name">Name</FieldLabel>
+                      <Input
+                        id="customer-name"
+                        {...field}
+                        aria-invalid={fieldState.invalid}
+                      />
+                      <FieldError errors={[fieldState.error]} />
+                    </Field>
+                  )}
+                />
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <Controller
+                    control={form.control}
+                    name="email"
+                    render={({ field, fieldState }) => (
+                      <Field data-invalid={fieldState.invalid || undefined}>
+                        <FieldLabel htmlFor="customer-email">Email</FieldLabel>
+                        <Input
+                          id="customer-email"
+                          type="email"
+                          {...field}
+                          aria-invalid={fieldState.invalid}
+                        />
+                        <FieldError errors={[fieldState.error]} />
+                      </Field>
+                    )}
+                  />
+                  <Controller
+                    control={form.control}
+                    name="phone"
+                    render={({ field, fieldState }) => (
+                      <Field data-invalid={fieldState.invalid || undefined}>
+                        <FieldLabel htmlFor="customer-phone">Phone</FieldLabel>
+                        <Input id="customer-phone" {...field} />
+                        <FieldError errors={[fieldState.error]} />
+                      </Field>
+                    )}
+                  />
+                </div>
+                <Controller
+                  control={form.control}
+                  name="address"
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid || undefined}>
+                      <FieldLabel htmlFor="customer-address">
+                        Address
+                      </FieldLabel>
+                      <Textarea id="customer-address" rows={3} {...field} />
+                      <FieldError errors={[fieldState.error]} />
+                    </Field>
+                  )}
+                />
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <Controller
+                    control={form.control}
+                    name="city"
+                    render={({ field }) => (
+                      <Field>
+                        <FieldLabel htmlFor="customer-city">City</FieldLabel>
+                        <Input id="customer-city" {...field} />
+                      </Field>
+                    )}
+                  />
+                  <Controller
+                    control={form.control}
+                    name="state"
+                    render={({ field }) => (
+                      <Field>
+                        <FieldLabel htmlFor="customer-state">
+                          State / province
+                        </FieldLabel>
+                        <Input id="customer-state" {...field} />
+                      </Field>
+                    )}
+                  />
+                  <Controller
+                    control={form.control}
+                    name="zip"
+                    render={({ field }) => (
+                      <Field>
+                        <FieldLabel htmlFor="customer-zip">
+                          ZIP / postal
+                        </FieldLabel>
+                        <Input id="customer-zip" {...field} />
+                      </Field>
+                    )}
+                  />
+                  <Controller
+                    control={form.control}
+                    name="countryCode"
+                    render={({ field }) => (
+                      <Field>
+                        <FieldLabel htmlFor="customer-country">
+                          Country code
+                        </FieldLabel>
+                        <Input
+                          id="customer-country"
+                          placeholder="US"
+                          {...field}
+                        />
+                      </Field>
+                    )}
+                  />
+                </div>
+                <div className="divide-y">
+                  <Controller
+                    control={form.control}
+                    name="isActive"
+                    render={({ field }) => (
+                      <SwitchRow
+                        title="Active"
+                        description="Inactive accounts stay in CRM but are hidden from the quote picker."
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    )}
+                  />
+                  <Controller
+                    control={form.control}
+                    name="isCustomer"
+                    render={({ field }) => (
+                      <SwitchRow
+                        title="Customer"
+                        description="Treat this account as a customer for quoting and sales."
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    )}
+                  />
+                  <Controller
+                    control={form.control}
+                    name="isVendor"
+                    render={({ field }) => (
+                      <SwitchRow
+                        title="Vendor"
+                        description="Mark this account as a vendor or carrier partner."
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    )}
+                  />
+                </div>
+              </FieldGroup>
+            </section>
           </div>
+        </div>
+
+        <div className="flex shrink-0 items-center justify-end gap-3 border-t bg-background px-5 py-4 lg:px-8">
           <Button
             type="button"
-            disabled={addingContact || !contactName.trim()}
-            onClick={() => void addContact()}
+            variant="outline"
+            disabled={!isDirty || isSubmitting}
+            onClick={() => form.reset()}
           >
-            {addingContact ? "Adding…" : "Add contact"}
+            Undo
           </Button>
-        </FieldGroup>
-      </section>
+          <Button type="submit" disabled={isSubmitting || !isDirty}>
+            {isSubmitting ? "Saving…" : "Save"}
+          </Button>
+        </div>
+      </form>
 
-      {error ? <p className="text-sm text-destructive">{error}</p> : null}
+      <Sheet
+        open={contactsSheetOpen}
+        onOpenChange={(open) => {
+          setContactsSheetOpen(open)
+          if (!open) setContactQuery("")
+        }}
+      >
+        <SheetContent
+          side="right"
+          className="flex h-full min-h-0 flex-col gap-0 p-0 sm:max-w-md"
+        >
+          <SheetHeader className="shrink-0 gap-1 px-4 pt-4 pr-12 pb-3 text-left">
+            <SheetTitle>Contacts</SheetTitle>
+            <SheetDescription>
+              People linked to{" "}
+              <span className="font-semibold">
+                {customerName || initialCustomer.name}
+              </span>
+            </SheetDescription>
+          </SheetHeader>
+
+          <div className="shrink-0 px-4 pb-3">
+            <Input
+              value={contactQuery}
+              onChange={(event) => setContactQuery(event.target.value)}
+              placeholder="Search contacts…"
+              aria-label="Search contacts"
+            />
+          </div>
+
+          <ul className="min-h-0 flex-1 space-y-2 overflow-y-auto px-4">
+            {filteredContacts.length === 0 ? (
+              <li className="py-6 text-sm text-muted-foreground">
+                {contacts.length === 0
+                  ? "No contacts yet."
+                  : "No contacts match."}
+              </li>
+            ) : (
+              filteredContacts.map((contact) => (
+                <li key={contact.id}>
+                  <Card size="sm" className="group">
+                    <CardHeader className="has-data-[slot=card-action]:grid-cols-[minmax(0,1fr)_auto]">
+                      <CardTitle className="truncate">{contact.name}</CardTitle>
+                      <CardDescription className="truncate">
+                        {[contact.role, contact.email, contact.phone]
+                          .filter(Boolean)
+                          .join(" · ") || "No details"}
+                      </CardDescription>
+                      <CardAction>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon-sm"
+                          className="opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
+                          aria-label={`Remove ${contact.name}`}
+                          onClick={() => void removeContact(contact.id)}
+                        >
+                          <TrashIcon className="size-4" />
+                        </Button>
+                      </CardAction>
+                    </CardHeader>
+                  </Card>
+                </li>
+              ))
+            )}
+          </ul>
+
+          <div className="shrink-0 border-t px-4 py-3">
+            <Dialog
+              open={contactDialogOpen}
+              onOpenChange={(open) => {
+                setContactDialogOpen(open)
+                if (!open) contactForm.reset(emptyContactFormValues)
+              }}
+            >
+              <DialogTrigger
+                render={<Button type="button" className="w-full" />}
+              >
+                Add contact
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-md">
+                <form
+                  onSubmit={contactForm.handleSubmit(
+                    onAddContact,
+                    toastFormErrors
+                  )}
+                >
+                  <DialogHeader>
+                    <DialogTitle>Add contact</DialogTitle>
+                    <DialogDescription>
+                      Add a person under{" "}
+                      <span className="font-semibold">
+                        {customerName || initialCustomer.name}
+                      </span>
+                    </DialogDescription>
+                  </DialogHeader>
+                  <FieldGroup className="gap-3">
+                    <Controller
+                      control={contactForm.control}
+                      name="name"
+                      render={({ field, fieldState }) => (
+                        <Field data-invalid={fieldState.invalid || undefined}>
+                          <FieldLabel htmlFor="contact-name">Name</FieldLabel>
+                          <Input
+                            id="contact-name"
+                            {...field}
+                            aria-invalid={fieldState.invalid}
+                          />
+                          <FieldError errors={[fieldState.error]} />
+                        </Field>
+                      )}
+                    />
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <Controller
+                        control={contactForm.control}
+                        name="email"
+                        render={({ field, fieldState }) => (
+                          <Field data-invalid={fieldState.invalid || undefined}>
+                            <FieldLabel htmlFor="contact-email">
+                              Email
+                            </FieldLabel>
+                            <Input
+                              id="contact-email"
+                              type="email"
+                              {...field}
+                              aria-invalid={fieldState.invalid}
+                            />
+                            <FieldError errors={[fieldState.error]} />
+                          </Field>
+                        )}
+                      />
+                      <Controller
+                        control={contactForm.control}
+                        name="phone"
+                        render={({ field }) => (
+                          <Field>
+                            <FieldLabel htmlFor="contact-phone">
+                              Phone
+                            </FieldLabel>
+                            <Input id="contact-phone" {...field} />
+                          </Field>
+                        )}
+                      />
+                    </div>
+                    <Controller
+                      control={contactForm.control}
+                      name="role"
+                      render={({ field }) => (
+                        <Field>
+                          <FieldLabel htmlFor="contact-role">Role</FieldLabel>
+                          <Input id="contact-role" {...field} />
+                        </Field>
+                      )}
+                    />
+                  </FieldGroup>
+                  <DialogFooter>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setContactDialogOpen(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button type="submit" disabled={contactSubmitting}>
+                      {contactSubmitting ? "Adding…" : "Add contact"}
+                    </Button>
+                  </DialogFooter>
+                </form>
+              </DialogContent>
+            </Dialog>
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   )
 }

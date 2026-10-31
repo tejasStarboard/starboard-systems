@@ -13,8 +13,13 @@ export const customer = crmSchema.table(
     email: text("email"),
     phone: text("phone"),
     address: text("address"),
+    city: text("city"),
+    state: text("state"),
+    countryCode: text("country_code"),
+    zip: text("zip"),
     isCustomer: boolean("is_customer").notNull().default(true),
     isVendor: boolean("is_vendor").notNull().default(false),
+    isActive: boolean("is_active").notNull().default(true),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },
@@ -23,6 +28,10 @@ export const customer = crmSchema.table(
     index("customer_organization_name_idx").on(
       table.organizationId,
       table.name
+    ),
+    index("customer_organization_active_idx").on(
+      table.organizationId,
+      table.isActive
     ),
   ]
 )

@@ -2,7 +2,6 @@
 
 import Link from "next/link"
 import {
-  AddressBookIcon,
   CaretRightIcon,
   CurrencyCircleDollarIcon,
   GearIcon,
@@ -42,12 +41,6 @@ const sections: SettingsSection[] = [
           "Manage workspace members and who can take certain actions.",
         href: "/settings/team",
         icon: <UsersIcon />,
-      },
-      {
-        title: "Customers",
-        description: "Accounts, contacts, and vendor flags for this workspace.",
-        href: "/settings/customers",
-        icon: <AddressBookIcon />,
       },
       {
         title: "Integrations",

@@ -1,48 +1,56 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useEffect } from "react"
+import { Controller, useForm } from "react-hook-form"
 
-import { Alert, AlertDescription } from "@starboard/lib-ui/components/alert"
 import { Button } from "@starboard/lib-ui/components/button"
 import {
   Field,
+  FieldError,
   FieldGroup,
   FieldLabel,
 } from "@starboard/lib-ui/components/field"
 import { Input } from "@starboard/lib-ui/components/input"
+import { toast } from "@starboard/lib-ui/components/toast"
 
+import {
+  profileFormSchema,
+  type ProfileFormValues,
+} from "@/lib/domain/settings/settings-forms.schema"
+import { toastFormErrors } from "@/lib/form-toast"
 import { authClient, useSession } from "@/lib/auth-client"
 
 export function ProfileSettingsForm() {
   const { data: session, isPending } = useSession()
-  const [name, setName] = useState("")
-  const [email, setEmail] = useState("")
-  const [saving, setSaving] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [message, setMessage] = useState<string | null>(null)
+  const form = useForm<ProfileFormValues>({
+    resolver: zodResolver(profileFormSchema),
+    defaultValues: { name: "", email: "" },
+  })
 
   useEffect(() => {
     if (session?.user) {
-      setName(session.user.name ?? "")
-      setEmail(session.user.email ?? "")
+      form.reset({
+        name: session.user.name ?? "",
+        email: session.user.email ?? "",
+      })
     }
-  }, [session])
+  }, [form, session])
 
-  async function save() {
-    const trimmed = name.trim()
-    if (!trimmed || saving) return
-    setSaving(true)
-    setError(null)
-    setMessage(null)
+  async function onSave(values: ProfileFormValues) {
     const { error: updateError } = await authClient.updateUser({
-      name: trimmed,
+      name: values.name,
     })
-    setSaving(false)
     if (updateError) {
-      setError(updateError.message ?? "Failed to update profile")
+      toast.add({
+        type: "error",
+        title: "Unable to update profile",
+        description: updateError.message ?? "Something went wrong. Try again.",
+      })
       return
     }
-    setMessage("Profile saved")
+    toast.add({ type: "success", title: "Profile saved" })
+    form.reset(values)
   }
 
   return (
@@ -54,41 +62,47 @@ export function ProfileSettingsForm() {
         </p>
       </div>
 
-      {error ? (
-        <Alert variant="destructive">
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      ) : null}
-      {message ? (
-        <p className="text-sm text-muted-foreground">{message}</p>
-      ) : null}
-
       {isPending ? (
         <p className="text-sm text-muted-foreground">Loading…</p>
       ) : (
-        <section className="space-y-4 rounded-xl border bg-card p-4">
+        <form
+          className="space-y-4 rounded-xl border bg-card p-4"
+          onSubmit={form.handleSubmit(onSave, toastFormErrors)}
+        >
           <FieldGroup className="gap-3">
-            <Field>
-              <FieldLabel htmlFor="profile-name">Name</FieldLabel>
-              <Input
-                id="profile-name"
-                value={name}
-                onChange={(event) => setName(event.target.value)}
-              />
-            </Field>
-            <Field>
-              <FieldLabel htmlFor="profile-email">Email</FieldLabel>
-              <Input id="profile-email" value={email} disabled readOnly />
-            </Field>
+            <Controller
+              control={form.control}
+              name="name"
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid || undefined}>
+                  <FieldLabel htmlFor="profile-name">Name</FieldLabel>
+                  <Input
+                    id="profile-name"
+                    aria-invalid={fieldState.invalid}
+                    {...field}
+                  />
+                  <FieldError errors={[fieldState.error]} />
+                </Field>
+              )}
+            />
+            <Controller
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <Field>
+                  <FieldLabel htmlFor="profile-email">Email</FieldLabel>
+                  <Input id="profile-email" {...field} disabled readOnly />
+                </Field>
+              )}
+            />
           </FieldGroup>
           <Button
-            type="button"
-            disabled={saving || !name.trim()}
-            onClick={() => void save()}
+            type="submit"
+            disabled={form.formState.isSubmitting || !form.formState.isDirty}
           >
-            {saving ? "Saving…" : "Save"}
+            {form.formState.isSubmitting ? "Saving…" : "Save"}
           </Button>
-        </section>
+        </form>
       )}
     </div>
   )

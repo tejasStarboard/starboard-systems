@@ -3,6 +3,7 @@
 import { useState } from "react"
 
 import { Button } from "@starboard/lib-ui/components/button"
+import { toast } from "@starboard/lib-ui/components/toast"
 
 import { extensionApiPath } from "@/lib/extension-api-path"
 
@@ -16,11 +17,9 @@ type ConnectionStatus = {
 export function ConnectOutlook({ initialStatus }: { initialStatus: string }) {
   const [status, setStatus] = useState(initialStatus)
   const [pending, setPending] = useState(false)
-  const [error, setError] = useState<string | null>(null)
 
   async function connect() {
     setPending(true)
-    setError(null)
     try {
       const response = await fetch(
         extensionApiPath(MESSAGING_EXTENSION_ID, "connection"),
@@ -29,7 +28,11 @@ export function ConnectOutlook({ initialStatus }: { initialStatus: string }) {
       const payload = (await response.json().catch(() => null)) as
         (ConnectionStatus & { error?: string }) | null
       if (!response.ok) {
-        setError(payload?.error ?? "Connect failed")
+        toast.add({
+          type: "error",
+          title: "Unable to connect Outlook",
+          description: payload?.error ?? "Something went wrong. Try again.",
+        })
         return
       }
 
@@ -42,7 +45,11 @@ export function ConnectOutlook({ initialStatus }: { initialStatus: string }) {
 
       setStatus(payload?.status ?? "connecting")
     } catch {
-      setError("Connect failed")
+      toast.add({
+        type: "error",
+        title: "Unable to connect Outlook",
+        description: "Something went wrong. Try again.",
+      })
     } finally {
       setPending(false)
     }
@@ -50,7 +57,6 @@ export function ConnectOutlook({ initialStatus }: { initialStatus: string }) {
 
   async function disconnect() {
     setPending(true)
-    setError(null)
     try {
       const response = await fetch(
         extensionApiPath(MESSAGING_EXTENSION_ID, "connection"),
@@ -59,12 +65,21 @@ export function ConnectOutlook({ initialStatus }: { initialStatus: string }) {
       const payload = (await response.json().catch(() => null)) as
         (ConnectionStatus & { error?: string }) | null
       if (!response.ok) {
-        setError(payload?.error ?? "Disconnect failed")
+        toast.add({
+          type: "error",
+          title: "Unable to disconnect Outlook",
+          description: payload?.error ?? "Something went wrong. Try again.",
+        })
         return
       }
       setStatus(payload?.status ?? "disconnected")
+      toast.add({ type: "success", title: "Outlook disconnected" })
     } catch {
-      setError("Disconnect failed")
+      toast.add({
+        type: "error",
+        title: "Unable to disconnect Outlook",
+        description: "Something went wrong. Try again.",
+      })
     } finally {
       setPending(false)
     }
@@ -73,26 +88,23 @@ export function ConnectOutlook({ initialStatus }: { initialStatus: string }) {
   const connected = status === "connected"
 
   return (
-    <div className="flex flex-col gap-2">
-      <div className="flex flex-wrap items-center gap-3">
-        <span className="text-xs text-muted-foreground">Outlook: {status}</span>
-        {connected ? (
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            disabled={pending}
-            onClick={disconnect}
-          >
-            {pending ? "Working…" : "Disconnect Outlook"}
-          </Button>
-        ) : (
-          <Button type="button" size="sm" disabled={pending} onClick={connect}>
-            {pending ? "Connecting…" : "Connect Outlook"}
-          </Button>
-        )}
-      </div>
-      {error ? <p className="text-sm text-destructive">{error}</p> : null}
+    <div className="flex flex-wrap items-center gap-3">
+      <span className="text-xs text-muted-foreground">Outlook: {status}</span>
+      {connected ? (
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          disabled={pending}
+          onClick={disconnect}
+        >
+          {pending ? "Working…" : "Disconnect Outlook"}
+        </Button>
+      ) : (
+        <Button type="button" size="sm" disabled={pending} onClick={connect}>
+          {pending ? "Connecting…" : "Connect Outlook"}
+        </Button>
+      )}
     </div>
   )
 }

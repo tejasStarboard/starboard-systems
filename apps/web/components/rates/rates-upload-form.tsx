@@ -4,6 +4,7 @@ import * as React from "react"
 import { useState } from "react"
 
 import { Button } from "@starboard/lib-ui/components/button"
+import { toast } from "@starboard/lib-ui/components/toast"
 
 import { extensionApiPath } from "@/lib/extension-api-path"
 import {
@@ -16,7 +17,6 @@ const INGESTION_EXTENSION_ID = "ingestion.fcl_v6"
 export function RatesUploadForm() {
   const [file, setFile] = useState<File | null>(null)
   const [pending, setPending] = useState(false)
-  const [error, setError] = useState<string | null>(null)
   const [job, setJob] = useState<{ workflowId: string; runId: string } | null>(
     null
   )
@@ -25,11 +25,13 @@ export function RatesUploadForm() {
   async function onSubmit(event: React.FormEvent) {
     event.preventDefault()
     if (!file) {
-      setError("Choose a CSV file")
+      toast.add({
+        type: "error",
+        title: "Choose a CSV file",
+      })
       return
     }
     setPending(true)
-    setError(null)
     setJob(null)
     setJobStatus(null)
     try {
@@ -48,11 +50,19 @@ export function RatesUploadForm() {
         runId?: string
       } | null
       if (!response.ok) {
-        setError(payload?.error ?? "Upload failed")
+        toast.add({
+          type: "error",
+          title: "Upload failed",
+          description: payload?.error ?? "Something went wrong. Try again.",
+        })
         return
       }
       if (!payload?.workflowId || !payload.runId) {
-        setError("Unexpected response from ingestion")
+        toast.add({
+          type: "error",
+          title: "Upload failed",
+          description: "Unexpected response from ingestion.",
+        })
         return
       }
       setJob({ workflowId: payload.workflowId, runId: payload.runId })
@@ -63,10 +73,20 @@ export function RatesUploadForm() {
       })
       setJobStatus(status)
       if (status.status === "failed" || status.status === "cancelled") {
-        setError(status.error ?? `Ingestion ${status.status}`)
+        toast.add({
+          type: "error",
+          title: `Ingestion ${status.status}`,
+          description: status.error ?? "Something went wrong. Try again.",
+        })
+      } else if (status.status === "completed") {
+        toast.add({ type: "success", title: "Ingestion completed" })
       }
     } catch {
-      setError("Upload failed")
+      toast.add({
+        type: "error",
+        title: "Upload failed",
+        description: "Something went wrong. Try again.",
+      })
     } finally {
       setPending(false)
     }
@@ -83,7 +103,6 @@ export function RatesUploadForm() {
       <Button type="submit" disabled={pending || !file}>
         {pending ? "Working…" : "Enqueue ingestion"}
       </Button>
-      {error ? <p className="text-sm text-destructive">{error}</p> : null}
       {job ? (
         <div className="space-y-1 text-xs text-muted-foreground">
           <p>

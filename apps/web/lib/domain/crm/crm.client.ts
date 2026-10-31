@@ -12,6 +12,7 @@ import {
   type CreateContactRequest,
   type CreateCustomerRequestInput,
   type CreateCustomerResponse,
+  type CustomerListItem,
   type FormOption,
   type UpdateContactRequest,
   type UpdateCustomerRequest,
@@ -32,7 +33,7 @@ export interface CrmClient {
   listCustomerRecords(
     organizationId: string,
     requestId?: string
-  ): Promise<CreateCustomerResponse[]>
+  ): Promise<CustomerListItem[]>
   getCustomer(
     organizationId: string,
     customerId: string,
@@ -112,7 +113,7 @@ class HttpCrmClient implements CrmClient {
   async listCustomerRecords(
     organizationId: string,
     requestId?: string
-  ): Promise<CreateCustomerResponse[]> {
+  ): Promise<CustomerListItem[]> {
     const options = createServiceOptions({
       baseUrl: this.options.baseUrl,
       organizationId,
