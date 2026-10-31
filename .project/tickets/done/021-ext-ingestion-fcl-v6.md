@@ -2,7 +2,7 @@
 id: 021
 wave: 02-rates-ingest
 title: Extension ingestion.fcl_v6
-status: in_progress
+status: done
 depends_on: [001, 020]
 epic: SYS-EXT-FCL-V6
 docs:

@@ -451,6 +451,8 @@ importers:
 
   services/ingestion: {}
 
+  services/messaging: {}
+
   services/quotes:
     dependencies:
       '@neondatabase/serverless':

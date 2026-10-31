@@ -49,7 +49,7 @@ const stubManifests = [
       plugin: "msgraph",
     },
     healthPath: "/health",
-    enabled: false,
+    enabled: true,
   },
   {
     id: "spot.maersk",

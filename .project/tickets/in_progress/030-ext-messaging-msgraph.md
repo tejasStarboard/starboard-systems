@@ -2,7 +2,7 @@
 id: 030
 wave: 03-messaging
 title: Extension messaging.msgraph
-status: open
+status: in_progress
 depends_on: [001, 002, 005]
 epic: SYS-EXT-MSGRAPH
 docs:

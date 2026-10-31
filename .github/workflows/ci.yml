@@ -39,6 +39,7 @@ jobs:
       CRM_SERVICE_URL: http://127.0.0.1:3103
       RATES_SERVICE_URL: http://127.0.0.1:3104
       INGESTION_SERVICE_URL: http://127.0.0.1:3201
+      MESSAGING_SERVICE_URL: http://127.0.0.1:3202
       INTERNAL_SERVICE_TOKEN: ci-internal-service-token
 
     steps:
@@ -104,6 +105,7 @@ jobs:
             echo 'CRM_SERVICE_URL=http://127.0.0.1:3103'
             echo 'RATES_SERVICE_URL=http://127.0.0.1:3104'
             echo 'INGESTION_SERVICE_URL=http://127.0.0.1:3201'
+            echo 'MESSAGING_SERVICE_URL=http://127.0.0.1:3202'
             echo 'INTERNAL_SERVICE_TOKEN=ci-internal-service-token'
           } > .env
 
