@@ -1,7 +1,35 @@
-import { listRegisteredExtensions } from "@/lib/extensions"
+import { headers } from "next/headers"
+import { redirect } from "next/navigation"
 
-export default function IntegrationsSettingsPage() {
+import { ConnectOutlook } from "@/components/messaging/connect-outlook"
+import { auth } from "@/lib/auth"
+import { getOrganizationPlan } from "@/lib/billing/plan"
+import { getMessagingManager } from "@/lib/domain/messaging/messaging.manager"
+import { isExtensionActive, listRegisteredExtensions } from "@/lib/extensions"
+
+export default async function IntegrationsSettingsPage() {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  })
+  if (!session?.session.activeOrganizationId) {
+    redirect("/login")
+  }
+
+  const organizationId = session.session.activeOrganizationId
+  const plan = await getOrganizationPlan(organizationId)
   const extensions = listRegisteredExtensions()
+  const messagingActive = isExtensionActive("messaging.msgraph", plan)
+
+  let connectionStatus = "disconnected"
+  if (messagingActive) {
+    try {
+      const connection =
+        await getMessagingManager().getConnection(organizationId)
+      connectionStatus = connection.status
+    } catch {
+      connectionStatus = "disconnected"
+    }
+  }
 
   return (
     <div className="flex flex-col gap-6 p-6">
@@ -17,7 +45,7 @@ export default function IntegrationsSettingsPage() {
         {extensions.map((extension) => (
           <li
             key={extension.id}
-            className="flex flex-col gap-1 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+            className="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
           >
             <div className="flex flex-col gap-0.5">
               <span className="text-sm font-medium">
@@ -27,9 +55,14 @@ export default function IntegrationsSettingsPage() {
                 {extension.id}
               </span>
             </div>
-            <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
-              <span>Plan: {extension.requiredPlan.join(", ")}</span>
-              <span>{extension.enabled ? "Enabled" : "Disabled"}</span>
+            <div className="flex flex-col items-start gap-2 sm:items-end">
+              <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+                <span>Plan: {extension.requiredPlan.join(", ")}</span>
+                <span>{extension.enabled ? "Enabled" : "Disabled"}</span>
+              </div>
+              {extension.id === "messaging.msgraph" && messagingActive ? (
+                <ConnectOutlook initialStatus={connectionStatus} />
+              ) : null}
             </div>
           </li>
         ))}

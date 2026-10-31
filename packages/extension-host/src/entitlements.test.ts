@@ -80,6 +80,20 @@ describe("entitlement filter", () => {
     ).toBe(true)
   })
 
+  test("enabled messaging.msgraph contributes inbox only on enterprise", () => {
+    const onCredit = getActiveContributions("credit", listManifests())
+    expect(onCredit.uiSlots).not.toContain("messaging.inbox")
+    expect(onCredit.nav.some((item) => item.href === "/messaging/inbox")).toBe(
+      false
+    )
+
+    const onEnterprise = getActiveContributions("enterprise", listManifests())
+    expect(onEnterprise.uiSlots).toContain("messaging.inbox")
+    expect(
+      onEnterprise.nav.some((item) => item.href === "/messaging/inbox")
+    ).toBe(true)
+  })
+
   test("enabled entitled extensions contribute nav and slots", () => {
     const contributions = getActiveContributions("credit", [
       enterpriseOnlyEnabled,
