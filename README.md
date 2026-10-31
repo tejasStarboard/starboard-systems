@@ -6,13 +6,13 @@ See [docs/architecture.md](docs/architecture.md) for layout, package naming, and
 
 ## Layout
 
-| Path | Package name | Role |
-| --- | --- | --- |
-| `apps/web` | `@starboard/app-web` | Next.js orchestrator (Better Auth, UI) |
-| `services/<domain>` | `@starboard/svc-<domain>` | Bun + Hono domain APIs |
-| `extensions/<name>` | `@starboard/ext-<name>` | Extension host / workers / Temporal |
-| `packages/<lib>` | `@starboard/lib-<name>` | Shared libraries |
-| `tooling/<name>` | `@starboard/tool-<name>` | ESLint / TS configs |
+| Path                | Package name              | Role                                   |
+| ------------------- | ------------------------- | -------------------------------------- |
+| `apps/web`          | `@starboard/app-web`      | Next.js orchestrator (Better Auth, UI) |
+| `services/<domain>` | `@starboard/svc-<domain>` | Bun + Hono domain APIs                 |
+| `extensions/<name>` | `@starboard/ext-<name>`   | Extension host / workers / Temporal    |
+| `packages/<lib>`    | `@starboard/lib-<name>`   | Shared libraries                       |
+| `tooling/<name>`    | `@starboard/tool-<name>`  | ESLint / TS configs                    |
 
 Python extension projects use `starboard-ext-<name>`; shared Python libs use `starboard-lib-<name>`.
 

@@ -2,10 +2,10 @@
 
 Rate-doc ingestion extension worker (Python + Temporal).
 
-| | |
-| --- | --- |
-| npm | `@starboard/ext-ingestion` |
-| Python | `starboard-ext-ingestion` |
+|        |                            |
+| ------ | -------------------------- |
+| npm    | `@starboard/ext-ingestion` |
+| Python | `starboard-ext-ingestion`  |
 
 ```bash
 pnpm --filter @starboard/ext-temporal dev

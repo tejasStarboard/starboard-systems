@@ -166,9 +166,7 @@ export class GooglePlacesClient {
     const streetNumber = component(components, ["street_number"])
     const route = component(components, ["route"])
     const street =
-      streetNumber && route
-        ? `${streetNumber} ${route}`
-        : route || streetNumber
+      streetNumber && route ? `${streetNumber} ${route}` : route || streetNumber
 
     const city =
       component(components, ["locality"]) ||

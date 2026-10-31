@@ -11,7 +11,11 @@ import {
 } from "react-hook-form"
 
 import { Button } from "@starboard/lib-ui/components/button"
-import { Field, FieldGroup, FieldLabel } from "@starboard/lib-ui/components/field"
+import {
+  Field,
+  FieldGroup,
+  FieldLabel,
+} from "@starboard/lib-ui/components/field"
 import { Input } from "@starboard/lib-ui/components/input"
 import {
   Select,
@@ -101,8 +105,7 @@ export function LaneFields({
   const originLabel = mode === "air" ? "Origin airport" : "Origin port"
   const destinationLabel =
     mode === "air" ? "Destination airport" : "Destination port"
-  const codePlaceholder =
-    mode === "air" ? "IATA / UNLOCODE" : "UNLOCODE"
+  const codePlaceholder = mode === "air" ? "IATA / UNLOCODE" : "UNLOCODE"
   const fieldId = (name: string) => `lane-${laneIndex}-${name}`
 
   return (

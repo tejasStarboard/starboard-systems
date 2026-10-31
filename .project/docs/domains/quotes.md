@@ -4,7 +4,7 @@
 | --------- | --------------------------------------------------- |
 | Service   | `services/quotes`                                   |
 | Schema    | `quotes.*`                                          |
-| Contracts | `@starboard/lib-contracts` quotes                       |
+| Contracts | `@starboard/lib-contracts` quotes                   |
 | Status    | Partial — header + lanes/cargo/manual rates persist |
 
 ## Owns

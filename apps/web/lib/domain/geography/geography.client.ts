@@ -20,14 +20,8 @@ export interface GeographyClient {
   listCurrencyOptions(requestId?: string): Promise<FormOption[]>
   ensureCurrency(code: string, requestId?: string): Promise<void>
   searchPorts(q?: string, requestId?: string): Promise<FormOption[]>
-  searchAddresses(
-    q?: string,
-    requestId?: string
-  ): Promise<AddressPrediction[]>
-  getAddressDetails(
-    placeId: string,
-    requestId?: string
-  ): Promise<DoorAddress>
+  searchAddresses(q?: string, requestId?: string): Promise<AddressPrediction[]>
+  getAddressDetails(placeId: string, requestId?: string): Promise<DoorAddress>
 }
 
 class HttpGeographyClient implements GeographyClient {

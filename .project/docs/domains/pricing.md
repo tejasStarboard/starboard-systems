@@ -1,9 +1,9 @@
 # Domain: pricing
 
-|         |                                           |
-| ------- | ----------------------------------------- |
+|         |                                               |
+| ------- | --------------------------------------------- |
 | Package | `packages/pricing` (`@starboard/lib-pricing`) |
-| Status  | Started — ticket 010 ONE MATH core        |
+| Status  | Started — ticket 010 ONE MATH core            |
 
 ## Owns
 

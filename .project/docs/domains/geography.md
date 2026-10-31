@@ -4,7 +4,7 @@
 | --------- | -------------------------------------------------------- |
 | Service   | `services/geography`                                     |
 | Schema    | `geo.*`                                                  |
-| Contracts | `@starboard/lib-contracts` geography                         |
+| Contracts | `@starboard/lib-contracts` geography                     |
 | Status    | Currencies + facility gazetteer search; locations unused |
 
 ## Owns

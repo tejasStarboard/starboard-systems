@@ -2,10 +2,10 @@
 
 Messaging extension worker (Python + Temporal), including `messaging.msgraph`.
 
-| | |
-| --- | --- |
-| npm | `@starboard/ext-messaging` |
-| Python | `starboard-ext-messaging` |
+|        |                            |
+| ------ | -------------------------- |
+| npm    | `@starboard/ext-messaging` |
+| Python | `starboard-ext-messaging`  |
 
 ```bash
 pnpm --filter @starboard/ext-temporal dev

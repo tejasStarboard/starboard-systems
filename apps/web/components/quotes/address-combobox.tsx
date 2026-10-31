@@ -2,10 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react"
 
-import type {
-  AddressPrediction,
-  DoorAddress,
-} from "@starboard/lib-contracts"
+import type { AddressPrediction, DoorAddress } from "@starboard/lib-contracts"
 import { emptyDoorAddress, isDoorAddressEmpty } from "@starboard/lib-contracts"
 import {
   Combobox,
@@ -88,9 +85,7 @@ export function AddressCombobox({
     setLoading(true)
     try {
       const params = new URLSearchParams({ placeId: prediction.placeId })
-      const response = await fetch(
-        `/api/geography/addresses/details?${params}`
-      )
+      const response = await fetch(`/api/geography/addresses/details?${params}`)
       if (!response.ok) return
       const body = (await response.json()) as { address?: DoorAddress }
       if (!body.address) return
@@ -146,7 +141,9 @@ export function AddressCombobox({
           {(option) => (
             <ComboboxItem key={option.placeId} value={option}>
               <span className="flex min-w-0 flex-col">
-                <span className="truncate">{option.mainText || option.description}</span>
+                <span className="truncate">
+                  {option.mainText || option.description}
+                </span>
                 {option.secondaryText ? (
                   <span className="truncate text-xs text-muted-foreground">
                     {option.secondaryText}

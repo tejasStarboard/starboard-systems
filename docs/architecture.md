@@ -2,23 +2,23 @@
 
 ## Monorepo layout
 
-| Directory | Responsibility |
-| --- | --- |
-| `apps/` | Product apps (Next.js shell BFF) |
-| `packages/` | Shared product libraries (`contracts`, `db`, `pricing`, `ui`, …) |
-| `tooling/` | Monorepo toolchain (`eslint-config`, `typescript-config`) |
-| `services/` | Domain Bun + Hono HTTP APIs (quotes, geography, crm, rates) |
-| `extensions/` | Extension host, Python+Temporal workers, Temporal OSS |
+| Directory     | Responsibility                                                   |
+| ------------- | ---------------------------------------------------------------- |
+| `apps/`       | Product apps (Next.js shell BFF)                                 |
+| `packages/`   | Shared product libraries (`contracts`, `db`, `pricing`, `ui`, …) |
+| `tooling/`    | Monorepo toolchain (`eslint-config`, `typescript-config`)        |
+| `services/`   | Domain Bun + Hono HTTP APIs (quotes, geography, crm, rates)      |
+| `extensions/` | Extension host, Python+Temporal workers, Temporal OSS            |
 
 ### Package naming
 
-| Layer | npm / pnpm name | Python project name |
-| --- | --- | --- |
-| App | `@starboard/app-<name>` | — |
-| Shared lib | `@starboard/lib-<name>` | `starboard-lib-<name>` |
-| Tool | `@starboard/tool-<name>` | — |
-| Domain service | `@starboard/svc-<name>` | — |
-| Extension | `@starboard/ext-<name>` | `starboard-ext-<name>` |
+| Layer          | npm / pnpm name          | Python project name    |
+| -------------- | ------------------------ | ---------------------- |
+| App            | `@starboard/app-<name>`  | —                      |
+| Shared lib     | `@starboard/lib-<name>`  | `starboard-lib-<name>` |
+| Tool           | `@starboard/tool-<name>` | —                      |
+| Domain service | `@starboard/svc-<name>`  | —                      |
+| Extension      | `@starboard/ext-<name>`  | `starboard-ext-<name>` |
 
 All packages are `private: true`, `license: UNLICENSED`, and should set a one-line `description` plus `repository.directory` pointing at their folder.
 
