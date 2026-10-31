@@ -2,7 +2,7 @@
 id: 055
 wave: 05-foundation
 title: Extension foundation hardening (UI / BFF / Temporal contract)
-status: in_progress
+status: done
 depends_on: [001, 050]
 epic: SYS-EXT-HOST
 docs:

@@ -11,19 +11,19 @@ description: >-
 
 ## Read first
 
-- [extensions.md](../../../.project/docs/extensions.md)
-- [adr/0005-extension-foundation.md](../../../.project/docs/adr/0005-extension-foundation.md) — **foundation before new product extensions**
+- [extensions.md](../../../.project/docs/extensions.md) — **developer cookbook** (file-exact add/`spot.fake` walkthrough, unplug, test matrix)
+- [adr/0005-extension-foundation.md](../../../.project/docs/adr/0005-extension-foundation.md) — foundation before new product extensions
 - [adr/0003-extension-host.md](../../../.project/docs/adr/0003-extension-host.md)
 - [adr/0002-python-temporal-extensions.md](../../../.project/docs/adr/0002-python-temporal-extensions.md)
 
-If ticket `056` is still open, prefer finishing the cookbook over new product carriers.
+Follow the cookbook for new `spot.*` / ingest / messaging plugins. Product work (apply rates, live carriers, …) depends on foundation tickets **055** / **056**.
 
 ## Rules
 
 1. Shell must work with the extension **disabled** (and when rollout map read fails — fail closed).
 2. Contribute nav / UI slots / API prefixes via **manifest only** — no `if (extensionId === "…")` in unrelated shell components.
 3. Long work: start Temporal workflow; BFF returns **202 + workflow / run id**; expose **GET job status** `{ status, result?, error? }`.
-4. BFF is **generic** (`/api/extensions/[extensionId]/[[...path]]`) — never add a new per-id Next `route.ts` tree.
+4. BFF is **generic** (`/api/extensions/[extensionId]/[[...path]]`) — never add a new per-id Next `route.ts` tree. Spot Python still needs a per-id `POST /extensions/spot.<id>/jobs` today.
 5. One plugin per carrier (`spot.maersk`) or ingest mode (`ingestion.fcl_v6`).
 6. Ocean FCL = **v6 only**. Never port v3–v5.
 7. Entitlements: `requiredPlan: ["credit"|"enterprise"]` via extension-host + billing stubs. Missing rollout row = **on**.
@@ -32,7 +32,7 @@ If ticket `056` is still open, prefer finishing the cookbook over new product ca
 ## Typical files
 
 - `extensions/host` — types, registry, entitlement filter (`@starboard/ext-host`)
-- `apps/web` — `lib/extensions.ts`, `lib/extensions-api-dispatch.ts`, generic extensions API route
+- `apps/web` — `lib/extensions.ts`, `lib/extensions-api-dispatch.ts`, `lib/extension-api-path.ts`, `lib/poll-extension-job.ts`, generic extensions API route
 - `extensions/ingestion|messaging|spot` (Python) + plugin folder + Temporal worker
 - `packages/python-kit` — `describe_job` shared status helper
 - `extensions/temporal` — Temporal OSS via Docker (`@starboard/ext-temporal`)

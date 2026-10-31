@@ -2,7 +2,7 @@
 id: 056
 wave: 05-foundation
 title: Extension developer workflow docs + skill sync
-status: open
+status: in_progress
 depends_on: [055]
 epic: SYS-EXT-HOST
 docs:
@@ -24,15 +24,15 @@ After 055 lands, freeze the **playbook** so feature chats can build extensions (
 
 ## Deliverables
 
-- [ ] `.project/docs/extensions.md`: step-by-step “add extension X” (manifest fields, worker layout, Temporal workflow naming, BFF dispatch, uiSlot/nav, rollout, unplug checklist, test matrix)
-- [ ] Example walkthrough using `spot.fake` as the reference extension
-- [ ] Sync `.agents/skills/starboard-extension` + `reference/checklist.md`
-- [ ] Roadmap note: product tickets (apply rates, live spot, …) **depend on 055/056**
+- [x] `.project/docs/extensions.md`: step-by-step “add extension X” (manifest fields, worker layout, Temporal workflow naming, BFF dispatch, uiSlot/nav, rollout, unplug checklist, test matrix)
+- [x] Example walkthrough using `spot.fake` as the reference extension
+- [x] Sync `.agents/skills/starboard-extension` + `reference/checklist.md`
+- [x] Roadmap note: product tickets (apply rates, live spot, …) **depend on 055/056**
 
 ## Acceptance criteria
 
-- [ ] A new agent chat can follow the cookbook and list exact files to touch for a new `spot.*` plugin without reading starboard-2
-- [ ] Unplug checklist verified against current code paths post-055
+- [x] A new agent chat can follow the cookbook and list exact files to touch for a new `spot.*` plugin without reading starboard-2
+- [x] Unplug checklist verified against current code paths post-055
 
 ## Out of scope
 
