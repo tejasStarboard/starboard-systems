@@ -2,7 +2,7 @@
 id: 063
 wave: 06-product
 title: Messaging production path (Graph OAuth + Neon)
-status: in_progress
+status: done
 depends_on: [030, 055, 061]
 epic: SYS-EXT-MSGRAPH
 docs:
@@ -24,11 +24,11 @@ Replace stub OAuth and file-backed token/message stores with real Microsoft Grap
 
 ## Acceptance criteria
 
-- [ ] Authorize + callback with Azure AD app config via env
-- [ ] Tokens encrypted at rest in Neon (not default-dev file store)
-- [ ] Messages list/send against Graph in non-stub mode
-- [ ] Extension inactive → connect UI hidden; APIs 404
-- [ ] Sync respects `sync_interval_minutes` when set
+- [x] Authorize + callback with Azure AD app config via env
+- [x] Tokens encrypted at rest in Neon (not default-dev file store)
+- [x] Messages list/send against Graph in non-stub mode
+- [x] Extension inactive → connect UI hidden; APIs 404
+- [x] Sync respects `sync_interval_minutes` when set
 
 ## Out of scope
 
