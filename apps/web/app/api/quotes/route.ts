@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 
 import { requireApiSession } from "@/lib/auth/session"
-import { getQuotesManager } from "@/lib/quotes/manager"
+import { getQuotesManager } from "@/lib/domain/quotes.manager"
 import { ServiceClientError } from "@/lib/clients/http"
 
 export async function GET() {

@@ -39,7 +39,7 @@ import {
   type LaneMode,
   type QuoteFormOption,
   type QuoteFormValues,
-} from "@/lib/quotes/schema"
+} from "@/lib/domain/quotes.schema"
 
 export function LaneFields({
   control,

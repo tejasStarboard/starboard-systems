@@ -31,7 +31,7 @@ import type {
   LaneFormValues,
   QuoteFormOption,
   QuoteFormValues,
-} from "@/lib/quotes/schema"
+} from "@/lib/domain/quotes.schema"
 
 function formatMoney(value: number, currencyCode: string) {
   try {

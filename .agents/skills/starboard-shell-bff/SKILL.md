@@ -3,7 +3,7 @@ name: starboard-shell-bff
 description: >-
   Next.js shell BFF patterns for Starboard Systems: Better Auth organization
   tenancy, requireApiSession, domain managers, service clients, entitlements.
-  Use when editing apps/web lib/clients, managers, auth, settings, or
+  Use when editing apps/web domain clients/managers, auth, settings, or
   quote/CRM UI that calls domain services.
 ---
 
@@ -19,9 +19,9 @@ description: >-
 ## Layering
 
 - **Call site** (`route.ts` / `page.tsx`): auth/session only; call `getXManager().method(...)`.
-- **Manager** (`lib/*/manager.ts`): cross-client orchestration / enrichment; injectable deps + module `get`/`set`.
-- **HTTP client** (`lib/clients/*-client.ts`): thin typed fetch to Bun services; constructor `{ baseUrl }`, singleton `get`/`set`.
-- **Local DAO** (e.g. `lib/organizations/dao.ts`): shell DB reads that are not a remote service.
+- **Manager** (`lib/domain/<domain>.manager.ts`): cross-client orchestration / enrichment; injectable deps + module `get`/`set`.
+- **HTTP client** (`lib/domain/<domain>.client.ts`): thin typed fetch to Bun services; constructor `{ baseUrl }`, singleton `get`/`set`. Shared fetch helpers live in `lib/clients/http.ts`.
+- **Local DAO** (e.g. `lib/domain/organizations.dao.ts`): shell DB reads that are not a remote service.
 - No free-function domain APIs and no thin wrappers around managers.
 - Domain Bun services remain `dao → service → controller`.
 

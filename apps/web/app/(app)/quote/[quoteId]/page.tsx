@@ -3,8 +3,8 @@ import { redirect } from "next/navigation"
 
 import { QuoteForm } from "@/components/quotes/quote-form"
 import { auth } from "@/lib/auth"
-import { getQuotesManager } from "@/lib/quotes/manager"
-import { emptyQuoteFormValues } from "@/lib/quotes/schema"
+import { getQuotesManager } from "@/lib/domain/quotes.manager"
+import { emptyQuoteFormValues } from "@/lib/domain/quotes.schema"
 
 export default async function QuotePage({
   params,

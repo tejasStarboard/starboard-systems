@@ -4,7 +4,7 @@ import { requireApiSession } from "@/lib/auth/session"
 import { getOrganizationPlan } from "@/lib/billing/plan"
 import { ServiceClientError } from "@/lib/clients/http"
 import { isExtensionActive } from "@/lib/extensions"
-import { getIngestionManager } from "@/lib/ingestion/manager"
+import { getIngestionManager } from "@/lib/domain/ingestion.manager"
 
 export async function POST(request: Request) {
   const authResult = await requireApiSession()

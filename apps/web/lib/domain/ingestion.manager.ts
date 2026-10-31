@@ -3,7 +3,7 @@ import "server-only"
 import {
   getIngestionClient,
   type IngestionClient,
-} from "@/lib/clients/ingestion-client"
+} from "@/lib/domain/ingestion.client"
 
 export class IngestionManager {
   constructor(

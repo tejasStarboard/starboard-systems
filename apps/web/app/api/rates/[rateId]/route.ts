@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 
 import { requireApiSession } from "@/lib/auth/session"
 import { ServiceClientError } from "@/lib/clients/http"
-import { getRatesManager } from "@/lib/rates/manager"
+import { getRatesManager } from "@/lib/domain/rates.manager"
 
 export async function GET(
   _request: Request,

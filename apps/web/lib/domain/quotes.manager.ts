@@ -9,13 +9,13 @@ import type {
 import {
   type GeographyClient,
   getGeographyClient,
-} from "@/lib/clients/geography-client"
-import { getQuotesClient, type QuotesClient } from "@/lib/clients/quotes-client"
-import { type CrmManager, getCrmManager } from "@/lib/crm/manager"
+} from "@/lib/domain/geography.client"
+import { getQuotesClient, type QuotesClient } from "@/lib/domain/quotes.client"
+import { type CrmManager, getCrmManager } from "@/lib/domain/crm.manager"
 import {
   getOrganizationsDao,
   type OrganizationsDao,
-} from "@/lib/organizations/dao"
+} from "@/lib/domain/organizations.dao"
 
 export class QuotesManager {
   constructor(

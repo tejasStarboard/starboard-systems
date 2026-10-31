@@ -11,7 +11,7 @@ import {
   ComboboxList,
 } from "@workspace/ui/components/combobox"
 
-import { type QuoteFormOption } from "@/lib/quotes/schema"
+import { type QuoteFormOption } from "@/lib/domain/quotes.schema"
 
 export function CustomerCombobox({
   options: initialOptions,
