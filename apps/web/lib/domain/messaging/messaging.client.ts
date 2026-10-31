@@ -41,7 +41,10 @@ export interface MessagingClient {
     code?: string
   ): Promise<MessagingConnection>
   disconnect(organizationId: string): Promise<MessagingConnection>
-  enqueueSync(organizationId: string): Promise<EnqueueMessagingJobResult>
+  enqueueSync(
+    organizationId: string,
+    options?: { syncIntervalMinutes?: number }
+  ): Promise<EnqueueMessagingJobResult>
   listMessages(organizationId: string): Promise<MessagingMessage[]>
   sendMail(input: {
     organizationId: string
@@ -126,7 +129,8 @@ class HttpMessagingClient implements MessagingClient {
   }
 
   async enqueueSync(
-    organizationId: string
+    organizationId: string,
+    enqueueOptions?: { syncIntervalMinutes?: number }
   ): Promise<EnqueueMessagingJobResult> {
     const options = createServiceOptions({
       baseUrl: this.options.baseUrl,
@@ -137,7 +141,12 @@ class HttpMessagingClient implements MessagingClient {
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ organizationId }),
+        body: JSON.stringify({
+          organizationId,
+          ...(typeof enqueueOptions?.syncIntervalMinutes === "number"
+            ? { syncIntervalMinutes: enqueueOptions.syncIntervalMinutes }
+            : {}),
+        }),
       },
       options
     )

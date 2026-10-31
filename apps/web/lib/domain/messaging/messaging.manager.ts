@@ -8,6 +8,10 @@ import {
   type MessagingMessage,
   type SendMessageResult,
 } from "@/lib/domain/messaging/messaging.client"
+import { messagingJobSettingsFromResolved } from "@/lib/domain/platform/extension-settings-runtime"
+import { getPlatformManager } from "@/lib/domain/platform/platform.manager"
+
+const MESSAGING_MSGRAPH = "messaging.msgraph"
 
 export class MessagingManager {
   constructor(
@@ -33,8 +37,15 @@ export class MessagingManager {
     return this.messagingClient.disconnect(organizationId)
   }
 
-  enqueueSync(organizationId: string): Promise<EnqueueMessagingJobResult> {
-    return this.messagingClient.enqueueSync(organizationId)
+  async enqueueSync(
+    organizationId: string
+  ): Promise<EnqueueMessagingJobResult> {
+    const resolved =
+      await getPlatformManager().getExtensionSettings(MESSAGING_MSGRAPH)
+    return this.messagingClient.enqueueSync(
+      organizationId,
+      messagingJobSettingsFromResolved(MESSAGING_MSGRAPH, resolved)
+    )
   }
 
   listMessages(organizationId: string): Promise<MessagingMessage[]> {

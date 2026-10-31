@@ -37,15 +37,32 @@ def _default_inbox() -> list[GraphMessage]:
 
 
 @activity.defn(name="msgraph.sync_inbox")
-async def sync_inbox_activity(organization_id: str) -> dict[str, Any]:
+async def sync_inbox_activity(payload: str | dict[str, Any]) -> dict[str, Any]:
+    if isinstance(payload, str):
+        organization_id = payload
+        sync_interval_minutes = 15
+    else:
+        organization_id = str(payload.get("organizationId") or "")
+        raw_interval = payload.get("syncIntervalMinutes")
+        sync_interval_minutes = (
+            int(raw_interval)
+            if isinstance(raw_interval, (int, float)) and int(raw_interval) > 0
+            else 15
+        )
+
     store = TokenStore(data_dir=_data_dir(), token_key=_token_key())
     connection = ConnectionService(store)
     access_token = connection.require_access_token(organization_id)
 
     # Vertical slice uses FakeGraphClient with a fixed sample inbox.
     # Swap for HttpGraphClient when Azure credentials are configured.
+    # sync_interval_minutes is job input for schedule wiring (063); also
+    # bounds how many recent messages we pull this run.
     graph = FakeGraphClient(inbox=_default_inbox())
-    messages = graph.list_recent_messages(access_token=access_token, limit=20)
+    message_limit = max(1, min(50, sync_interval_minutes))
+    messages = graph.list_recent_messages(
+        access_token=access_token, limit=message_limit
+    )
 
     message_store = MessageStore(data_dir=_data_dir())
     ids: list[str] = []
@@ -60,4 +77,7 @@ async def sync_inbox_activity(organization_id: str) -> dict[str, Any]:
             )
         )
         ids.append(saved.id)
-    return {"messageIds": ids}
+    return {
+        "messageIds": ids,
+        "syncIntervalMinutes": sync_interval_minutes,
+    }

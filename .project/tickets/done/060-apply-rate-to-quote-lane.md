@@ -2,7 +2,7 @@
 id: 060
 wave: 06-product
 title: Apply catalog/spot rate to quote lane
-status: in_progress
+status: done
 depends_on: [002, 010, 020, 055]
 epic: SYS-QUOTES
 docs:
@@ -25,11 +25,11 @@ Close the core quote loop: from the rates search sheet, **apply** a catalog rate
 
 ## Acceptance criteria
 
-- [ ] User can select a catalog rate from the sheet and apply it to the current lane
-- [ ] After spot job `completed`, user can apply an offer from `result` to the lane
-- [ ] Lane rates persist and reload; totals use pricing package
-- [ ] Works with extensions off for catalog-only path; spot apply only when spot sources active
-- [ ] Clear errors if job failed / no offers
+- [x] User can select a catalog rate from the sheet and apply it to the current lane
+- [x] After spot job `completed`, user can apply an offer from `result` to the lane
+- [x] Lane rates persist and reload; totals use pricing package
+- [x] Works with extensions off for catalog-only path; spot apply only when spot sources active
+- [x] Clear errors if job failed / no offers
 
 ## Files to touch
 
