@@ -1,64 +1,71 @@
 "use client"
 
+import { zodResolver } from "@hookform/resolvers/zod"
 import { useCallback, useEffect, useState } from "react"
+import { Controller, useForm } from "react-hook-form"
 
-import { Alert, AlertDescription } from "@starboard/lib-ui/components/alert"
 import { Button } from "@starboard/lib-ui/components/button"
 import {
   Field,
+  FieldError,
   FieldGroup,
   FieldLabel,
 } from "@starboard/lib-ui/components/field"
 import { Input } from "@starboard/lib-ui/components/input"
+import { toast } from "@starboard/lib-ui/components/toast"
 
+import {
+  companyFormSchema,
+  type CompanyFormValues,
+} from "@/lib/domain/settings/settings-forms.schema"
+import { toastFormErrors } from "@/lib/form-toast"
 import { authClient } from "@/lib/auth-client"
 
 export function CompanySettingsForm() {
-  const [name, setName] = useState("")
-  const [slug, setSlug] = useState("")
   const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [message, setMessage] = useState<string | null>(null)
+  const form = useForm<CompanyFormValues>({
+    resolver: zodResolver(companyFormSchema),
+    defaultValues: { name: "", slug: "" },
+  })
 
   const load = useCallback(async () => {
     setLoading(true)
-    setError(null)
     const { data, error: orgError } =
       await authClient.organization.getFullOrganization()
     if (orgError || !data) {
-      setError(orgError?.message ?? "Failed to load company")
+      toast.add({
+        type: "error",
+        title: "Unable to load company",
+        description: orgError?.message ?? "Something went wrong. Try again.",
+      })
       setLoading(false)
       return
     }
-    setName(data.name)
-    setSlug(data.slug)
+    form.reset({ name: data.name, slug: data.slug })
     setLoading(false)
-  }, [])
+  }, [form])
 
   useEffect(() => {
     void load()
   }, [load])
 
-  async function save() {
-    const trimmedName = name.trim()
-    const trimmedSlug = slug.trim()
-    if (!trimmedName || !trimmedSlug || saving) return
-    setSaving(true)
-    setError(null)
-    setMessage(null)
+  async function onSave(values: CompanyFormValues) {
     const { error: updateError } = await authClient.organization.update({
       data: {
-        name: trimmedName,
-        slug: trimmedSlug,
+        name: values.name,
+        slug: values.slug,
       },
     })
-    setSaving(false)
     if (updateError) {
-      setError(updateError.message ?? "Failed to save company")
+      toast.add({
+        type: "error",
+        title: "Unable to save company",
+        description: updateError.message ?? "Something went wrong. Try again.",
+      })
       return
     }
-    setMessage("Company saved")
+    toast.add({ type: "success", title: "Company saved" })
+    form.reset(values)
     await load()
   }
 
@@ -71,45 +78,52 @@ export function CompanySettingsForm() {
         </p>
       </div>
 
-      {error ? (
-        <Alert variant="destructive">
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      ) : null}
-      {message ? (
-        <p className="text-sm text-muted-foreground">{message}</p>
-      ) : null}
-
       {loading ? (
         <p className="text-sm text-muted-foreground">Loading…</p>
       ) : (
-        <section className="space-y-4 rounded-xl border bg-card p-4">
+        <form
+          className="space-y-4 rounded-xl border bg-card p-4"
+          onSubmit={form.handleSubmit(onSave, toastFormErrors)}
+        >
           <FieldGroup className="gap-3">
-            <Field>
-              <FieldLabel htmlFor="company-name">Name</FieldLabel>
-              <Input
-                id="company-name"
-                value={name}
-                onChange={(event) => setName(event.target.value)}
-              />
-            </Field>
-            <Field>
-              <FieldLabel htmlFor="company-slug">Slug</FieldLabel>
-              <Input
-                id="company-slug"
-                value={slug}
-                onChange={(event) => setSlug(event.target.value)}
-              />
-            </Field>
+            <Controller
+              control={form.control}
+              name="name"
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid || undefined}>
+                  <FieldLabel htmlFor="company-name">Name</FieldLabel>
+                  <Input
+                    id="company-name"
+                    aria-invalid={fieldState.invalid}
+                    {...field}
+                  />
+                  <FieldError errors={[fieldState.error]} />
+                </Field>
+              )}
+            />
+            <Controller
+              control={form.control}
+              name="slug"
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid || undefined}>
+                  <FieldLabel htmlFor="company-slug">Slug</FieldLabel>
+                  <Input
+                    id="company-slug"
+                    aria-invalid={fieldState.invalid}
+                    {...field}
+                  />
+                  <FieldError errors={[fieldState.error]} />
+                </Field>
+              )}
+            />
           </FieldGroup>
           <Button
-            type="button"
-            disabled={saving || !name.trim() || !slug.trim()}
-            onClick={() => void save()}
+            type="submit"
+            disabled={form.formState.isSubmitting || !form.formState.isDirty}
           >
-            {saving ? "Saving…" : "Save"}
+            {form.formState.isSubmitting ? "Saving…" : "Save"}
           </Button>
-        </section>
+        </form>
       )}
     </div>
   )

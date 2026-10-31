@@ -1,9 +1,25 @@
 "use client"
 
-import { useState, type FormEvent } from "react"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useState } from "react"
+import { Controller, useForm } from "react-hook-form"
 
 import { Button } from "@starboard/lib-ui/components/button"
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@starboard/lib-ui/components/field"
+import { Input } from "@starboard/lib-ui/components/input"
+import { Textarea } from "@starboard/lib-ui/components/textarea"
+import { toast } from "@starboard/lib-ui/components/toast"
 
+import {
+  sendMessageFormSchema,
+  type SendMessageFormValues,
+} from "@/lib/domain/settings/settings-forms.schema"
+import { toastFormErrors } from "@/lib/form-toast"
 import { extensionApiPath } from "@/lib/extension-api-path"
 
 const MESSAGING_EXTENSION_ID = "messaging.msgraph"
@@ -21,19 +37,18 @@ export function InboxPanel({
   initialMessages: Message[]
 }) {
   const [messages, setMessages] = useState(initialMessages)
-  const [pending, setPending] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [syncPending, setSyncPending] = useState(false)
   const [job, setJob] = useState<{ workflowId: string; runId: string } | null>(
     null
   )
-  const [toAddress, setToAddress] = useState("")
-  const [subject, setSubject] = useState("")
-  const [body, setBody] = useState("")
-  const [sendStatus, setSendStatus] = useState<string | null>(null)
+
+  const form = useForm<SendMessageFormValues>({
+    resolver: zodResolver(sendMessageFormSchema),
+    defaultValues: { toAddress: "", subject: "", body: "" },
+  })
 
   async function syncInbox() {
-    setPending(true)
-    setError(null)
+    setSyncPending(true)
     setJob(null)
     try {
       const response = await fetch(
@@ -48,11 +63,19 @@ export function InboxPanel({
         runId?: string
       } | null
       if (!response.ok) {
-        setError(payload?.error ?? "Sync failed")
+        toast.add({
+          type: "error",
+          title: "Sync failed",
+          description: payload?.error ?? "Something went wrong. Try again.",
+        })
         return
       }
       if (!payload?.workflowId || !payload.runId) {
-        setError("Unexpected sync response")
+        toast.add({
+          type: "error",
+          title: "Sync failed",
+          description: "Unexpected sync response.",
+        })
         return
       }
       setJob({ workflowId: payload.workflowId, runId: payload.runId })
@@ -64,41 +87,48 @@ export function InboxPanel({
         const listed = (await listResponse.json()) as Message[]
         setMessages(listed)
       }
+      toast.add({ type: "success", title: "Inbox sync started" })
     } catch {
-      setError("Sync failed")
+      toast.add({
+        type: "error",
+        title: "Sync failed",
+        description: "Something went wrong. Try again.",
+      })
     } finally {
-      setPending(false)
+      setSyncPending(false)
     }
   }
 
-  async function sendReply(event: FormEvent) {
-    event.preventDefault()
-    setPending(true)
-    setError(null)
-    setSendStatus(null)
+  async function onSend(values: SendMessageFormValues) {
     try {
       const response = await fetch(
         extensionApiPath(MESSAGING_EXTENSION_ID, "send"),
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ toAddress, subject, body }),
+          body: JSON.stringify(values),
         }
       )
       const payload = (await response.json().catch(() => null)) as {
         error?: string
         status?: string
-        id?: string
       } | null
       if (!response.ok) {
-        setError(payload?.error ?? "Send failed")
+        toast.add({
+          type: "error",
+          title: "Send failed",
+          description: payload?.error ?? "Something went wrong. Try again.",
+        })
         return
       }
-      setSendStatus(payload?.status ?? "sent")
+      form.reset({ toAddress: "", subject: "", body: "" })
+      toast.add({ type: "success", title: "Message sent" })
     } catch {
-      setError("Send failed")
-    } finally {
-      setPending(false)
+      toast.add({
+        type: "error",
+        title: "Send failed",
+        description: "Something went wrong. Try again.",
+      })
     }
   }
 
@@ -107,11 +137,11 @@ export function InboxPanel({
       <div className="flex flex-col gap-2">
         <Button
           type="button"
-          disabled={pending}
+          disabled={syncPending}
           onClick={syncInbox}
           className="w-fit"
         >
-          {pending ? "Working…" : "Sync inbox"}
+          {syncPending ? "Working…" : "Sync inbox"}
         </Button>
         {job ? (
           <p className="font-mono text-xs text-muted-foreground">
@@ -140,38 +170,66 @@ export function InboxPanel({
         )}
       </ul>
 
-      <form onSubmit={sendReply} className="flex flex-col gap-3">
+      <form
+        onSubmit={form.handleSubmit(onSend, toastFormErrors)}
+        className="flex flex-col gap-3"
+      >
         <h2 className="text-sm font-medium">Send reply</h2>
-        <input
-          className="border px-3 py-2 text-sm"
-          placeholder="To"
-          value={toAddress}
-          onChange={(event) => setToAddress(event.target.value)}
-          required
-        />
-        <input
-          className="border px-3 py-2 text-sm"
-          placeholder="Subject"
-          value={subject}
-          onChange={(event) => setSubject(event.target.value)}
-          required
-        />
-        <textarea
-          className="min-h-24 border px-3 py-2 text-sm"
-          placeholder="Body"
-          value={body}
-          onChange={(event) => setBody(event.target.value)}
-          required
-        />
-        <Button type="submit" disabled={pending}>
-          {pending ? "Sending…" : "Send"}
+        <FieldGroup className="gap-3">
+          <Controller
+            control={form.control}
+            name="toAddress"
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid || undefined}>
+                <FieldLabel htmlFor="send-to">To</FieldLabel>
+                <Input
+                  id="send-to"
+                  placeholder="To"
+                  aria-invalid={fieldState.invalid}
+                  {...field}
+                />
+                <FieldError errors={[fieldState.error]} />
+              </Field>
+            )}
+          />
+          <Controller
+            control={form.control}
+            name="subject"
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid || undefined}>
+                <FieldLabel htmlFor="send-subject">Subject</FieldLabel>
+                <Input
+                  id="send-subject"
+                  placeholder="Subject"
+                  aria-invalid={fieldState.invalid}
+                  {...field}
+                />
+                <FieldError errors={[fieldState.error]} />
+              </Field>
+            )}
+          />
+          <Controller
+            control={form.control}
+            name="body"
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid || undefined}>
+                <FieldLabel htmlFor="send-body">Body</FieldLabel>
+                <Textarea
+                  id="send-body"
+                  className="min-h-24"
+                  placeholder="Body"
+                  aria-invalid={fieldState.invalid}
+                  {...field}
+                />
+                <FieldError errors={[fieldState.error]} />
+              </Field>
+            )}
+          />
+        </FieldGroup>
+        <Button type="submit" disabled={form.formState.isSubmitting}>
+          {form.formState.isSubmitting ? "Sending…" : "Send"}
         </Button>
-        {sendStatus ? (
-          <p className="text-xs text-muted-foreground">Sent: {sendStatus}</p>
-        ) : null}
       </form>
-
-      {error ? <p className="text-sm text-destructive">{error}</p> : null}
     </div>
   )
 }

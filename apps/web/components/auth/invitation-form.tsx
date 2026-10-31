@@ -4,8 +4,8 @@ import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useEffect, useState } from "react"
 
-import { Alert, AlertDescription } from "@starboard/lib-ui/components/alert"
 import { Button } from "@starboard/lib-ui/components/button"
+import { toast } from "@starboard/lib-ui/components/toast"
 
 import { authClient, useSession } from "@/lib/auth-client"
 
@@ -15,8 +15,8 @@ export function InvitationForm() {
   const invitationId = searchParams.get("invitationId")
   const { data: session, isPending: sessionPending } = useSession()
 
-  const [error, setError] = useState<string | null>(null)
   const [organizationName, setOrganizationName] = useState<string | null>(null)
+  const [loadFailed, setLoadFailed] = useState(false)
   const [pending, setPending] = useState(false)
   const [loadingInvite, setLoadingInvite] = useState(true)
 
@@ -37,7 +37,13 @@ export function InvitationForm() {
       if (cancelled) return
 
       if (inviteError) {
-        setError(inviteError.message ?? "Invitation not found")
+        setLoadFailed(true)
+        toast.add({
+          type: "error",
+          title: "Invitation not found",
+          description:
+            inviteError.message ?? "Something went wrong. Try again.",
+        })
       } else if (data) {
         setOrganizationName(data.organizationName)
       }
@@ -56,7 +62,6 @@ export function InvitationForm() {
     if (!invitationId) return
 
     setPending(true)
-    setError(null)
 
     const { error: acceptError } =
       await authClient.organization.acceptInvitation({
@@ -66,7 +71,11 @@ export function InvitationForm() {
     setPending(false)
 
     if (acceptError) {
-      setError(acceptError.message ?? "Unable to accept invitation")
+      toast.add({
+        type: "error",
+        title: "Unable to accept invitation",
+        description: acceptError.message ?? "Something went wrong. Try again.",
+      })
       return
     }
 
@@ -76,15 +85,27 @@ export function InvitationForm() {
 
   if (!invitationId) {
     return (
-      <Alert variant="destructive">
-        <AlertDescription>Missing invitation id.</AlertDescription>
-      </Alert>
+      <div className="space-y-1">
+        <h1 className="text-sm font-medium">Invalid invitation</h1>
+        <p className="text-xs text-muted-foreground">Missing invitation id.</p>
+      </div>
     )
   }
 
   if (loadingInvite || sessionPending) {
     return (
       <p className="text-xs text-muted-foreground">Loading invitation...</p>
+    )
+  }
+
+  if (loadFailed) {
+    return (
+      <div className="space-y-1">
+        <h1 className="text-sm font-medium">Invitation unavailable</h1>
+        <p className="text-xs text-muted-foreground">
+          This invitation could not be loaded. Ask for a new invite link.
+        </p>
+      </div>
     )
   }
 
@@ -134,12 +155,6 @@ export function InvitationForm() {
           .
         </p>
       </div>
-
-      {error ? (
-        <Alert variant="destructive">
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      ) : null}
 
       <Button className="w-full" disabled={pending} onClick={acceptInvitation}>
         {pending ? "Accepting..." : "Accept invitation"}

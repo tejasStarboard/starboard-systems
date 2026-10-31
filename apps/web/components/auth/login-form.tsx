@@ -1,46 +1,49 @@
 "use client"
 
+import { zodResolver } from "@hookform/resolvers/zod"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { useState } from "react"
+import { Controller, useForm } from "react-hook-form"
 
-import { Alert, AlertDescription } from "@starboard/lib-ui/components/alert"
 import { Button } from "@starboard/lib-ui/components/button"
 import {
   Field,
+  FieldError,
   FieldGroup,
   FieldLabel,
   FieldSeparator,
 } from "@starboard/lib-ui/components/field"
 import { Input } from "@starboard/lib-ui/components/input"
+import { toast } from "@starboard/lib-ui/components/toast"
 
 import { GoogleButton } from "@/components/auth/google-button"
+import {
+  loginFormSchema,
+  type LoginFormValues,
+} from "@/lib/domain/auth/auth-forms.schema"
+import { toastFormErrors } from "@/lib/form-toast"
 import { authClient } from "@/lib/auth-client"
 
 export function LoginForm() {
   const router = useRouter()
-  const [error, setError] = useState<string | null>(null)
-  const [pending, setPending] = useState(false)
+  const form = useForm<LoginFormValues>({
+    resolver: zodResolver(loginFormSchema),
+    defaultValues: { email: "", password: "" },
+  })
 
-  async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    setError(null)
-    setPending(true)
-
-    const form = new FormData(event.currentTarget)
-    const email = String(form.get("email") ?? "")
-    const password = String(form.get("password") ?? "")
-
+  async function onSubmit(values: LoginFormValues) {
     const { error: signInError } = await authClient.signIn.email({
-      email,
-      password,
+      email: values.email,
+      password: values.password,
       callbackURL: "/select-org",
     })
 
-    setPending(false)
-
     if (signInError) {
-      setError(signInError.message ?? "Unable to sign in")
+      toast.add({
+        type: "error",
+        title: "Unable to sign in",
+        description: signInError.message ?? "Something went wrong. Try again.",
+      })
       return
     }
 
@@ -60,47 +63,62 @@ export function LoginForm() {
       <GoogleButton />
       <FieldSeparator>or</FieldSeparator>
 
-      <form onSubmit={onSubmit} className="flex flex-col gap-4">
+      <form
+        onSubmit={form.handleSubmit(onSubmit, toastFormErrors)}
+        className="flex flex-col gap-4"
+      >
         <FieldGroup>
-          <Field>
-            <FieldLabel htmlFor="email">Email</FieldLabel>
-            <Input
-              id="email"
-              name="email"
-              type="email"
-              autoComplete="email"
-              required
-              placeholder="you@company.com"
-            />
-          </Field>
-          <Field>
-            <div className="flex items-center justify-between gap-2">
-              <FieldLabel htmlFor="password">Password</FieldLabel>
-              <Link
-                href="/forgot-password"
-                className="text-xs text-muted-foreground hover:text-foreground"
-              >
-                Forgot password?
-              </Link>
-            </div>
-            <Input
-              id="password"
-              name="password"
-              type="password"
-              autoComplete="current-password"
-              required
-            />
-          </Field>
+          <Controller
+            control={form.control}
+            name="email"
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid || undefined}>
+                <FieldLabel htmlFor="email">Email</FieldLabel>
+                <Input
+                  id="email"
+                  type="email"
+                  autoComplete="email"
+                  placeholder="you@company.com"
+                  aria-invalid={fieldState.invalid}
+                  {...field}
+                />
+                <FieldError errors={[fieldState.error]} />
+              </Field>
+            )}
+          />
+          <Controller
+            control={form.control}
+            name="password"
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid || undefined}>
+                <div className="flex items-center justify-between gap-2">
+                  <FieldLabel htmlFor="password">Password</FieldLabel>
+                  <Link
+                    href="/forgot-password"
+                    className="text-xs text-muted-foreground hover:text-foreground"
+                  >
+                    Forgot password?
+                  </Link>
+                </div>
+                <Input
+                  id="password"
+                  type="password"
+                  autoComplete="current-password"
+                  aria-invalid={fieldState.invalid}
+                  {...field}
+                />
+                <FieldError errors={[fieldState.error]} />
+              </Field>
+            )}
+          />
         </FieldGroup>
 
-        {error ? (
-          <Alert variant="destructive">
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        ) : null}
-
-        <Button type="submit" className="w-full" disabled={pending}>
-          {pending ? "Signing in..." : "Sign in"}
+        <Button
+          type="submit"
+          className="w-full"
+          disabled={form.formState.isSubmitting}
+        >
+          {form.formState.isSubmitting ? "Signing in..." : "Sign in"}
         </Button>
       </form>
 

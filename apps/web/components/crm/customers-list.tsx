@@ -1,9 +1,11 @@
 "use client"
 
 import { PlusIcon } from "@phosphor-icons/react"
+import { zodResolver } from "@hookform/resolvers/zod"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { useEffect, useMemo, useState } from "react"
+import { Controller, useForm } from "react-hook-form"
 
 import type {
   ContactRecord,
@@ -20,13 +22,21 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@starboard/lib-ui/components/dialog"
+import { toast } from "@starboard/lib-ui/components/toast"
 import {
   Field,
+  FieldError,
   FieldGroup,
   FieldLabel,
 } from "@starboard/lib-ui/components/field"
 import { Input } from "@starboard/lib-ui/components/input"
 import { cn } from "@starboard/lib-ui/lib/utils"
+
+import {
+  createCustomerFormSchema,
+  type CreateCustomerFormValues,
+} from "@/lib/domain/crm/crm-forms.schema"
+import { toastFormErrors } from "@/lib/form-toast"
 
 type SearchHit =
   | {
@@ -107,10 +117,12 @@ export function CustomersList({
   const pathname = usePathname()
   const [query, setQuery] = useState("")
   const [dialogOpen, setDialogOpen] = useState(false)
-  const [name, setName] = useState("")
-  const [creating, setCreating] = useState(false)
-  const [error, setError] = useState<string | null>(null)
   const [customers, setCustomers] = useState(initialCustomers)
+
+  const createForm = useForm<CreateCustomerFormValues>({
+    resolver: zodResolver(createCustomerFormSchema),
+    defaultValues: { name: "" },
+  })
 
   useEffect(() => {
     setCustomers(initialCustomers)
@@ -121,40 +133,37 @@ export function CustomersList({
     [customers, query]
   )
 
-  function resetDialog() {
-    setName("")
-    setError(null)
-  }
-
-  async function createCustomer() {
-    const trimmed = name.trim()
-    if (!trimmed || creating) return
-    setCreating(true)
-    setError(null)
+  async function onCreateCustomer(values: CreateCustomerFormValues) {
     try {
       const response = await fetch("/api/customers", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: trimmed }),
+        body: JSON.stringify({ name: values.name }),
       })
       const body = (await response.json().catch(() => null)) as
         (CustomerRecord & { error?: string }) | null
       if (!response.ok || !body?.id) {
-        setError(body?.error ?? "Failed to create customer")
+        toast.add({
+          type: "error",
+          title: "Unable to create customer",
+          description: body?.error ?? "Something went wrong. Try again.",
+        })
         return
       }
       const created: CustomerListItem = { ...body, contacts: [] }
       setCustomers((prev) =>
         [...prev, created].sort((a, b) => a.name.localeCompare(b.name))
       )
-      resetDialog()
+      createForm.reset({ name: "" })
       setDialogOpen(false)
       router.push(`/customers/${body.id}`)
       router.refresh()
     } catch {
-      setError("Failed to create customer")
-    } finally {
-      setCreating(false)
+      toast.add({
+        type: "error",
+        title: "Unable to create customer",
+        description: "Something went wrong. Try again.",
+      })
     }
   }
 
@@ -163,7 +172,7 @@ export function CustomersList({
       open={dialogOpen}
       onOpenChange={(open) => {
         setDialogOpen(open)
-        if (!open) resetDialog()
+        if (!open) createForm.reset({ name: "" })
       }}
     >
       <DialogTrigger
@@ -179,49 +188,49 @@ export function CustomersList({
         <PlusIcon className="size-4" />
       </DialogTrigger>
       <DialogContent className="sm:max-w-sm">
-        <DialogHeader>
-          <DialogTitle>New customer</DialogTitle>
-          <DialogDescription>
-            Create a customer with a company name. You can add details next.
-          </DialogDescription>
-        </DialogHeader>
-        <FieldGroup>
-          <Field>
-            <FieldLabel htmlFor={`new-customer-name-${variant}`}>
-              Name
-            </FieldLabel>
-            <Input
-              id={`new-customer-name-${variant}`}
-              value={name}
-              onChange={(event) => setName(event.target.value)}
-              placeholder="Company name"
-              onKeyDown={(event) => {
-                if (event.key === "Enter") {
-                  event.preventDefault()
-                  void createCustomer()
-                }
-              }}
-              autoFocus
+        <form
+          onSubmit={createForm.handleSubmit(onCreateCustomer, toastFormErrors)}
+        >
+          <DialogHeader>
+            <DialogTitle>New customer</DialogTitle>
+            <DialogDescription>
+              Create a customer with a company name. You can add details next.
+            </DialogDescription>
+          </DialogHeader>
+          <FieldGroup>
+            <Controller
+              control={createForm.control}
+              name="name"
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid || undefined}>
+                  <FieldLabel htmlFor={`new-customer-name-${variant}`}>
+                    Name
+                  </FieldLabel>
+                  <Input
+                    id={`new-customer-name-${variant}`}
+                    placeholder="Company name"
+                    autoFocus
+                    aria-invalid={fieldState.invalid}
+                    {...field}
+                  />
+                  <FieldError errors={[fieldState.error]} />
+                </Field>
+              )}
             />
-          </Field>
-          {error ? <p className="text-xs text-destructive">{error}</p> : null}
-        </FieldGroup>
-        <DialogFooter>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => setDialogOpen(false)}
-          >
-            Cancel
-          </Button>
-          <Button
-            type="button"
-            disabled={creating || !name.trim()}
-            onClick={() => void createCustomer()}
-          >
-            {creating ? "Creating…" : "Create"}
-          </Button>
-        </DialogFooter>
+          </FieldGroup>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button type="submit" disabled={createForm.formState.isSubmitting}>
+              {createForm.formState.isSubmitting ? "Creating…" : "Create"}
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   )

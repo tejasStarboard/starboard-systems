@@ -1,20 +1,28 @@
 "use client"
 
 import { Buildings, Plus } from "@phosphor-icons/react"
+import { zodResolver } from "@hookform/resolvers/zod"
 import { useRouter } from "next/navigation"
 import { useCallback, useEffect, useState } from "react"
+import { Controller, useForm } from "react-hook-form"
 
-import { Alert, AlertDescription } from "@starboard/lib-ui/components/alert"
 import { Button } from "@starboard/lib-ui/components/button"
 import {
   Field,
+  FieldError,
   FieldGroup,
   FieldLabel,
   FieldSeparator,
 } from "@starboard/lib-ui/components/field"
 import { Input } from "@starboard/lib-ui/components/input"
 import { Spinner } from "@starboard/lib-ui/components/spinner"
+import { toast } from "@starboard/lib-ui/components/toast"
 
+import {
+  createOrganizationFormSchema,
+  type CreateOrganizationFormValues,
+} from "@/lib/domain/auth/auth-forms.schema"
+import { toastFormErrors } from "@/lib/form-toast"
 import { authClient } from "@/lib/auth-client"
 
 type Organization = {
@@ -35,22 +43,25 @@ export function SelectOrgForm() {
   const router = useRouter()
   const [organizations, setOrganizations] = useState<Organization[]>([])
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
   const [enteringId, setEnteringId] = useState<string | null>(null)
-  const [creating, setCreating] = useState(false)
   const [showCreate, setShowCreate] = useState(false)
-  const [name, setName] = useState("")
-  const [slug, setSlug] = useState("")
-  const [slugTouched, setSlugTouched] = useState(false)
+
+  const form = useForm<CreateOrganizationFormValues>({
+    resolver: zodResolver(createOrganizationFormSchema),
+    defaultValues: { name: "", slug: "" },
+  })
 
   const loadOrganizations = useCallback(async () => {
     setLoading(true)
-    setError(null)
 
     const { data, error: listError } = await authClient.organization.list()
 
     if (listError) {
-      setError(listError.message ?? "Unable to load organizations")
+      toast.add({
+        type: "error",
+        title: "Unable to load organizations",
+        description: listError.message ?? "Something went wrong. Try again.",
+      })
       setOrganizations([])
     } else {
       setOrganizations(data ?? [])
@@ -68,7 +79,6 @@ export function SelectOrgForm() {
 
   async function enterOrganization(organizationId: string) {
     setEnteringId(organizationId)
-    setError(null)
 
     const { error: activeError } = await authClient.organization.setActive({
       organizationId,
@@ -76,7 +86,11 @@ export function SelectOrgForm() {
 
     if (activeError) {
       setEnteringId(null)
-      setError(activeError.message ?? "Unable to enter organization")
+      toast.add({
+        type: "error",
+        title: "Unable to enter organization",
+        description: activeError.message ?? "Something went wrong. Try again.",
+      })
       return
     }
 
@@ -84,21 +98,18 @@ export function SelectOrgForm() {
     router.refresh()
   }
 
-  async function onCreate(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    setCreating(true)
-    setError(null)
-
-    const orgSlug = slug || toSlug(name)
-
+  async function onCreate(values: CreateOrganizationFormValues) {
     const { data, error: createError } = await authClient.organization.create({
-      name: name.trim(),
-      slug: orgSlug,
+      name: values.name,
+      slug: values.slug,
     })
 
     if (createError || !data) {
-      setCreating(false)
-      setError(createError?.message ?? "Unable to create organization")
+      toast.add({
+        type: "error",
+        title: "Unable to create organization",
+        description: createError?.message ?? "Something went wrong. Try again.",
+      })
       return
     }
 
@@ -106,12 +117,14 @@ export function SelectOrgForm() {
       organizationId: data.id,
     })
 
-    setCreating(false)
-
     if (activeError) {
-      setError(
-        activeError.message ?? "Organization created, but could not enter it"
-      )
+      toast.add({
+        type: "error",
+        title: "Organization created",
+        description:
+          activeError.message ??
+          "Created, but could not enter it. Try selecting it below.",
+      })
       await loadOrganizations()
       return
     }
@@ -139,12 +152,6 @@ export function SelectOrgForm() {
           Choose an organization to continue, or create a new one.
         </p>
       </div>
-
-      {error ? (
-        <Alert variant="destructive">
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      ) : null}
 
       {organizations.length > 0 ? (
         <div className="flex flex-col gap-2">
@@ -182,41 +189,56 @@ export function SelectOrgForm() {
       <FieldSeparator>or</FieldSeparator>
 
       {showCreate ? (
-        <form onSubmit={onCreate} className="flex flex-col gap-4">
+        <form
+          onSubmit={form.handleSubmit(onCreate, toastFormErrors)}
+          className="flex flex-col gap-4"
+        >
           <FieldGroup>
-            <Field>
-              <FieldLabel htmlFor="org-name">Organization name</FieldLabel>
-              <Input
-                id="org-name"
-                name="name"
-                value={name}
-                onChange={(event) => {
-                  const next = event.target.value
-                  setName(next)
-                  if (!slugTouched) {
-                    setSlug(toSlug(next))
-                  }
-                }}
-                required
-                placeholder="Acme Shipping"
-                autoComplete="organization"
-              />
-            </Field>
-            <Field>
-              <FieldLabel htmlFor="org-slug">Slug</FieldLabel>
-              <Input
-                id="org-slug"
-                name="slug"
-                value={slug}
-                onChange={(event) => {
-                  setSlugTouched(true)
-                  setSlug(toSlug(event.target.value))
-                }}
-                required
-                placeholder="acme-shipping"
-                pattern="[a-z0-9]+(?:-[a-z0-9]+)*"
-              />
-            </Field>
+            <Controller
+              control={form.control}
+              name="name"
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid || undefined}>
+                  <FieldLabel htmlFor="org-name">Organization name</FieldLabel>
+                  <Input
+                    id="org-name"
+                    placeholder="Acme Shipping"
+                    autoComplete="organization"
+                    aria-invalid={fieldState.invalid}
+                    {...field}
+                    onChange={(event) => {
+                      const next = event.target.value
+                      field.onChange(next)
+                      if (!form.getFieldState("slug").isDirty) {
+                        form.setValue("slug", toSlug(next), {
+                          shouldValidate: true,
+                        })
+                      }
+                    }}
+                  />
+                  <FieldError errors={[fieldState.error]} />
+                </Field>
+              )}
+            />
+            <Controller
+              control={form.control}
+              name="slug"
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid || undefined}>
+                  <FieldLabel htmlFor="org-slug">Slug</FieldLabel>
+                  <Input
+                    id="org-slug"
+                    placeholder="acme-shipping"
+                    aria-invalid={fieldState.invalid}
+                    {...field}
+                    onChange={(event) => {
+                      field.onChange(toSlug(event.target.value))
+                    }}
+                  />
+                  <FieldError errors={[fieldState.error]} />
+                </Field>
+              )}
+            />
           </FieldGroup>
 
           <div className="flex gap-2">
@@ -225,14 +247,21 @@ export function SelectOrgForm() {
                 type="button"
                 variant="outline"
                 className="flex-1"
-                disabled={creating}
-                onClick={() => setShowCreate(false)}
+                disabled={form.formState.isSubmitting}
+                onClick={() => {
+                  setShowCreate(false)
+                  form.reset({ name: "", slug: "" })
+                }}
               >
                 Cancel
               </Button>
             ) : null}
-            <Button type="submit" className="flex-1" disabled={creating}>
-              {creating ? "Creating..." : "Create and enter"}
+            <Button
+              type="submit"
+              className="flex-1"
+              disabled={form.formState.isSubmitting}
+            >
+              {form.formState.isSubmitting ? "Creating..." : "Create and enter"}
             </Button>
           </div>
         </form>

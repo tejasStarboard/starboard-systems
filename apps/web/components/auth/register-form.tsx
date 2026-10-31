@@ -1,47 +1,50 @@
 "use client"
 
+import { zodResolver } from "@hookform/resolvers/zod"
 import Link from "next/link"
 import { useState } from "react"
+import { Controller, useForm } from "react-hook-form"
 
-import { Alert, AlertDescription } from "@starboard/lib-ui/components/alert"
 import { Button } from "@starboard/lib-ui/components/button"
 import {
   Field,
+  FieldError,
   FieldGroup,
   FieldLabel,
   FieldSeparator,
 } from "@starboard/lib-ui/components/field"
 import { Input } from "@starboard/lib-ui/components/input"
+import { toast } from "@starboard/lib-ui/components/toast"
 
 import { GoogleButton } from "@/components/auth/google-button"
+import {
+  registerFormSchema,
+  type RegisterFormValues,
+} from "@/lib/domain/auth/auth-forms.schema"
+import { toastFormErrors } from "@/lib/form-toast"
 import { authClient } from "@/lib/auth-client"
 
 export function RegisterForm() {
-  const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
-  const [pending, setPending] = useState(false)
+  const form = useForm<RegisterFormValues>({
+    resolver: zodResolver(registerFormSchema),
+    defaultValues: { name: "", email: "", password: "" },
+  })
 
-  async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    setError(null)
-    setPending(true)
-
-    const form = new FormData(event.currentTarget)
-    const name = String(form.get("name") ?? "")
-    const email = String(form.get("email") ?? "")
-    const password = String(form.get("password") ?? "")
-
+  async function onSubmit(values: RegisterFormValues) {
     const { error: signUpError } = await authClient.signUp.email({
-      name,
-      email,
-      password,
+      name: values.name,
+      email: values.email,
+      password: values.password,
       callbackURL: "/select-org",
     })
 
-    setPending(false)
-
     if (signUpError) {
-      setError(signUpError.message ?? "Unable to create account")
+      toast.add({
+        type: "error",
+        title: "Unable to create account",
+        description: signUpError.message ?? "Something went wrong. Try again.",
+      })
       return
     }
 
@@ -79,51 +82,74 @@ export function RegisterForm() {
       <GoogleButton label="Sign up with Google" />
       <FieldSeparator>or</FieldSeparator>
 
-      <form onSubmit={onSubmit} className="flex flex-col gap-4">
+      <form
+        onSubmit={form.handleSubmit(onSubmit, toastFormErrors)}
+        className="flex flex-col gap-4"
+      >
         <FieldGroup>
-          <Field>
-            <FieldLabel htmlFor="name">Name</FieldLabel>
-            <Input
-              id="name"
-              name="name"
-              type="text"
-              autoComplete="name"
-              required
-              placeholder="Jane Doe"
-            />
-          </Field>
-          <Field>
-            <FieldLabel htmlFor="email">Email</FieldLabel>
-            <Input
-              id="email"
-              name="email"
-              type="email"
-              autoComplete="email"
-              required
-              placeholder="you@company.com"
-            />
-          </Field>
-          <Field>
-            <FieldLabel htmlFor="password">Password</FieldLabel>
-            <Input
-              id="password"
-              name="password"
-              type="password"
-              autoComplete="new-password"
-              required
-              minLength={8}
-            />
-          </Field>
+          <Controller
+            control={form.control}
+            name="name"
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid || undefined}>
+                <FieldLabel htmlFor="name">Name</FieldLabel>
+                <Input
+                  id="name"
+                  type="text"
+                  autoComplete="name"
+                  placeholder="Jane Doe"
+                  aria-invalid={fieldState.invalid}
+                  {...field}
+                />
+                <FieldError errors={[fieldState.error]} />
+              </Field>
+            )}
+          />
+          <Controller
+            control={form.control}
+            name="email"
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid || undefined}>
+                <FieldLabel htmlFor="email">Email</FieldLabel>
+                <Input
+                  id="email"
+                  type="email"
+                  autoComplete="email"
+                  placeholder="you@company.com"
+                  aria-invalid={fieldState.invalid}
+                  {...field}
+                />
+                <FieldError errors={[fieldState.error]} />
+              </Field>
+            )}
+          />
+          <Controller
+            control={form.control}
+            name="password"
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid || undefined}>
+                <FieldLabel htmlFor="password">Password</FieldLabel>
+                <Input
+                  id="password"
+                  type="password"
+                  autoComplete="new-password"
+                  aria-invalid={fieldState.invalid}
+                  {...field}
+                />
+                <FieldError errors={[fieldState.error]} />
+              </Field>
+            )}
+          />
         </FieldGroup>
 
-        {error ? (
-          <Alert variant="destructive">
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        ) : null}
-
-        <Button type="submit" className="w-full" disabled={pending}>
-          {pending ? "Creating account..." : "Create account"}
+        <Button
+          type="submit"
+          className="w-full"
+          disabled={form.formState.isSubmitting}
+        >
+          {form.formState.isSubmitting
+            ? "Creating account..."
+            : "Create account"}
         </Button>
       </form>
 
