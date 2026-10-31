@@ -4,6 +4,8 @@ Shell discovers extensions via `extensions/host` (`@starboard/ext-host`; see tic
 
 **Foundation:** [ADR 0005](adr/0005-extension-foundation.md) + tickets **055** / **056**. Full developer walkthrough lands with 056.
 
+**Admin settings (planned):** `contributes.settings` — per-extension toggles/inputs declared in the kit, stored in platform DB, edited in collapsible admin rows. Tickets [057](../tickets/todo/057-extension-settings-schema.md) (schema + API) → [058](../tickets/todo/058-admin-extension-settings-ui.md) (UI). Separate from rollout on/off.
+
 ## Manifest schema (sketch)
 
 ```ts
@@ -17,6 +19,16 @@ type ExtensionManifest = {
     jobs?: Array<{ type: string; carrier?: string }>
     api?: Array<{ pathPrefix: string }>
     uiSlots?: string[] // e.g. "quote.rateSources", "rates.upload"
+    // Planned (057): admin-configurable fields
+    settings?: Array<{
+      key: string
+      label: string
+      description?: string
+      type: "boolean" | "string" | "number" | "select" | "secret"
+      default?: boolean | string | number | null
+      options?: Array<{ value: string; label: string }>
+      scope: "platform"
+    }>
   }
   // Async extensions use Temporal OSS (ADR 0002). kind is always python-temporal.
   worker?: {
