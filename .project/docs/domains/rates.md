@@ -24,7 +24,10 @@ Service-token + `X-Organization-Id`:
 - `GET /rates/:id` — get by id (org-scoped)
 
 BFF: `apps/web/lib/clients/rates-client.ts`, `/api/rates`, quote
-`RatesSearchSheet` lists matches for the selected lane.
+`RatesSearchSheet` lists matches for the selected lane and can **apply** a
+catalog rate onto the active quote lane as a manual rate line (copy of
+label/amount — not a FK into `rates.rate`). Completed spot offers use the
+same apply path when spot sources are active.
 
 ## Ingestion writes
 

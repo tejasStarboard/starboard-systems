@@ -1,7 +1,7 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import type { Rate } from "@starboard/lib-contracts"
+import { useEffect, useMemo, useState } from "react"
+import type { ManualRateLine, Rate } from "@starboard/lib-contracts"
 
 import {
   Sheet,
@@ -11,6 +11,12 @@ import {
   SheetTitle,
 } from "@starboard/lib-ui/components/sheet"
 
+import {
+  catalogRateToManualLine,
+  parseSpotSearchResult,
+  spotOfferToManualLine,
+  type SpotOffer,
+} from "@/lib/domain/quotes/apply-rate-to-lane"
 import { extensionApiPath } from "@/lib/extension-api-path"
 import {
   pollExtensionJob,
@@ -18,18 +24,25 @@ import {
 } from "@/lib/poll-extension-job"
 import type { SpotRateSource } from "@/lib/spot-rate-source"
 
+export type ApplyRatePayload = {
+  line: ManualRateLine
+  currencyCode: string
+}
+
 export function RatesSearchSheet({
   open,
   onOpenChange,
   origin,
   destination,
   spotRateSources = [],
+  onApplyRate,
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
   origin?: string
   destination?: string
   spotRateSources?: SpotRateSource[]
+  onApplyRate: (payload: ApplyRatePayload) => void
 }) {
   const [rates, setRates] = useState<Rate[]>([])
   const [loading, setLoading] = useState(false)
@@ -84,6 +97,14 @@ export function RatesSearchSheet({
     return () => controller.abort()
   }, [open, origin, destination])
 
+  const spotOffers = useMemo((): SpotOffer[] => {
+    if (spotStatus?.status !== "completed") {
+      return []
+    }
+    const parsed = parseSpotSearchResult(spotStatus.result)
+    return parsed.ok ? parsed.rates : []
+  }, [spotStatus])
+
   async function enqueueSpotSearch(extensionId: string) {
     setSpotPending(true)
     setSpotError(null)
@@ -115,6 +136,13 @@ export function RatesSearchSheet({
       setSpotStatus(status)
       if (status.status === "failed" || status.status === "cancelled") {
         setSpotError(status.error ?? `Spot search ${status.status}`)
+        return
+      }
+      if (status.status === "completed") {
+        const parsed = parseSpotSearchResult(status.result)
+        if (!parsed.ok) {
+          setSpotError(parsed.error)
+        }
       }
     } catch (err: unknown) {
       setSpotError(
@@ -123,6 +151,22 @@ export function RatesSearchSheet({
     } finally {
       setSpotPending(false)
     }
+  }
+
+  function applyCatalogRate(rate: Rate) {
+    onApplyRate({
+      line: catalogRateToManualLine(rate),
+      currencyCode: rate.currencyCode,
+    })
+    onOpenChange(false)
+  }
+
+  function applySpotOffer(offer: SpotOffer) {
+    onApplyRate({
+      line: spotOfferToManualLine(offer),
+      currencyCode: offer.currencyCode,
+    })
+    onOpenChange(false)
   }
 
   return (
@@ -169,15 +213,44 @@ export function RatesSearchSheet({
                 ))}
               </ul>
               {spotJob ? (
-                <div className="space-y-1 text-xs text-muted-foreground">
+                <div className="space-y-2 text-xs text-muted-foreground">
                   <p>
                     Job {spotJob.workflowId}
                     {spotStatus ? ` — ${spotStatus.status}` : ""}
                   </p>
-                  {spotStatus?.status === "completed" ? (
-                    <p className="font-mono">
-                      Result: {JSON.stringify(spotStatus.result ?? null)}
-                    </p>
+                  {spotOffers.length > 0 ? (
+                    <ul className="space-y-2">
+                      {spotOffers.map((offer, index) => (
+                        <li
+                          key={`${offer.label}-${offer.amount}-${index}`}
+                          className="border-b border-border py-2 last:border-b-0"
+                        >
+                          <div className="flex items-baseline justify-between gap-2">
+                            <p className="text-sm font-medium text-foreground">
+                              {offer.label}
+                            </p>
+                            <p className="text-sm text-foreground tabular-nums">
+                              {offer.amount.toLocaleString("en-US", {
+                                style: "currency",
+                                currency: offer.currencyCode,
+                              })}
+                            </p>
+                          </div>
+                          <p className="text-xs text-muted-foreground">
+                            {[offer.carrier, offer.origin, offer.destination]
+                              .filter(Boolean)
+                              .join(" · ")}
+                          </p>
+                          <button
+                            type="button"
+                            className="mt-1 text-xs font-medium underline-offset-2 hover:underline"
+                            onClick={() => applySpotOffer(offer)}
+                          >
+                            Apply to lane
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
                   ) : null}
                 </div>
               ) : null}
@@ -221,6 +294,13 @@ export function RatesSearchSheet({
                     Valid {rate.validFrom.slice(0, 10)} →{" "}
                     {rate.validTo.slice(0, 10)}
                   </p>
+                  <button
+                    type="button"
+                    className="mt-1 text-xs font-medium underline-offset-2 hover:underline"
+                    onClick={() => applyCatalogRate(rate)}
+                  >
+                    Apply to lane
+                  </button>
                 </li>
               ))}
             </ul>

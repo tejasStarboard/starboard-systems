@@ -11,7 +11,10 @@ import { QuoteFormDesktop } from "@/components/quotes/quote-form-desktop"
 import type { QuoteFormLayoutProps } from "@/components/quotes/quote-form-layout-props"
 import { QuoteFormMobile } from "@/components/quotes/quote-form-mobile"
 import { QuoteFormTablet } from "@/components/quotes/quote-form-tablet"
-import { RatesSearchSheet } from "@/components/quotes/rates-search-sheet"
+import {
+  RatesSearchSheet,
+  type ApplyRatePayload,
+} from "@/components/quotes/rates-search-sheet"
 import {
   calculateManualRateTotals,
   createManualRateLine,
@@ -187,6 +190,33 @@ export function QuoteForm({
     appendRate(createManualRateLine({ label: "Freight" }))
   }
 
+  function handleApplyRate({
+    line,
+    currencyCode: appliedCurrency,
+  }: ApplyRatePayload) {
+    if (selectedLaneId) {
+      setManualRatesVisibleByLane((prev) => ({
+        ...prev,
+        [selectedLaneId]: true,
+      }))
+    }
+    appendRate(line)
+
+    const quoteCurrency = (form.getValues("currencyCode") ?? "").toUpperCase()
+    const rateCurrency = appliedCurrency.toUpperCase()
+    if (
+      quoteCurrency.length === 3 &&
+      rateCurrency.length === 3 &&
+      quoteCurrency !== rateCurrency
+    ) {
+      toast.add({
+        type: "warning",
+        title: "Currency differs",
+        description: `Applied ${rateCurrency} amount onto a ${quoteCurrency} quote. Convert manually if needed.`,
+      })
+    }
+  }
+
   function handleCancel() {
     form.reset(defaultValues)
     setSelectedLaneIndex(0)
@@ -259,6 +289,7 @@ export function QuoteForm({
         origin={selectedLane?.origin || undefined}
         destination={selectedLane?.destination || undefined}
         spotRateSources={spotRateSources}
+        onApplyRate={handleApplyRate}
       />
     </div>
   )
