@@ -67,12 +67,12 @@ Rebuild/publish `@starboard/ext-host` as the package’s usual build expects.
 
 ### 2. Worker plugin — `extensions/spot`
 
-| Touch | Path |
-| ----- | ---- |
-| Plugin class | `extensions/spot/src/spot/plugins/<plugin>/plugin.py` (implement `SpotPlugin` / mirror `fake/`) |
+| Touch                 | Path                                                                                                                                 |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| Plugin class          | `extensions/spot/src/spot/plugins/<plugin>/plugin.py` (implement `SpotPlugin` / mirror `fake/`)                                      |
 | Activities / workflow | Reuse shared `spot.search` workflow when possible (`plugins/fake/workflows.py`); carrier-specific activities under the plugin folder |
-| Register | `extensions/spot/src/spot/plugins/registry.py` — add to `_PLUGIN_REGISTRY` |
-| Worker imports | `extensions/spot/src/spot/worker.py` / `dev.py` if new activities/workflows must be registered with Temporal |
+| Register              | `extensions/spot/src/spot/plugins/registry.py` — add to `_PLUGIN_REGISTRY`                                                           |
+| Worker imports        | `extensions/spot/src/spot/worker.py` / `dev.py` if new activities/workflows must be registered with Temporal                         |
 
 ### 3. Temporal naming
 
@@ -92,14 +92,14 @@ Do **not** add a new Next.js `app/api/extensions/spot.<id>/…` tree.
 
 ### 5. BFF — generic dispatch only
 
-| Piece | Path |
-| ----- | ---- |
-| Route | `apps/web/app/api/extensions/[extensionId]/[[...path]]/route.ts` |
-| Gate | `apps/web/lib/auth/require-active-extension.ts` → `requireActiveExtension` |
-| Dispatch | `apps/web/lib/extensions-api-dispatch.ts` — `worker.service === "spot"` + `POST/GET …/jobs` |
-| Client URL helper | `apps/web/lib/extension-api-path.ts` → `extensionApiPath(extensionId, …)` |
-| Poll helper | `apps/web/lib/poll-extension-job.ts` → `pollExtensionJob` |
-| Spot manager/client | `apps/web/lib/domain/spot/spot.manager.ts`, `spot.client.ts` — already take `extensionId` |
+| Piece               | Path                                                                                        |
+| ------------------- | ------------------------------------------------------------------------------------------- |
+| Route               | `apps/web/app/api/extensions/[extensionId]/[[...path]]/route.ts`                            |
+| Gate                | `apps/web/lib/auth/require-active-extension.ts` → `requireActiveExtension`                  |
+| Dispatch            | `apps/web/lib/extensions-api-dispatch.ts` — `worker.service === "spot"` + `POST/GET …/jobs` |
+| Client URL helper   | `apps/web/lib/extension-api-path.ts` → `extensionApiPath(extensionId, …)`                   |
+| Poll helper         | `apps/web/lib/poll-extension-job.ts` → `pollExtensionJob`                                   |
+| Spot manager/client | `apps/web/lib/domain/spot/spot.manager.ts`, `spot.client.ts` — already take `extensionId`   |
 
 For an existing `service` (`spot` / `ingestion` / `messaging`), **no new dispatch branch** is required if paths match the existing job/connection patterns. New HTTP shapes need a dispatch arm + manager method — still not a per-id `route.ts`.
 
@@ -120,7 +120,7 @@ Use contributions / activation helpers. Domain pages owned by a single slot (e.g
 
 ### 7. Rollout
 
-- Admin modes: `on` / `off` / `beta` / `common` ([admin extensions page](../../apps/web/app/(admin)/admin/extensions/page.tsx)).
+- Admin modes: `on` / `off` / `beta` / `common` ([admin extensions page](<../../apps/web/app/(admin)/admin/extensions/page.tsx>)).
 - Missing rollout row = **on**.
 - `getRolloutMap()` failure → **fail closed**: log, empty contributions, `isExtensionActive` false (APIs 404). Shell Quotes stays up. See `apps/web/lib/extensions-rollout.ts`.
 
@@ -134,12 +134,12 @@ Use contributions / activation helpers. Domain pages owned by a single slot (e.g
 
 ### 9. Test matrix
 
-| Layer | What to add/run |
-| ----- | --------------- |
-| Host | `extensions/host` entitlements / rollout unit tests |
-| BFF | `apps/web/lib/extensions-api-dispatch.test.ts`, `extension-api-path.test.ts`, `extensions-all-off.test.ts`, `extensions-rollout.test.ts` |
-| Spot Python | `extensions/spot/tests/test_<plugin>_plugin.py`, job status (`test_job_status_api.py`), workflow smoke as needed |
-| Manual | Rollout `off` → source hidden in rates sheet; `POST /api/extensions/spot.<id>/jobs` → 404 |
+| Layer       | What to add/run                                                                                                                          |
+| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| Host        | `extensions/host` entitlements / rollout unit tests                                                                                      |
+| BFF         | `apps/web/lib/extensions-api-dispatch.test.ts`, `extension-api-path.test.ts`, `extensions-all-off.test.ts`, `extensions-rollout.test.ts` |
+| Spot Python | `extensions/spot/tests/test_<plugin>_plugin.py`, job status (`test_job_status_api.py`), workflow smoke as needed                         |
+| Manual      | Rollout `off` → source hidden in rates sheet; `POST /api/extensions/spot.<id>/jobs` → 404                                                |
 
 Also update this doc’s **Registered extensions** table when shipping a new id.
 
