@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server"
-import { createCustomerRequestSchema } from "@starboard/lib-contracts"
+import {
+  createCustomerRequestSchema,
+  crmListQuerySchema,
+} from "@starboard/lib-contracts"
 
 import { requireApiSession } from "@/lib/auth/session"
 import { ServiceClientError } from "@/lib/clients/http"
@@ -11,14 +14,21 @@ export async function GET(request: Request) {
     return authResult.error
   }
 
-  const detail = new URL(request.url).searchParams.get("detail") === "1"
+  const searchParams = new URL(request.url).searchParams
+  const detail = searchParams.get("detail") === "1"
 
   try {
     if (detail) {
-      const customers = await getCrmManager().listCustomerRecords(
-        authResult.organizationId
+      const query = crmListQuerySchema.parse({
+        page: searchParams.get("page") ?? undefined,
+        pageSize: searchParams.get("pageSize") ?? undefined,
+        q: searchParams.get("q") ?? "",
+      })
+      const result = await getCrmManager().listCustomerRecords(
+        authResult.organizationId,
+        query
       )
-      return NextResponse.json({ customers })
+      return NextResponse.json(result)
     }
 
     const customers = await getCrmManager().listCustomerOptions(

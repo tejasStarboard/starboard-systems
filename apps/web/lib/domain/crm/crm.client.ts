@@ -12,8 +12,10 @@ import {
   type CreateContactRequest,
   type CreateCustomerRequestInput,
   type CreateCustomerResponse,
-  type CustomerListItem,
+  type CrmListQueryInput,
   type FormOption,
+  type ListContactsResponse,
+  type ListCustomerRecordsResponse,
   type UpdateContactRequest,
   type UpdateCustomerRequest,
 } from "@starboard/lib-contracts"
@@ -32,8 +34,9 @@ export interface CrmClient {
   ): Promise<FormOption[]>
   listCustomerRecords(
     organizationId: string,
+    query?: CrmListQueryInput,
     requestId?: string
-  ): Promise<CustomerListItem[]>
+  ): Promise<ListCustomerRecordsResponse>
   getCustomer(
     organizationId: string,
     customerId: string,
@@ -58,8 +61,9 @@ export interface CrmClient {
   listContacts(
     organizationId: string,
     customerId: string,
+    query?: CrmListQueryInput,
     requestId?: string
-  ): Promise<ContactRecord[]>
+  ): Promise<ListContactsResponse>
   createContact(
     organizationId: string,
     customerId: string,
@@ -112,15 +116,20 @@ class HttpCrmClient implements CrmClient {
 
   async listCustomerRecords(
     organizationId: string,
+    query?: CrmListQueryInput,
     requestId?: string
-  ): Promise<CustomerListItem[]> {
+  ): Promise<ListCustomerRecordsResponse> {
     const options = createServiceOptions({
       baseUrl: this.options.baseUrl,
       organizationId,
       requestId,
     })
+    const params = new URLSearchParams({ detail: "1" })
+    if (query?.page != null) params.set("page", String(query.page))
+    if (query?.pageSize != null) params.set("pageSize", String(query.pageSize))
+    if (query?.q) params.set("q", String(query.q))
     const response = await serviceFetch(
-      "/customers?detail=1",
+      `/customers?${params}`,
       { method: "GET" },
       options
     )
@@ -129,7 +138,7 @@ class HttpCrmClient implements CrmClient {
     if (!parsed.success) {
       throw new Error("Failed to list customers: invalid response")
     }
-    return parsed.data.customers
+    return parsed.data
   }
 
   async getCustomer(
@@ -243,15 +252,23 @@ class HttpCrmClient implements CrmClient {
   async listContacts(
     organizationId: string,
     customerId: string,
+    query?: CrmListQueryInput,
     requestId?: string
-  ): Promise<ContactRecord[]> {
+  ): Promise<ListContactsResponse> {
     const options = createServiceOptions({
       baseUrl: this.options.baseUrl,
       organizationId,
       requestId,
     })
+    const params = new URLSearchParams()
+    if (query?.page != null) params.set("page", String(query.page))
+    if (query?.pageSize != null) params.set("pageSize", String(query.pageSize))
+    if (query?.q) params.set("q", String(query.q))
+    const queryString = params.toString()
     const response = await serviceFetch(
-      `/customers/${encodeURIComponent(customerId)}/contacts`,
+      `/customers/${encodeURIComponent(customerId)}/contacts${
+        queryString ? `?${queryString}` : ""
+      }`,
       { method: "GET" },
       options
     )
@@ -260,7 +277,7 @@ class HttpCrmClient implements CrmClient {
     if (!parsed.success) {
       throw new Error("Failed to list contacts: invalid response")
     }
-    return parsed.data.contacts
+    return parsed.data
   }
 
   async createContact(

@@ -2,6 +2,7 @@ import { Hono } from "hono"
 import {
   createContactRequestSchema,
   createCustomerRequestSchema,
+  crmListQuerySchema,
   updateContactRequestSchema,
   updateCustomerRequestSchema,
 } from "@starboard/lib-contracts"
@@ -25,12 +26,19 @@ export function createCrmController(service: CrmService) {
 
     try {
       if (detail) {
-        const customers = await service.listRecords(organizationId)
+        const query = crmListQuerySchema.parse({
+          page: c.req.query("page") ?? undefined,
+          pageSize: c.req.query("pageSize") ?? undefined,
+          q: c.req.query("q") ?? "",
+        })
+        const result = await service.listRecords(organizationId, query)
         logInfo("crm", requestId, "list_customer_records", {
           organizationId,
-          count: customers.length,
+          count: result.customers.length,
+          page: result.page,
+          total: result.total,
         })
-        return c.json({ customers })
+        return c.json(result)
       }
 
       const customers = await service.list(organizationId)
@@ -152,8 +160,17 @@ export function createCrmController(service: CrmService) {
     const customerId = c.req.param("customerId")
 
     try {
-      const contacts = await service.listContacts(organizationId, customerId)
-      return c.json({ contacts })
+      const query = crmListQuerySchema.parse({
+        page: c.req.query("page") ?? undefined,
+        pageSize: c.req.query("pageSize") ?? undefined,
+        q: c.req.query("q") ?? "",
+      })
+      const result = await service.listContacts(
+        organizationId,
+        customerId,
+        query
+      )
+      return c.json(result)
     } catch (error) {
       return handleError(c, requestId, "list_contacts_failed", error)
     }

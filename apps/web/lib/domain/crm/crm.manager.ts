@@ -5,8 +5,10 @@ import type {
   CreateContactRequest,
   CreateCustomerRequestInput,
   CreateCustomerResponse,
-  CustomerListItem,
+  CrmListQueryInput,
   FormOption,
+  ListContactsResponse,
+  ListCustomerRecordsResponse,
   UpdateContactRequest,
   UpdateCustomerRequest,
 } from "@starboard/lib-contracts"
@@ -25,9 +27,10 @@ export class CrmManager {
 
   async listCustomerRecords(
     organizationId: string,
+    query?: CrmListQueryInput,
     requestId?: string
-  ): Promise<CustomerListItem[]> {
-    return this.crmClient.listCustomerRecords(organizationId, requestId)
+  ): Promise<ListCustomerRecordsResponse> {
+    return this.crmClient.listCustomerRecords(organizationId, query, requestId)
   }
 
   async getCustomer(
@@ -73,9 +76,15 @@ export class CrmManager {
   async listContacts(
     organizationId: string,
     customerId: string,
+    query?: CrmListQueryInput,
     requestId?: string
-  ): Promise<ContactRecord[]> {
-    return this.crmClient.listContacts(organizationId, customerId, requestId)
+  ): Promise<ListContactsResponse> {
+    return this.crmClient.listContacts(
+      organizationId,
+      customerId,
+      query,
+      requestId
+    )
   }
 
   async createContact(

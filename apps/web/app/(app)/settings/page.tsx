@@ -129,7 +129,7 @@ export default function SettingsPage() {
             {section.title ? (
               <h2 className="text-sm text-muted-foreground">{section.title}</h2>
             ) : null}
-            <div className="divide-y divide-border overflow-hidden rounded-xl border bg-card">
+            <div className="divide-y divide-border overflow-hidden border">
               {section.items.map((item) => (
                 <SettingsRow key={item.href} item={item} />
               ))}

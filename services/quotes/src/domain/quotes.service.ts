@@ -1,14 +1,33 @@
 import {
   createQuoteRequestSchema,
   quoteFormSchema,
+  quotesListQuerySchema,
   type CreateQuoteRequest,
   type FormOption,
+  type ListQuotesResponse,
   type QuoteFormValues,
-  type QuoteListItem,
   type QuoteSource,
+  type QuotesListQueryInput,
 } from "@starboard/lib-contracts"
 
 import type { QuotesDao } from "../dao/quotes.dao"
+
+function normalizeListQuery(input?: QuotesListQueryInput) {
+  const parsed = quotesListQuerySchema.safeParse(input ?? {})
+  if (!parsed.success) {
+    throw new QuotesValidationError(
+      parsed.error.issues[0]?.message ?? "Invalid list query"
+    )
+  }
+  const { page, pageSize, q } = parsed.data
+  return {
+    page,
+    pageSize,
+    q: q.trim(),
+    limit: pageSize,
+    offset: (page - 1) * pageSize,
+  }
+}
 
 const SHORT_QUOTE_ID_LENGTH = 6
 const SHORT_QUOTE_ID_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
@@ -27,7 +46,10 @@ export class QuotesNotFoundError extends Error {
 }
 
 export interface QuotesService {
-  list(organizationId: string): Promise<QuoteListItem[]>
+  list(
+    organizationId: string,
+    query?: QuotesListQueryInput
+  ): Promise<ListQuotesResponse>
   get(quoteId: string, organizationId: string): Promise<QuoteFormValues>
   create(input: CreateQuoteRequest): Promise<{ id: string }>
   save(
@@ -41,11 +63,25 @@ export interface QuotesService {
 export class DefaultQuotesService implements QuotesService {
   constructor(private readonly dao: QuotesDao) {}
 
-  async list(organizationId: string): Promise<QuoteListItem[]> {
+  async list(
+    organizationId: string,
+    query?: QuotesListQueryInput
+  ): Promise<ListQuotesResponse> {
     if (!organizationId) {
       throw new QuotesValidationError("organizationId is required")
     }
-    return this.dao.listByOrganization(organizationId)
+    const { page, pageSize, q, limit, offset } = normalizeListQuery(query)
+    const { rows, total } = await this.dao.listByOrganization(organizationId, {
+      limit,
+      offset,
+      q,
+    })
+    return {
+      quotes: rows,
+      page,
+      pageSize,
+      total,
+    }
   }
 
   async get(quoteId: string, organizationId: string): Promise<QuoteFormValues> {

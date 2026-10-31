@@ -1,11 +1,13 @@
 import "server-only"
 
-import type {
-  CreateQuoteRequest,
-  FormOption,
-  QuoteFormValues,
-  QuoteListItem,
-  QuoteSource,
+import {
+  listQuotesResponseSchema,
+  type CreateQuoteRequest,
+  type FormOption,
+  type ListQuotesResponse,
+  type QuoteFormValues,
+  type QuotesListQueryInput,
+  type QuoteSource,
 } from "@starboard/lib-contracts"
 
 import { env } from "@/env"
@@ -19,8 +21,9 @@ import {
 export interface QuotesClient {
   listQuotes(
     organizationId: string,
+    query?: QuotesListQueryInput,
     requestId?: string
-  ): Promise<QuoteListItem[]>
+  ): Promise<ListQuotesResponse>
   getQuoteFormValues(
     quoteId: string,
     organizationId: string,
@@ -48,19 +51,30 @@ class HttpQuotesClient implements QuotesClient {
 
   async listQuotes(
     organizationId: string,
+    query?: QuotesListQueryInput,
     requestId?: string
-  ): Promise<QuoteListItem[]> {
+  ): Promise<ListQuotesResponse> {
     const options = createServiceOptions({
       baseUrl: this.options.baseUrl,
       organizationId,
       requestId,
     })
-    const response = await serviceFetch("/quotes", { method: "GET" }, options)
-    const body = await parseJsonResponse<{ quotes: QuoteListItem[] }>(
-      response,
-      "Failed to list quotes"
+    const params = new URLSearchParams()
+    if (query?.page != null) params.set("page", String(query.page))
+    if (query?.pageSize != null) params.set("pageSize", String(query.pageSize))
+    if (query?.q) params.set("q", String(query.q))
+    const queryString = params.toString()
+    const response = await serviceFetch(
+      `/quotes${queryString ? `?${queryString}` : ""}`,
+      { method: "GET" },
+      options
     )
-    return body.quotes
+    const body = await parseJsonResponse(response, "Failed to list quotes")
+    const parsed = listQuotesResponseSchema.safeParse(body)
+    if (!parsed.success) {
+      throw new Error("Failed to list quotes: invalid response")
+    }
+    return parsed.data
   }
 
   async getQuoteFormValues(

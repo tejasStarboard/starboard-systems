@@ -17,7 +17,10 @@ export default async function CustomerDetailPage({
   try {
     const [customer, contacts] = await Promise.all([
       crm.getCustomer(organizationId, customerId),
-      crm.listContacts(organizationId, customerId),
+      crm.listContacts(organizationId, customerId, {
+        page: 1,
+        pageSize: 25,
+      }),
     ])
     return (
       <CustomerDetail initialCustomer={customer} initialContacts={contacts} />

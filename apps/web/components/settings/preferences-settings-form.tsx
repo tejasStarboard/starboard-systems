@@ -37,7 +37,7 @@ export function PreferencesSettingsForm() {
         </p>
       </div>
 
-      <section className="space-y-4 rounded-xl border bg-card p-4">
+      <section className="space-y-4">
         <FieldGroup>
           <Field>
             <FieldLabel>Theme</FieldLabel>

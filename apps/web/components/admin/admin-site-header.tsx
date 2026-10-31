@@ -48,7 +48,7 @@ export function AdminSiteHeader() {
           <BreadcrumbList>
             <BreadcrumbItem>
               <BreadcrumbLink render={<Link href="/admin" />}>
-                Platform admin
+                Admin
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />

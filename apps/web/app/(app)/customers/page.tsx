@@ -4,7 +4,10 @@ import { getCrmManager } from "@/lib/domain/crm/crm.manager"
 
 export default async function CustomersPage() {
   const { organizationId } = await requireOrganizationContext()
-  const customers = await getCrmManager().listCustomerRecords(organizationId)
+  const initial = await getCrmManager().listCustomerRecords(organizationId, {
+    page: 1,
+    pageSize: 25,
+  })
 
-  return <CustomersList initialCustomers={customers} />
+  return <CustomersList initial={initial} />
 }

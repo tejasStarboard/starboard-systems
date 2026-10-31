@@ -1,6 +1,7 @@
 import { Hono } from "hono"
 import {
   createQuoteRequestSchema,
+  quotesListQuerySchema,
   saveQuoteRequestSchema,
 } from "@starboard/lib-contracts"
 import {
@@ -24,12 +25,19 @@ export function createQuotesController(service: QuotesService) {
       c.get("organizationId") || c.req.query("organizationId") || ""
 
     try {
-      const quotes = await service.list(organizationId)
+      const query = quotesListQuerySchema.parse({
+        page: c.req.query("page") ?? undefined,
+        pageSize: c.req.query("pageSize") ?? undefined,
+        q: c.req.query("q") ?? "",
+      })
+      const result = await service.list(organizationId, query)
       logInfo("quotes", requestId, "list_quotes", {
         organizationId,
-        count: quotes.length,
+        count: result.quotes.length,
+        page: result.page,
+        total: result.total,
       })
-      return c.json({ quotes })
+      return c.json(result)
     } catch (error) {
       return handleError(c, requestId, "list_quotes_failed", error)
     }

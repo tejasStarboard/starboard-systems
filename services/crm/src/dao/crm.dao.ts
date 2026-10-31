@@ -1,4 +1,14 @@
-import { and, asc, eq, inArray } from "drizzle-orm"
+import {
+  and,
+  asc,
+  count,
+  eq,
+  exists,
+  ilike,
+  inArray,
+  or,
+  type SQL,
+} from "drizzle-orm"
 import { contact, customer } from "@starboard/lib-db/schema"
 import type { FormOption } from "@starboard/lib-contracts"
 
@@ -82,9 +92,23 @@ export type ContactUpdate = {
   role?: string | null
 }
 
+export type CrmListParams = {
+  limit: number
+  offset: number
+  q?: string
+}
+
+export type CrmListResult<T> = {
+  rows: T[]
+  total: number
+}
+
 export interface CrmDao {
   listOptionsByOrganization(organizationId: string): Promise<FormOption[]>
-  listRecordsByOrganization(organizationId: string): Promise<CustomerRow[]>
+  listRecordsByOrganization(
+    organizationId: string,
+    params: CrmListParams
+  ): Promise<CrmListResult<CustomerRow>>
   getById(
     organizationId: string,
     customerId: string
@@ -101,9 +125,13 @@ export interface CrmDao {
   ): Promise<CustomerNameRow[]>
   listContacts(
     organizationId: string,
-    customerId: string
+    customerId: string,
+    params: CrmListParams
+  ): Promise<CrmListResult<ContactRow>>
+  listContactsByCustomerIds(
+    organizationId: string,
+    customerIds: string[]
   ): Promise<ContactRow[]>
-  listContactsByOrganization(organizationId: string): Promise<ContactRow[]>
   getContactById(
     organizationId: string,
     customerId: string,
@@ -149,6 +177,10 @@ const contactColumns = {
   role: contact.role,
 } as const
 
+function likePattern(q: string): string {
+  return `%${q}%`
+}
+
 export class DrizzleCrmDao implements CrmDao {
   constructor(private readonly db: CrmDb) {}
 
@@ -176,13 +208,28 @@ export class DrizzleCrmDao implements CrmDao {
   }
 
   async listRecordsByOrganization(
-    organizationId: string
-  ): Promise<CustomerRow[]> {
-    return this.db
+    organizationId: string,
+    params: CrmListParams
+  ): Promise<CrmListResult<CustomerRow>> {
+    const whereClause = this.customerListWhere(organizationId, params.q)
+
+    const [totalRow] = await this.db
+      .select({ total: count() })
+      .from(customer)
+      .where(whereClause)
+
+    const rows = await this.db
       .select(customerColumns)
       .from(customer)
-      .where(eq(customer.organizationId, organizationId))
+      .where(whereClause)
       .orderBy(asc(customer.name))
+      .limit(params.limit)
+      .offset(params.offset)
+
+    return {
+      rows,
+      total: totalRow?.total ?? 0,
+    }
   }
 
   async getById(
@@ -277,27 +324,52 @@ export class DrizzleCrmDao implements CrmDao {
 
   async listContacts(
     organizationId: string,
-    customerId: string
+    customerId: string,
+    params: CrmListParams
+  ): Promise<CrmListResult<ContactRow>> {
+    const whereClause = this.contactListWhere(
+      organizationId,
+      customerId,
+      params.q
+    )
+
+    const [totalRow] = await this.db
+      .select({ total: count() })
+      .from(contact)
+      .where(whereClause)
+
+    const rows = await this.db
+      .select(contactColumns)
+      .from(contact)
+      .where(whereClause)
+      .orderBy(asc(contact.name))
+      .limit(params.limit)
+      .offset(params.offset)
+
+    return {
+      rows,
+      total: totalRow?.total ?? 0,
+    }
+  }
+
+  async listContactsByCustomerIds(
+    organizationId: string,
+    customerIds: string[]
   ): Promise<ContactRow[]> {
+    const unique = [...new Set(customerIds.filter(Boolean))]
+    if (unique.length === 0) {
+      return []
+    }
+
     return this.db
       .select(contactColumns)
       .from(contact)
       .where(
         and(
           eq(contact.organizationId, organizationId),
-          eq(contact.customerId, customerId)
+          inArray(contact.customerId, unique)
         )
       )
-      .orderBy(asc(contact.name))
-  }
-
-  async listContactsByOrganization(
-    organizationId: string
-  ): Promise<ContactRow[]> {
-    return this.db
-      .select(contactColumns)
-      .from(contact)
-      .where(eq(contact.organizationId, organizationId))
       .orderBy(asc(contact.name))
   }
 
@@ -375,5 +447,73 @@ export class DrizzleCrmDao implements CrmDao {
       .returning({ id: contact.id })
 
     return deleted.length > 0
+  }
+
+  private customerListWhere(organizationId: string, q?: string): SQL {
+    const conditions: SQL[] = [eq(customer.organizationId, organizationId)]
+    const trimmed = q?.trim()
+    if (!trimmed) {
+      return and(...conditions)!
+    }
+
+    const pattern = likePattern(trimmed)
+    conditions.push(
+      or(
+        ilike(customer.name, pattern),
+        ilike(customer.email, pattern),
+        ilike(customer.phone, pattern),
+        ilike(customer.address, pattern),
+        ilike(customer.city, pattern),
+        ilike(customer.state, pattern),
+        ilike(customer.countryCode, pattern),
+        ilike(customer.zip, pattern),
+        exists(
+          this.db
+            .select({ id: contact.id })
+            .from(contact)
+            .where(
+              and(
+                eq(contact.organizationId, organizationId),
+                eq(contact.customerId, customer.id),
+                or(
+                  ilike(contact.name, pattern),
+                  ilike(contact.email, pattern),
+                  ilike(contact.phone, pattern),
+                  ilike(contact.role, pattern)
+                )
+              )
+            )
+        )
+      )!
+    )
+
+    return and(...conditions)!
+  }
+
+  private contactListWhere(
+    organizationId: string,
+    customerId: string,
+    q?: string
+  ): SQL {
+    const conditions: SQL[] = [
+      eq(contact.organizationId, organizationId),
+      eq(contact.customerId, customerId),
+    ]
+    const trimmed = q?.trim()
+    if (!trimmed) {
+      return and(...conditions)!
+    }
+
+    const pattern = likePattern(trimmed)
+    conditions.push(
+      or(
+        ilike(contact.name, pattern),
+        ilike(contact.email, pattern),
+        ilike(contact.phone, pattern),
+        ilike(contact.role, pattern)
+      )!
+    )
+
+    return and(...conditions)!
   }
 }

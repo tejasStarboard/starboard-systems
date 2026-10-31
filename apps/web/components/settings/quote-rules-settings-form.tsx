@@ -95,7 +95,7 @@ export function QuoteRulesSettingsForm() {
         <p className="text-sm text-muted-foreground">Loading…</p>
       ) : (
         <form
-          className="space-y-4 rounded-xl border bg-card p-4"
+          className="space-y-4"
           onSubmit={form.handleSubmit(onSave, toastFormErrors)}
         >
           <FieldGroup>

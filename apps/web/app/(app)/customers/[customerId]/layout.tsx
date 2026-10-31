@@ -9,11 +9,14 @@ export default async function CustomerSplitLayout({
   children: React.ReactNode
 }) {
   const { organizationId } = await requireOrganizationContext()
-  const customers = await getCrmManager().listCustomerRecords(organizationId)
+  const initial = await getCrmManager().listCustomerRecords(organizationId, {
+    page: 1,
+    pageSize: 25,
+  })
 
   return (
     <CustomerSplitPanes
-      list={<CustomersList initialCustomers={customers} variant="pane" />}
+      list={<CustomersList initial={initial} variant="pane" />}
       detail={children}
     />
   )

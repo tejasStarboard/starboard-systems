@@ -21,7 +21,6 @@ export const customerFormSchema = z.object({
   zip: z.string(),
   isCustomer: z.boolean(),
   isVendor: z.boolean(),
-  isActive: z.boolean(),
 })
 
 export type CustomerFormValues = z.infer<typeof customerFormSchema>
@@ -60,6 +59,5 @@ export function customerToFormValues(row: CustomerRecord): CustomerFormValues {
     zip: row.zip ?? "",
     isCustomer: row.isCustomer === true,
     isVendor: row.isVendor === true,
-    isActive: row.isActive === true,
   }
 }
