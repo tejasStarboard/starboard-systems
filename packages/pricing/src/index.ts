@@ -1,10 +1,13 @@
 export { roundMoney } from "./money"
 export {
+  buildLaneUsageQuantities,
   calculateManualRateTotals,
   computeManualLaneTotals,
+  type LaneUsageQuantities,
   type ManualLaneTotals,
   type ManualLaneTotalsInput,
   type ManualRateTotals,
+  type ManualSurchargeLineInput,
   type MarkupType,
 } from "./manual-totals"
 export {

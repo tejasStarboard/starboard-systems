@@ -36,15 +36,15 @@ pnpm --filter @starboard/lib-db db:push
 
 ## Apply rate → lane
 
-From `RatesSearchSheet`, catalog rows and completed spot offers **Apply to lane** by appending a `ManualRateLine` (`label` + `amount`) on the active lane. Totals use `@starboard/lib-pricing`; persist via existing quote save (no catalog/spot FK on `quotes.rate`). Spot UI only when active spot sources are present; catalog path works with extensions off. Mapping source charge lines into nested surcharges is ticket **067**.
+From `RatesSearchSheet`, catalog rows and completed spot offers **Apply to lane** by appending a `ManualRateLine` (`label` + `amount` + nested `surcharges` when the source has charge lines) on the active lane. Totals use `@starboard/lib-pricing` (base + included surcharge amounts by unit / % freight); persist via existing quote save (no catalog/spot FK on `quotes.rate`). Spot UI only when active spot sources are present; catalog + manual surcharge editing work with extensions off.
 
 ## Current gaps
 
 - No status-transition rules, delete, PDF, email send
 - No provenance link from lane rate back to catalog/spot offer id
 - Geography doors via Places (007); facility gazetteer still evolving
-- Surcharge amount engine (**066**) and quote UI (**067**) not wired yet
+- Global charges + Incoterm bucket scope (**068**) not wired yet
 
 ## Next tickets
 
-Surcharge engine/UI/globals (`066`–`068`).
+Globals / Incoterm scope (`068`).

@@ -2,7 +2,7 @@
 id: 067
 wave: 06-product
 title: Surcharges in quote UI and apply-rate path
-status: open
+status: in_progress
 depends_on: [066, 060]
 epic: SYS-QUOTES
 docs:
@@ -24,10 +24,10 @@ Show and edit surcharge lines on a quote lane grouped by origin / freight / dest
 
 ## Acceptance criteria
 
-- [ ] Add/edit/remove surcharge lines with unit + leg
-- [ ] Lane totals reflect inclusion flags + units
-- [ ] Apply-rate path can attach surcharges from source when available
-- [ ] Works with extensions off (manual + catalog)
+- [x] Add/edit/remove surcharge lines with unit + leg
+- [x] Lane totals reflect inclusion flags + units
+- [x] Apply-rate path can attach surcharges from source when available
+- [x] Works with extensions off (manual + catalog)
 
 ## Out of scope
 

@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test"
-import type { Rate } from "@starboard/lib-contracts"
+import { createSurchargeLine, type Rate } from "@starboard/lib-contracts"
 
 import {
   catalogRateToManualLine,
@@ -33,6 +33,28 @@ describe("catalogRateToManualLine", () => {
     expect(line.amount).toBe(1500)
     expect(line.id).not.toBe(catalogRate.id)
     expect(line.id.length).toBeGreaterThan(0)
+    expect(line.surcharges).toEqual([])
+  })
+
+  test("maps nested surcharges with fresh ids", () => {
+    const source = createSurchargeLine({
+      id: "src-surcharge",
+      name: "BAF",
+      leg: "freight",
+      usageUnit: "container",
+      rate: 40,
+      currencyCode: "USD",
+      source: "carrier",
+    })
+    const line = catalogRateToManualLine({
+      ...catalogRate,
+      surcharges: [source],
+    })
+    expect(line.surcharges).toHaveLength(1)
+    expect(line.surcharges[0]?.name).toBe("BAF")
+    expect(line.surcharges[0]?.usageUnit).toBe("container")
+    expect(line.surcharges[0]?.rate).toBe(40)
+    expect(line.surcharges[0]?.id).not.toBe(source.id)
   })
 })
 
@@ -46,6 +68,7 @@ describe("spotOfferToManualLine", () => {
     })
     expect(line.label).toBe("Fake spot SGSIN-NLRTM (FAKE)")
     expect(line.amount).toBe(1234.56)
+    expect(line.surcharges).toEqual([])
   })
 
   test("uses plain label when carrier missing", () => {
@@ -56,6 +79,26 @@ describe("spotOfferToManualLine", () => {
     })
     expect(line.label).toBe("Spot offer")
     expect(line.amount).toBe(900)
+  })
+
+  test("attaches surcharges when present on the offer", () => {
+    const line = spotOfferToManualLine({
+      label: "Spot offer",
+      currencyCode: "USD",
+      amount: 900,
+      surcharges: [
+        createSurchargeLine({
+          id: "spot-thc",
+          name: "THC",
+          leg: "origin",
+          usageUnit: "flat",
+          rate: 120,
+        }),
+      ],
+    })
+    expect(line.surcharges).toHaveLength(1)
+    expect(line.surcharges[0]?.name).toBe("THC")
+    expect(line.surcharges[0]?.id).not.toBe("spot-thc")
   })
 })
 

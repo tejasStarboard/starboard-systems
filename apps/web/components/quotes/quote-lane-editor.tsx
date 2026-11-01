@@ -27,6 +27,7 @@ import {
 import { cn } from "@starboard/lib-ui/lib/utils"
 
 import { LaneFields } from "@/components/quotes/lane-fields"
+import { RateSurchargesEditor } from "@/components/quotes/rate-surcharges-editor"
 import type {
   LaneFormValues,
   QuoteFormOption,
@@ -168,65 +169,82 @@ export function QuoteLaneEditor({
             </p>
           </div>
 
-          <div className="overflow-x-auto rounded-none border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Charge</TableHead>
-                  <TableHead className="w-40 text-right">Amount</TableHead>
-                  <TableHead className="w-10" />
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {rateFields.length ? (
-                  rateFields.map((field, index) => (
-                    <TableRow key={field.id}>
-                      <TableCell>
-                        <Input
-                          placeholder="Surcharge label"
-                          {...register(
-                            `${lanePath}.manualRates.${index}.label`
-                          )}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Input
-                          type="number"
-                          step="0.01"
-                          className="text-right tabular-nums"
-                          {...register(
-                            `${lanePath}.manualRates.${index}.amount`,
-                            {
-                              valueAsNumber: true,
-                            }
-                          )}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon-sm"
-                          aria-label="Remove charge"
-                          onClick={() => onRemoveRate(index)}
-                        >
-                          <TrashIcon />
-                        </Button>
+          <div className="space-y-3">
+            {rateFields.length ? (
+              rateFields.map((field, index) => (
+                <div
+                  key={field.id}
+                  className="overflow-hidden rounded-none border"
+                >
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Charge</TableHead>
+                        <TableHead className="w-40 text-right">
+                          Amount
+                        </TableHead>
+                        <TableHead className="w-10" />
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      <TableRow>
+                        <TableCell>
+                          <Input
+                            placeholder="Rate label"
+                            {...register(
+                              `${lanePath}.manualRates.${index}.label`
+                            )}
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <Input
+                            type="number"
+                            step="0.01"
+                            className="text-right tabular-nums"
+                            {...register(
+                              `${lanePath}.manualRates.${index}.amount`,
+                              {
+                                valueAsNumber: true,
+                              }
+                            )}
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon-sm"
+                            aria-label="Remove charge"
+                            onClick={() => onRemoveRate(index)}
+                          >
+                            <TrashIcon />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                  <RateSurchargesEditor
+                    control={control}
+                    register={register}
+                    lanePath={lanePath}
+                    rateIndex={index}
+                    currencyCode={currencyCode}
+                  />
+                </div>
+              ))
+            ) : (
+              <div className="overflow-x-auto rounded-none border">
+                <Table>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell className="h-16 text-center text-muted-foreground">
+                        No charges yet.
                       </TableCell>
                     </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell
-                      colSpan={3}
-                      className="h-16 text-center text-muted-foreground"
-                    >
-                      No charges yet.
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
+                  </TableBody>
+                </Table>
+              </div>
+            )}
           </div>
 
           <Button

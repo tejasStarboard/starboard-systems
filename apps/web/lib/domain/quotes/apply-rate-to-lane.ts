@@ -1,7 +1,9 @@
 import {
   createManualRateLine,
+  createSurchargeLine,
   type ManualRateLine,
   type Rate,
+  type SurchargeLine,
 } from "@starboard/lib-contracts"
 
 /** Spot offer row from a completed search workflow `result.rates[]`. */
@@ -16,6 +18,8 @@ export type SpotOffer = {
   validTo?: string
   source?: string
   mode?: string
+  /** Charge lines when the spot strategy returns them. */
+  surcharges?: SurchargeLine[]
 }
 
 export type SpotSearchWorkflowResult = {
@@ -27,10 +31,26 @@ export type SpotSearchWorkflowResult = {
 export type ParseSpotSearchResult =
   { ok: true; rates: SpotOffer[] } | { ok: false; error: string }
 
+/** Clone source charge lines onto a new manual rate (fresh ids). */
+export function mapSurchargesToManual(
+  source: SurchargeLine[] | undefined | null
+): SurchargeLine[] {
+  if (source == null || source.length === 0) {
+    return []
+  }
+  return source.map((line) =>
+    createSurchargeLine({
+      ...line,
+      id: crypto.randomUUID(),
+    })
+  )
+}
+
 export function catalogRateToManualLine(rate: Rate): ManualRateLine {
   return createManualRateLine({
     label: rate.label,
     amount: rate.amount,
+    surcharges: mapSurchargesToManual(rate.surcharges),
   })
 }
 
@@ -41,6 +61,7 @@ export function spotOfferToManualLine(offer: SpotOffer): ManualRateLine {
   return createManualRateLine({
     label,
     amount: offer.amount,
+    surcharges: mapSurchargesToManual(offer.surcharges),
   })
 }
 
