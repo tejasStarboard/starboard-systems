@@ -1,6 +1,6 @@
 import { z } from "zod"
 
-/** Leg bucket for charge lines (globals live in ticket 068). */
+/** Leg bucket for charge lines. Quote-level globals use `source: "global"`. */
 export const surchargeLegSchema = z.enum(["origin", "freight", "destination"])
 export type SurchargeLeg = z.infer<typeof surchargeLegSchema>
 

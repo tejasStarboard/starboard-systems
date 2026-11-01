@@ -26,6 +26,7 @@ import {
 } from "@starboard/lib-ui/components/toggle-group"
 import { cn } from "@starboard/lib-ui/lib/utils"
 
+import { GlobalChargesEditor } from "@/components/quotes/global-charges-editor"
 import { LaneFields } from "@/components/quotes/lane-fields"
 import { RateSurchargesEditor } from "@/components/quotes/rate-surcharges-editor"
 import type {
@@ -74,6 +75,7 @@ export function QuoteLaneEditor({
   rateFields,
   manualRatesVisible,
   totals,
+  excludedBuckets,
   currencyCode,
   portOptions,
   containerTypeOptions,
@@ -99,6 +101,7 @@ export function QuoteLaneEditor({
   >[]
   manualRatesVisible: boolean
   totals: { subtotal: number; markup: number; total: number }
+  excludedBuckets: Array<"origin" | "freight" | "destination">
   currencyCode: string
   portOptions: QuoteFormOption[]
   containerTypeOptions: QuoteFormOption[]
@@ -229,6 +232,7 @@ export function QuoteLaneEditor({
                     lanePath={lanePath}
                     rateIndex={index}
                     currencyCode={currencyCode}
+                    excludedBuckets={excludedBuckets}
                   />
                 </div>
               ))
@@ -256,6 +260,18 @@ export function QuoteLaneEditor({
             <PlusIcon data-icon="inline-start" />
             Add charge
           </Button>
+
+          <GlobalChargesEditor
+            control={control}
+            register={register}
+            currencyCode={currencyCode}
+          />
+
+          {excludedBuckets.length > 0 ? (
+            <p className="text-[11px] text-muted-foreground">
+              Scoped out of totals (no door): {excludedBuckets.join(", ")}.
+            </p>
+          ) : null}
 
           <div className="ml-auto flex w-full max-w-sm flex-col gap-3">
             <div className="flex items-center justify-between gap-3 text-xs">

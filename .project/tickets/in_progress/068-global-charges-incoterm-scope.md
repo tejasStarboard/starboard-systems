@@ -2,7 +2,7 @@
 id: 068
 wave: 06-product
 title: Global charges + incoterm / bucket scope
-status: open
+status: in_progress
 depends_on: [067]
 epic: SYS-PRICING
 docs:

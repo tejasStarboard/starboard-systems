@@ -18,6 +18,7 @@ export {
   type SurchargeFlagInput,
   type TotalKind,
 } from "./total-inclusion"
+export { deriveExcludedBuckets } from "./scope"
 export { getEffectiveUsageAmount } from "./usage"
 export {
   findBaseFreightRow,

@@ -19,7 +19,9 @@ import {
   buildLaneUsageQuantities,
   calculateManualRateTotals,
   createManualRateLine,
+  deriveExcludedBuckets,
   emptyLaneFormValues,
+  isDoorAddressEmpty,
   isLaneReady,
   quoteFormSchema,
   type LaneFormValues,
@@ -109,10 +111,23 @@ export function QuoteForm({
     name: lanePath,
   })
   const lanes = useWatch({ control: form.control, name: "lanes" })
+  const globalCharges = useWatch({
+    control: form.control,
+    name: "globalCharges",
+  })
   const currencyCode = useWatch({
     control: form.control,
     name: "currencyCode",
   })
+
+  const excludedBuckets = useMemo(
+    () =>
+      deriveExcludedBuckets({
+        hasPickupDoor: !isDoorAddressEmpty(selectedLane?.pickup),
+        hasDeliveryDoor: !isDoorAddressEmpty(selectedLane?.delivery),
+      }),
+    [selectedLane?.pickup, selectedLane?.delivery]
+  )
 
   useEffect(() => {
     if (selectedLaneIndex > laneFields.length - 1) {
@@ -142,8 +157,10 @@ export function QuoteForm({
         markupType: selectedLane?.markupType ?? "amount",
         markupValue: Number(selectedLane?.markupValue) || 0,
         usage: usageFromLane(selectedLane),
+        scope: { excluded_buckets: excludedBuckets },
+        globalCharges: globalCharges ?? [],
       }),
-    [selectedLane]
+    [selectedLane, excludedBuckets, globalCharges]
   )
 
   function onSubmit(values: QuoteFormValues) {
@@ -276,6 +293,7 @@ export function QuoteForm({
     rateFields,
     manualRatesVisible,
     totals,
+    excludedBuckets,
     currencyCode: currencyCode ?? "",
     pending,
     isDirty: form.formState.isDirty,

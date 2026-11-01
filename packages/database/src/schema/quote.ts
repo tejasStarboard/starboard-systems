@@ -193,8 +193,51 @@ export const surcharge = quotesSchema.table(
   (table) => [index("quote_surcharge_rate_id_idx").on(table.rateId)]
 )
 
+/** Quote-level global charges (not nested under a rate). */
+export const globalCharge = quotesSchema.table(
+  "global_charge",
+  {
+    id: text("id").primaryKey(),
+    quoteId: text("quote_id")
+      .notNull()
+      .references(() => quote.id, { onDelete: "cascade" }),
+    name: text("name").notNull().default(""),
+    /** Schema requires a leg; globals are scope-immune via source=`global`. */
+    leg: varchar("leg", { length: 16 }).$type<SurchargeLeg>().notNull(),
+    usageUnit: varchar("usage_unit", { length: 16 })
+      .$type<UsageUnit>()
+      .notNull()
+      .default("flat"),
+    rate: doublePrecision("rate"),
+    ratePercentage: doublePrecision("rate_percentage"),
+    currencyCode: varchar("currency_code", { length: 3 }).notNull(),
+    source: varchar("source", { length: 16 })
+      .$type<SurchargeSource>()
+      .notNull()
+      .default("global"),
+    isIncludedInTotal: boolean("is_included_in_total").notNull().default(true),
+    isRemoved: boolean("is_removed").notNull().default(false),
+    isVisible: boolean("is_visible").notNull().default(true),
+    freeUsage: doublePrecision("free_usage"),
+    minUsage: doublePrecision("min_usage"),
+    maxUsage: doublePrecision("max_usage"),
+    buyAmount: doublePrecision("buy_amount"),
+    sellAmount: doublePrecision("sell_amount"),
+    scopeOverride: varchar("scope_override", {
+      length: 16,
+    }).$type<ScopeOverride | null>(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+      .defaultNow()
+      .$onUpdate(() => /* @__PURE__ */ new Date())
+      .notNull(),
+  },
+  (table) => [index("quote_global_charge_quote_id_idx").on(table.quoteId)]
+)
+
 export const quoteRelations = relations(quote, ({ many }) => ({
   lanes: many(lane),
+  globalCharges: many(globalCharge),
 }))
 
 export const laneRelations = relations(lane, ({ one, many }) => ({
@@ -217,5 +260,12 @@ export const surchargeRelations = relations(surcharge, ({ one }) => ({
   rate: one(rate, {
     fields: [surcharge.rateId],
     references: [rate.id],
+  }),
+}))
+
+export const globalChargeRelations = relations(globalCharge, ({ one }) => ({
+  quote: one(quote, {
+    fields: [globalCharge.quoteId],
+    references: [quote.id],
   }),
 }))
