@@ -3,10 +3,14 @@
  * Canonical schemas live in `@starboard/lib-contracts`.
  * Pricing math lives in `@starboard/lib-pricing`.
  */
-export { calculateManualRateTotals } from "@starboard/lib-pricing"
+export {
+  buildLaneUsageQuantities,
+  calculateManualRateTotals,
+} from "@starboard/lib-pricing"
 export {
   createContainerLine,
   createManualRateLine,
+  createSurchargeLine,
   emptyLaneFormValues,
   emptyQuoteFormValues,
   isLaneReady,

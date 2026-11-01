@@ -2,7 +2,7 @@
 id: 066
 wave: 06-product
 title: Surcharge amount engine in packages/pricing
-status: in_progress
+status: done
 depends_on: [065, 010]
 epic: SYS-PRICING
 docs:

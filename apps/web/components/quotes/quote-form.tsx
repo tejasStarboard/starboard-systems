@@ -16,15 +16,39 @@ import {
   type ApplyRatePayload,
 } from "@/components/quotes/rates-search-sheet"
 import {
+  buildLaneUsageQuantities,
   calculateManualRateTotals,
   createManualRateLine,
   emptyLaneFormValues,
   isLaneReady,
   quoteFormSchema,
+  type LaneFormValues,
   type QuoteFormOption,
   type QuoteFormValues,
 } from "@/lib/domain/quotes/quotes.schema"
 import type { SpotRateSource } from "@/lib/spot-rate-source"
+
+function usageFromLane(lane: LaneFormValues | undefined) {
+  if (!lane) {
+    return buildLaneUsageQuantities({})
+  }
+  if (lane.mode === "fcl") {
+    const containerCount = lane.containers.reduce(
+      (sum, line) => sum + (Number.isFinite(line.count) ? line.count : 0),
+      0
+    )
+    const weightKg = lane.containers.reduce(
+      (sum, line) => sum + (Number.isFinite(line.weight) ? line.weight : 0),
+      0
+    )
+    return buildLaneUsageQuantities({ containerCount, weightKg })
+  }
+  return buildLaneUsageQuantities({
+    weightKg: lane.weight,
+    volumeCbm: lane.volume,
+    palletCount: lane.palletCount,
+  })
+}
 
 export function QuoteForm({
   defaultValues,
@@ -117,6 +141,7 @@ export function QuoteForm({
         lines: selectedLane?.manualRates ?? [],
         markupType: selectedLane?.markupType ?? "amount",
         markupValue: Number(selectedLane?.markupValue) || 0,
+        usage: usageFromLane(selectedLane),
       }),
     [selectedLane]
   )
