@@ -17,12 +17,13 @@ Pricing math (`packages/pricing`), geography resolution, CRM customer records, s
 
 ## Rates + surcharges
 
-Each lane stores `manualRates: ManualRateLine[]` (`label` + `amount` + nested `surcharges`). Persist shape:
+Each lane stores `manualRates: ManualRateLine[]` (`label` + `amount` + nested `surcharges`). Quote also stores `globalCharges` (quote-level). Persist shape:
 
 - `quotes.rate` — base rate line (label/amount)
 - `quotes.surcharge` — lean charge rows FK → `quotes.rate` (`leg`, `usage_unit`, rate / rate_percentage, inclusion flags, usage bounds, buy/sell amounts)
+- `quotes.global_charge` — quote-level charges (`source: global`); immune to door bucket scope
 
-Save path is still full lane-tree replace (`replaceLanes`); deleting a lane cascades rates → surcharges.
+Save path is still full lane-tree replace (`replaceLanes`, which also replaces globals); deleting a lane cascades rates → surcharges.
 
 ### Schema push
 
@@ -32,19 +33,20 @@ After pulling schema changes:
 pnpm --filter @starboard/lib-db db:push
 ```
 
-`quotes` is in drizzle `schemaFilter`. New table: `quotes.surcharge`. No checked-in SQL migrations — push is the path (same as CI `db:push:ci`).
+`quotes` is in drizzle `schemaFilter`. Tables: `quotes.surcharge`, `quotes.global_charge`. No checked-in SQL migrations — push is the path (same as CI `db:push:ci`).
 
 ## Apply rate → lane
 
-From `RatesSearchSheet`, catalog rows and completed spot offers **Apply to lane** by appending a `ManualRateLine` (`label` + `amount` + nested `surcharges` when the source has charge lines) on the active lane. Totals use `@starboard/lib-pricing` (base + included surcharge amounts by unit / % freight); persist via existing quote save (no catalog/spot FK on `quotes.rate`). Spot UI only when active spot sources are present; catalog + manual surcharge editing work with extensions off.
+From `RatesSearchSheet`, catalog rows and completed spot offers **Apply to lane** by appending a `ManualRateLine` (`label` + `amount` + nested `surcharges` when the source has charge lines) on the active lane. Totals use `@starboard/lib-pricing` (base + included surcharge amounts by unit / % freight + globals; door absence excludes origin/destination buckets); persist via existing quote save (no catalog/spot FK on `quotes.rate`). Spot UI only when active spot sources are present; catalog + manual surcharge editing work with extensions off.
 
 ## Current gaps
 
 - No status-transition rules, delete, PDF, email send
 - No provenance link from lane rate back to catalog/spot offer id
 - Geography doors via Places (007); facility gazetteer still evolving
-- Global charges + Incoterm bucket scope (**068**) not wired yet
+- Full Incoterm code table (lean door-derived buckets only)
+- Org settings rate-item admin for default globals
 
 ## Next tickets
 
-Globals / Incoterm scope (`068`).
+Quote stages / validity / PDF (after money path).

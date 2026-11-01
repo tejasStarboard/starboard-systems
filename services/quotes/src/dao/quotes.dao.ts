@@ -18,9 +18,11 @@ import {
   type QuoteListItem,
   type QuoteSource,
   type QuoteStatus,
+  type SurchargeLine,
 } from "@starboard/lib-contracts"
 import {
   containerType,
+  globalCharge,
   lane,
   palletType,
   quote,
@@ -29,6 +31,8 @@ import {
 } from "@starboard/lib-db/schema"
 
 import {
+  globalChargeLineToRow,
+  globalChargeRowToLine,
   laneFormToRows,
   resolveRateValidity,
   rowsToLaneForm,
@@ -63,6 +67,7 @@ export type ReplaceLanesInput = {
   quoteId: string
   organizationId: string
   lanes: LaneFormValues[]
+  globalCharges: SurchargeLine[]
   currencyCode: string | null
   effectiveFrom: Date | null
   expiryAt: Date | null
@@ -280,6 +285,31 @@ export class DrizzleQuotesDao implements QuotesDao {
       surchargesByRateId.set(surchargeRow.rateId, list)
     }
 
+    const globalChargeRows = await this.db
+      .select({
+        id: globalCharge.id,
+        quoteId: globalCharge.quoteId,
+        name: globalCharge.name,
+        leg: globalCharge.leg,
+        usageUnit: globalCharge.usageUnit,
+        rate: globalCharge.rate,
+        ratePercentage: globalCharge.ratePercentage,
+        currencyCode: globalCharge.currencyCode,
+        source: globalCharge.source,
+        isIncludedInTotal: globalCharge.isIncludedInTotal,
+        isRemoved: globalCharge.isRemoved,
+        isVisible: globalCharge.isVisible,
+        freeUsage: globalCharge.freeUsage,
+        minUsage: globalCharge.minUsage,
+        maxUsage: globalCharge.maxUsage,
+        buyAmount: globalCharge.buyAmount,
+        sellAmount: globalCharge.sellAmount,
+        scopeOverride: globalCharge.scopeOverride,
+      })
+      .from(globalCharge)
+      .where(eq(globalCharge.quoteId, quoteId))
+      .orderBy(asc(globalCharge.createdAt))
+
     const lanes =
       laneRows.length === 0
         ? [emptyLaneFormValues()]
@@ -300,6 +330,7 @@ export class DrizzleQuotesDao implements QuotesDao {
       currencyCode: row.currencyCode ?? "",
       effectiveFrom: toDateInputValue(row.effectiveFrom),
       expiryAt: toDateInputValue(row.expiryAt),
+      globalCharges: globalChargeRows.map(globalChargeRowToLine),
       lanes,
     }
   }
@@ -360,12 +391,43 @@ export class DrizzleQuotesDao implements QuotesDao {
     }
 
     await this.db.delete(lane).where(eq(lane.quoteId, input.quoteId))
+    await this.db
+      .delete(globalCharge)
+      .where(eq(globalCharge.quoteId, input.quoteId))
 
     const validity = resolveRateValidity({
       effectiveFrom: input.effectiveFrom,
       expiryAt: input.expiryAt,
     })
     const currencyCode = input.currencyCode ?? ""
+
+    const globalRows = input.globalCharges.map((line) =>
+      globalChargeLineToRow(line, input.quoteId)
+    )
+    if (globalRows.length > 0) {
+      await this.db.insert(globalCharge).values(
+        globalRows.map((row) => ({
+          id: row.id,
+          quoteId: row.quoteId,
+          name: row.name,
+          leg: row.leg,
+          usageUnit: row.usageUnit,
+          rate: row.rate,
+          ratePercentage: row.ratePercentage,
+          currencyCode: row.currencyCode,
+          source: row.source,
+          isIncludedInTotal: row.isIncludedInTotal,
+          isRemoved: row.isRemoved,
+          isVisible: row.isVisible,
+          freeUsage: row.freeUsage,
+          minUsage: row.minUsage,
+          maxUsage: row.maxUsage,
+          buyAmount: row.buyAmount,
+          sellAmount: row.sellAmount,
+          scopeOverride: row.scopeOverride,
+        }))
+      )
+    }
 
     for (const formLane of input.lanes) {
       const mapped = laneFormToRows(

@@ -24,6 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@starboard/lib-ui/components/select"
+import { cn } from "@starboard/lib-ui/lib/utils"
 
 import type { QuoteFormValues } from "@/lib/domain/quotes/quotes.schema"
 
@@ -53,12 +54,14 @@ export function RateSurchargesEditor({
   lanePath,
   rateIndex,
   currencyCode,
+  excludedBuckets = [],
 }: {
   control: Control<QuoteFormValues>
   register: UseFormRegister<QuoteFormValues>
   lanePath: `lanes.${number}`
   rateIndex: number
   currencyCode: string
+  excludedBuckets?: Array<"origin" | "freight" | "destination">
 }) {
   const surchargesPath =
     `${lanePath}.manualRates.${rateIndex}.surcharges` as const
@@ -118,13 +121,22 @@ export function RateSurchargesEditor({
                 {group.label}
               </p>
               <div className="space-y-2">
-                {group.items.map(({ field, index, usageUnit }) => {
+                {group.items.map(({ field, index, usageUnit, leg }) => {
                   const prefix = `${surchargesPath}.${index}` as const
                   const isPercentage = usageUnit === "percentage"
+                  const scopedOut = excludedBuckets.includes(leg)
                   return (
                     <div
                       key={field.id}
-                      className="grid grid-cols-[minmax(0,1.4fr)_7rem_7rem_6rem_auto_auto] items-center gap-2"
+                      className={cn(
+                        "grid grid-cols-[minmax(0,1.4fr)_7rem_7rem_6rem_auto_auto] items-center gap-2",
+                        scopedOut && "opacity-50"
+                      )}
+                      title={
+                        scopedOut
+                          ? `${leg} charges excluded without a door at that end`
+                          : undefined
+                      }
                     >
                       <Input
                         placeholder="Name"

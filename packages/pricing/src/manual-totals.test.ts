@@ -1,13 +1,16 @@
 import { describe, expect, test } from "bun:test"
 
+import globalScopeFixtures from "../fixtures/global-scope-totals.json"
 import manualRateFixtures from "../fixtures/manual-rate-totals.json"
 import {
   buildLaneUsageQuantities,
   calculateManualRateTotals,
   computeManualLaneTotals,
+  type ManualLaneTotalsInput,
   type MarkupType,
 } from "./manual-totals"
 import { roundMoney } from "./money"
+import { deriveExcludedBuckets } from "./scope"
 
 type ManualCase = {
   id: string
@@ -197,4 +200,41 @@ describe("buildLaneUsageQuantities", () => {
       per_time: 1,
     })
   })
+})
+
+describe("deriveExcludedBuckets", () => {
+  test("port-to-port excludes origin and destination", () => {
+    expect(
+      deriveExcludedBuckets({ hasPickupDoor: false, hasDeliveryDoor: false })
+    ).toEqual(["origin", "destination"])
+  })
+
+  test("door-to-door excludes nothing", () => {
+    expect(
+      deriveExcludedBuckets({ hasPickupDoor: true, hasDeliveryDoor: true })
+    ).toEqual([])
+  })
+
+  test("door pickup only excludes destination", () => {
+    expect(
+      deriveExcludedBuckets({ hasPickupDoor: true, hasDeliveryDoor: false })
+    ).toEqual(["destination"])
+  })
+})
+
+type GlobalScopeCase = {
+  id: string
+  input: ManualLaneTotalsInput
+  expected: { buy: number; markup: number; sell: number }
+}
+
+const globalScopeCases = (globalScopeFixtures as { cases: GlobalScopeCase[] })
+  .cases
+
+describe("computeManualLaneTotals — global + scope fixtures", () => {
+  for (const fixture of globalScopeCases) {
+    test(fixture.id, () => {
+      expect(computeManualLaneTotals(fixture.input)).toEqual(fixture.expected)
+    })
+  }
 })

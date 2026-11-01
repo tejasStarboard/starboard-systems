@@ -12,9 +12,12 @@ import {
 } from "@starboard/lib-contracts"
 
 import {
+  globalChargeLineToRow,
+  globalChargeRowToLine,
   laneFormToRows,
   resolveRateValidity,
   rowsToLaneForm,
+  type GlobalChargeRow,
   type LaneRow,
   type RateRow,
   type SurchargeRow,
@@ -34,6 +37,7 @@ class InMemoryQuotesDao implements QuotesDao {
   private lanesByQuote = new Map<string, LaneRow[]>()
   private ratesByLane = new Map<string, RateRow[]>()
   private surchargesByRateId = new Map<string, SurchargeRow[]>()
+  private globalChargesByQuote = new Map<string, GlobalChargeRow[]>()
 
   async listByOrganization(
     organizationId: string,
@@ -101,6 +105,9 @@ class InMemoryQuotesDao implements QuotesDao {
       currencyCode: row.currencyCode ?? "",
       effectiveFrom: toDateInput(row.effectiveFrom),
       expiryAt: toDateInput(row.expiryAt),
+      globalCharges: (this.globalChargesByQuote.get(quoteId) ?? []).map(
+        globalChargeRowToLine
+      ),
       lanes,
     }
   }
@@ -176,6 +183,12 @@ class InMemoryQuotesDao implements QuotesDao {
       }
     }
     this.lanesByQuote.set(input.quoteId, nextLanes)
+    this.globalChargesByQuote.set(
+      input.quoteId,
+      input.globalCharges.map((line) =>
+        globalChargeLineToRow(line, input.quoteId)
+      )
+    )
     return true
   }
 
@@ -260,6 +273,16 @@ describe("DefaultQuotesService.save", () => {
     values.effectiveFrom = "2026-03-01"
     values.expiryAt = "2026-06-01"
     values.lanes = [lane]
+    values.globalCharges = [
+      createSurchargeLine({
+        id: "global-1",
+        name: "Documentation",
+        source: "global",
+        usageUnit: "flat",
+        rate: 35,
+        currencyCode: "USD",
+      }),
+    ]
 
     await service.save(values, {
       ownerId: "user-1",
@@ -268,6 +291,14 @@ describe("DefaultQuotesService.save", () => {
 
     const loaded = await service.get(quoteId, "org-1")
     expect(loaded.currencyCode).toBe("USD")
+    expect(loaded.globalCharges).toEqual([
+      expect.objectContaining({
+        id: "global-1",
+        name: "Documentation",
+        source: "global",
+        rate: 35,
+      }),
+    ])
     expect(loaded.lanes).toHaveLength(1)
     expect(loaded.lanes[0]).toMatchObject({
       id: "lane-1",

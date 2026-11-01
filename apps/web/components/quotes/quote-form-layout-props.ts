@@ -37,6 +37,7 @@ export type QuoteFormLayoutProps = {
   >[]
   manualRatesVisible: boolean
   totals: { subtotal: number; markup: number; total: number }
+  excludedBuckets: Array<"origin" | "freight" | "destination">
   currencyCode: string
   pending: boolean
   isDirty: boolean

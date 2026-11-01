@@ -176,6 +176,7 @@ export class DefaultQuotesService implements QuotesService {
       quoteId: data.id,
       organizationId: input.organizationId,
       lanes: data.lanes,
+      globalCharges: data.globalCharges,
       currencyCode,
       effectiveFrom: payload.effectiveFrom,
       expiryAt: payload.expiryAt,

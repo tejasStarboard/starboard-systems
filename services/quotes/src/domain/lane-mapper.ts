@@ -54,6 +54,11 @@ export type SurchargeRow = {
   scopeOverride: SurchargeLine["scopeOverride"]
 }
 
+/** Quote-level global charge row (FK → quote, not rate). */
+export type GlobalChargeRow = Omit<SurchargeRow, "rateId"> & {
+  quoteId: string
+}
+
 export type RateValidity = {
   validFrom: Date
   validTo: Date
@@ -169,7 +174,28 @@ function surchargeLineToRow(line: SurchargeLine, rateId: string): SurchargeRow {
   }
 }
 
-function surchargeRowToLine(row: SurchargeRow): SurchargeLine {
+function surchargeRowToLine(
+  row: Pick<
+    SurchargeRow,
+    | "id"
+    | "name"
+    | "leg"
+    | "usageUnit"
+    | "rate"
+    | "ratePercentage"
+    | "currencyCode"
+    | "source"
+    | "isIncludedInTotal"
+    | "isRemoved"
+    | "isVisible"
+    | "freeUsage"
+    | "minUsage"
+    | "maxUsage"
+    | "buyAmount"
+    | "sellAmount"
+    | "scopeOverride"
+  >
+): SurchargeLine {
   return {
     id: row.id,
     name: row.name,
@@ -189,6 +215,36 @@ function surchargeRowToLine(row: SurchargeRow): SurchargeLine {
     sellAmount: row.sellAmount,
     scopeOverride: row.scopeOverride,
   }
+}
+
+export function globalChargeLineToRow(
+  line: SurchargeLine,
+  quoteId: string
+): GlobalChargeRow {
+  return {
+    id: line.id,
+    quoteId,
+    name: line.name,
+    leg: line.leg,
+    usageUnit: line.usageUnit,
+    rate: line.rate,
+    ratePercentage: line.ratePercentage,
+    currencyCode: line.currencyCode,
+    source: "global",
+    isIncludedInTotal: line.isIncludedInTotal,
+    isRemoved: line.isRemoved,
+    isVisible: line.isVisible,
+    freeUsage: line.freeUsage,
+    minUsage: line.minUsage,
+    maxUsage: line.maxUsage,
+    buyAmount: line.buyAmount,
+    sellAmount: line.sellAmount,
+    scopeOverride: line.scopeOverride,
+  }
+}
+
+export function globalChargeRowToLine(row: GlobalChargeRow): SurchargeLine {
+  return surchargeRowToLine(row)
 }
 
 export function laneFormToRows(

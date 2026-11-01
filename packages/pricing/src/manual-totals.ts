@@ -3,7 +3,7 @@ import {
   calculateSurchargeAmount,
   type SurchargeUsageUnit,
 } from "./surcharge-amount"
-import { isIncludedInTotal } from "./total-inclusion"
+import { isIncludedInTotal, type ScopeContext } from "./total-inclusion"
 
 export type MarkupType = "amount" | "percent"
 
@@ -44,6 +44,13 @@ export type ManualLaneTotalsInput = {
   markupValue: number
   /** Required for per-unit surcharge math; ignored when lines have no surcharges. */
   usage?: LaneUsageQuantities | null
+  /** Bucket / incoterm scope for lane surcharge inclusion (sell / rollup_buy). */
+  scope?: ScopeContext | null
+  /**
+   * Quote-level global charges (source `global`). Always scope-bucket-immune;
+   * still respect inclusion / removed flags. % rows use sum of line amounts.
+   */
+  globalCharges?: ManualSurchargeLineInput[] | null
 }
 
 /** Canonical ONE MATH lane totals: sell = buy + markup. */
@@ -122,7 +129,8 @@ function rawUsageForUnit(
 function surchargeBuy(
   surcharge: ManualSurchargeLineInput,
   baseFreightAmount: number,
-  usage: LaneUsageQuantities | null | undefined
+  usage: LaneUsageQuantities | null | undefined,
+  scope?: ScopeContext | null
 ): number {
   if (
     !isIncludedInTotal(
@@ -135,7 +143,8 @@ function surchargeBuy(
         source: surcharge.source,
       },
       {},
-      "sell"
+      "sell",
+      scope
     )
   ) {
     return 0
@@ -155,7 +164,8 @@ function surchargeBuy(
 
 function lineBuy(
   line: ManualLaneTotalsInput["lines"][number],
-  usage: LaneUsageQuantities | null | undefined
+  usage: LaneUsageQuantities | null | undefined,
+  scope?: ScopeContext | null
 ): number {
   const base = Number.isFinite(line.amount) ? line.amount : 0
   const surcharges = line.surcharges ?? []
@@ -163,24 +173,51 @@ function lineBuy(
     return base
   }
   const surchargeTotal = surcharges.reduce(
-    (sum, row) => sum + surchargeBuy(row, base, usage),
+    (sum, row) => sum + surchargeBuy(row, base, usage, scope),
     0
   )
   return base + surchargeTotal
+}
+
+function linesBaseFreight(lines: ManualLaneTotalsInput["lines"]): number {
+  return lines.reduce((sum, line) => {
+    const amount = Number.isFinite(line.amount) ? line.amount : 0
+    return sum + amount
+  }, 0)
 }
 
 /**
  * Sum manual rate lines as buy seed, apply amount/percent markup, derive sell.
  * When lines carry surcharges, included rows are priced via
  * {@link calculateSurchargeAmount} using {@link ManualLaneTotalsInput.usage}.
+ * Optional {@link ManualLaneTotalsInput.scope} drops origin/destination buckets.
+ * Optional {@link ManualLaneTotalsInput.globalCharges} roll in after lane lines.
  * Non-finite line amounts and markup values are treated as 0. Outputs are rounded.
  */
 export function computeManualLaneTotals(
   input: ManualLaneTotalsInput
 ): ManualLaneTotals {
-  const buy = roundMoney(
-    input.lines.reduce((sum, line) => sum + lineBuy(line, input.usage), 0)
+  const scope = input.scope ?? null
+  const laneBuy = input.lines.reduce(
+    (sum, line) => sum + lineBuy(line, input.usage, scope),
+    0
   )
+  const globals = input.globalCharges ?? []
+  const globalBuy =
+    globals.length === 0
+      ? 0
+      : globals.reduce(
+          (sum, row) =>
+            sum +
+            surchargeBuy(
+              { ...row, source: row.source ?? "global" },
+              linesBaseFreight(input.lines),
+              input.usage,
+              scope
+            ),
+          0
+        )
+  const buy = roundMoney(laneBuy + globalBuy)
   const markupValue = Number.isFinite(input.markupValue) ? input.markupValue : 0
   const markup = roundMoney(
     input.markupType === "percent" ? (buy * markupValue) / 100 : markupValue

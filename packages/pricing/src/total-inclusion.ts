@@ -39,6 +39,10 @@ function scopeExcluded(
   if (surcharge.scope_override === "include") {
     return false
   }
+  // Quote-level globals are immune to origin/freight/destination bucket scope.
+  if (surcharge.source === "global") {
+    return false
+  }
   const buckets = scope?.excluded_buckets
   if (!buckets || buckets.length === 0) {
     return false

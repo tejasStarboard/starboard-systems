@@ -72,6 +72,7 @@ export function QuoteFormMobile(props: QuoteFormLayoutProps) {
           rateFields={props.rateFields}
           manualRatesVisible={props.manualRatesVisible}
           totals={props.totals}
+          excludedBuckets={props.excludedBuckets}
           currencyCode={props.currencyCode}
           portOptions={props.portOptions}
           containerTypeOptions={props.containerTypeOptions}

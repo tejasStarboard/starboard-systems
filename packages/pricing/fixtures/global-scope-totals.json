@@ -1,0 +1,100 @@
+{
+  "$schema_version": "1.0.0",
+  "description": "Lean rewrite cases for computeManualLaneTotals with excluded_buckets scope and quote-level global charges. Money rounded to 2 dp.",
+  "cases": [
+    {
+      "id": "scope_drops_origin_sell",
+      "input": {
+        "lines": [
+          {
+            "amount": 1000,
+            "surcharges": [
+              {
+                "usageUnit": "flat",
+                "rate": 100,
+                "source": "carrier",
+                "isIncludedInTotal": true,
+                "leg": "origin"
+              },
+              {
+                "usageUnit": "flat",
+                "rate": 50,
+                "source": "carrier",
+                "isIncludedInTotal": true,
+                "leg": "freight"
+              }
+            ]
+          }
+        ],
+        "markupType": "amount",
+        "markupValue": 0,
+        "scope": { "excluded_buckets": ["origin"] }
+      },
+      "expected": { "buy": 1050, "markup": 0, "sell": 1050 }
+    },
+    {
+      "id": "scope_override_include_keeps_origin",
+      "input": {
+        "lines": [
+          {
+            "amount": 1000,
+            "surcharges": [
+              {
+                "usageUnit": "flat",
+                "rate": 100,
+                "source": "carrier",
+                "isIncludedInTotal": true,
+                "leg": "origin",
+                "scopeOverride": "include"
+              }
+            ]
+          }
+        ],
+        "markupType": "amount",
+        "markupValue": 0,
+        "scope": { "excluded_buckets": ["origin"] }
+      },
+      "expected": { "buy": 1100, "markup": 0, "sell": 1100 }
+    },
+    {
+      "id": "globals_immune_to_bucket_scope",
+      "input": {
+        "lines": [{ "amount": 1000, "surcharges": [] }],
+        "markupType": "amount",
+        "markupValue": 0,
+        "scope": { "excluded_buckets": ["origin", "freight", "destination"] },
+        "globalCharges": [
+          {
+            "usageUnit": "flat",
+            "rate": 75,
+            "source": "global",
+            "isIncludedInTotal": true,
+            "leg": "freight"
+          }
+        ]
+      },
+      "expected": { "buy": 1075, "markup": 0, "sell": 1075 }
+    },
+    {
+      "id": "globals_percent_of_base_freight",
+      "input": {
+        "lines": [
+          { "amount": 800, "surcharges": [] },
+          { "amount": 200, "surcharges": [] }
+        ],
+        "markupType": "percent",
+        "markupValue": 10,
+        "globalCharges": [
+          {
+            "usageUnit": "percentage",
+            "ratePercentage": 5,
+            "source": "global",
+            "isIncludedInTotal": true,
+            "leg": "freight"
+          }
+        ]
+      },
+      "expected": { "buy": 1050, "markup": 105, "sell": 1155 }
+    }
+  ]
+}

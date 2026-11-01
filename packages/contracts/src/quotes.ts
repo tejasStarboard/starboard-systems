@@ -121,6 +121,8 @@ export const quoteFormSchema = z.object({
     ),
   effectiveFrom: z.string(),
   expiryAt: z.string(),
+  /** Quote-level charges (source `global`); immune to door bucket scope. */
+  globalCharges: z.array(surchargeLineSchema),
   lanes: z.array(laneFormSchema).min(1),
 })
 
@@ -289,6 +291,7 @@ export function emptyQuoteFormValues(input: {
     currencyCode: "",
     effectiveFrom: "",
     expiryAt: "",
+    globalCharges: [],
     lanes: [emptyLaneFormValues("fcl")],
   }
 }
