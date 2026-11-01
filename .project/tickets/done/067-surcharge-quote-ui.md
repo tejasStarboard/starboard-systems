@@ -2,7 +2,7 @@
 id: 067
 wave: 06-product
 title: Surcharges in quote UI and apply-rate path
-status: in_progress
+status: done
 depends_on: [066, 060]
 epic: SYS-QUOTES
 docs:
