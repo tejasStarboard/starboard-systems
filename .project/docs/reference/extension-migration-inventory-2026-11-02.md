@@ -34,20 +34,23 @@ Kernel should retain: auth routes, `(app)/layout` → **workbench host**, `lib/e
 | `api` / `jobs` / `settings`    | Keep; wire UI factories by contribution id |
 | Entitlements + rollout         | Unchanged                                  |
 
-## Suggested package layout (v1)
+## Package layout (decided in 076)
 
 ```text
 extensions/
-  host/                 # @starboard/ext-host (registry + types) — exists
-  spot|messaging|ingestion/  # optional Python — exists
-  quoting-document/     # NEW — UI + BFF contributions for quote
-  quoting-charges/      # NEW — or fold into quoting-document until 073
-  crm-parties/          # NEW
-  org-settings/         # NEW
+  host/                 # @starboard/ext-host (registry + types)
+  spot|messaging|ingestion/  # optional Python workers
+  builtins/             # driving built-ins (JS/TS, default-on credit+enterprise)
+    quoting-document/   # @starboard/ext-quoting-document  → id quoting.document
+    quoting-charges/    # quoting.charges (stub until 073)
+    crm-parties/        # crm.parties
+    geo-gazetteer/      # geo.gazetteer
+    rates-catalog/      # rates.catalog
+    org-settings/       # org.settings
 packages/pricing/       # quoting.math implementation (keep)
 ```
 
-Monorepo can use `extensions/builtins/*` or `packages/ext-*`; pick one convention in **075** and stick to it.
+Convention: `extensions/builtins/<id with dots → dashes>` → `@starboard/ext-<same>`. Each package exports `./manifest` (pure data, no imports; host bundles + Zod-validates it in `extensions/host/src/builtins.ts`) and `.` (manifest + UI/widget factories; React only here). Editor factories are keyed by contributed `workbench.editors` viewType and registered in `apps/web/lib/workbench/builtin-editors.ts`. `pnpm-workspace.yaml` lists `extensions/builtins/*`; `pyproject.toml` excludes `extensions/builtins` from uv.
 
 ## Migration order (matches build-priority)
 
