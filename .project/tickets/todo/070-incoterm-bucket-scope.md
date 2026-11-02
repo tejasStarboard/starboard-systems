@@ -12,7 +12,6 @@ docs:
   - .project/docs/extension-points.md
 ---
 
-
 # Incoterm-driven charge bucket scope (legacy parity)
 
 ## Context (from quote-form discussion)

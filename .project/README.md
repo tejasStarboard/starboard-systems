@@ -4,13 +4,13 @@ Greenfield rewrite of production Starboard (`../starboard-2`).
 
 ## Layout
 
-| Path | Purpose |
-|------|---------|
-| [docs/](docs/) | Architecture, ADRs, extension-points |
-| [docs/reference/](docs/reference/) | Inventory, coverage, **build priority**, migration map |
-| [tickets/](tickets/) | `todo` / `in_progress` / `done` |
-| [../.agents/](../.agents/) | Skills |
-| [docs/git-workflow.md](docs/git-workflow.md) | Branches / `dev` / `main` |
+| Path                                         | Purpose                                                |
+| -------------------------------------------- | ------------------------------------------------------ |
+| [docs/](docs/)                               | Architecture, ADRs, extension-points                   |
+| [docs/reference/](docs/reference/)           | Inventory, coverage, **build priority**, migration map |
+| [tickets/](tickets/)                         | `todo` / `in_progress` / `done`                        |
+| [../.agents/](../.agents/)                   | Skills                                                 |
+| [docs/git-workflow.md](docs/git-workflow.md) | Branches / `dev` / `main`                              |
 
 ## How to pick the next ticket
 

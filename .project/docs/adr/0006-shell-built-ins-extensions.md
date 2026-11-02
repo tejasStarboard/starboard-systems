@@ -16,12 +16,12 @@ Product rule: **refactor of QV2, not a redesign**. Default-on built-ins still de
 
 Always on. **No quote/CRM/settings product UI.**
 
-| Owns | Does not own |
-|------|----------------|
-| Better Auth, organization, plan, entitlements | Quotes, customers, rates product screens |
-| Extension host: manifests, activation, contribution registry | Hard-coded feature page modules |
-| **Workbench shell** (single authenticated app surface) | Domain managers for quotes/CRM as kernel |
-| Auth routes (`/login`, …) | Per-feature `app/(app)/quote/…` trees as product home |
+| Owns                                                         | Does not own                                          |
+| ------------------------------------------------------------ | ----------------------------------------------------- |
+| Better Auth, organization, plan, entitlements                | Quotes, customers, rates product screens              |
+| Extension host: manifests, activation, contribution registry | Hard-coded feature page modules                       |
+| **Workbench shell** (single authenticated app surface)       | Domain managers for quotes/CRM as kernel              |
+| Auth routes (`/login`, …)                                    | Per-feature `app/(app)/quote/…` trees as product home |
 
 **Kernel routes (target):**
 
@@ -35,14 +35,14 @@ Shareable URLs (e.g. `/q/:quoteId`) are **workbench deep links**: same shell rou
 
 ### 2. Workbench regions (VS Code analogy)
 
-| VS Code | Starboard workbench region | Who fills it |
-|---------|----------------------------|--------------|
-| Editor group (multi-tab documents) | **Center editor tabs** | `quoting.document` → quote tabs; later other document types |
-| File explorer / sidebar views | **Primary sidebar** | Built-ins list platform features: Quotes list, Customers, … — open tabs in center |
-| Activity bar | **Activity / view switcher** | One icon per contributed sidebar view |
-| Panel (terminal) | **Bottom panel** (later) | Jobs, logs, messaging preview, … |
-| Secondary sidebar (chat) | **Auxiliary panel** (later) | AI / assist extensions |
-| Settings UI | **Settings editor tab or view** | Contributed by org/settings built-in(s), not kernel pages |
+| VS Code                            | Starboard workbench region      | Who fills it                                                                      |
+| ---------------------------------- | ------------------------------- | --------------------------------------------------------------------------------- |
+| Editor group (multi-tab documents) | **Center editor tabs**          | `quoting.document` → quote tabs; later other document types                       |
+| File explorer / sidebar views      | **Primary sidebar**             | Built-ins list platform features: Quotes list, Customers, … — open tabs in center |
+| Activity bar                       | **Activity / view switcher**    | One icon per contributed sidebar view                                             |
+| Panel (terminal)                   | **Bottom panel** (later)        | Jobs, logs, messaging preview, …                                                  |
+| Secondary sidebar (chat)           | **Auxiliary panel** (later)     | AI / assist extensions                                                            |
+| Settings UI                        | **Settings editor tab or view** | Contributed by org/settings built-in(s), not kernel pages                         |
 
 **Analogies locked:**
 
@@ -53,14 +53,14 @@ Charge table, Incoterm, markup, rate sources are **editor-internal** contributio
 
 ### 3. Driving built-ins — default-on
 
-| Built-in | Contributes |
-|----------|-------------|
-| `quoting.document` | Sidebar “Quotes” view + **quote editor** for center tabs; declares editor slots |
-| `quoting.charges` / `math` / `incoterm` / `markup` / `globals` | Slots inside quote editor |
-| `crm.parties` | Sidebar “Customers” (+ customer editor tab if needed); quote header party picker |
-| `geo.gazetteer` | APIs/widgets used by quote editor (not necessarily its own top-level view) |
-| `rates.catalog` | Rate sources / catalog UI into quote slots (+ optional sidebar later) |
-| `org.settings` (proposed) | Settings view/tabs (company, team, profile, …) |
+| Built-in                                                       | Contributes                                                                      |
+| -------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| `quoting.document`                                             | Sidebar “Quotes” view + **quote editor** for center tabs; declares editor slots  |
+| `quoting.charges` / `math` / `incoterm` / `markup` / `globals` | Slots inside quote editor                                                        |
+| `crm.parties`                                                  | Sidebar “Customers” (+ customer editor tab if needed); quote header party picker |
+| `geo.gazetteer`                                                | APIs/widgets used by quote editor (not necessarily its own top-level view)       |
+| `rates.catalog`                                                | Rate sources / catalog UI into quote slots (+ optional sidebar later)            |
+| `org.settings` (proposed)                                      | Settings view/tabs (company, team, profile, …)                                   |
 
 **Driving test:** optionals off → workbench shows Quotes/Customers/Settings contributions; open quote tab; full manual QV2. Kernel-only → empty regions.
 

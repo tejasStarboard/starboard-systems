@@ -15,9 +15,9 @@ Same as Eclipse: the platform defines `org.eclipse.ui.editors`; **JDT** defines 
 
 ## Two registries
 
-| Registry | Owner | Examples |
-|----------|--------|----------|
-| **Kernel extension points** | Host / workbench | `workbench.views`, `workbench.editors`, `core.jobs`, `core.preferences` |
+| Registry                      | Owner                                      | Examples                                                                |
+| ----------------------------- | ------------------------------------------ | ----------------------------------------------------------------------- |
+| **Kernel extension points**   | Host / workbench                           | `workbench.views`, `workbench.editors`, `core.jobs`, `core.preferences` |
 | **Extension-declared points** | Any extension (usually a driving built-in) | `quoting.document` → `quoting.slots.chargeTable`, `quoting.totalsHooks` |
 
 An extension manifest may both **contribute to** points and **define** points:
@@ -47,28 +47,28 @@ Host activation: resolve contribution target `quoting.slots.chargeTable` → own
 
 ### Workbench (UI)
 
-| Point | Purpose | Who contributes |
-|-------|---------|-----------------|
-| `workbench.activity` | Activity bar icons | Any |
-| `workbench.views` | Sidebar / panel views | `quoting.document` (Quotes list), `crm.parties`, … |
-| `workbench.editors` | Center tab **document types** | `quoting.document` → viewType `quote` |
-| `workbench.commands` / `menus` / `toolbars` | Actions | Any |
-| `workbench.perspectives` / `statusBar` / panels | Later | — |
+| Point                                           | Purpose                       | Who contributes                                    |
+| ----------------------------------------------- | ----------------------------- | -------------------------------------------------- |
+| `workbench.activity`                            | Activity bar icons            | Any                                                |
+| `workbench.views`                               | Sidebar / panel views         | `quoting.document` (Quotes list), `crm.parties`, … |
+| `workbench.editors`                             | Center tab **document types** | `quoting.document` → viewType `quote`              |
+| `workbench.commands` / `menus` / `toolbars`     | Actions                       | Any                                                |
+| `workbench.perspectives` / `statusBar` / panels | Later                         | —                                                  |
 
 **Not kernel:** nested quote UI regions. Kernel editor host only renders whatever the **active editor extension** returns (including that extension’s internal slot hosts).
 
 ### Core (headless)
 
-| Point | Purpose |
-|-------|---------|
+| Point                               | Purpose                                                         |
+| ----------------------------------- | --------------------------------------------------------------- |
 | `core.resources` / `resourceEvents` | Resource kinds + adapters (extensions register `kind: "quote"`) |
-| `core.contentTypes` | URI / MIME recognition |
-| `core.jobs` / `jobProgress` | Async 202 + status (exists) |
-| `core.preferences` / `secrets` | Declared settings |
-| `core.api` | `/api/extensions/{id}/…` |
-| `core.services` (later) | Shared service interfaces |
-| `core.validators` | Optional save validators by resource kind |
-| Entitlements query | Kernel-owned API (not an override point) |
+| `core.contentTypes`                 | URI / MIME recognition                                          |
+| `core.jobs` / `jobProgress`         | Async 202 + status (exists)                                     |
+| `core.preferences` / `secrets`      | Declared settings                                               |
+| `core.api`                          | `/api/extensions/{id}/…`                                        |
+| `core.services` (later)             | Shared service interfaces                                       |
+| `core.validators`                   | Optional save validators by resource kind                       |
+| Entitlements query                  | Kernel-owned API (not an override point)                        |
 
 Kernel does **not** list `quote` as a built-in resource kind in code forever — extensions **register** kinds via `core.resources`. Kernel may ship zero product kinds.
 
@@ -78,15 +78,15 @@ Kernel does **not** list `quote` as a built-in resource kind in code forever —
 
 `quoting.document` contributes a `workbench.editors` entry (`viewType: "quote"`) and a Quotes `workbench.views` entry. It also **`defines`**:
 
-| Point id | Purpose | Typical contributors |
-|----------|---------|----------------------|
-| `quoting.slots.headerFields` | Header region inside quote editor | `quoting.incoterm`, `crm.parties` |
-| `quoting.slots.chargeTable` | Charge grid region | `quoting.charges`, `quoting.globals` |
-| `quoting.slots.totals` | Footer / markup | `quoting.markup`, `quoting.math` |
-| `quoting.slots.rateSources` | Search/apply rates UI | `rates.catalog`, `spot.*` |
-| `quoting.totalsHooks` | Headless hooks into ONE MATH pipeline | `quoting.incoterm`, `quoting.markup` |
-| `quoting.chargeProviders` | Extra lines/sections into charge model | globals, apply-rate |
-| `quoting.documentModel` (optional) | Extend aggregate fields | carefully versioned |
+| Point id                           | Purpose                                | Typical contributors                 |
+| ---------------------------------- | -------------------------------------- | ------------------------------------ |
+| `quoting.slots.headerFields`       | Header region inside quote editor      | `quoting.incoterm`, `crm.parties`    |
+| `quoting.slots.chargeTable`        | Charge grid region                     | `quoting.charges`, `quoting.globals` |
+| `quoting.slots.totals`             | Footer / markup                        | `quoting.markup`, `quoting.math`     |
+| `quoting.slots.rateSources`        | Search/apply rates UI                  | `rates.catalog`, `spot.*`            |
+| `quoting.totalsHooks`              | Headless hooks into ONE MATH pipeline  | `quoting.incoterm`, `quoting.markup` |
+| `quoting.chargeProviders`          | Extra lines/sections into charge model | globals, apply-rate                  |
+| `quoting.documentModel` (optional) | Extend aggregate fields                | carefully versioned                  |
 
 The **quote editor React tree** (inside the built-in) hosts these slots. Kernel never imports `ChargeTable`.
 
@@ -99,10 +99,10 @@ Other driving built-ins follow the same pattern when they grow nested UI:
 
 ## 3. Specialty elsewhere (also extension-owned)
 
-| Owner | Defines | Contributors |
-|-------|---------|----------------|
+| Owner                                  | Defines                                         | Contributors                 |
+| -------------------------------------- | ----------------------------------------------- | ---------------------------- |
 | `rates.catalog` or rates host built-in | `rates.offerProviders`, `rates.ingestPipelines` | `spot.*`, `ingestion.fcl_v6` |
-| Messaging host / `messaging.msgraph` | mail account / send hooks | future gmail, … |
+| Messaging host / `messaging.msgraph`   | mail account / send hooks                       | future gmail, …              |
 
 Optional extensions should prefer contributing to **driving** points, not inventing kernel specialty APIs.
 
@@ -155,12 +155,12 @@ Optional extensions should prefer contributing to **driving** points, not invent
 
 ## 5. What kernel implements first (**074**)
 
-| Ship | Do not put in kernel |
-|------|----------------------|
-| Empty activity / view / editor / command hosts | `quoting.slots.*` |
-| `defines` / `contributes` resolution in host | Hardcoded quote layout |
-| `core.api` / `jobs` / `preferences` | Charge/Incoterm/markup imports |
-| Deep link → `workbench.editors` open | Feature `page.tsx` as long-term model |
+| Ship                                           | Do not put in kernel                  |
+| ---------------------------------------------- | ------------------------------------- |
+| Empty activity / view / editor / command hosts | `quoting.slots.*`                     |
+| `defines` / `contributes` resolution in host   | Hardcoded quote layout                |
+| `core.api` / `jobs` / `preferences`            | Charge/Incoterm/markup imports        |
+| Deep link → `workbench.editors` open           | Feature `page.tsx` as long-term model |
 
 **073:** implement slot **hosts + `defines`** inside `quoting.document`; wire sibling contributions.
 
@@ -174,6 +174,6 @@ Session/auth, org/plan, activation algorithm, empty workbench chrome, generic ex
 
 ## Related tickets
 
-- **074** — kernel workbench hosts + generic points only  
-- **073** — `quoting.document` defines slots; charges/Incoterm/… contribute  
-- **071 / 070 / 072** — QV2 parity implementations behind those contributions  
+- **074** — kernel workbench hosts + generic points only
+- **073** — `quoting.document` defines slots; charges/Incoterm/… contribute
+- **071 / 070 / 072** — QV2 parity implementations behind those contributions

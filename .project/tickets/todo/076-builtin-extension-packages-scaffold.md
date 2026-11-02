@@ -17,14 +17,14 @@ docs:
 
 Create empty (or stub) packages and register **driving** manifests default-on for credit+enterprise:
 
-| Id | Package (convention TBD in ticket) |
-|----|-------------------------------------|
-| `quoting.document` | stub view + editor factories |
-| `quoting.charges` | stub (or defer stub until **073**) |
-| `crm.parties` | stub |
-| `geo.gazetteer` | stub widgets export |
-| `rates.catalog` | stub |
-| `org.settings` | stub |
+| Id                 | Package (convention TBD in ticket) |
+| ------------------ | ---------------------------------- |
+| `quoting.document` | stub view + editor factories       |
+| `quoting.charges`  | stub (or defer stub until **073**) |
+| `crm.parties`      | stub                               |
+| `geo.gazetteer`    | stub widgets export                |
+| `rates.catalog`    | stub                               |
+| `org.settings`     | stub                               |
 
 Wire into `extensions/host` registry. Workbench shows activity/views from stubs. **No** large code moves yet (**077**/**078**).
 
