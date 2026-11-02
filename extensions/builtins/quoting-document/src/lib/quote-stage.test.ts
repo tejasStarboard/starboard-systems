@@ -12,10 +12,10 @@ describe("quote stage gates (082)", () => {
     expect(isCommercialEditable("expired")).toBe(false)
   })
 
-  test("export commands only for sent / win / loss", () => {
+  test("export commands for review / sent / win / loss", () => {
     expect(canRunExportCommand("draft")).toBe(false)
-    expect(canRunExportCommand("review")).toBe(false)
     expect(canRunExportCommand("expired")).toBe(false)
+    expect(canRunExportCommand("review")).toBe(true)
     expect(canRunExportCommand("sent")).toBe(true)
     expect(canRunExportCommand("win")).toBe(true)
     expect(canRunExportCommand("loss")).toBe(true)

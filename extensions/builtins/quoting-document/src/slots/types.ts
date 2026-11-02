@@ -68,6 +68,8 @@ export type LifecycleSlotProps = Pick<Form, "control" | "register"> & {
 /**
  * Toolbar actions (PDF in 083, …). Host always mounts contributions; gate
  * export/destructive actions with `exportAllowed`.
+ * `quoteId` is the persisted row UUID used by `/api/quotes/:id` (not the
+ * human-facing 6-char number).
  */
 export type CommandsSlotProps = {
   quoteId: string
