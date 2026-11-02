@@ -75,7 +75,74 @@ export const extensionSettingContributionSchema = z
     }
   })
 
+/** Kernel-owned point prefixes; extensions may contribute to them but never define them. */
+export const KERNEL_POINT_PREFIXES = ["workbench.", "core."] as const
+
+export function isKernelPointId(pointId: string): boolean {
+  return KERNEL_POINT_PREFIXES.some((prefix) => pointId.startsWith(prefix))
+}
+
+/** `workbench.activity` — activity bar entry. */
+export const extensionActivityContributionSchema = z.object({
+  id: z.string().min(1),
+  label: z.string().min(1),
+  icon: z.string().min(1).optional(),
+})
+
+/** `workbench.views` — sidebar view (list of link entries) under an activity. */
+export const extensionViewContributionSchema = z.object({
+  id: z.string().min(1),
+  name: z.string().min(1),
+  activityId: z.string().min(1),
+  entries: z
+    .array(
+      z.object({
+        id: z.string().min(1),
+        label: z.string().min(1),
+        href: z.string().min(1),
+      })
+    )
+    .optional(),
+})
+
+/** `workbench.editors` — center tab document type. */
+export const extensionEditorContributionSchema = z.object({
+  viewType: z.string().min(1),
+  displayName: z.string().min(1),
+  deepLink: z.string().min(1).optional(),
+})
+
+/** `workbench.commands` — action id + title (handler wiring is client-side, later). */
+export const extensionCommandContributionSchema = z.object({
+  id: z.string().min(1),
+  title: z.string().min(1),
+})
+
+/** Contribution into an extension-defined point (e.g. `quoting.slots.chargeTable`). */
+export const extensionPointContributionSchema = z.object({
+  id: z.string().min(1),
+  label: z.string().min(1).optional(),
+})
+
+/** `defines.extensionPoints` — points this extension owns; others contribute here. */
+export const extensionPointDefinitionSchema = z.object({
+  id: z.string().min(1),
+  description: z.string().min(1).optional(),
+})
+
+export const extensionDefinesSchema = z.object({
+  extensionPoints: z.array(extensionPointDefinitionSchema).optional(),
+})
+
 export const extensionContributesSchema = z.object({
+  activity: z.array(extensionActivityContributionSchema).optional(),
+  views: z.array(extensionViewContributionSchema).optional(),
+  editors: z.array(extensionEditorContributionSchema).optional(),
+  commands: z.array(extensionCommandContributionSchema).optional(),
+  /** Keyed by extension-defined point id → contributions to that point. */
+  points: z
+    .record(z.string().min(1), z.array(extensionPointContributionSchema))
+    .optional(),
   nav: z.array(extensionNavContributionSchema).optional(),
   jobs: z.array(extensionJobContributionSchema).optional(),
   api: z.array(extensionApiContributionSchema).optional(),
@@ -89,20 +156,69 @@ export const extensionWorkerSchema = z.object({
   plugin: z.string().min(1),
 })
 
-export const extensionManifestSchema = z.object({
-  id: z.string().min(1),
-  version: z.string().min(1),
-  displayName: z.string().min(1),
-  requiredPlan: z.array(planSchema).min(1),
-  contributes: extensionContributesSchema,
-  worker: extensionWorkerSchema.optional(),
-  healthPath: z.string().min(1).optional(),
-  enabled: z.boolean().optional(),
-})
+export const extensionManifestSchema = z
+  .object({
+    id: z.string().min(1),
+    version: z.string().min(1),
+    displayName: z.string().min(1),
+    requiredPlan: z.array(planSchema).min(1),
+    defines: extensionDefinesSchema.optional(),
+    contributes: extensionContributesSchema,
+    worker: extensionWorkerSchema.optional(),
+    healthPath: z.string().min(1).optional(),
+    enabled: z.boolean().optional(),
+  })
+  .superRefine((manifest, ctx) => {
+    const seen = new Set<string>()
+    manifest.defines?.extensionPoints?.forEach((point, index) => {
+      if (isKernelPointId(point.id)) {
+        ctx.addIssue({
+          code: "custom",
+          message: `Extensions cannot define kernel point "${point.id}"`,
+          path: ["defines", "extensionPoints", index, "id"],
+        })
+      }
+      if (seen.has(point.id)) {
+        ctx.addIssue({
+          code: "custom",
+          message: `Duplicate defined point "${point.id}"`,
+          path: ["defines", "extensionPoints", index, "id"],
+        })
+      }
+      seen.add(point.id)
+    })
+    for (const pointId of Object.keys(manifest.contributes.points ?? {})) {
+      if (isKernelPointId(pointId)) {
+        ctx.addIssue({
+          code: "custom",
+          message: `Kernel point "${pointId}" uses its named contributes key, not contributes.points`,
+          path: ["contributes", "points", pointId],
+        })
+      }
+    }
+  })
 
 export type ExtensionManifest = z.infer<typeof extensionManifestSchema>
 export type ExtensionNavContribution = z.infer<
   typeof extensionNavContributionSchema
+>
+export type ExtensionActivityContribution = z.infer<
+  typeof extensionActivityContributionSchema
+>
+export type ExtensionViewContribution = z.infer<
+  typeof extensionViewContributionSchema
+>
+export type ExtensionEditorContribution = z.infer<
+  typeof extensionEditorContributionSchema
+>
+export type ExtensionCommandContribution = z.infer<
+  typeof extensionCommandContributionSchema
+>
+export type ExtensionPointContribution = z.infer<
+  typeof extensionPointContributionSchema
+>
+export type ExtensionPointDefinition = z.infer<
+  typeof extensionPointDefinitionSchema
 >
 export type ExtensionContributes = z.infer<typeof extensionContributesSchema>
 export type ExtensionSettingType = z.infer<typeof extensionSettingTypeSchema>

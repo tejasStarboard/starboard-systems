@@ -2,7 +2,7 @@
 id: 075
 wave: 06-platform
 title: Extension host — workbench contributions + defines
-status: open
+status: in_progress
 depends_on: [055, 056]
 epic: SYS-PLATFORM
 docs:
@@ -27,11 +27,11 @@ Can ship in parallel with **074** UI chrome; both required before **076**/**077*
 
 ## Acceptance
 
-- [ ] Zod schemas + registry tests for new contribute/define fields
-- [ ] `getActiveWorkbenchContributions` (or equivalent) used by workbench host
-- [ ] Contribution to a defined point fails closed if owner extension inactive
-- [ ] `extensions.md` + skill cookbook updated
-- [ ] Legacy `nav` / `uiSlots` still work (compat) or migrated with a note
+- [x] Zod schemas + registry tests for new contribute/define fields
+- [x] `getActiveWorkbenchContributions` (or equivalent) used by workbench host
+- [x] Contribution to a defined point fails closed if owner extension inactive
+- [x] `extensions.md` + skill cookbook updated
+- [x] Legacy `nav` / `uiSlots` still work (compat) or migrated with a note
 
 ## Non-goals
 

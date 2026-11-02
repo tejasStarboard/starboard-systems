@@ -2,7 +2,7 @@
 id: 074
 wave: 06-platform
 title: Workbench shell (kernel UI regions)
-status: in_progress
+status: done
 depends_on: []
 epic: SYS-PLATFORM
 docs:
