@@ -1,5 +1,5 @@
 /**
- * Contract between the workbench hosts (kernel) and `quoting.document` UI.
+ * Contract between the workbench hosts (kernel) and `crm.parties` UI.
  * The kernel passes this in; the package never imports kernel / Next modules.
  */
 export type BuiltinHost = {

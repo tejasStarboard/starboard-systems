@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 import {
   Combobox,
@@ -26,6 +26,20 @@ export function CustomerCombobox({
   invalid?: boolean
 }) {
   const [options, setOptions] = useState(initialOptions)
+
+  // Resync when the parent supplies new options (e.g. editor context reload);
+  // keep customers created locally that the parent list doesn't know yet.
+  useEffect(() => {
+    setOptions((prev) => {
+      const byValue = new Map(initialOptions.map((o) => [o.value, o]))
+      for (const option of prev) {
+        if (!byValue.has(option.value)) byValue.set(option.value, option)
+      }
+      return [...byValue.values()].sort((a, b) =>
+        a.label.localeCompare(b.label)
+      )
+    })
+  }, [initialOptions])
   const [query, setQuery] = useState("")
   const [creating, setCreating] = useState(false)
 
