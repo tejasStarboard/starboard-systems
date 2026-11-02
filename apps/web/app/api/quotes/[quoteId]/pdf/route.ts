@@ -9,7 +9,7 @@ import { ServiceClientError } from "@/lib/clients/http"
 import { getQuotesManager } from "@/lib/domain/quotes/quotes.manager"
 import { isExtensionActive } from "@/lib/extensions"
 
-const EXPORT_ALLOWED = new Set<QuoteStatus>(["sent", "win", "loss"])
+const EXPORT_ALLOWED = new Set<QuoteStatus>(["review", "sent", "win", "loss"])
 
 /**
  * PDF bytes for a quote. Product UI lives in `quoting.pdf`; this BFF route
@@ -46,7 +46,9 @@ export async function GET(
 
     if (!EXPORT_ALLOWED.has(quote.status)) {
       return NextResponse.json(
-        { error: "Export available when status is sent, win, or loss" },
+        {
+          error: "Export available when status is review, sent, win, or loss",
+        },
         { status: 403 }
       )
     }

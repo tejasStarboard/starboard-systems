@@ -80,7 +80,7 @@ UI chrome (id / stage / dates) mounts only via `quoting.slots.lifecycle`, self-c
 
 - Free select among enum values on save (no full prod state machine).
 - Terminal `win` / `loss` / `expired` → commercial body read-only (lanes, charges, customer, currency, Incoterm); status + validity stay editable.
-- Export / destructive command contributions: allowed when status ∈ `sent` \| `win` \| `loss` (`exportAllowed` on commands slot props).
+- Export / destructive command contributions: allowed when status ∈ `review` \| `sent` \| `win` \| `loss` (`exportAllowed` on commands slot props).
 
 ## Current gaps (vs prod QV2)
 
@@ -93,7 +93,7 @@ Also: no delete yet; no catalog/spot provenance FK. Full prod stage-transition e
 
 ## Quote PDF (083)
 
-Built-in **`quoting.pdf`** (`extensions/builtins/quoting-pdf`) contributes Export PDF into `quoting.commands`. Totals use `@starboard/lib-pricing` only. Download via BFF `GET /api/quotes/:id/pdf` (gated on extension active + status ∈ sent|win|loss). Unplug → no export control; editor intact.
+Built-in **`quoting.pdf`** (`extensions/builtins/quoting-pdf`) contributes Export PDF into `quoting.commands`. Totals use `@starboard/lib-pricing` only. Download via BFF `GET /api/quotes/:id/pdf` (row UUID, not human `quoteId`; gated on extension active + status ∈ review|sent|win|loss). Unplug → no export control; editor intact.
 
 ## Next tickets
 

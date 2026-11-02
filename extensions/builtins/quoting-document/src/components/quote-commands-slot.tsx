@@ -22,8 +22,11 @@ export function QuoteCommandsSlot({
 }) {
   const status = (useWatch({ control: props.control, name: "status" }) ??
     "draft") as QuoteStatus
+  // API paths need the persisted row UUID (`id`), not the human `quoteId`.
+  const resourceId = (useWatch({ control: props.control, name: "id" }) ??
+    "") as string
   const slotProps: CommandsSlotProps = {
-    quoteId: props.quoteId,
+    quoteId: resourceId,
     status,
     exportAllowed: canRunExportCommand(status),
   }

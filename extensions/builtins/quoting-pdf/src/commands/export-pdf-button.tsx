@@ -11,7 +11,8 @@ import { Button } from "@starboard/lib-ui/components/button"
 
 /**
  * `quoting.pdf.export` → `quoting.commands`.
- * Host always mounts; gate with `exportAllowed` (sent | win | loss).
+ * Host always mounts; gate with `exportAllowed` (review | sent | win | loss).
+ * `quoteId` is the persisted row UUID (not the human quote number).
  */
 export function ExportPdfButton({
   quoteId,
@@ -20,10 +21,12 @@ export function ExportPdfButton({
   const [pending, setPending] = useState(false)
 
   async function onExport() {
-    if (!exportAllowed || pending) return
+    if (!exportAllowed || pending || !quoteId) return
     setPending(true)
     try {
-      const response = await fetch(`/api/quotes/${quoteId}/pdf`)
+      const response = await fetch(
+        `/api/quotes/${encodeURIComponent(quoteId)}/pdf`
+      )
       if (!response.ok) {
         const payload = (await response.json().catch(() => null)) as {
           error?: string
@@ -54,13 +57,13 @@ export function ExportPdfButton({
       type="button"
       size="sm"
       variant="outline"
-      disabled={!exportAllowed || pending}
+      disabled={!exportAllowed || pending || !quoteId}
       onClick={() => void onExport()}
       data-testid="quoting-pdf-export"
       title={
         exportAllowed
           ? "Export PDF"
-          : "Export available when status is sent, win, or loss"
+          : "Export available when status is review, sent, win, or loss"
       }
     >
       <DownloadSimpleIcon className="size-4" />
