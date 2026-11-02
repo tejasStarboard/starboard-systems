@@ -4,6 +4,7 @@ packages:
   - "tooling/*"
   - "services/*"
   - "extensions/*"
+  - "extensions/builtins/*"
 
 allowBuilds:
   esbuild: true

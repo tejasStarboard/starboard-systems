@@ -1,0 +1,33 @@
+{
+  "name": "@starboard/ext-crm-parties",
+  "version": "0.0.1",
+  "description": "Driving built-in extension `crm.parties` (stub scaffold)",
+  "private": true,
+  "license": "UNLICENSED",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tejasStarboard/starboard-systems.git",
+    "directory": "extensions/builtins/crm-parties"
+  },
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./manifest": {
+      "types": "./src/manifest.ts",
+      "default": "./src/manifest.ts"
+    }
+  },
+  "files": [
+    "src"
+  ],
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@starboard/tool-typescript-config": "workspace:*",
+    "typescript": "^5.9.3"
+  }
+}

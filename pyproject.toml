@@ -16,6 +16,7 @@ exclude = [
   "packages/pricing",
   "packages/service-kit",
   "packages/ui",
+  "extensions/builtins",
   "extensions/host",
   "extensions/temporal",
 ]

@@ -1,4 +1,5 @@
 import { extensionManifestSchema, type ExtensionManifest } from "./manifest.js"
+import { builtinManifests } from "./builtins.js"
 import { validateManifestSet } from "./validate.js"
 
 const stubManifests = [
@@ -138,9 +139,10 @@ const stubManifests = [
   },
 ] as const satisfies readonly ExtensionManifest[]
 
-export const extensionRegistry: ExtensionManifest[] = stubManifests.map(
-  (manifest) => extensionManifestSchema.parse(manifest)
-)
+export const extensionRegistry: ExtensionManifest[] = [
+  ...builtinManifests,
+  ...stubManifests,
+].map((manifest) => extensionManifestSchema.parse(manifest))
 
 const registryErrors = validateManifestSet(extensionRegistry)
 if (registryErrors.length > 0) {

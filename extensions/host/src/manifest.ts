@@ -89,18 +89,32 @@ export const extensionActivityContributionSchema = z.object({
   icon: z.string().min(1).optional(),
 })
 
-/** `workbench.views` — sidebar view (list of link entries) under an activity. */
+/** View entry that opens a (non-route) editor tab instead of navigating. */
+export const extensionViewEntryOpensSchema = z.object({
+  viewType: z.string().min(1),
+  resourceId: z.string().min(1),
+  title: z.string().min(1).optional(),
+})
+
+/** `workbench.views` — sidebar view (link / open-editor entries) under an activity. */
 export const extensionViewContributionSchema = z.object({
   id: z.string().min(1),
   name: z.string().min(1),
   activityId: z.string().min(1),
   entries: z
     .array(
-      z.object({
-        id: z.string().min(1),
-        label: z.string().min(1),
-        href: z.string().min(1),
-      })
+      z
+        .object({
+          id: z.string().min(1),
+          label: z.string().min(1),
+          /** Navigate to a route (route-backed editors). */
+          href: z.string().min(1).optional(),
+          /** Open an editor tab directly (extension-provided editor). */
+          opens: extensionViewEntryOpensSchema.optional(),
+        })
+        .refine((entry) => Boolean(entry.href) !== Boolean(entry.opens), {
+          message: "view entry needs exactly one of href or opens",
+        })
     )
     .optional(),
 })
