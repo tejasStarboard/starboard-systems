@@ -4,11 +4,11 @@ What exists today vs target packages. Optional workers already live under `exten
 
 ## Already extension-shaped (optional)
 
-| Id                                                          | Code today                                                                                                                                | Gap                                          |
-| ----------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
-| `spot.fake` / `maersk` / `cma` — **slot-contributed (073)** | `extensions/spot` + host registry; contribute `quoting.slots.rateSources` (`component: rates.spotSource`, panel owned by `rates.catalog`) | **069** creds                                |
-| `messaging.msgraph` — **workbench (080)**                   | `extensions/messaging` + `/messaging/inbox` route anchor; contributes `messaging` activity / inbox editor                                 | Thin page remains; UI package optional later |
-| `ingestion.fcl_v6` — **workbench (080)**                    | `extensions/ingestion` + `/rates/upload` route anchor; contributes `rates` activity / upload editor                                       | Thin page remains; UI package optional later |
+| Id                                                          | Code today                                                                                                                                                | Gap                                          |
+| ----------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
+| `spot.fake` / `maersk` / `cma` — **slot-contributed (073)** | `extensions/spot` + host registry; contribute `quoting.slots.rateSources` (`component: rates.spotSource`, panel owned by `rates.catalog`)                 | **069** creds                                |
+| `messaging.msgraph` — **workbench (080)**                   | `extensions/messaging` + `/messaging/inbox` route anchor; contributes `messaging` activity / inbox editor                                                 | Thin page remains; UI package optional later |
+| `ingestion.fcl_v6` — **workbench (080) + Excel/PDF (087)**  | `extensions/ingestion` CSV/XLSX/PDF gate-first pipeline + `/rates/upload`; contributes upload editor + `rates.slots.ingestActions` (`rates.ingestUpload`) | Thin page remains; UI package optional later |
 
 ## Still in shell — package as driving built-ins
 
@@ -66,4 +66,4 @@ Convention: `extensions/builtins/<id with dots → dashes>` → `@starboard/ext-
 6. ~~Retire legacy shell shim (**080**)~~ — done: `legacyShellContributions` / catch-all `page` removed; `ingestion.fcl_v6` + `messaging.msgraph` contribute workbench activity/views/editors; pages gated with `isExtensionActive`.
 7. ~~QV2 parity inside those packages (**071→070→072**)~~ — done
 8. ~~Org carrier secrets (**069**)~~ — done
-9. **Phase D:** ~~stages (**082**)~~ → ~~PDF (**083**)~~ → ~~peel Incoterm/markup (**084**)~~ → ~~money follow-ons (**085**)~~ → ~~catalog workbench (**086**)~~; optional Excel/PDF ingest (**087**)
+9. **Phase D:** ~~stages (**082**)~~ → ~~PDF (**083**)~~ → ~~peel Incoterm/markup (**084**)~~ → ~~money follow-ons (**085**)~~ → ~~catalog workbench (**086**)~~ → ~~Excel/PDF ingest (**087**)~~

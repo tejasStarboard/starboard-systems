@@ -2,7 +2,7 @@
 id: 087
 wave: 07-quote-loop
 title: FCL v6 Excel/PDF ingest (optional ingestion.fcl_v6)
-status: todo
+status: in_progress
 depends_on: [021, 080, 086]
 epic: SYS-EXT-INGEST
 docs:

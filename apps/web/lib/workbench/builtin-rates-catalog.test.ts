@@ -4,7 +4,7 @@ import {
   listManifests,
 } from "@starboard/ext-host"
 
-import { builtinEditors } from "./builtin-editors"
+import { builtinEditors, builtinPointComponents } from "./builtin-editors"
 import { resolveWorkbenchContributions } from "./contributions"
 import { matchDeepLink } from "./deep-link"
 import { initialTabsState, tabHref, tabsReducer } from "./tabs"
@@ -94,5 +94,13 @@ describe("086 rates.catalog in the workbench", () => {
         (c) => c.id === "ingestion.fcl_v6.upload.action"
       )
     ).toBe(true)
+    expect(
+      merged.points["rates.slots.ingestActions"]?.some(
+        (c) =>
+          c.id === "ingestion.fcl_v6.upload.action" &&
+          c.component === "rates.ingestUpload"
+      )
+    ).toBe(true)
+    expect(typeof builtinPointComponents["rates.ingestUpload"]).toBe("function")
   })
 })

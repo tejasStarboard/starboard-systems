@@ -18,7 +18,7 @@ export function RatesUploadForm() {
     <form onSubmit={onSubmit} className="flex max-w-lg flex-col gap-4">
       <input
         type="file"
-        accept=".csv,text/csv"
+        accept=".csv,.xlsx,.pdf,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/pdf"
         onChange={(event) => setFile(event.target.files?.[0] ?? null)}
         className="text-sm"
       />

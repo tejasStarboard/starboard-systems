@@ -34,7 +34,10 @@ import {
   rateFormToPayload,
   type RateFormValues,
 } from "../lib/rate-forms.schema"
-import { IngestActionsSlot } from "../slots/ingest-actions"
+import {
+  IngestActionsSlot,
+  RATES_INGEST_ACTIONS_POINT,
+} from "../slots/ingest-actions"
 
 export function RatesList({ host }: { host: BuiltinHost }) {
   const [query, setQuery] = useState("")
@@ -139,8 +142,11 @@ export function RatesList({ host }: { host: BuiltinHost }) {
       <div className="flex flex-wrap items-center gap-2">
         <h1 className="text-sm font-medium">Rate catalog</h1>
         <div className="ml-auto flex items-center gap-2">
-          {/* Stub host for rates.slots.ingestActions — empty until 087. */}
-          <IngestActionsSlot />
+          <IngestActionsSlot
+            contributions={host.slots?.[RATES_INGEST_ACTIONS_POINT] ?? []}
+            pointComponents={host.pointComponents ?? {}}
+            host={host}
+          />
           <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <input
               type="checkbox"

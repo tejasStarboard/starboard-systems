@@ -39,16 +39,29 @@ export type WorkbenchEditor = {
   deepLink?: string
 }
 
+/** Serializable contribution into an extension-defined point. */
+export type WorkbenchPointContribution = {
+  id: string
+  label?: string
+  component?: string
+  order?: number
+  props?: Record<string, string | number | boolean>
+  extensionId?: string
+}
+
 export type WorkbenchContributions = {
   activity: WorkbenchActivity[]
   views: WorkbenchView[]
   editors: WorkbenchEditor[]
+  /** Contributions to extension-defined points, keyed by point id. */
+  points: Record<string, WorkbenchPointContribution[]>
 }
 
 export const EMPTY_CONTRIBUTIONS: WorkbenchContributions = {
   activity: [],
   views: [],
   editors: [],
+  points: {},
 }
 
 export type EditorTab = {

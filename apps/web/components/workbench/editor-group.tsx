@@ -94,8 +94,9 @@ export function EditorGroup({ children }: { children: React.ReactNode }) {
         ? { viewType: active.viewType, resourceId: active.resourceId }
         : null,
       pointComponents: builtinPointComponents,
+      slots: contributions.points,
     }),
-    [openEditor, active]
+    [openEditor, active, contributions.points]
   )
 
   let content: React.ReactNode

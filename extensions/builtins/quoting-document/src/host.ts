@@ -19,6 +19,22 @@ export type BuiltinHost = {
    * every package's `pointComponents` and never names slots.
    */
   pointComponents?: SlotComponentRegistry
+  /**
+   * Active contributions to extension-defined points, keyed by point id.
+   * Optional; quote editors prefer editor-context `slots` instead.
+   */
+  slots?: Readonly<
+    Record<
+      string,
+      readonly {
+        id: string
+        label?: string
+        component?: string
+        props?: Record<string, string | number | boolean>
+        extensionId?: string
+      }[]
+    >
+  >
 }
 
 /** Props every built-in editor factory receives from the workbench editor host. */
