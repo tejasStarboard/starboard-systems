@@ -11,6 +11,8 @@ import { QuoteFormDesktop } from "./quote-form-desktop"
 import type { QuoteFormLayoutProps } from "./quote-form-layout-props"
 import { QuoteFormMobile } from "./quote-form-mobile"
 import { QuoteFormTablet } from "./quote-form-tablet"
+import { useQuoteSlotEntries } from "../slots/slot-host"
+import { QUOTING_SLOTS } from "../slots/types"
 import { RatesSearchSheet, type ApplyRatePayload } from "./rates-search-sheet"
 import {
   buildLaneUsageQuantities,
@@ -66,6 +68,10 @@ export function QuoteForm({
   const breakpoint = useBreakpoint()
   const [pending, startTransition] = useTransition()
   const [ratesOpen, setRatesOpen] = useState(false)
+  // Rates may only be applied while the charge table is mounted; otherwise the
+  // result would land in charge UI the user cannot see (quoting.charges off).
+  const hasChargeTable =
+    useQuoteSlotEntries(QUOTING_SLOTS.chargeTable).length > 0
   const [selectedLaneIndex, setSelectedLaneIndex] = useState(0)
   const [manualRatesVisibleByLane, setManualRatesVisibleByLane] = useState<
     Record<string, boolean>
@@ -217,6 +223,7 @@ export function QuoteForm({
   }
 
   function handleAddManualRate() {
+    if (!hasChargeTable) return
     if (selectedLaneId) {
       setManualRatesVisibleByLane((prev) => ({
         ...prev,
@@ -230,6 +237,7 @@ export function QuoteForm({
     line,
     currencyCode: appliedCurrency,
   }: ApplyRatePayload) {
+    if (!hasChargeTable) return
     if (selectedLaneId) {
       setManualRatesVisibleByLane((prev) => ({
         ...prev,
@@ -294,7 +302,9 @@ export function QuoteForm({
     onSelectLane: setSelectedLaneIndex,
     onAddLane: handleAddLane,
     onRemoveLane: handleRemoveLane,
-    onSearchRates: () => setRatesOpen(true),
+    onSearchRates: () => {
+      if (hasChargeTable) setRatesOpen(true)
+    },
     onAddManualRate: handleAddManualRate,
     onAppendRate: () => appendRate(createManualRateLine()),
     onRemoveRate: removeRate,
@@ -321,7 +331,7 @@ export function QuoteForm({
       </form>
 
       <RatesSearchSheet
-        open={ratesOpen}
+        open={ratesOpen && hasChargeTable}
         onOpenChange={setRatesOpen}
         origin={selectedLane?.origin || undefined}
         destination={selectedLane?.destination || undefined}

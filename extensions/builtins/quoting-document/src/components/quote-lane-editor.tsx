@@ -108,8 +108,9 @@ export function QuoteLaneEditor({
   onAppendRate: () => void
   onRemoveRate: (index: number) => void
 }) {
-  // Rate sources / charge grid are contributed; with none mounted the matching
-  // lane actions disappear (nothing could render or apply the result).
+  // Rate sources / charge grid are contributed. Rates are applied into the
+  // charge table, so search/apply need BOTH; without a charge table the lane's
+  // existing manual rates are left untouched (never mutated invisibly).
   const hasRateSources =
     useQuoteSlotEntries(QUOTING_SLOTS.rateSources).length > 0
   const hasChargeTable =
@@ -162,7 +163,7 @@ export function QuoteLaneEditor({
           fullWidthActions ? "flex-col" : "flex-wrap"
         )}
       >
-        {hasRateSources ? (
+        {hasRateSources && hasChargeTable ? (
           <Button
             type="button"
             variant="outline"
@@ -187,6 +188,19 @@ export function QuoteLaneEditor({
           </Button>
         ) : null}
       </div>
+
+      {!hasChargeTable && (rateFields.length > 0 || hasRateSources) ? (
+        <p
+          role="status"
+          data-testid="charges-unavailable"
+          className="text-xs text-muted-foreground"
+        >
+          Charges are unavailable (the quote charges extension is off).
+          {rateFields.length > 0
+            ? ` ${rateFields.length} existing charge${rateFields.length === 1 ? "" : "s"} on this lane are kept unchanged and totals are hidden.`
+            : " Rate search is disabled."}
+        </p>
+      ) : null}
 
       {manualRatesVisible && hasChargeTable ? (
         <div className="space-y-4 border-t pt-4">
