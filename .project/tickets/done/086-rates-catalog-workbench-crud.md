@@ -2,7 +2,7 @@
 id: 086
 wave: 07-quote-loop
 title: Rates catalog CRUD via rates.catalog workbench contributions
-status: in_progress
+status: done
 depends_on: [073, 080]
 epic: SYS-RATES
 docs:
