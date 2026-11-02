@@ -93,9 +93,18 @@ export type ContainerLine = z.infer<typeof containerLineSchema>
 export const rateBaseModeSchema = z.enum(["flat", "per_eq"])
 export type RateBaseMode = z.infer<typeof rateBaseModeSchema>
 
+export const markupTypeSchema = z.enum(["amount", "percent"])
+export type MarkupType = z.infer<typeof markupTypeSchema>
+
 export const equipmentAmountSchema = z.object({
   containerType: z.string(),
   amount: z.number(),
+  /**
+   * Per-CT markup dial (starboard-2 `equipment_rates[ct].profit_*`).
+   * Null → fall back to the lane dial for that unit.
+   */
+  markupType: markupTypeSchema.nullable().optional(),
+  markupValue: z.number().nullable().optional(),
 })
 export type EquipmentAmount = z.infer<typeof equipmentAmountSchema>
 
@@ -112,8 +121,6 @@ export const manualRateLineSchema = z.object({
 })
 
 export type ManualRateLine = z.infer<typeof manualRateLineSchema>
-
-export const markupTypeSchema = z.enum(["amount", "percent"])
 
 export const laneFormSchema = z.object({
   id: z.string(),
@@ -152,6 +159,11 @@ export const quoteFormSchema = z.object({
       (value) => value === "" || /^[A-Za-z]{3}$/.test(value),
       "Currency must be a 3-letter code"
     ),
+  /**
+   * Quote FX map `from → to → rate` (starboard-2 `exchange_rates`).
+   * Used when charge-line currency ≠ quote currency.
+   */
+  exchangeRates: z.record(z.string(), z.record(z.string(), z.number())),
   effectiveFrom: z.string(),
   expiryAt: z.string(),
   /** Blank until the user picks an Incoterm. Blank excludes no buckets. */
@@ -341,6 +353,7 @@ export function emptyQuoteFormValues(input: {
     status: "draft",
     customerId: input.customerId ?? "",
     currencyCode: "",
+    exchangeRates: {},
     effectiveFrom: "",
     expiryAt: "",
     incoterm: "",

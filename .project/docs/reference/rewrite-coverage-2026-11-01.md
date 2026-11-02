@@ -39,25 +39,25 @@ Legend: **Done** · **Partial** · **Ticketed** · **Not started** · **Out of s
 
 ## 2. Quoting
 
-| Prod feature                      | Rewrite              | Notes                                                                                                                       |
-| --------------------------------- | -------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| RFQ v2 email → quote              | **Partial**          | Messaging stub only; no full extract pipeline                                                                               |
-| QGS multi-lane editor             | **Partial**          | Lanes persist; charge UX ≠ QV2 (**071**)                                                                                    |
-| ONE MATH                          | **Partial**          | Lean engine. Incoterm scope **070**. **072** adds line sell + Split presentation                                            |
-| Markups / tiers / FX              | **Partial**          | One lane `$`/`%` dial, including mixed equipment (**072** fixture). Distinct per-CT dials, tiers, and row FX still deferred |
-| Surcharges (legs, units, globals) | **Partial**          | Nested under multi-rate cards; not QV2 grid (**071**)                                                                       |
-| Rate alternatives (tabs)          | **Partial**          | Apply appends rates then **sums all** — prod selects one (**071**)                                                          |
-| Incoterm scope                    | **Partial**          | Door knock-out shipped; prod is Incoterm×role (**070**)                                                                     |
-| Quote stages / lifecycle          | **Partial (082)**    | Stage/validity/number persist + lifecycle slot; send still open                                                             |
-| PDF / Excel / templates           | **Partial (083)**    | Lean `quoting.pdf` export; not pixel-perfect / branded templates                                                            |
-| Send reply                        | **Partial**          | Messaging send stub (030)                                                                                                   |
-| RFR / recurring RFR               | **Not started**      |                                                                                                                             |
-| Autonomous modes                  | **Not started**      |                                                                                                                             |
-| Agentic extraction                | **Not started**      |                                                                                                                             |
-| CargoWise sync                    | **Not started**      |                                                                                                                             |
-| Ocean booking                     | **Won’t / deferred** | Dev-only in prod                                                                                                            |
-| Sailing schedules                 | **Not started**      |                                                                                                                             |
-| Apply catalog/spot → lane         | **Ticketed**         | [060](../../tickets/todo/060-apply-rate-to-quote-lane.md)                                                                   |
+| Prod feature                      | Rewrite              | Notes                                                                                               |
+| --------------------------------- | -------------------- | --------------------------------------------------------------------------------------------------- |
+| RFQ v2 email → quote              | **Partial**          | Messaging stub only; no full extract pipeline                                                       |
+| QGS multi-lane editor             | **Partial**          | Lanes persist; charge UX ≠ QV2 (**071**)                                                            |
+| ONE MATH                          | **Partial**          | Lean engine. Incoterm scope **070**. **072** adds line sell + Split presentation                    |
+| Markups / tiers / FX              | **Partial (085)**    | Per-CT dials + row FX convert + equipment column (**085**). Tiers / live finStore FX still deferred |
+| Surcharges (legs, units, globals) | **Partial**          | Nested under multi-rate cards; not QV2 grid (**071**)                                               |
+| Rate alternatives (tabs)          | **Partial**          | Apply appends rates then **sums all** — prod selects one (**071**)                                  |
+| Incoterm scope                    | **Partial**          | Door knock-out shipped; prod is Incoterm×role (**070**)                                             |
+| Quote stages / lifecycle          | **Partial (082)**    | Stage/validity/number persist + lifecycle slot; send still open                                     |
+| PDF / Excel / templates           | **Partial (083)**    | Lean `quoting.pdf` export; not pixel-perfect / branded templates                                    |
+| Send reply                        | **Partial**          | Messaging send stub (030)                                                                           |
+| RFR / recurring RFR               | **Not started**      |                                                                                                     |
+| Autonomous modes                  | **Not started**      |                                                                                                     |
+| Agentic extraction                | **Not started**      |                                                                                                     |
+| CargoWise sync                    | **Not started**      |                                                                                                     |
+| Ocean booking                     | **Won’t / deferred** | Dev-only in prod                                                                                    |
+| Sailing schedules                 | **Not started**      |                                                                                                     |
+| Apply catalog/spot → lane         | **Ticketed**         | [060](../../tickets/todo/060-apply-rate-to-quote-lane.md)                                           |
 
 ---
 

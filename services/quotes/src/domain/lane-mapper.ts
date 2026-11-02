@@ -55,6 +55,7 @@ export type SurchargeRow = {
   buyAmount: number | null
   sellAmount: number | null
   scopeOverride: SurchargeLine["scopeOverride"]
+  equipmentType: string | null
 }
 
 /** Quote-level global charge row (FK → quote, not rate). */
@@ -174,6 +175,7 @@ function surchargeLineToRow(line: SurchargeLine, rateId: string): SurchargeRow {
     buyAmount: line.buyAmount,
     sellAmount: line.sellAmount,
     scopeOverride: line.scopeOverride,
+    equipmentType: line.equipmentType,
   }
 }
 
@@ -197,6 +199,7 @@ function surchargeRowToLine(
     | "buyAmount"
     | "sellAmount"
     | "scopeOverride"
+    | "equipmentType"
   >
 ): SurchargeLine {
   return {
@@ -217,6 +220,7 @@ function surchargeRowToLine(
     buyAmount: row.buyAmount,
     sellAmount: row.sellAmount,
     scopeOverride: row.scopeOverride,
+    equipmentType: row.equipmentType ?? null,
   }
 }
 
@@ -243,6 +247,7 @@ export function globalChargeLineToRow(
     buyAmount: line.buyAmount,
     sellAmount: line.sellAmount,
     scopeOverride: line.scopeOverride,
+    equipmentType: line.equipmentType,
   }
 }
 

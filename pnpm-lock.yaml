@@ -252,6 +252,9 @@ importers:
       '@starboard/lib-contracts':
         specifier: workspace:*
         version: link:../../../packages/contracts
+      '@starboard/lib-pricing':
+        specifier: workspace:*
+        version: link:../../../packages/pricing
       '@starboard/lib-ui':
         specifier: workspace:*
         version: link:../../../packages/ui
@@ -351,6 +354,9 @@ importers:
       '@starboard/ext-quoting-document':
         specifier: workspace:*
         version: link:../quoting-document
+      '@starboard/lib-contracts':
+        specifier: workspace:*
+        version: link:../../../packages/contracts
       '@starboard/lib-ui':
         specifier: workspace:*
         version: link:../../../packages/ui

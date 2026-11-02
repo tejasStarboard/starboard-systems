@@ -62,7 +62,7 @@ FCL unit labels: `container` Per Eq, `kg` Per KG, `per_time` Per Day. Enum value
 
 ## Charge line economics (072)
 
-Each surcharge and global charge row edits a buy rate (`rate`, or `%` when the unit is percentage), an optional line sell (`sellAmount`; blank mirrors the calculated buy), Include (`isIncludedInTotal`), and Split (`isVisible`). Split off marks the line Absorbed: it still counts in the total and is not drawn as its own customer line. Free / min / max usage feed `getEffectiveUsageAmount`. When the quote Incoterm excludes a bucket, the row shows Auto / Include / Exclude (`scopeOverride`). Lane markup stays one `$` / `%` dial on the selected rate, including mixed equipment. Totals are `sell = buy + markup`, and a sell override’s gap vs buy is part of markup.
+Each surcharge and global charge row edits a buy rate (`rate`, or `%` when the unit is percentage), an optional line sell (`sellAmount`; blank mirrors the calculated buy), Include (`isIncludedInTotal`), and Split (`isVisible`). Split off marks the line Absorbed: it still counts in the total and is not drawn as its own customer line. Free / min / max usage feed `getEffectiveUsageAmount`. When the quote Incoterm excludes a bucket, the row shows Auto / Include / Exclude (`scopeOverride`). Multi-CT FCL: one `$` / `%` dial **per container type** on `equipmentAmounts` (starboard-2 SB-5766; UI in `quoting.markup`). Flat / single-CT keeps the lane dial. Surcharge **Equipment** column (`equipmentType`, Default = all CTs). Row FX when line currency ≠ quote currency uses `exchangeRates` (convert in ONE MATH). Totals are `sell = buy + markup`, and a sell override’s gap vs buy is part of markup.
 
 ## Stages, validity, numbering (082)
 
@@ -87,7 +87,7 @@ UI chrome (id / stage / dates) mounts only via `quoting.slots.lifecycle`, self-c
 See [build-priority](../reference/build-priority-2026-11-01.md) · [migration inventory](../reference/extension-migration-inventory-2026-11-02.md).
 
 **Phase A:** workbench (**074**) → host (**075**) → scaffold (**076**) → migrate quote (**077**) → slots (**073**).  
-**Phase B:** charge grid (**071**) and Incoterm (**070**) shipped. Economics (**072**) is the lean subset in [Charge line economics](#charge-line-economics-072). Still deferred: per-container markup dials, row FX, surcharge equipment column, tier matrix.
+**Phase B:** charge grid (**071**) and Incoterm (**070**) shipped. Economics (**072**) + money follow-ons (**085**): per-CT dials, row FX convert, equipment column. Still deferred: surcharge_matrix tiers; live finStore FX.
 
 Also: no delete yet; no catalog/spot provenance FK. Full prod stage-transition edge cases deferred. PDF is lean (not pixel-perfect prod template).
 
@@ -97,4 +97,4 @@ Built-in **`quoting.pdf`** (`extensions/builtins/quoting-pdf`) contributes Expor
 
 ## Next tickets
 
-**Phase D (cont.):** ~~peel Incoterm/markup (**084**)~~ — done: `quoting.incoterm` → `headerFields`, `quoting.markup` → `totals`. Next: money follow-ons in `quoting.charges` (**085**).
+**Phase D (cont.):** ~~peel Incoterm/markup (**084**)~~ — done. ~~Money follow-ons (**085**)~~ — per-CT dials / row FX / equipment in charges + markup + pricing.

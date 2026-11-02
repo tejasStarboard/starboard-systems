@@ -1,3 +1,4 @@
+import { convertToQuoteCurrency, type FxRates } from "./fx"
 import { roundMoney } from "./money"
 import {
   calculateSurchargeAmount,
@@ -35,6 +36,13 @@ export type ManualSurchargeLineInput = {
   source?: string | null
   /** Line sell total. Finite values replace the mirrored buy for this row. */
   sellAmount?: number | null
+  /** Line currency; converted into quote currency when FX is supplied. */
+  currencyCode?: string | null
+  /**
+   * Prod `equipment_type`. Null / empty / `default` → applies to every CT.
+   * A concrete type scopes the line to that equipment only.
+   */
+  equipmentType?: string | null
 }
 
 export type ManualRateBaseMode = "flat" | "per_eq"
@@ -43,6 +51,9 @@ export type ManualEquipmentAmount = {
   containerType: string
   amount: number
   count: number
+  /** Per-CT dial; null/undefined falls back to the lane dial (per unit). */
+  markupType?: MarkupType | null
+  markupValue?: number | null
 }
 
 export type ManualLaneTotalsInput = {
@@ -65,6 +76,10 @@ export type ManualLaneTotalsInput = {
    * still respect inclusion / removed flags. % rows use sum of line amounts.
    */
   globalCharges?: ManualSurchargeLineInput[] | null
+  /** Quote currency for FX conversion (starboard-2 display / quote currency). */
+  quoteCurrency?: string | null
+  /** Quote FX map. Missing pairs convert foreign lines to 0. */
+  fxRates?: FxRates | null
 }
 
 /** Canonical ONE MATH lane totals: sell = buy + markup. */
@@ -140,11 +155,47 @@ function rawUsageForUnit(
   }
 }
 
+/** True when the surcharge applies to `containerType` (null = Default / all). */
+export function surchargeAppliesToEquipment(
+  equipmentType: string | null | undefined,
+  containerType: string
+): boolean {
+  const normalized = (equipmentType ?? "").trim()
+  if (normalized.length === 0 || normalized.toLowerCase() === "default") {
+    return true
+  }
+  return normalized === containerType
+}
+
+function convertAmounts(
+  amounts: { buy: number; sell: number },
+  lineCurrency: string | null | undefined,
+  quoteCurrency: string | null | undefined,
+  fxRates: FxRates | null | undefined
+): { buy: number; sell: number } {
+  return {
+    buy: convertToQuoteCurrency(
+      amounts.buy,
+      lineCurrency,
+      quoteCurrency,
+      fxRates
+    ),
+    sell: convertToQuoteCurrency(
+      amounts.sell,
+      lineCurrency,
+      quoteCurrency,
+      fxRates
+    ),
+  }
+}
+
 function surchargeAmounts(
   surcharge: ManualSurchargeLineInput,
   baseFreightAmount: number,
   usage: LaneUsageQuantities | null | undefined,
-  scope?: ScopeContext | null
+  scope: ScopeContext | null | undefined,
+  quoteCurrency: string | null | undefined,
+  fxRates: FxRates | null | undefined
 ): { buy: number; sell: number } {
   if (
     !isIncludedInTotal(
@@ -175,7 +226,109 @@ function surchargeAmounts(
     baseFreightAmount,
     sellAmount: surcharge.sellAmount,
   })
-  return { buy: priced.buy, sell: priced.sell }
+  return convertAmounts(
+    { buy: priced.buy, sell: priced.sell },
+    surcharge.currencyCode,
+    quoteCurrency,
+    fxRates
+  )
+}
+
+function dialMarkup(
+  buy: number,
+  markupType: MarkupType,
+  markupValue: number
+): number {
+  const value = Number.isFinite(markupValue) ? markupValue : 0
+  return roundMoney(markupType === "percent" ? (buy * value) / 100 : value)
+}
+
+function resolveDial(
+  row: ManualEquipmentAmount | null | undefined,
+  laneType: MarkupType,
+  laneValue: number
+): { markupType: MarkupType; markupValue: number } {
+  const type = row?.markupType
+  const value = row?.markupValue
+  if (type === "amount" || type === "percent") {
+    return {
+      markupType: type,
+      markupValue: value != null && Number.isFinite(value) ? value : 0,
+    }
+  }
+  if (value != null && Number.isFinite(value)) {
+    return { markupType: laneType, markupValue: value }
+  }
+  return { markupType: laneType, markupValue: laneValue }
+}
+
+function unitUsage(
+  usage: LaneUsageQuantities | null | undefined
+): LaneUsageQuantities {
+  return {
+    ...(usage ?? {}),
+    container: 1,
+    teu: 1,
+  }
+}
+
+/**
+ * starboard-2 FCL path: price **one container** of a type, apply that CT's
+ * dial, then multiply by count (see `deriveFclRateTotals` + SB-5766).
+ */
+function equipmentLineAmounts(
+  line: ManualLaneTotalsInput["lines"][number],
+  usage: LaneUsageQuantities | null | undefined,
+  scope: ScopeContext | null | undefined,
+  laneMarkupType: MarkupType,
+  laneMarkupValue: number,
+  quoteCurrency: string | null | undefined,
+  fxRates: FxRates | null | undefined
+): { buy: number; sell: number; dial: number } {
+  const equipment = line.equipmentAmounts ?? []
+  const surcharges = line.surcharges ?? []
+  const perUnitUsage = unitUsage(usage)
+
+  return equipment.reduce(
+    (sum, row) => {
+      const count = Number.isFinite(row.count) ? row.count : 0
+      if (count <= 0) {
+        return sum
+      }
+      const unitBase = Number.isFinite(row.amount) ? row.amount : 0
+      const applicable = surcharges.filter((surcharge) =>
+        surchargeAppliesToEquipment(surcharge.equipmentType, row.containerType)
+      )
+      const surchargeTotal = applicable.reduce(
+        (inner, surcharge) => {
+          const amounts = surchargeAmounts(
+            surcharge,
+            unitBase,
+            perUnitUsage,
+            scope,
+            quoteCurrency,
+            fxRates
+          )
+          return {
+            buy: inner.buy + amounts.buy,
+            sell: inner.sell + amounts.sell,
+          }
+        },
+        { buy: 0, sell: 0 }
+      )
+      const unitBuy = unitBase + surchargeTotal.buy
+      const unitSellSeed = unitBase + surchargeTotal.sell
+      const dial = resolveDial(row, laneMarkupType, laneMarkupValue)
+      const unitDial = dialMarkup(unitBuy, dial.markupType, dial.markupValue)
+      const unitUplift = unitSellSeed - unitBuy
+      return {
+        buy: sum.buy + unitBuy * count,
+        sell: sum.sell + (unitSellSeed + unitDial) * count,
+        dial: sum.dial + unitDial * count,
+      }
+    },
+    { buy: 0, sell: 0, dial: 0 }
+  )
 }
 
 function baseFreightBuy(
@@ -201,7 +354,9 @@ function baseFreightBuy(
 function lineAmounts(
   line: ManualLaneTotalsInput["lines"][number],
   usage: LaneUsageQuantities | null | undefined,
-  scope?: ScopeContext | null
+  scope: ScopeContext | null | undefined,
+  quoteCurrency: string | null | undefined,
+  fxRates: FxRates | null | undefined
 ): { buy: number; sell: number } {
   const base = baseFreightBuy(line, usage)
   const surcharges = line.surcharges ?? []
@@ -210,7 +365,14 @@ function lineAmounts(
   }
   const surchargeTotal = surcharges.reduce(
     (sum, row) => {
-      const amounts = surchargeAmounts(row, base, usage, scope)
+      const amounts = surchargeAmounts(
+        row,
+        base,
+        usage,
+        scope,
+        quoteCurrency,
+        fxRates
+      )
       return { buy: sum.buy + amounts.buy, sell: sum.sell + amounts.sell }
     },
     { buy: 0, sell: 0 }
@@ -228,27 +390,78 @@ function linesBaseFreight(
   return lines.reduce((sum, line) => sum + baseFreightBuy(line, usage), 0)
 }
 
+function usesPerCtPath(lines: ManualLaneTotalsInput["lines"]): boolean {
+  return lines.some(
+    (line) =>
+      line.baseMode === "per_eq" && (line.equipmentAmounts?.length ?? 0) > 0
+  )
+}
+
 /**
  * Sum manual rate lines as buy seed, apply amount/percent markup, derive sell.
- * When lines carry surcharges, included rows are priced via
- * {@link calculateSurchargeAmount} using {@link ManualLaneTotalsInput.usage}.
- * A finite `sellAmount` replaces that row's sell; the gap vs buy is added to
- * markup so sell = buy + markup still holds. `isVisible` does not change math.
- * Optional {@link ManualLaneTotalsInput.scope} drops origin/destination buckets.
- * Optional {@link ManualLaneTotalsInput.globalCharges} roll in after lane lines.
- * Non-finite line amounts and markup values are treated as 0. Outputs are rounded.
+ *
+ * Multi-CT FCL (`per_eq` + `equipmentAmounts`): prices each CT like starboard-2
+ * `deriveFclRateTotals` (one container, then × count) with per-CT dials and
+ * `equipmentType` filtering. Flat / single-amount paths keep one lane dial on
+ * the rolled buy.
+ *
+ * FX: line amounts in a foreign currency convert via `fxRates` into
+ * `quoteCurrency` (missing rate → 0).
  */
 export function computeManualLaneTotals(
   input: ManualLaneTotalsInput
 ): ManualLaneTotals {
   const scope = input.scope ?? null
-  const lane = input.lines.reduce(
-    (sum, line) => {
-      const amounts = lineAmounts(line, input.usage, scope)
-      return { buy: sum.buy + amounts.buy, sell: sum.sell + amounts.sell }
-    },
-    { buy: 0, sell: 0 }
-  )
+  const quoteCurrency = input.quoteCurrency ?? null
+  const fxRates = input.fxRates ?? null
+  const perCt = usesPerCtPath(input.lines)
+
+  let laneBuy = 0
+  let laneSellSeed = 0
+
+  if (perCt) {
+    for (const line of input.lines) {
+      if (
+        line.baseMode === "per_eq" &&
+        (line.equipmentAmounts?.length ?? 0) > 0
+      ) {
+        const amounts = equipmentLineAmounts(
+          line,
+          input.usage,
+          scope,
+          input.markupType,
+          Number.isFinite(input.markupValue) ? input.markupValue : 0,
+          quoteCurrency,
+          fxRates
+        )
+        laneBuy += amounts.buy
+        laneSellSeed += amounts.sell
+      } else {
+        const amounts = lineAmounts(
+          line,
+          input.usage,
+          scope,
+          quoteCurrency,
+          fxRates
+        )
+        laneBuy += amounts.buy
+        laneSellSeed += amounts.sell
+      }
+    }
+  } else {
+    for (const line of input.lines) {
+      const amounts = lineAmounts(
+        line,
+        input.usage,
+        scope,
+        quoteCurrency,
+        fxRates
+      )
+      laneBuy += amounts.buy
+      laneSellSeed += amounts.sell
+    }
+  }
+
   const globals = input.globalCharges ?? []
   const baseFreight = linesBaseFreight(input.lines, input.usage)
   const globalAmounts =
@@ -260,19 +473,30 @@ export function computeManualLaneTotals(
               { ...row, source: row.source ?? "global" },
               baseFreight,
               input.usage,
-              scope
+              scope,
+              quoteCurrency,
+              fxRates
             )
             return { buy: sum.buy + amounts.buy, sell: sum.sell + amounts.sell }
           },
           { buy: 0, sell: 0 }
         )
-  const buy = roundMoney(lane.buy + globalAmounts.buy)
-  const sellSeed = roundMoney(lane.sell + globalAmounts.sell)
-  const markupValue = Number.isFinite(input.markupValue) ? input.markupValue : 0
-  const dial = roundMoney(
-    input.markupType === "percent" ? (buy * markupValue) / 100 : markupValue
-  )
+
+  const buy = roundMoney(laneBuy + globalAmounts.buy)
+  const sellSeed = roundMoney(laneSellSeed + globalAmounts.sell)
   const rowUplift = roundMoney(sellSeed - buy)
+
+  if (perCt) {
+    const markup = roundMoney(rowUplift)
+    return {
+      buy,
+      markup,
+      sell: roundMoney(buy + markup),
+    }
+  }
+
+  const markupValue = Number.isFinite(input.markupValue) ? input.markupValue : 0
+  const dial = dialMarkup(buy, input.markupType, markupValue)
   const markup = roundMoney(rowUplift + dial)
 
   return {

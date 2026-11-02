@@ -1,6 +1,6 @@
 {
   "$schema_version": "1.0.0",
-  "description": "072 lean charge-line economics. One lane $/% markup dial applies to the rolled buy for both a single container and mixed equipment (20GP + 40HC). Prod per-container markup footers are the same dial, not a separate markup per container type. A finite sellAmount replaces that row's sell; markup includes the uplift so sell = buy + markup. isVisible false (Split off / absorbed) still contributes. Include and scope_override follow the existing inclusion predicate.",
+  "description": "Charge-line economics (072 + 085). Multi-CT FCL with equipmentAmounts prices each CT like starboard-2 deriveFclRateTotals: one container, apply that CT's dial (or lane dial fallback), then × count. A finite sellAmount replaces that row's sell; markup includes the uplift so sell = buy + markup. isVisible false (Split off / absorbed) still contributes. Include and scope_override follow the existing inclusion predicate.",
   "cases": [
     {
       "id": "single-ct-percent-markup",
@@ -35,7 +35,93 @@
         "markupValue": 150,
         "usage": { "container": 3 }
       },
-      "expected": { "buy": 2800, "markup": 150, "sell": 2950 }
+      "expected": { "buy": 2800, "markup": 450, "sell": 3250 }
+    },
+    {
+      "id": "multi-ct-distinct-dials",
+      "input": {
+        "lines": [
+          {
+            "amount": 0,
+            "baseMode": "per_eq",
+            "equipmentAmounts": [
+              {
+                "containerType": "20GP",
+                "amount": 800,
+                "count": 2,
+                "markupType": "amount",
+                "markupValue": 100
+              },
+              {
+                "containerType": "40HC",
+                "amount": 1200,
+                "count": 1,
+                "markupType": "percent",
+                "markupValue": 10
+              }
+            ]
+          }
+        ],
+        "markupType": "amount",
+        "markupValue": 0,
+        "usage": { "container": 3 }
+      },
+      "expected": { "buy": 2800, "markup": 320, "sell": 3120 }
+    },
+    {
+      "id": "equipment-type-scopes-surcharge",
+      "input": {
+        "lines": [
+          {
+            "amount": 0,
+            "baseMode": "per_eq",
+            "equipmentAmounts": [
+              { "containerType": "20GP", "amount": 1000, "count": 1 },
+              { "containerType": "40HC", "amount": 1000, "count": 1 }
+            ],
+            "surcharges": [
+              {
+                "usageUnit": "flat",
+                "rate": 50,
+                "source": "manual",
+                "isIncludedInTotal": true,
+                "leg": "freight",
+                "equipmentType": "20GP"
+              }
+            ]
+          }
+        ],
+        "markupType": "amount",
+        "markupValue": 0,
+        "usage": { "container": 2 }
+      },
+      "expected": { "buy": 2050, "markup": 0, "sell": 2050 }
+    },
+    {
+      "id": "row-fx-converts-into-quote-currency",
+      "input": {
+        "lines": [
+          {
+            "amount": 1000,
+            "baseMode": "flat",
+            "surcharges": [
+              {
+                "usageUnit": "flat",
+                "rate": 100,
+                "currencyCode": "EUR",
+                "source": "manual",
+                "isIncludedInTotal": true,
+                "leg": "freight"
+              }
+            ]
+          }
+        ],
+        "markupType": "amount",
+        "markupValue": 0,
+        "quoteCurrency": "USD",
+        "fxRates": { "EUR": { "USD": 1.1 } }
+      },
+      "expected": { "buy": 1110, "markup": 0, "sell": 1110 }
     },
     {
       "id": "sell-amount-uplift-is-markup",

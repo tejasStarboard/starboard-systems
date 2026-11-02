@@ -54,6 +54,7 @@ export type QuoteInsert = {
   effectiveFrom: Date | null
   expiryAt: Date | null
   currencyCode: string | null
+  exchangeRates: Record<string, Record<string, number>>
   incoterm: string
   customerRole: string
 }
@@ -64,6 +65,7 @@ export type QuoteUpdate = {
   effectiveFrom: Date | null
   expiryAt: Date | null
   currencyCode: string | null
+  exchangeRates: Record<string, Record<string, number>>
   incoterm: string
   customerRole: string
 }
@@ -197,6 +199,7 @@ export class DrizzleQuotesDao implements QuotesDao {
         status: quote.status,
         customerId: quote.customerId,
         currencyCode: quote.currencyCode,
+        exchangeRates: quote.exchangeRates,
         effectiveFrom: quote.effectiveFrom,
         expiryAt: quote.expiryAt,
         incoterm: quote.incoterm,
@@ -276,6 +279,7 @@ export class DrizzleQuotesDao implements QuotesDao {
               buyAmount: surcharge.buyAmount,
               sellAmount: surcharge.sellAmount,
               scopeOverride: surcharge.scopeOverride,
+              equipmentType: surcharge.equipmentType,
             })
             .from(surcharge)
             .where(inArray(surcharge.rateId, rateIds))
@@ -315,6 +319,7 @@ export class DrizzleQuotesDao implements QuotesDao {
         buyAmount: globalCharge.buyAmount,
         sellAmount: globalCharge.sellAmount,
         scopeOverride: globalCharge.scopeOverride,
+        equipmentType: globalCharge.equipmentType,
       })
       .from(globalCharge)
       .where(eq(globalCharge.quoteId, quoteId))
@@ -338,6 +343,7 @@ export class DrizzleQuotesDao implements QuotesDao {
       status: row.status,
       customerId: row.customerId ?? "",
       currencyCode: row.currencyCode ?? "",
+      exchangeRates: row.exchangeRates ?? {},
       incoterm: oceanIncotermSchema.safeParse(row.incoterm).success
         ? oceanIncotermSchema.parse(row.incoterm)
         : "",
@@ -439,6 +445,7 @@ export class DrizzleQuotesDao implements QuotesDao {
           buyAmount: row.buyAmount,
           sellAmount: row.sellAmount,
           scopeOverride: row.scopeOverride,
+          equipmentType: row.equipmentType,
         }))
       )
     }
@@ -505,6 +512,7 @@ export class DrizzleQuotesDao implements QuotesDao {
             buyAmount: surchargeRow.buyAmount,
             sellAmount: surchargeRow.sellAmount,
             scopeOverride: surchargeRow.scopeOverride,
+            equipmentType: surchargeRow.equipmentType,
           }))
         )
       }

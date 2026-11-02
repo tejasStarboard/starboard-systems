@@ -7,10 +7,12 @@ import {
   useWatch,
   type Control,
   type UseFormRegister,
+  type UseFormSetValue,
 } from "react-hook-form"
 
 import {
   createSurchargeLine,
+  type QuoteFormValues,
   type SurchargeLeg,
   type UsageUnit,
 } from "@starboard/lib-contracts"
@@ -26,9 +28,8 @@ import {
 } from "@starboard/lib-ui/components/select"
 import { cn } from "@starboard/lib-ui/lib/utils"
 
-import type { QuoteFormValues } from "@starboard/lib-contracts"
-
 import { ChargeGuardrails } from "./charge-guardrails"
+import { RowFxHint } from "./row-fx-hint"
 import { USAGE_UNIT_LABELS } from "./usage-labels"
 
 const LEGS: { value: SurchargeLeg; label: string }[] = [
@@ -38,10 +39,12 @@ const LEGS: { value: SurchargeLeg; label: string }[] = [
 ]
 
 const USAGE_UNITS = USAGE_UNIT_LABELS
+const DEFAULT_EQ = "__default__"
 
 export function RateSurchargesEditor({
   control,
   register,
+  setValue,
   lanePath,
   rateIndex,
   currencyCode,
@@ -49,6 +52,7 @@ export function RateSurchargesEditor({
 }: {
   control: Control<QuoteFormValues>
   register: UseFormRegister<QuoteFormValues>
+  setValue: UseFormSetValue<QuoteFormValues>
   lanePath: `lanes.${number}`
   rateIndex: number
   currencyCode: string
@@ -67,6 +71,22 @@ export function RateSurchargesEditor({
       control,
       name: surchargesPath,
     }) ?? []
+  const containers =
+    useWatch({
+      control,
+      name: `${lanePath}.containers`,
+    }) ?? []
+  const exchangeRates = useWatch({ control, name: "exchangeRates" }) ?? {}
+  const quoteCurrency = currencyCode || "USD"
+
+  const equipmentOptions = [
+    { value: DEFAULT_EQ, label: "Default" },
+    ...containers
+      .map((container) => container.containerType.trim())
+      .filter(Boolean)
+      .filter((value, index, all) => all.indexOf(value) === index)
+      .map((value) => ({ value, label: value })),
+  ]
 
   const byLeg = LEGS.map((leg) => ({
     ...leg,
@@ -80,6 +100,17 @@ export function RateSurchargesEditor({
       .filter((item) => item.leg === leg.value),
   }))
 
+  function setFxRate(from: string, to: string, rate: number) {
+    const next = {
+      ...exchangeRates,
+      [from]: {
+        ...(exchangeRates[from] ?? {}),
+        [to]: rate,
+      },
+    }
+    setValue("exchangeRates", next, { shouldDirty: true })
+  }
+
   return (
     <div className="space-y-3 border-t border-dashed bg-muted/20 px-3 py-3">
       <div className="flex items-center justify-between gap-2">
@@ -91,7 +122,7 @@ export function RateSurchargesEditor({
           onClick={() =>
             append(
               createSurchargeLine({
-                currencyCode: currencyCode || "USD",
+                currencyCode: quoteCurrency,
                 source: "manual",
               })
             )
@@ -122,6 +153,8 @@ export function RateSurchargesEditor({
                     forcedOut || (!forcedIn && excludedBuckets.includes(leg))
                   const showScope =
                     excludedBuckets.length > 0 || scopeOverride != null
+                  const lineCurrency =
+                    watched[index]?.currencyCode ?? quoteCurrency
                   return (
                     <div
                       key={field.id}
@@ -131,11 +164,39 @@ export function RateSurchargesEditor({
                       )}
                       title={scopedOut ? "Excluded by Incoterm" : undefined}
                     >
-                      <div className="grid grid-cols-[minmax(0,1.4fr)_7rem_7rem_6rem_auto_auto] items-center gap-2">
+                      <div className="grid grid-cols-[minmax(0,1.2fr)_6rem_6rem_5rem_4.5rem_5rem_auto_auto] items-center gap-2">
                         <Input
                           placeholder="Name"
                           className="h-8"
                           {...register(`${prefix}.name`)}
+                        />
+                        <Controller
+                          control={control}
+                          name={`${prefix}.equipmentType`}
+                          render={({ field: eqField }) => (
+                            <Select
+                              value={eqField.value?.trim() || DEFAULT_EQ}
+                              onValueChange={(value) => {
+                                eqField.onChange(
+                                  value === DEFAULT_EQ ? null : value
+                                )
+                              }}
+                            >
+                              <SelectTrigger size="sm" className="w-full">
+                                <SelectValue placeholder="Eq" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {equipmentOptions.map((option) => (
+                                  <SelectItem
+                                    key={option.value}
+                                    value={option.value}
+                                  >
+                                    {option.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          )}
                         />
                         <Controller
                           control={control}
@@ -225,6 +286,13 @@ export function RateSurchargesEditor({
                             })}
                           />
                         )}
+                        <Input
+                          placeholder="CCY"
+                          maxLength={3}
+                          className="h-8 uppercase"
+                          title="Line currency"
+                          {...register(`${prefix}.currencyCode`)}
+                        />
                         <Controller
                           control={control}
                           name={`${prefix}.isIncludedInTotal`}
@@ -250,6 +318,12 @@ export function RateSurchargesEditor({
                           <TrashIcon />
                         </Button>
                       </div>
+                      <RowFxHint
+                        lineCurrency={lineCurrency}
+                        quoteCurrency={quoteCurrency}
+                        exchangeRates={exchangeRates}
+                        onSetRate={setFxRate}
+                      />
                       <ChargeGuardrails
                         control={control}
                         register={register}

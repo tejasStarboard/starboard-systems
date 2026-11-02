@@ -112,6 +112,7 @@ export function QuoteLaneEditor({
   const totalsProps: TotalsSlotProps = {
     control,
     register,
+    setValue,
     lanePath,
     currencyCode,
     totals,

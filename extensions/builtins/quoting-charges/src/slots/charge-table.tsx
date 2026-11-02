@@ -163,6 +163,8 @@ export function ChargeTable({
                           next.push({
                             containerType: container.containerType,
                             amount,
+                            markupType: current?.markupType ?? null,
+                            markupValue: current?.markupValue ?? null,
                           })
                         }
                         setValue(
@@ -185,6 +187,7 @@ export function ChargeTable({
             <RateSurchargesEditor
               control={control}
               register={register}
+              setValue={setValue}
               lanePath={lanePath}
               rateIndex={selectedIndex}
               currencyCode={currencyCode}
@@ -199,6 +202,7 @@ export function ChargeTable({
         <GlobalChargesEditor
           control={control}
           register={register}
+          setValue={setValue}
           currencyCode={currencyCode}
         />
       </div>
