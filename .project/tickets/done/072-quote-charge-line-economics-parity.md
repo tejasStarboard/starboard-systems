@@ -2,7 +2,7 @@
 id: 072
 wave: 06-product
 title: Quote charge-line economics parity (markup, sell, Split, guardrails)
-status: in_progress
+status: done
 depends_on: [071, 070]
 epic: SYS-PRICING
 docs:
