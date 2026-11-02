@@ -2,7 +2,7 @@
 id: 069
 wave: 06-product
 title: Org carrier credentials in settings (not env)
-status: in_progress
+status: done
 depends_on: [057, 058, 061]
 epic: SYS-EXT-SPOT
 docs:

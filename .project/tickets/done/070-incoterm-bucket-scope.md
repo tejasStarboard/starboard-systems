@@ -2,7 +2,7 @@
 id: 070
 wave: 06-product
 title: Incoterm-driven charge bucket scope (legacy parity)
-status: in_progress
+status: done
 depends_on: [068, 071]
 epic: SYS-PRICING
 docs:
