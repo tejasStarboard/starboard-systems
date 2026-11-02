@@ -97,4 +97,4 @@ Built-in **`quoting.pdf`** (`extensions/builtins/quoting-pdf`) contributes Expor
 
 ## Next tickets
 
-**Phase D (cont.):** peel Incoterm/markup (**084**); money follow-ons in `quoting.charges` (**085**).
+**Phase D (cont.):** ~~peel Incoterm/markup (**084**)~~ — done: `quoting.incoterm` → `headerFields`, `quoting.markup` → `totals`. Next: money follow-ons in `quoting.charges` (**085**).

@@ -2,7 +2,7 @@
 id: 084
 wave: 07-quote-loop
 title: Peel Incoterm + markup into quoting.incoterm / quoting.markup
-status: todo
+status: in_progress
 depends_on: [070, 072, 073]
 epic: SYS-PLATFORM
 docs:

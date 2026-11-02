@@ -67,6 +67,7 @@ export function ActivityBar({
             aria-label="Admin"
             title="Admin"
             className="size-9"
+            nativeButton={false}
             render={<Link href="/admin" />}
           >
             <ShieldCheckIcon />

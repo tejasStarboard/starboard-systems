@@ -54,6 +54,10 @@ type Form = {
 export type HeaderFieldsSlotProps = Form & {
   quoteId: string
   errors: FieldErrors<QuoteFormValues>
+  /** False for terminal stages (win / loss / expired). */
+  commercialEditable: boolean
+  /** Layout hint so contributed fields match header density. */
+  layout: "desktop" | "tablet" | "mobile"
 }
 
 /** Stage / validity / number chrome (self-contributed by quoting.document). */
