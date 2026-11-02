@@ -120,6 +120,8 @@ export class DefaultQuotesService implements QuotesService {
       effectiveFrom: null,
       expiryAt: null,
       currencyCode,
+      incoterm: "",
+      customerRole: "shipper",
     })
 
     return { id }
@@ -144,6 +146,8 @@ export class DefaultQuotesService implements QuotesService {
       effectiveFrom: parseOptionalDate(data.effectiveFrom),
       expiryAt: parseOptionalDate(data.expiryAt),
       currencyCode,
+      incoterm: data.incoterm,
+      customerRole: data.customerRole,
     }
 
     const exists = await this.dao.existsInOrganization(

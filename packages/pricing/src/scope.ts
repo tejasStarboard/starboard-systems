@@ -1,8 +1,9 @@
 import type { ScopeBucket } from "./total-inclusion"
 
 /**
- * Lean door → bucket scope: missing pickup/delivery doors drop that end's
- * charges from sell / rollup_buy totals (port/CY ends).
+ * Door → bucket scope from ticket 068.
+ * Quote totals use {@link excludedBucketsForIncoterm} instead. Door presence
+ * is no longer the knock-out rule for origin/destination charges.
  */
 export function deriveExcludedBuckets(input: {
   hasPickupDoor: boolean

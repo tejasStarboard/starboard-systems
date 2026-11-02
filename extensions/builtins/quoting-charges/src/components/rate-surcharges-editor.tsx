@@ -122,11 +122,7 @@ export function RateSurchargesEditor({
                         "grid grid-cols-[minmax(0,1.4fr)_7rem_7rem_6rem_auto_auto] items-center gap-2",
                         scopedOut && "opacity-50"
                       )}
-                      title={
-                        scopedOut
-                          ? `${leg} charges excluded without a door at that end`
-                          : undefined
-                      }
+                      title={scopedOut ? "Excluded by Incoterm" : undefined}
                     >
                       <Input
                         placeholder="Name"

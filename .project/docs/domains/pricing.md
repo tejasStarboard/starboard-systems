@@ -15,17 +15,18 @@ Single implementation + fixture conformance suite. No TS/Python/add-in twins.
 
 ## Exported API
 
-| Export                      | Role                                                    |
-| --------------------------- | ------------------------------------------------------- |
-| `roundMoney`                | Half-up money rounding (default 2 dp)                   |
-| `computeManualLaneTotals`   | Canonical `{ buy, markup, sell }` for manual rate lines |
-| `calculateManualRateTotals` | UI alias `{ subtotal, markup, total }`                  |
-| `isIncludedInTotal`         | Surcharge inclusion predicate (sell / buy / rollup_buy) |
-| `deriveExcludedBuckets`     | Door presence → `origin` / `destination` exclusions     |
-| `getEffectiveUsageAmount`   | free → min → max usage → billable qty                   |
-| `calculateSurchargeAmount`  | Unit / flat / % of base freight → `{ buy, sell }`       |
-| `isBaseFreightRow`          | Stamp or name-allowlist base-freight predicate          |
-| `findBaseFreightRow`        | Elect base freight from a surcharge list                |
+| Export                       | Role                                                           |
+| ---------------------------- | -------------------------------------------------------------- |
+| `roundMoney`                 | Half-up money rounding (default 2 dp)                          |
+| `computeManualLaneTotals`    | Canonical `{ buy, markup, sell }` for manual rate lines        |
+| `calculateManualRateTotals`  | UI alias `{ subtotal, markup, total }`                         |
+| `isIncludedInTotal`          | Surcharge inclusion predicate (sell / buy / rollup_buy)        |
+| `deriveExcludedBuckets`      | Legacy door presence helper (068). Quote UI no longer calls it |
+| `excludedBucketsForIncoterm` | Incoterm × shipper/consignee → excluded buckets (070)          |
+| `getEffectiveUsageAmount`    | free → min → max usage → billable qty                          |
+| `calculateSurchargeAmount`   | Unit / flat / % of base freight → `{ buy, sell }`              |
+| `isBaseFreightRow`           | Stamp or name-allowlist base-freight predicate                 |
+| `findBaseFreightRow`         | Elect base freight from a surcharge list                       |
 
 `computeManualLaneTotals` accepts optional `scope.excluded_buckets` and quote-level `globalCharges` (`source: "global"` — immune to bucket scope). The quote UI passes **one** selected rate line. `baseMode: "per_eq"` multiplies `amount` by container count, or sums `equipmentAmounts` (`amount × count`) when those rows are present. Flat mode ignores container count. Schemas for quote/catalog charge lines live in `@starboard/lib-contracts` (`surchargeLineSchema`). Persistence: ticket **065** (`quotes.surcharge`), **068** (`quotes.global_charge`), **071** (`quotes.lane.selected_rate_id`, `quotes.rate.base_mode`, `quotes.rate.equipment_amounts`). Amount engine: **066**.
 
@@ -52,8 +53,8 @@ Creates/updates `quotes.surcharge`, `quotes.global_charge`, and `rates.surcharge
 
 - FX converters / display-currency paths → with **072** or follow-up
 - Full `surcharge_matrix.json` parity (tiers, dollar min/max beyond lean) — document cells left out
-- Full Incoterm × role matrix — **[070](../../tickets/todo/070-incoterm-bucket-scope.md)** (068 = door → bucket only; **product deviation until 070**)
-- QV2 charge grid / rate alternatives / base flat·per-eq — **[071](../../tickets/todo/071-quote-charge-table-prod-parity.md)**
+- **070** is the quote default: Incoterm × role excludes buckets. **068** door-only `deriveExcludedBuckets` remains in the package and is not used by the quote form. Globals (`source: global`) stay in the total. Deferred: trucking remaps and non-ocean incoterms.
+- QV2 charge grid / rate alternatives / base flat·per-eq — **071** shipped
 - Row economics (markup, sell, Split, guardrails) — **[072](../../tickets/todo/072-quote-charge-line-economics-parity.md)**
 - Org settings rate-item admin stamp for globals
 

@@ -2,7 +2,7 @@
 id: 070
 wave: 06-product
 title: Incoterm-driven charge bucket scope (legacy parity)
-status: open
+status: in_progress
 depends_on: [068, 071]
 epic: SYS-PRICING
 docs:
@@ -38,12 +38,12 @@ Product decision: follow **legacy prod** — allow charges in any bucket; **knoc
 
 ## Acceptance criteria
 
-- [ ] Quote form has an Incoterm control; value persists on quote
-- [ ] Port-to-port (no doors) + Incoterm that includes origin → origin rate surcharges **count** in total
-- [ ] Same quote + Incoterm that excludes origin → origin surcharges **do not** count (rows may remain visible)
-- [ ] Fixture/oracle cases for matrix cells used in UI
-- [ ] Domain docs: 068 = door lean shipped; **070** = Incoterm parity
-- [ ] Deprecate or narrow door-only exclusion once Incoterm path is default
+- [x] Quote form has an Incoterm control; value persists on quote
+- [x] Port-to-port (no doors) + Incoterm that includes origin → origin rate surcharges **count** in total
+- [x] Same quote + Incoterm that excludes origin → origin surcharges **do not** count (rows may remain visible)
+- [x] Fixture/oracle cases for matrix cells used in UI
+- [x] Domain docs: 068 = door lean shipped; **070** = Incoterm parity
+- [x] Deprecate or narrow door-only exclusion once Incoterm path is default
 
 ## Files to touch (expected)
 

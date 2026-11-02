@@ -48,6 +48,10 @@ Quote UI/data activation is the driving built-in **`quoting.document`** (not ker
 
 Match **starboard-2 QV2** quote money UX/semantics. Architecture may differ (ONE MATH package, `global_charge` table); **user-visible behavior must not**. Silent simplifications are bugs until ticketed.
 
+## Incoterm scope (070)
+
+Quote header stores `incoterm` and `customerRole` (`shipper` | `consignee`). Lane totals call `excludedBucketsForIncoterm`. A blank Incoterm excludes nothing, including port-to-port origin charges. Globals stay in the total. Door presence does not knock buckets out.
+
 ## Charge grid (071)
 
 One table for the **selected** rate inside `quoting.charges` (`quoting.slots.chargeTable`). Rate tabs are alternatives; totals do not sum every rate. **Add charge** adds a surcharge line. **Add rate** (and apply catalog/spot) adds an alternative and selects it.

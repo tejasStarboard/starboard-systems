@@ -5,6 +5,7 @@ import {
   createSurchargeLine,
   emptyLaneFormValues,
   emptyQuoteFormValues,
+  oceanIncotermSchema,
   type FormOption,
   type LaneFormValues,
   type QuoteFormValues,
@@ -103,6 +104,10 @@ class InMemoryQuotesDao implements QuotesDao {
       status: row.status,
       customerId: row.customerId ?? "",
       currencyCode: row.currencyCode ?? "",
+      incoterm: oceanIncotermSchema.safeParse(row.incoterm).success
+        ? oceanIncotermSchema.parse(row.incoterm)
+        : "",
+      customerRole: row.customerRole === "consignee" ? "consignee" : "shipper",
       effectiveFrom: toDateInput(row.effectiveFrom),
       expiryAt: toDateInput(row.expiryAt),
       globalCharges: (this.globalChargesByQuote.get(quoteId) ?? []).map(

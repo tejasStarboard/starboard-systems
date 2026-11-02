@@ -213,7 +213,7 @@ export function QuoteLaneEditor({
 
           {excludedBuckets.length > 0 ? (
             <p className="text-[11px] text-muted-foreground">
-              Scoped out of totals (no door): {excludedBuckets.join(", ")}.
+              Excluded by Incoterm: {excludedBuckets.join(", ")}.
             </p>
           ) : null}
 

@@ -27,6 +27,8 @@ import { cn } from "@starboard/lib-ui/lib/utils"
 
 import { CustomerCombobox } from "@starboard/ext-crm-parties"
 import {
+  customerRoleSchema,
+  oceanIncotermSchema,
   quoteStatusSchema,
   type QuoteFormOption,
   type QuoteFormValues,
@@ -185,6 +187,90 @@ export function QuoteCurrencyField({
               {currencyOptions.map((option) => (
                 <SelectItem key={option.value} value={option.value}>
                   {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <FieldError errors={[fieldState.error]} />
+        </Field>
+      )}
+    />
+  )
+}
+
+export function QuoteIncotermField({
+  control,
+  className,
+}: {
+  control: Control<QuoteFormValues>
+  className?: string
+}) {
+  return (
+    <Controller
+      control={control}
+      name="incoterm"
+      render={({ field, fieldState }) => (
+        <Field
+          className={cn(className)}
+          data-invalid={fieldState.invalid || undefined}
+        >
+          <FieldLabel>Incoterm</FieldLabel>
+          <Select
+            value={field.value || null}
+            onValueChange={(value) => {
+              field.onChange(value ?? "")
+            }}
+          >
+            <SelectTrigger className="w-full" aria-invalid={fieldState.invalid}>
+              <SelectValue placeholder="—" />
+            </SelectTrigger>
+            <SelectContent>
+              {oceanIncotermSchema.options.map((code) => (
+                <SelectItem key={code} value={code}>
+                  {code}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <FieldError errors={[fieldState.error]} />
+        </Field>
+      )}
+    />
+  )
+}
+
+export function QuoteCustomerRoleField({
+  control,
+  className,
+}: {
+  control: Control<QuoteFormValues>
+  className?: string
+}) {
+  return (
+    <Controller
+      control={control}
+      name="customerRole"
+      render={({ field, fieldState }) => (
+        <Field
+          className={cn(className)}
+          data-invalid={fieldState.invalid || undefined}
+        >
+          <FieldLabel>Role</FieldLabel>
+          <Select
+            value={field.value}
+            onValueChange={(value) => {
+              if (value === "shipper" || value === "consignee") {
+                field.onChange(value)
+              }
+            }}
+          >
+            <SelectTrigger className="w-full" aria-invalid={fieldState.invalid}>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {customerRoleSchema.options.map((role) => (
+                <SelectItem key={role} value={role}>
+                  {role === "shipper" ? "Shipper" : "Consignee"}
                 </SelectItem>
               ))}
             </SelectContent>
