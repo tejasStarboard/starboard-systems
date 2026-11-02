@@ -11,6 +11,7 @@ import {
 } from "drizzle-orm"
 import {
   emptyLaneFormValues,
+  oceanIncotermSchema,
   toDateInputValue,
   type FormOption,
   type LaneFormValues,
@@ -53,6 +54,8 @@ export type QuoteInsert = {
   effectiveFrom: Date | null
   expiryAt: Date | null
   currencyCode: string | null
+  incoterm: string
+  customerRole: string
 }
 
 export type QuoteUpdate = {
@@ -61,6 +64,8 @@ export type QuoteUpdate = {
   effectiveFrom: Date | null
   expiryAt: Date | null
   currencyCode: string | null
+  incoterm: string
+  customerRole: string
 }
 
 export type ReplaceLanesInput = {
@@ -194,6 +199,8 @@ export class DrizzleQuotesDao implements QuotesDao {
         currencyCode: quote.currencyCode,
         effectiveFrom: quote.effectiveFrom,
         expiryAt: quote.expiryAt,
+        incoterm: quote.incoterm,
+        customerRole: quote.customerRole,
       })
       .from(quote)
       .where(
@@ -331,6 +338,10 @@ export class DrizzleQuotesDao implements QuotesDao {
       status: row.status,
       customerId: row.customerId ?? "",
       currencyCode: row.currencyCode ?? "",
+      incoterm: oceanIncotermSchema.safeParse(row.incoterm).success
+        ? oceanIncotermSchema.parse(row.incoterm)
+        : "",
+      customerRole: row.customerRole === "consignee" ? "consignee" : "shipper",
       effectiveFrom: toDateInputValue(row.effectiveFrom),
       expiryAt: toDateInputValue(row.expiryAt),
       globalCharges: globalChargeRows.map(globalChargeRowToLine),

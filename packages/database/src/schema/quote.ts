@@ -71,6 +71,12 @@ export const quote = quotesSchema.table(
     expiryAt: timestamp("expiry_at"),
     /** Opaque currency code from geography service. */
     currencyCode: varchar("currency_code", { length: 3 }),
+    /** Ocean Incoterm code. Empty means no bucket knock-out. */
+    incoterm: varchar("incoterm", { length: 3 }).notNull().default(""),
+    /** shipper | consignee */
+    customerRole: varchar("customer_role", { length: 16 })
+      .notNull()
+      .default("shipper"),
   },
   (table) => [
     uniqueIndex("quote_organization_quote_id_uidx").on(

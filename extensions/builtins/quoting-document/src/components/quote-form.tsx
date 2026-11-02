@@ -19,9 +19,8 @@ import {
   calculateManualRateTotals,
   createManualRateLine,
   resolveSelectedManualRate,
-  deriveExcludedBuckets,
+  excludedBucketsForIncoterm,
   emptyLaneFormValues,
-  isDoorAddressEmpty,
   isLaneReady,
   quoteFormSchema,
   type LaneFormValues,
@@ -120,14 +119,22 @@ export function QuoteForm({
     control: form.control,
     name: "currencyCode",
   })
+  const incoterm = useWatch({
+    control: form.control,
+    name: "incoterm",
+  })
+  const customerRole = useWatch({
+    control: form.control,
+    name: "customerRole",
+  })
 
   const excludedBuckets = useMemo(
     () =>
-      deriveExcludedBuckets({
-        hasPickupDoor: !isDoorAddressEmpty(selectedLane?.pickup),
-        hasDeliveryDoor: !isDoorAddressEmpty(selectedLane?.delivery),
+      excludedBucketsForIncoterm({
+        incoterm,
+        role: customerRole,
       }),
-    [selectedLane?.pickup, selectedLane?.delivery]
+    [incoterm, customerRole]
   )
 
   useEffect(() => {
@@ -182,7 +189,7 @@ export function QuoteForm({
       scope: { excluded_buckets: excludedBuckets },
       globalCharges: globalCharges ?? [],
     })
-  }, [selectedLane, excludedBuckets, globalCharges])
+  }, [selectedLane, excludedBuckets, globalCharges, incoterm, customerRole])
 
   function onSubmit(values: QuoteFormValues) {
     startTransition(async () => {

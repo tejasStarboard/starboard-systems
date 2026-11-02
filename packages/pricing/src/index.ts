@@ -19,6 +19,12 @@ export {
   type TotalKind,
 } from "./total-inclusion"
 export { deriveExcludedBuckets } from "./scope"
+export {
+  excludedBucketsForIncoterm,
+  OCEAN_INCOTERMS,
+  type IncotermCustomerRole,
+  type OceanIncoterm,
+} from "./incoterm-scope"
 export { getEffectiveUsageAmount } from "./usage"
 export {
   findBaseFreightRow,

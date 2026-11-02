@@ -1,0 +1,40 @@
+{
+  "cases": [
+    {
+      "id": "blank-incoterm-excludes-nothing",
+      "incoterm": "",
+      "role": "shipper",
+      "excluded": []
+    },
+    {
+      "id": "fob-shipper-includes-origin",
+      "incoterm": "FOB",
+      "role": "shipper",
+      "excluded": ["freight", "destination"]
+    },
+    {
+      "id": "exw-shipper-excludes-origin",
+      "incoterm": "EXW",
+      "role": "shipper",
+      "excluded": ["origin", "freight", "destination"]
+    },
+    {
+      "id": "fob-consignee-excludes-origin",
+      "incoterm": "FOB",
+      "role": "consignee",
+      "excluded": ["origin"]
+    },
+    {
+      "id": "ddp-shipper-includes-all-buckets",
+      "incoterm": "DDP",
+      "role": "shipper",
+      "excluded": []
+    },
+    {
+      "id": "cif-shipper-excludes-destination",
+      "incoterm": "CIF",
+      "role": "shipper",
+      "excluded": ["destination"]
+    }
+  ]
+}

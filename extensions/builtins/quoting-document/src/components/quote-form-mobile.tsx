@@ -6,7 +6,9 @@ import { Separator } from "@starboard/lib-ui/components/separator"
 import {
   QuoteCurrencyField,
   QuoteCustomerField,
+  QuoteCustomerRoleField,
   QuoteEffectiveField,
+  QuoteIncotermField,
   QuoteExpiryField,
   QuoteIdField,
   QuoteStatusField,
@@ -38,6 +40,8 @@ export function QuoteFormMobile(props: QuoteFormLayoutProps) {
             currencyOptions={props.currencyOptions}
             className="w-full"
           />
+          <QuoteIncotermField control={props.control} className="w-full" />
+          <QuoteCustomerRoleField control={props.control} className="w-full" />
           <QuoteEffectiveField
             register={props.register}
             errors={props.errors}

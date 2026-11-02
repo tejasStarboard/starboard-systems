@@ -3,6 +3,24 @@ import { z } from "zod"
 import { doorAddressSchema, emptyDoorAddress } from "./door-address.js"
 import { surchargeLineSchema } from "./surcharge.js"
 
+export const oceanIncotermSchema = z.enum([
+  "EXW",
+  "FCA",
+  "FAS",
+  "FOB",
+  "CFR",
+  "CIF",
+  "CPT",
+  "CIP",
+  "DAP",
+  "DPU",
+  "DDP",
+])
+export type OceanIncoterm = z.infer<typeof oceanIncotermSchema>
+
+export const customerRoleSchema = z.enum(["shipper", "consignee"])
+export type CustomerRole = z.infer<typeof customerRoleSchema>
+
 export const quoteSourceSchema = z.enum(["email", "manual"])
 export type QuoteSource = z.infer<typeof quoteSourceSchema>
 
@@ -136,7 +154,10 @@ export const quoteFormSchema = z.object({
     ),
   effectiveFrom: z.string(),
   expiryAt: z.string(),
-  /** Quote-level charges (source `global`); immune to door bucket scope. */
+  /** Blank until the user picks an Incoterm. Blank excludes no buckets. */
+  incoterm: z.union([oceanIncotermSchema, z.literal("")]),
+  customerRole: customerRoleSchema,
+  /** Quote-level charges (source `global`); immune to Incoterm bucket scope. */
   globalCharges: z.array(surchargeLineSchema),
   lanes: z.array(laneFormSchema).min(1),
 })
@@ -322,6 +343,8 @@ export function emptyQuoteFormValues(input: {
     currencyCode: "",
     effectiveFrom: "",
     expiryAt: "",
+    incoterm: "",
+    customerRole: "shipper",
     globalCharges: [],
     lanes: [emptyLaneFormValues("fcl")],
   }
