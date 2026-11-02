@@ -152,6 +152,7 @@ jobs:
       MESSAGING_SERVICE_URL: http://127.0.0.1:3202
       SPOT_SERVICE_URL: http://127.0.0.1:3203
       INTERNAL_SERVICE_TOKEN: ci-internal-service-token
+      EXTENSION_SETTINGS_SECRET: ci-extension-settings-secret-32!!
       TURBO_SCM_BASE: ${{ needs.changes.outputs.base_sha }}
       TURBO_SCM_HEAD: ${{ github.sha }}
 
@@ -230,6 +231,7 @@ jobs:
             echo 'MESSAGING_SERVICE_URL=http://127.0.0.1:3202'
             echo 'SPOT_SERVICE_URL=http://127.0.0.1:3203'
             echo 'INTERNAL_SERVICE_TOKEN=ci-internal-service-token'
+            echo 'EXTENSION_SETTINGS_SECRET=ci-extension-settings-secret-32!!'
           } > .env
 
       - name: Format check

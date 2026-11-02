@@ -41,7 +41,7 @@ export const extensionSettingContributionSchema = z
       .union([z.boolean(), z.string(), z.number(), z.null()])
       .optional(),
     options: z.array(extensionSettingOptionSchema).optional(),
-    scope: z.literal("platform"),
+    scope: z.enum(["platform", "organization"]),
     required: z.boolean().optional(),
   })
   .superRefine((setting, ctx) => {

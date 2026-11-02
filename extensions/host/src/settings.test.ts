@@ -58,7 +58,7 @@ describe("extension settings schema", () => {
     expect(getDeclaredSettings(parsed)).toHaveLength(4)
   })
 
-  test("rejects organization scope and select settings without options", () => {
+  test("accepts organization scope and rejects select settings without options", () => {
     expect(
       extensionManifestSchema.safeParse({
         ...baseManifest,
@@ -73,7 +73,7 @@ describe("extension settings schema", () => {
           ],
         },
       }).success
-    ).toBe(false)
+    ).toBe(true)
 
     expect(
       extensionManifestSchema.safeParse({
@@ -194,9 +194,14 @@ describe("registered extension settings", () => {
     )
     expect(getDeclaredSettings(maersk!).map((setting) => setting.key)).toEqual([
       "live_strategy",
+      "username",
+      "password",
+      "customerCode",
     ])
     expect(getDeclaredSettings(cma!).map((setting) => setting.key)).toEqual([
       "live_strategy",
+      "apiKey",
+      "clientId",
     ])
     expect(getDeclaredSettings(msgraph!).map((setting) => setting.key)).toEqual(
       ["sync_interval_minutes"]

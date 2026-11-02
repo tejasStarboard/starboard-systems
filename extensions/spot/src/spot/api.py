@@ -10,7 +10,11 @@ from starboard_python_kit import describe_job
 from temporalio.client import Client
 
 from spot.config import SpotConfig, load_config
+from spot.plugins.cma.validate import validate_credentials as validate_cma_credentials
 from spot.plugins.fake.workflows import SearchWorkflowInput, SpotSearchWorkflow
+from spot.plugins.maersk.validate import (
+    validate_credentials as validate_maersk_credentials,
+)
 from spot.plugins.registry import get_plugin
 
 
@@ -31,6 +35,15 @@ class SearchJobBody(BaseModel):
     destination: str | None = None
     mode: str = Field(default="fcl")
     liveStrategy: bool | None = None
+
+
+class ValidateCredentialsBody(BaseModel):
+    credentials: dict[str, str] = Field(default_factory=dict)
+
+
+class ValidateCredentialsResponse(BaseModel):
+    ok: bool
+    error: str | None = None
 
 
 def create_app(
@@ -123,6 +136,28 @@ def create_app(
     )
     async def enqueue_cma_search(body: SearchJobBody) -> EnqueueResponse:
         return await enqueue_search("cma", body)
+
+    @app.post(
+        "/extensions/spot.maersk/validate",
+        response_model=ValidateCredentialsResponse,
+        dependencies=[Depends(require_service_token)],
+    )
+    async def validate_maersk(
+        body: ValidateCredentialsBody,
+    ) -> ValidateCredentialsResponse:
+        result = await validate_maersk_credentials(body.credentials)
+        return ValidateCredentialsResponse(ok=bool(result.get("ok")))
+
+    @app.post(
+        "/extensions/spot.cma/validate",
+        response_model=ValidateCredentialsResponse,
+        dependencies=[Depends(require_service_token)],
+    )
+    async def validate_cma(
+        body: ValidateCredentialsBody,
+    ) -> ValidateCredentialsResponse:
+        result = await validate_cma_credentials(body.credentials)
+        return ValidateCredentialsResponse(ok=bool(result.get("ok")))
 
     @app.get(
         "/extensions/{extension_id}/jobs/{workflow_id}",
