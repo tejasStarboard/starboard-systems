@@ -40,7 +40,7 @@ See also: [extension-migration-inventory-2026-11-02.md](extension-migration-inve
 
 |   # | Ticket                                                                                              | Why               |
 | --: | --------------------------------------------------------------------------------------------------- | ----------------- |
-|   7 | **[071](../../tickets/todo/071-quote-charge-table-prod-parity.md)** Charge grid + rate alternatives | Prod table shape  |
+|   7 | **[071](../../tickets/done/071-quote-charge-table-prod-parity.md)** Charge grid + rate alternatives | Prod table shape  |
 |   8 | **[070](../../tickets/todo/070-incoterm-bucket-scope.md)** Incoterm scope                           | Replace door-only |
 |   9 | **[072](../../tickets/todo/072-quote-charge-line-economics-parity.md)** Line economics              | Markup/sell/Split |
 

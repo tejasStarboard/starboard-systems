@@ -2,7 +2,7 @@
 id: 071
 wave: 06-product
 title: Quote charge table prod parity (QV2 grid + rate alternatives)
-status: in_progress
+status: done
 depends_on: [067, 068, 073]
 epic: SYS-PRICING
 docs:

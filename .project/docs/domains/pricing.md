@@ -53,7 +53,7 @@ Creates/updates `quotes.surcharge`, `quotes.global_charge`, and `rates.surcharge
 - FX converters / display-currency paths → with **072** or follow-up
 - Full `surcharge_matrix.json` parity (tiers, dollar min/max beyond lean) — document cells left out
 - Full Incoterm × role matrix — **[070](../../tickets/todo/070-incoterm-bucket-scope.md)** (068 = door → bucket only; **product deviation until 070**)
-- QV2 charge grid / rate alternatives / base flat·per-eq — **[071](../../tickets/todo/071-quote-charge-table-prod-parity.md)**
+- QV2 charge grid / rate alternatives / base flat·per-eq — **[071](../../tickets/done/071-quote-charge-table-prod-parity.md)** shipped
 - Row economics (markup, sell, Split, guardrails) — **[072](../../tickets/todo/072-quote-charge-line-economics-parity.md)**
 - Org settings rate-item admin stamp for globals
 
