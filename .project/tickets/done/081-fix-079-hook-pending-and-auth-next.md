@@ -2,7 +2,7 @@
 id: 081
 wave: 06-platform
 title: Fix 079 hook pending flags, poll errors, and auth ?next=
-status: in_progress
+status: done
 depends_on: [079, 080]
 epic: SYS-SHELL
 docs:
