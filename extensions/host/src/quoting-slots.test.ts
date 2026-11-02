@@ -45,7 +45,15 @@ describe("quoting.document defines slots (073)", () => {
         c.extensionId,
       ])
     ).toEqual([["quoting.document.lifecycle", "quoting.document"]])
-    expect(getContributionsToPoint("quoting.commands", "credit")).toEqual([])
+  })
+
+  test("quoting.pdf contributes Export PDF to quoting.commands (083)", () => {
+    expect(
+      getContributionsToPoint("quoting.commands", "credit").map((c) => [
+        c.id,
+        c.extensionId,
+      ])
+    ).toEqual([["quoting.pdf.export", "quoting.pdf"]])
   })
 
   test("only quoting.document defines quoting.* points", () => {
@@ -96,7 +104,20 @@ describe("quoting.document defines slots (073)", () => {
     expect(result["quoting.slots.chargeTable"]).toHaveLength(1)
     expect(result["quoting.slots.rateSources"]).toHaveLength(4)
     expect(result["quoting.slots.lifecycle"]).toHaveLength(1)
+    expect(result["quoting.commands"]).toHaveLength(1)
+  })
+
+  test("unplug quoting.pdf → no export command; other slots intact", () => {
+    const context = off("quoting.pdf")
+    const result = getContributionsForOwner(
+      "quoting.document",
+      "credit",
+      manifests,
+      context
+    )
     expect(result["quoting.commands"]).toEqual([])
+    expect(result["quoting.slots.lifecycle"]).toHaveLength(1)
+    expect(result["quoting.slots.chargeTable"]).toHaveLength(1)
   })
 
   test("inactive owner → no mounts (even though contributors are active)", () => {

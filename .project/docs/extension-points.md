@@ -171,7 +171,9 @@ Optional extensions should prefer contributing to **driving** points, not invent
 
 **073 (done):** slot **hosts + `defines`** live inside `quoting.document`; `quoting.charges` → `chargeTable`, `rates.catalog` + `spot.*` → `rateSources`; `headerFields` / `totals` hosted, unclaimed; `quoting.totalsHooks` declared (headless, consumed by 072). How-to: [extensions.md cookbook](extensions.md#cookbook-contribute-ui-to-a-quotingdocument-slot-073).
 
-**082 (done):** `quoting.slots.lifecycle` + `quoting.commands` defined; document self-contributes lifecycle chrome; commands host empty for **083**.
+**082 (done):** `quoting.slots.lifecycle` + `quoting.commands` defined; document self-contributes lifecycle chrome.
+
+**083 (done):** `quoting.pdf` contributes `quoting.pdf.export` into `quoting.commands`; BFF `GET /api/quotes/:id/pdf`.
 
 ---
 

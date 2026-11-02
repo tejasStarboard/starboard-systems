@@ -48,8 +48,8 @@ Legend: **Done** · **Partial** · **Ticketed** · **Not started** · **Out of s
 | Surcharges (legs, units, globals) | **Partial**          | Nested under multi-rate cards; not QV2 grid (**071**)                                                                       |
 | Rate alternatives (tabs)          | **Partial**          | Apply appends rates then **sums all** — prod selects one (**071**)                                                          |
 | Incoterm scope                    | **Partial**          | Door knock-out shipped; prod is Incoterm×role (**070**)                                                                     |
-| Quote stages / lifecycle          | **Partial (082)**    | Stage/validity/number persist + lifecycle slot; PDF/send still open                                                         |
-| PDF / Excel / templates           | **Not started**      |                                                                                                                             |
+| Quote stages / lifecycle          | **Partial (082)**    | Stage/validity/number persist + lifecycle slot; send still open                                                             |
+| PDF / Excel / templates           | **Partial (083)**    | Lean `quoting.pdf` export; not pixel-perfect / branded templates                                                            |
 | Send reply                        | **Partial**          | Messaging send stub (030)                                                                                                   |
 | RFR / recurring RFR               | **Not started**      |                                                                                                                             |
 | Autonomous modes                  | **Not started**      |                                                                                                                             |

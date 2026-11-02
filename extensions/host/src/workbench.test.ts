@@ -323,6 +323,7 @@ describe("getActiveWorkbenchContributions", () => {
       "quoting.slots.chargeTable",
       "quoting.slots.rateSources",
       "quoting.slots.lifecycle",
+      "quoting.commands",
     ])
   })
 })

@@ -74,7 +74,7 @@ Persisted on `quotes.quote` and exposed on `QuoteFormValues` / list items:
 | `effectiveFrom` / `expiryAt` | Quote validity window (also copied onto rate `validFrom`/`validTo` on save)                                                                                                  |
 | `quoteId`                    | Human-facing number — **6-char A–Z0–9**, unique per `organizationId` (unique index). Assigned on create via random collision-retry (not a sequential counter; no CargoWise). |
 
-UI chrome (id / stage / dates) mounts only via `quoting.slots.lifecycle`, self-contributed by `quoting.document`. Toolbar actions use `quoting.commands` (empty until **083** PDF). Kernel has no stage imports.
+UI chrome (id / stage / dates) mounts only via `quoting.slots.lifecycle`, self-contributed by `quoting.document`. Toolbar **Export PDF** comes from `quoting.pdf` into `quoting.commands` (**083**). Kernel has no stage/PDF imports.
 
 ### Lean stage gates
 
@@ -89,8 +89,12 @@ See [build-priority](../reference/build-priority-2026-11-01.md) · [migration in
 **Phase A:** workbench (**074**) → host (**075**) → scaffold (**076**) → migrate quote (**077**) → slots (**073**).  
 **Phase B:** charge grid (**071**) and Incoterm (**070**) shipped. Economics (**072**) is the lean subset in [Charge line economics](#charge-line-economics-072). Still deferred: per-container markup dials, row FX, surcharge equipment column, tier matrix.
 
-Also: no PDF/delete yet; no catalog/spot provenance FK. Full prod stage-transition edge cases deferred.
+Also: no delete yet; no catalog/spot provenance FK. Full prod stage-transition edge cases deferred. PDF is lean (not pixel-perfect prod template).
+
+## Quote PDF (083)
+
+Built-in **`quoting.pdf`** (`extensions/builtins/quoting-pdf`) contributes Export PDF into `quoting.commands`. Totals use `@starboard/lib-pricing` only. Download via BFF `GET /api/quotes/:id/pdf` (gated on extension active + status ∈ sent|win|loss). Unplug → no export control; editor intact.
 
 ## Next tickets
 
-**Phase D (cont.):** PDF via **`quoting.pdf`** (**083**); peel Incoterm/markup (**084**); money follow-ons in `quoting.charges` (**085**).
+**Phase D (cont.):** peel Incoterm/markup (**084**); money follow-ons in `quoting.charges` (**085**).
