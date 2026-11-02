@@ -3,6 +3,7 @@
 import { XIcon } from "@phosphor-icons/react"
 
 import { useWorkbench } from "@/components/workbench/workbench-context"
+import { builtinEditors } from "@/lib/workbench/builtin-editors"
 import {
   Empty,
   EmptyDescription,
@@ -78,8 +79,13 @@ export function EditorGroup({ children }: { children: React.ReactNode }) {
     ? contributions.editors.find((e) => e.viewType === active.viewType)
     : undefined
 
+  const Provided =
+    editor && !editor.deepLink ? builtinEditors[editor.viewType] : undefined
+
   let content: React.ReactNode
-  if (active && !editor?.deepLink) {
+  if (active && Provided) {
+    content = <Provided resourceId={active.resourceId} title={active.title} />
+  } else if (active && !editor?.deepLink) {
     content = (
       <div
         data-testid="stub-editor"

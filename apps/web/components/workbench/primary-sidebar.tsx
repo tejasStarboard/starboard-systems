@@ -19,8 +19,10 @@ function isActive(pathname: string, href: string) {
 
 function SidebarViews({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname()
-  const { contributions, activeActivityId } = useWorkbench()
+  const { contributions, activeActivityId, openEditor, tabs, activeTabId } =
+    useWorkbench()
 
+  const activeTab = tabs.find((tab) => tab.id === activeTabId)
   const views = contributions.views.filter(
     (view) => view.activityId === activeActivityId
   )
@@ -39,16 +41,34 @@ function SidebarViews({ onNavigate }: { onNavigate?: () => void }) {
       <ul>
         {view.entries.map((entry) => (
           <li key={entry.id}>
-            <Link
-              href={entry.href}
-              onClick={onNavigate}
-              className={cn(
-                "block px-4 py-1.5 text-sm hover:bg-muted",
-                isActive(pathname, entry.href) && "bg-muted font-medium"
-              )}
-            >
-              {entry.label}
-            </Link>
+            {entry.opens ? (
+              <button
+                type="button"
+                onClick={() => {
+                  openEditor(entry.opens!)
+                  onNavigate?.()
+                }}
+                className={cn(
+                  "block w-full px-4 py-1.5 text-left text-sm hover:bg-muted",
+                  activeTab?.viewType === entry.opens.viewType &&
+                    activeTab.resourceId === entry.opens.resourceId &&
+                    "bg-muted font-medium"
+                )}
+              >
+                {entry.label}
+              </button>
+            ) : entry.href ? (
+              <Link
+                href={entry.href}
+                onClick={onNavigate}
+                className={cn(
+                  "block px-4 py-1.5 text-sm hover:bg-muted",
+                  isActive(pathname, entry.href) && "bg-muted font-medium"
+                )}
+              >
+                {entry.label}
+              </Link>
+            ) : null}
           </li>
         ))}
       </ul>

@@ -64,7 +64,8 @@ export function mergeHostContributions(
       entries: (item.entries ?? []).map((entry) => ({
         id: entry.id,
         label: entry.label,
-        href: entry.href,
+        ...(entry.href ? { href: entry.href } : {}),
+        ...(entry.opens ? { opens: entry.opens } : {}),
       })),
     })
   }
