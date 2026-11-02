@@ -108,7 +108,7 @@ export function EditorGroup({ children }: { children: React.ReactNode }) {
       className="flex min-w-0 flex-1 flex-col"
     >
       <TabStrip />
-      <div className="flex min-h-0 flex-1 flex-col overflow-auto [--header-height:calc(--spacing(15))]">
+      <div className="flex min-h-0 flex-1 flex-col overflow-auto">
         {content}
       </div>
     </section>

@@ -3,6 +3,8 @@
 import { usePathname, useRouter } from "next/navigation"
 import * as React from "react"
 
+import { useIsMobile } from "@starboard/lib-ui/hooks/use-mobile"
+
 import {
   closeTab,
   initialTabsState,
@@ -17,7 +19,10 @@ type WorkbenchContextValue = {
   tabs: EditorTab[]
   activeTabId: string | null
   activeActivityId: string | null
+  /** Desktop: inline sidebar visible. */
   sidebarOpen: boolean
+  /** Mobile (<md): sidebar shown as an overlay drawer. */
+  mobileSidebarOpen: boolean
   panelOpen: boolean
   /** Open (or focus) an editor tab; route-backed editors also navigate. */
   openEditor: (input: {
@@ -28,6 +33,7 @@ type WorkbenchContextValue = {
   focusTab: (id: string) => void
   closeEditorTab: (id: string) => void
   selectActivity: (id: string) => void
+  closeMobileSidebar: () => void
   togglePanel: () => void
 }
 
@@ -67,6 +73,9 @@ export function WorkbenchProvider({
     null
   )
   const [sidebarOpen, setSidebarOpen] = React.useState(true)
+  const [mobileOverride, setMobileSidebarOpen] = React.useState(false)
+  const isMobile = useIsMobile()
+  const mobileSidebarOpen = isMobile && mobileOverride
   const [panelOpen, setPanelOpen] = React.useState(false)
 
   const activeActivityId =
@@ -86,6 +95,7 @@ export function WorkbenchProvider({
       activeTabId: state.activeTabId,
       activeActivityId,
       sidebarOpen,
+      mobileSidebarOpen,
       panelOpen,
       openEditor: ({ viewType, resourceId, title }) => {
         dispatch({ type: "open", viewType, resourceId, title })
@@ -106,19 +116,27 @@ export function WorkbenchProvider({
         else if (pathname !== "/") router.push("/")
       },
       selectActivity: (id) => {
-        if (id === activeActivityId) {
+        if (isMobile) {
+          setActivityOverride(id)
+          setMobileSidebarOpen(
+            id === activeActivityId ? !mobileSidebarOpen : true
+          )
+        } else if (id === activeActivityId) {
           setSidebarOpen((open) => !open)
         } else {
           setActivityOverride(id)
           setSidebarOpen(true)
         }
       },
+      closeMobileSidebar: () => setMobileSidebarOpen(false),
       togglePanel: () => setPanelOpen((open) => !open),
     }
   }, [
     activeActivityId,
     contributions,
     editors,
+    isMobile,
+    mobileSidebarOpen,
     panelOpen,
     pathname,
     router,
