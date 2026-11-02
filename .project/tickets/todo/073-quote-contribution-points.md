@@ -31,4 +31,4 @@ After quote lives in **`quoting.document`**:
 
 ## Non-goals
 
-QV2 grid rewrite (**071**); Incoterm field (**070**) — those land *into* these slots afterward
+QV2 grid rewrite (**071**); Incoterm field (**070**) — those land _into_ these slots afterward

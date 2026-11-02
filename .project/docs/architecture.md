@@ -6,14 +6,14 @@ Runtime deploy details for the monorepo live in [docs/architecture.md](../../doc
 
 See **[ADR 0006](adr/0006-shell-built-ins-extensions.md)** · **[extension-points.md](extension-points.md)**.
 
-| VS Code | Starboard |
-| ------- | --------- |
-| Workbench window + host API | **Kernel:** auth/org + **one** workbench shell + extension host |
-| Multi-tab text editor | **Center tabs** — quote documents (`quoting.document`) |
+| VS Code                              | Starboard                                                         |
+| ------------------------------------ | ----------------------------------------------------------------- |
+| Workbench window + host API          | **Kernel:** auth/org + **one** workbench shell + extension host   |
+| Multi-tab text editor                | **Center tabs** — quote documents (`quoting.document`)            |
 | File explorer (+ context menu hooks) | **Sidebar** + built-in-**defined** menus/slots others inject into |
-| Terminal / chat panels | Bottom / aux panels (later) |
-| Built-in extensions | Driving: quoting.*, geo, catalog, CRM, settings |
-| Marketplace | Optional: `spot.*`, `messaging.*`, `ingestion.*` |
+| Terminal / chat panels               | Bottom / aux panels (later)                                       |
+| Built-in extensions                  | Driving: quoting.*, geo, catalog, CRM, settings                   |
+| Marketplace                          | Optional: `spot.*`, `messaging.*`, `ingestion.*`                  |
 
 **Target routes:** auth + single workbench surface. `/quote/[id]`, `/customers/…`, `/settings/…` → contributed views/editors (deep links open tabs). Ticket **074**.
 
@@ -48,15 +48,15 @@ Browser --cookie--> Next shell/BFF --service token--> Bun domain services --> Ne
 
 ## Data ownership
 
-| Schema / concern | Owner |
-| ---------------- | ----- |
-| `public` / Better Auth | Next shell (kernel) |
-| Org plan (`credit` \| `enterprise`) | Next shell (`organization.plan`) |
-| `geo.*` | `services/geography` (built-in) |
-| `quotes.*` | `services/quotes` (`quoting.document` + siblings) |
-| `rates.*` | `services/rates` |
-| `crm.*` | `services/crm` |
-| Extension job / workflow state | Python worker / Temporal OSS |
+| Schema / concern                    | Owner                                             |
+| ----------------------------------- | ------------------------------------------------- |
+| `public` / Better Auth              | Next shell (kernel)                               |
+| Org plan (`credit` \| `enterprise`) | Next shell (`organization.plan`)                  |
+| `geo.*`                             | `services/geography` (built-in)                   |
+| `quotes.*`                          | `services/quotes` (`quoting.document` + siblings) |
+| `rates.*`                           | `services/rates`                                  |
+| `crm.*`                             | `services/crm`                                    |
+| Extension job / workflow state      | Python worker / Temporal OSS                      |
 
 Cross-domain FKs are opaque text IDs; BFF enforces integrity.
 

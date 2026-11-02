@@ -16,14 +16,14 @@ See also: [extension-migration-inventory-2026-11-02.md](extension-migration-inve
 
 ## Phase A — Workbench + extension system (NOW)
 
-| # | Ticket | Why |
-| -: | ------ | --- |
-| 1 | **[074](../../tickets/todo/074-workbench-shell.md)** Workbench shell | Region hosts + tab model + deep links |
-| 2 | **[075](../../tickets/todo/075-extension-host-workbench-contributions.md)** Host contributions + `defines` | Manifest/API for views/editors/extension-points |
-| 3 | **[076](../../tickets/todo/076-builtin-extension-packages-scaffold.md)** Scaffold built-in packages | Empty `quoting.document`, crm, settings, … + registry |
-| 4 | **[077](../../tickets/todo/077-migrate-quoting-document-builtin.md)** Migrate quote → built-in | Largest shell extraction |
-| 5 | **[078](../../tickets/todo/078-migrate-crm-settings-builtins.md)** Migrate CRM + settings (+ geo) | Clear kernel of remaining product pages |
-| 6 | **[073](../../tickets/todo/073-quote-contribution-points.md)** Quote-defined slots | Peel charges / rateSources into contributions |
+|   # | Ticket                                                                                                     | Why                                                   |
+| --: | ---------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+|   1 | **[074](../../tickets/todo/074-workbench-shell.md)** Workbench shell                                       | Region hosts + tab model + deep links                 |
+|   2 | **[075](../../tickets/todo/075-extension-host-workbench-contributions.md)** Host contributions + `defines` | Manifest/API for views/editors/extension-points       |
+|   3 | **[076](../../tickets/todo/076-builtin-extension-packages-scaffold.md)** Scaffold built-in packages        | Empty `quoting.document`, crm, settings, … + registry |
+|   4 | **[077](../../tickets/todo/077-migrate-quoting-document-builtin.md)** Migrate quote → built-in             | Largest shell extraction                              |
+|   5 | **[078](../../tickets/todo/078-migrate-crm-settings-builtins.md)** Migrate CRM + settings (+ geo)          | Clear kernel of remaining product pages               |
+|   6 | **[073](../../tickets/todo/073-quote-contribution-points.md)** Quote-defined slots                         | Peel charges / rateSources into contributions         |
 
 `074` ∥ `075` OK if coordinated on contracts.
 
@@ -38,11 +38,11 @@ See also: [extension-migration-inventory-2026-11-02.md](extension-migration-inve
 
 ## Phase B — QV2 money parity (after quote is a built-in)
 
-| # | Ticket | Why |
-| -: | ------ | --- |
-| 7 | **[071](../../tickets/todo/071-quote-charge-table-prod-parity.md)** Charge grid + rate alternatives | Prod table shape |
-| 8 | **[070](../../tickets/todo/070-incoterm-bucket-scope.md)** Incoterm scope | Replace door-only |
-| 9 | **[072](../../tickets/todo/072-quote-charge-line-economics-parity.md)** Line economics | Markup/sell/Split |
+|   # | Ticket                                                                                              | Why               |
+| --: | --------------------------------------------------------------------------------------------------- | ----------------- |
+|   7 | **[071](../../tickets/todo/071-quote-charge-table-prod-parity.md)** Charge grid + rate alternatives | Prod table shape  |
+|   8 | **[070](../../tickets/todo/070-incoterm-bucket-scope.md)** Incoterm scope                           | Replace door-only |
+|   9 | **[072](../../tickets/todo/072-quote-charge-line-economics-parity.md)** Line economics              | Markup/sell/Split |
 
 Implement inside built-in packages / quote-defined slots — **not** new kernel pages.
 
@@ -50,9 +50,9 @@ Implement inside built-in packages / quote-defined slots — **not** new kernel 
 
 ## Phase C — Optional extension hardening
 
-| # | Ticket | Why |
-| -: | ------ | --- |
-| 10 | **[069](../../tickets/todo/069-org-carrier-credentials-settings.md)** Org carrier credentials | Spot secrets in settings |
+|   # | Ticket                                                                                        | Why                      |
+| --: | --------------------------------------------------------------------------------------------- | ------------------------ |
+|  10 | **[069](../../tickets/todo/069-org-carrier-credentials-settings.md)** Org carrier credentials | Spot secrets in settings |
 
 ---
 

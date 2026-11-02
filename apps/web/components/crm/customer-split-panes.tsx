@@ -16,7 +16,7 @@ export function CustomerSplitPanes({
   return (
     <ResizablePanelGroup
       orientation="horizontal"
-      className="h-[calc(100svh-var(--header-height))] min-h-0 flex-1 overflow-hidden"
+      className="h-full min-h-0 flex-1 overflow-hidden"
     >
       <ResizablePanel
         defaultSize={"30"}
