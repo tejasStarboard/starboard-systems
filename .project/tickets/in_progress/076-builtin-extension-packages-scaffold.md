@@ -2,7 +2,7 @@
 id: 076
 wave: 06-platform
 title: Scaffold driving built-in extension packages + manifests
-status: open
+status: in_progress
 depends_on: [075]
 epic: SYS-PLATFORM
 docs:
@@ -30,11 +30,11 @@ Wire into `extensions/host` registry. Workbench shows activity/views from stubs.
 
 ## Acceptance
 
-- [ ] Package layout convention documented (e.g. `extensions/builtins/quoting-document`)
-- [ ] Manifests registered; rollout/entitlements treat as default-on
-- [ ] Stub Quotes view + quote editor open in workbench from contribution
-- [ ] Kernel-only (built-ins off) → empty workbench still
-- [ ] Optional spot/messaging/ingestion unchanged
+- [x] Package layout convention documented (e.g. `extensions/builtins/quoting-document`)
+- [x] Manifests registered; rollout/entitlements treat as default-on
+- [x] Stub Quotes view + quote editor open in workbench from contribution
+- [x] Kernel-only (built-ins off) → empty workbench still
+- [x] Optional spot/messaging/ingestion unchanged
 
 ## Non-goals
 

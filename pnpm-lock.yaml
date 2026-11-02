@@ -38,6 +38,12 @@ importers:
       '@phosphor-icons/react':
         specifier: ^2.1.10
         version: 2.1.10(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+      '@starboard/ext-host':
+        specifier: workspace:*
+        version: link:../../extensions/host
+      '@starboard/ext-quoting-document':
+        specifier: workspace:*
+        version: link:../../extensions/builtins/quoting-document
       '@starboard/lib-contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
@@ -47,9 +53,6 @@ importers:
       '@starboard/lib-email':
         specifier: workspace:*
         version: link:../../packages/email
-      '@starboard/ext-host':
-        specifier: workspace:*
-        version: link:../../extensions/host
       '@starboard/lib-pricing':
         specifier: workspace:*
         version: link:../../packages/pricing
@@ -118,12 +121,90 @@ importers:
         specifier: ^5.9.3
         version: 5.9.3
 
+  extensions/builtins/crm-parties:
+    devDependencies:
+      '@starboard/tool-typescript-config':
+        specifier: workspace:*
+        version: link:../../../tooling/typescript-config
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+
+  extensions/builtins/geo-gazetteer:
+    devDependencies:
+      '@starboard/tool-typescript-config':
+        specifier: workspace:*
+        version: link:../../../tooling/typescript-config
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+
+  extensions/builtins/org-settings:
+    devDependencies:
+      '@starboard/tool-typescript-config':
+        specifier: workspace:*
+        version: link:../../../tooling/typescript-config
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+
+  extensions/builtins/quoting-charges:
+    devDependencies:
+      '@starboard/tool-typescript-config':
+        specifier: workspace:*
+        version: link:../../../tooling/typescript-config
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+
+  extensions/builtins/quoting-document:
+    devDependencies:
+      '@starboard/tool-typescript-config':
+        specifier: workspace:*
+        version: link:../../../tooling/typescript-config
+      '@types/react':
+        specifier: ^19
+        version: 19.3.0
+      react:
+        specifier: 19.3.1
+        version: 19.3.1
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+
+  extensions/builtins/rates-catalog:
+    devDependencies:
+      '@starboard/tool-typescript-config':
+        specifier: workspace:*
+        version: link:../../../tooling/typescript-config
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+
   extensions/host:
     dependencies:
       zod:
         specifier: ^4.6.7
         version: 4.6.7
     devDependencies:
+      '@starboard/ext-crm-parties':
+        specifier: workspace:*
+        version: link:../builtins/crm-parties
+      '@starboard/ext-geo-gazetteer':
+        specifier: workspace:*
+        version: link:../builtins/geo-gazetteer
+      '@starboard/ext-org-settings':
+        specifier: workspace:*
+        version: link:../builtins/org-settings
+      '@starboard/ext-quoting-charges':
+        specifier: workspace:*
+        version: link:../builtins/quoting-charges
+      '@starboard/ext-quoting-document':
+        specifier: workspace:*
+        version: link:../builtins/quoting-document
+      '@starboard/ext-rates-catalog':
+        specifier: workspace:*
+        version: link:../builtins/rates-catalog
       '@starboard/tool-typescript-config':
         specifier: workspace:*
         version: link:../../tooling/typescript-config

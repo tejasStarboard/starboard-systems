@@ -16,7 +16,9 @@ export type WorkbenchViewEntry = {
   id: string
   label: string
   /** Navigates; if the href matches an editor deep link, a tab opens. */
-  href: string
+  href?: string
+  /** Opens an extension-provided (non-route) editor tab directly. */
+  opens?: { viewType: string; resourceId: string; title?: string }
 }
 
 export type WorkbenchView = {

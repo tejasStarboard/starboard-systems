@@ -2,7 +2,7 @@
 id: 075
 wave: 06-platform
 title: Extension host — workbench contributions + defines
-status: in_progress
+status: done
 depends_on: [055, 056]
 epic: SYS-PLATFORM
 docs:

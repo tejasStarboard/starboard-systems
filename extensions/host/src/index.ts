@@ -6,6 +6,7 @@ export {
   extensionApiContributionSchema,
   extensionActivityContributionSchema,
   extensionViewContributionSchema,
+  extensionViewEntryOpensSchema,
   extensionEditorContributionSchema,
   extensionCommandContributionSchema,
   extensionPointContributionSchema,
@@ -40,6 +41,7 @@ export {
   type StoredExtensionSetting,
 } from "./settings.js"
 
+export { builtinManifests } from "./builtins.js"
 export { extensionRegistry, listManifests } from "./registry.js"
 
 export {

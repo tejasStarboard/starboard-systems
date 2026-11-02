@@ -300,9 +300,14 @@ describe("getActiveWorkbenchContributions", () => {
     expect(result.editors[0]?.extensionId).toBe("quoting.document")
   })
 
-  test("current stub registry contributes nothing to the workbench", () => {
+  test("registry contributes only quoting.document stubs (076); no points yet", () => {
     const result = getActiveWorkbenchContributions("enterprise")
-    expect(result.activity).toEqual([])
+    expect(result.activity.map((a) => a.extensionId)).toEqual([
+      "quoting.document",
+    ])
+    expect(result.editors.map((e) => e.extensionId)).toEqual([
+      "quoting.document",
+    ])
     expect(result.points).toEqual({})
   })
 })

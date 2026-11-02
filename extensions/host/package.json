@@ -32,8 +32,14 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
-    "@types/bun": "^1.3.5",
+    "@starboard/ext-crm-parties": "workspace:*",
+    "@starboard/ext-geo-gazetteer": "workspace:*",
+    "@starboard/ext-org-settings": "workspace:*",
+    "@starboard/ext-quoting-charges": "workspace:*",
+    "@starboard/ext-quoting-document": "workspace:*",
+    "@starboard/ext-rates-catalog": "workspace:*",
     "@starboard/tool-typescript-config": "workspace:*",
+    "@types/bun": "^1.3.5",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3"
   }
