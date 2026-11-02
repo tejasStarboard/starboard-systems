@@ -349,6 +349,46 @@ describe("DefaultQuotesService.save", () => {
     })
   })
 
+  test("create assigns org-scoped 6-char quote number as draft", async () => {
+    const dao = new InMemoryQuotesDao()
+    const service = new DefaultQuotesService(dao)
+
+    const created = await service.create({
+      ownerId: "user-1",
+      organizationId: "org-1",
+      source: "manual",
+    })
+    const loaded = await service.get(created.id, "org-1")
+    expect(loaded.status).toBe("draft")
+    expect(loaded.quoteId).toMatch(/^[A-Z0-9]{6}$/)
+    expect(loaded.effectiveFrom).toBe("")
+    expect(loaded.expiryAt).toBe("")
+  })
+
+  test("save round-trips stage and validity window", async () => {
+    const dao = new InMemoryQuotesDao()
+    const service = new DefaultQuotesService(dao)
+    const values = emptyQuoteFormValues({
+      id: "quote-stage",
+      quoteId: "STG001",
+    })
+    values.status = "sent"
+    values.effectiveFrom = "2026-04-01"
+    values.expiryAt = "2026-07-01"
+    values.lanes = [emptyLaneFormValues("fcl")]
+
+    await service.save(values, {
+      ownerId: "user-1",
+      organizationId: "org-1",
+    })
+
+    const loaded = await service.get("quote-stage", "org-1")
+    expect(loaded.status).toBe("sent")
+    expect(loaded.quoteId).toBe("STG001")
+    expect(loaded.effectiveFrom).toBe("2026-04-01")
+    expect(loaded.expiryAt).toBe("2026-07-01")
+  })
+
   test("rejects get for another organization", async () => {
     const dao = new InMemoryQuotesDao()
     const service = new DefaultQuotesService(dao)

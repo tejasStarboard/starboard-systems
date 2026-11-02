@@ -41,6 +41,8 @@ export type QuoteFormLayoutProps = {
   currencyCode: string
   pending: boolean
   isDirty: boolean
+  /** False for terminal stages (win / loss / expired). */
+  commercialEditable: boolean
   onSelectLane: (index: number) => void
   onAddLane: () => void
   onRemoveLane: (index: number) => void

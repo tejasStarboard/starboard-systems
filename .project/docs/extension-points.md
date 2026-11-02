@@ -78,15 +78,17 @@ Kernel does **not** list `quote` as a built-in resource kind in code forever —
 
 `quoting.document` contributes a `workbench.editors` entry (`viewType: "quote"`) and a Quotes `workbench.views` entry. It also **`defines`**:
 
-| Point id                           | Purpose                                | Typical contributors                 |
-| ---------------------------------- | -------------------------------------- | ------------------------------------ |
-| `quoting.slots.headerFields`       | Header region inside quote editor      | `quoting.incoterm`, `crm.parties`    |
-| `quoting.slots.chargeTable`        | Charge grid region                     | `quoting.charges`, `quoting.globals` |
-| `quoting.slots.totals`             | Footer / markup                        | `quoting.markup`, `quoting.math`     |
-| `quoting.slots.rateSources`        | Search/apply rates UI                  | `rates.catalog`, `spot.*`            |
-| `quoting.totalsHooks`              | Headless hooks into ONE MATH pipeline  | `quoting.incoterm`, `quoting.markup` |
-| `quoting.chargeProviders`          | Extra lines/sections into charge model | globals, apply-rate                  |
-| `quoting.documentModel` (optional) | Extend aggregate fields                | carefully versioned                  |
+| Point id                           | Purpose                                               | Typical contributors                 |
+| ---------------------------------- | ----------------------------------------------------- | ------------------------------------ |
+| `quoting.slots.headerFields`       | Header region inside quote editor                     | `quoting.incoterm`, `crm.parties`    |
+| `quoting.slots.chargeTable`        | Charge grid region                                    | `quoting.charges`, `quoting.globals` |
+| `quoting.slots.totals`             | Footer / markup                                       | `quoting.markup`, `quoting.math`     |
+| `quoting.slots.rateSources`        | Search/apply rates UI                                 | `rates.catalog`, `spot.*`            |
+| `quoting.slots.lifecycle`          | Stage / validity / numbering chrome (shipped **082**) | `quoting.document` (self)            |
+| `quoting.commands`                 | Editor/toolbar actions (host shipped **082**)         | `quoting.pdf` (**083**), later send  |
+| `quoting.totalsHooks`              | Headless hooks into ONE MATH pipeline                 | `quoting.incoterm`, `quoting.markup` |
+| `quoting.chargeProviders`          | Extra lines/sections into charge model                | globals, apply-rate                  |
+| `quoting.documentModel` (optional) | Extend aggregate fields                               | carefully versioned                  |
 
 The **quote editor React tree** (inside the built-in) hosts these slots. Kernel never imports `ChargeTable`.
 
@@ -168,6 +170,8 @@ Optional extensions should prefer contributing to **driving** points, not invent
 | Deep link → `workbench.editors` open           | Feature `page.tsx` as long-term model |
 
 **073 (done):** slot **hosts + `defines`** live inside `quoting.document`; `quoting.charges` → `chargeTable`, `rates.catalog` + `spot.*` → `rateSources`; `headerFields` / `totals` hosted, unclaimed; `quoting.totalsHooks` declared (headless, consumed by 072). How-to: [extensions.md cookbook](extensions.md#cookbook-contribute-ui-to-a-quotingdocument-slot-073).
+
+**082 (done):** `quoting.slots.lifecycle` + `quoting.commands` defined; document self-contributes lifecycle chrome; commands host empty for **083**.
 
 ---
 

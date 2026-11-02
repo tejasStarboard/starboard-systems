@@ -11,6 +11,8 @@ const SLOTS = [
   "quoting.slots.chargeTable",
   "quoting.slots.totals",
   "quoting.slots.rateSources",
+  "quoting.slots.lifecycle",
+  "quoting.commands",
 ]
 
 function off(...ids: string[]) {
@@ -29,11 +31,21 @@ describe("quoting.document defines slots (073)", () => {
   const manifests = listManifests()
   const document = manifests.find((m) => m.id === "quoting.document")!
 
-  test("defines header / chargeTable / totals / rateSources + totalsHooks", () => {
+  test("defines header / chargeTable / totals / rateSources / lifecycle / commands + totalsHooks", () => {
     expect(document.defines?.extensionPoints?.map((p) => p.id)).toEqual([
       ...SLOTS,
       "quoting.totalsHooks",
     ])
+  })
+
+  test("self-contributes lifecycle chrome (082)", () => {
+    expect(
+      getContributionsToPoint("quoting.slots.lifecycle", "credit").map((c) => [
+        c.id,
+        c.extensionId,
+      ])
+    ).toEqual([["quoting.document.lifecycle", "quoting.document"]])
+    expect(getContributionsToPoint("quoting.commands", "credit")).toEqual([])
   })
 
   test("only quoting.document defines quoting.* points", () => {
@@ -83,6 +95,8 @@ describe("quoting.document defines slots (073)", () => {
     expect(result["quoting.slots.headerFields"]).toEqual([])
     expect(result["quoting.slots.chargeTable"]).toHaveLength(1)
     expect(result["quoting.slots.rateSources"]).toHaveLength(4)
+    expect(result["quoting.slots.lifecycle"]).toHaveLength(1)
+    expect(result["quoting.commands"]).toEqual([])
   })
 
   test("inactive owner → no mounts (even though contributors are active)", () => {

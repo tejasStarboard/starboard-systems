@@ -10,6 +10,10 @@ const charges: SlotContribution = {
   id: "quoting.charges.table",
   extensionId: "quoting.charges",
 }
+const lifecycle: SlotContribution = {
+  id: "quoting.document.lifecycle",
+  extensionId: "quoting.document",
+}
 const spot: SlotContribution = {
   id: "spot.maersk.source",
   extensionId: "spot.maersk",
@@ -36,6 +40,16 @@ describe("resolveSlotEntries", () => {
       "rates.spotSource": B as never,
     })
     expect(entries[0]!.Component).toBe(B as never)
+  })
+
+  test("lifecycle chrome mounts only with contribution + factory (082)", () => {
+    expect(resolveSlotEntries([lifecycle], {})).toEqual([])
+    const entries = resolveSlotEntries([lifecycle], {
+      "quoting.document.lifecycle": A as never,
+    })
+    expect(entries).toHaveLength(1)
+    expect(entries[0]!.contribution.id).toBe("quoting.document.lifecycle")
+    expect(entries[0]!.Component).toBe(A as never)
   })
 
   test("fails closed: no contributions or no factory mounts nothing", () => {

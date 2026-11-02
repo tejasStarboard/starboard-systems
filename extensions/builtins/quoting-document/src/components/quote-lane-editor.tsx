@@ -77,6 +77,7 @@ export function QuoteLaneEditor({
   containerTypeOptions,
   palletTypeOptions,
   fullWidthActions,
+  commercialEditable = true,
   onSearchRates,
   onAddManualRate,
   onAppendRate,
@@ -103,6 +104,7 @@ export function QuoteLaneEditor({
   containerTypeOptions: QuoteFormOption[]
   palletTypeOptions: QuoteFormOption[]
   fullWidthActions?: boolean
+  commercialEditable?: boolean
   onSearchRates: () => void
   onAddManualRate: () => void
   onAppendRate: () => void
@@ -169,7 +171,7 @@ export function QuoteLaneEditor({
             type="button"
             variant="outline"
             className={cn(fullWidthActions && "w-full")}
-            disabled={!laneReady}
+            disabled={!laneReady || !commercialEditable}
             onClick={onSearchRates}
           >
             <MagnifyingGlassIcon data-icon="inline-start" />
@@ -181,7 +183,7 @@ export function QuoteLaneEditor({
             type="button"
             variant="outline"
             className={cn(fullWidthActions && "w-full")}
-            disabled={!laneReady}
+            disabled={!laneReady || !commercialEditable}
             onClick={onAddManualRate}
           >
             <PlusIcon data-icon="inline-start" />

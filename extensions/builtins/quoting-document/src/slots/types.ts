@@ -6,10 +6,14 @@ import type {
   UseFormSetValue,
 } from "react-hook-form"
 
-import type { ManualRateLine, QuoteFormValues } from "@starboard/lib-contracts"
+import type {
+  ManualRateLine,
+  QuoteFormValues,
+  QuoteStatus,
+} from "@starboard/lib-contracts"
 
 /**
- * Slots `quoting.document` defines (`defines.extensionPoints` in its
+ * Slots / points `quoting.document` defines (`defines.extensionPoints` in its
  * manifest). Contributors reference these ids in `contributes.points`; the
  * kernel never names them. Types-only contract: contributor packages import
  * from `@starboard/ext-quoting-document/slots` and never the other way round.
@@ -19,6 +23,8 @@ export const QUOTING_SLOTS = {
   chargeTable: "quoting.slots.chargeTable",
   totals: "quoting.slots.totals",
   rateSources: "quoting.slots.rateSources",
+  lifecycle: "quoting.slots.lifecycle",
+  commands: "quoting.commands",
 } as const
 
 export type QuoteSlotId = (typeof QUOTING_SLOTS)[keyof typeof QUOTING_SLOTS]
@@ -48,6 +54,25 @@ type Form = {
 export type HeaderFieldsSlotProps = Form & {
   quoteId: string
   errors: FieldErrors<QuoteFormValues>
+}
+
+/** Stage / validity / number chrome (self-contributed by quoting.document). */
+export type LifecycleSlotProps = Pick<Form, "control" | "register"> & {
+  quoteId: string
+  status: QuoteStatus
+  errors: FieldErrors<QuoteFormValues>
+  /** Layout hint so one contribution can adapt density. */
+  layout: "desktop" | "tablet" | "mobile"
+}
+
+/**
+ * Toolbar actions (PDF in 083, …). Host always mounts contributions; gate
+ * export/destructive actions with `exportAllowed`.
+ */
+export type CommandsSlotProps = {
+  quoteId: string
+  status: QuoteStatus
+  exportAllowed: boolean
 }
 
 export type ChargeTableSlotProps = Pick<
