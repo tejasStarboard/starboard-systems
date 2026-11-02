@@ -95,7 +95,7 @@ The **quote editor React tree** (inside the built-in) hosts these slots. Kernel 
 Other driving built-ins follow the same pattern when they grow nested UI:
 
 - `crm.parties` might define `crm.slots.contactPanel`
-- `rates.catalog` might define `rates.slots.ingestActions`
+- `rates.catalog` defines `rates.slots.ingestActions` (086 stub; 087 fills upload)
 
 ---
 

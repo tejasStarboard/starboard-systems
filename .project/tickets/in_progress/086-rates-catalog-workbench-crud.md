@@ -2,7 +2,7 @@
 id: 086
 wave: 07-quote-loop
 title: Rates catalog CRUD via rates.catalog workbench contributions
-status: todo
+status: in_progress
 depends_on: [073, 080]
 epic: SYS-RATES
 docs:
@@ -47,11 +47,11 @@ Thin `app/(app)/rates/...` anchors only (null children when editor provided), li
 
 ## Acceptance
 
-- [ ] Catalog CRUD usable from workbench when built-in active
-- [ ] Contributions registered; kernel has no catalog product imports
-- [ ] Unplug → no catalog activity; quote still opens
-- [ ] `rateSources` apply path still works when catalog on
-- [ ] `pnpm run ci` green
+- [x] Catalog CRUD usable from workbench when built-in active
+- [x] Contributions registered; kernel has no catalog product imports
+- [x] Unplug → no catalog activity; quote still opens
+- [x] `rateSources` apply path still works when catalog on
+- [x] `pnpm run ci` green
 
 ## Out of scope
 

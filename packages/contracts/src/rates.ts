@@ -24,6 +24,8 @@ export const rateSchema = z.object({
   validFrom: z.string().min(1),
   validTo: z.string().min(1),
   source: rateSourceSchema,
+  /** Soft-delete flag; inactive rates stay in catalog until hard-deleted. */
+  isActive: z.boolean(),
   createdAt: z.string().min(1),
   updatedAt: z.string().min(1),
   /** Prepared for catalog charge lines; not yet loaded by rates DAO. */
@@ -62,12 +64,74 @@ export type CreateRateRequest = z.infer<typeof createRateRequestSchema>
 export const createRateResponseSchema = rateSchema
 export type CreateRateResponse = z.infer<typeof createRateResponseSchema>
 
+/** Partial update; omit `source` (immutable after create). Omitted keys stay omitted. */
+export const updateRateRequestSchema = z.object({
+  origin: z
+    .string()
+    .max(7)
+    .nullish()
+    .transform((value) =>
+      value === undefined ? undefined : emptyToNull(value)
+    )
+    .optional(),
+  destination: z
+    .string()
+    .max(7)
+    .nullish()
+    .transform((value) =>
+      value === undefined ? undefined : emptyToNull(value)
+    )
+    .optional(),
+  customerId: z
+    .string()
+    .nullish()
+    .transform((value) =>
+      value === undefined ? undefined : emptyToNull(value)
+    )
+    .optional(),
+  mode: laneModeSchema.optional(),
+  carrier: z
+    .string()
+    .nullish()
+    .transform((value) =>
+      value === undefined ? undefined : emptyToNull(value)
+    )
+    .optional(),
+  label: z.string().trim().min(1, "Rate label is required").optional(),
+  currencyCode: z
+    .string()
+    .trim()
+    .length(3, "Currency code must be 3 characters")
+    .optional(),
+  amount: z.number().finite("Amount must be a finite number").optional(),
+  validFrom: z.string().min(1).optional(),
+  validTo: z.string().min(1).optional(),
+  /** Soft-delete / reactivate. */
+  isActive: z.boolean().optional(),
+})
+
+export type UpdateRateRequest = z.infer<typeof updateRateRequestSchema>
+
+export const updateRateResponseSchema = rateSchema
+export type UpdateRateResponse = z.infer<typeof updateRateResponseSchema>
+
+function parseIncludeInactive(value: unknown): boolean {
+  if (typeof value === "boolean") return value
+  if (typeof value === "string") {
+    const normalized = value.trim().toLowerCase()
+    return normalized === "1" || normalized === "true"
+  }
+  return false
+}
+
 export const listRatesQuerySchema = z.object({
   q: z.string().optional().default(""),
   origin: z.string().optional().default(""),
   destination: z.string().optional().default(""),
   customerId: z.string().optional().default(""),
   validAt: z.string().optional().default(""),
+  /** When false (default), only active rates are returned. */
+  includeInactive: z.preprocess(parseIncludeInactive, z.boolean()).optional(),
 })
 
 export type ListRatesQuery = z.infer<typeof listRatesQuerySchema>

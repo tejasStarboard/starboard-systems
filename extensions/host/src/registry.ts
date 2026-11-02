@@ -9,7 +9,9 @@ const stubManifests = [
     displayName: "Ocean FCL ingestion (v6)",
     requiredPlan: ["credit", "enterprise"],
     contributes: {
-      activity: [{ id: "rates", label: "Rates", icon: "upload" }],
+      // Activity owned by rates.catalog (086); first-registered wins.
+      // Keep a rates-sidebar entry + upload editor until 087 moves fully into
+      // rates.slots.ingestActions.
       views: [
         {
           id: "ingestion.fcl_v6.upload",
@@ -31,6 +33,16 @@ const stubManifests = [
           deepLink: "/rates/upload",
         },
       ],
+      points: {
+        "rates.slots.ingestActions": [
+          {
+            id: "ingestion.fcl_v6.upload.action",
+            label: "Upload CSV",
+            order: 100,
+            // Stub: no component yet; list host stays empty until 087.
+          },
+        ],
+      },
       jobs: [{ type: "ingestion.fcl_v6.pipeline" }],
       api: [{ pathPrefix: "/api/extensions/ingestion.fcl_v6" }],
     },

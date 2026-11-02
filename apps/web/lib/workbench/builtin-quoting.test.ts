@@ -78,11 +78,13 @@ describe("077 quoting.document in the workbench", () => {
     ).toEqual(EMPTY_CONTRIBUTIONS)
   })
 
-  test("073: every active slot contribution resolves to a UI factory", () => {
+  test("073: every active quoting slot contribution resolves to a UI factory", () => {
     const { points } = getActiveWorkbenchContributions("credit")
-    const all = Object.values(points).flat()
-    expect(all.length).toBeGreaterThan(0)
-    for (const contribution of all) {
+    const quoting = Object.entries(points)
+      .filter(([pointId]) => pointId.startsWith("quoting."))
+      .flatMap(([, contributions]) => contributions)
+    expect(quoting.length).toBeGreaterThan(0)
+    for (const contribution of quoting) {
       const key = contribution.component ?? contribution.id
       expect(typeof builtinPointComponents[key]).toBe("function")
     }
@@ -92,5 +94,7 @@ describe("077 quoting.document in the workbench", () => {
         key.startsWith("quoting.slots.")
       )
     ).toBe(false)
+    // 086 stub: ingestActions may be contributed without a factory yet (087).
+    expect(points["rates.slots.ingestActions"]?.length).toBeGreaterThan(0)
   })
 })

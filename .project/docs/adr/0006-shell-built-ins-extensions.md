@@ -53,14 +53,14 @@ Charge table, Incoterm, markup, rate sources are **editor-internal** contributio
 
 ### 3. Driving built-ins — default-on
 
-| Built-in                                                       | Contributes                                                                      |
-| -------------------------------------------------------------- | -------------------------------------------------------------------------------- |
-| `quoting.document`                                             | Sidebar “Quotes” view + **quote editor** for center tabs; declares editor slots  |
-| `quoting.charges` / `math` / `incoterm` / `markup` / `globals` | Slots inside quote editor                                                        |
-| `crm.parties`                                                  | Sidebar “Customers” (+ customer editor tab if needed); quote header party picker |
-| `geo.gazetteer`                                                | APIs/widgets used by quote editor (not necessarily its own top-level view)       |
-| `rates.catalog`                                                | Rate sources / catalog UI into quote slots (+ optional sidebar later)            |
-| `org.settings` (proposed)                                      | Settings view/tabs (company, team, profile, …)                                   |
+| Built-in                                                       | Contributes                                                                             |
+| -------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| `quoting.document`                                             | Sidebar “Quotes” view + **quote editor** for center tabs; declares editor slots         |
+| `quoting.charges` / `math` / `incoterm` / `markup` / `globals` | Slots inside quote editor                                                               |
+| `crm.parties`                                                  | Sidebar “Customers” (+ customer editor tab if needed); quote header party picker        |
+| `geo.gazetteer`                                                | APIs/widgets used by quote editor (not necessarily its own top-level view)              |
+| `rates.catalog`                                                | Rates activity + catalog editors; rateSources slot; defines `rates.slots.ingestActions` |
+| `org.settings` (proposed)                                      | Settings view/tabs (company, team, profile, …)                                          |
 
 **Driving test:** optionals off → workbench shows Quotes/Customers/Settings contributions; open quote tab; full manual QV2. Kernel-only → empty regions.
 

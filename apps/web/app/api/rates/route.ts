@@ -21,6 +21,7 @@ export async function GET(request: Request) {
     destination: url.searchParams.get("destination") ?? "",
     customerId: url.searchParams.get("customerId") ?? "",
     validAt: url.searchParams.get("validAt") ?? "",
+    includeInactive: url.searchParams.get("includeInactive") ?? "",
   })
   if (!parsed.success) {
     return NextResponse.json(

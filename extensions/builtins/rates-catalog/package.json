@@ -38,8 +38,12 @@
     "react": "19.3.1"
   },
   "dependencies": {
+    "@hookform/resolvers": "^6.0.2",
+    "@phosphor-icons/react": "^2.1.10",
     "@starboard/ext-quoting-document": "workspace:*",
     "@starboard/lib-contracts": "workspace:*",
-    "@starboard/lib-ui": "workspace:*"
+    "@starboard/lib-ui": "workspace:*",
+    "react-hook-form": "^7.91.0",
+    "zod": "^4.6.7"
   }
 }

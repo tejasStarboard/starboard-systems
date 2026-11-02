@@ -300,13 +300,13 @@ describe("getActiveWorkbenchContributions", () => {
     expect(result.editors[0]?.extensionId).toBe("quoting.document")
   })
 
-  test("registry contributes quoting.document (077), crm.parties + org.settings (078), rates/messaging (080); slot points resolve (073)", () => {
+  test("registry contributes quoting.document (077), crm.parties + org.settings (078), rates.catalog (086), rates/messaging (080); slot points resolve (073)", () => {
     const result = getActiveWorkbenchContributions("enterprise")
     expect(result.activity.map((a) => a.extensionId)).toEqual([
       "quoting.document",
       "crm.parties",
+      "rates.catalog",
       "org.settings",
-      "ingestion.fcl_v6",
       "messaging.msgraph",
     ])
     expect(result.editors.map((e) => e.extensionId)).toEqual([
@@ -314,6 +314,8 @@ describe("getActiveWorkbenchContributions", () => {
       "quoting.document",
       "crm.parties",
       "crm.parties",
+      "rates.catalog",
+      "rates.catalog",
       "org.settings",
       "org.settings",
       "ingestion.fcl_v6",
@@ -326,6 +328,7 @@ describe("getActiveWorkbenchContributions", () => {
       "quoting.slots.rateSources",
       "quoting.slots.lifecycle",
       "quoting.commands",
+      "rates.slots.ingestActions",
     ])
   })
 })

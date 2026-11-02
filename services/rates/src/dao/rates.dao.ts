@@ -18,6 +18,7 @@ export type RateRow = {
   validFrom: Date
   validTo: Date
   source: RateSource
+  isActive: boolean
   createdAt: Date
   updatedAt: Date
 }
@@ -36,6 +37,21 @@ export type RateInsert = {
   validFrom: Date
   validTo: Date
   source: RateSource
+  isActive?: boolean
+}
+
+export type RateUpdate = {
+  origin?: string | null
+  destination?: string | null
+  customerId?: string | null
+  mode?: LaneMode
+  carrier?: string | null
+  label?: string
+  currencyCode?: string
+  amount?: number
+  validFrom?: Date
+  validTo?: Date
+  isActive?: boolean
 }
 
 export type ListRatesFilters = {
@@ -44,6 +60,7 @@ export type ListRatesFilters = {
   destination?: string
   customerId?: string
   validAt?: Date | null
+  includeInactive?: boolean
 }
 
 export interface RatesDao {
@@ -53,6 +70,12 @@ export interface RatesDao {
   ): Promise<RateRow[]>
   insert(row: RateInsert): Promise<RateRow>
   getById(organizationId: string, id: string): Promise<RateRow | null>
+  update(
+    organizationId: string,
+    id: string,
+    patch: RateUpdate
+  ): Promise<RateRow | null>
+  delete(organizationId: string, id: string): Promise<boolean>
 }
 
 export class DrizzleRatesDao implements RatesDao {
@@ -63,6 +86,10 @@ export class DrizzleRatesDao implements RatesDao {
     filters: ListRatesFilters
   ): Promise<RateRow[]> {
     const conditions: SQL[] = [eq(rateCatalog.organizationId, organizationId)]
+
+    if (!filters.includeInactive) {
+      conditions.push(eq(rateCatalog.isActive, true))
+    }
 
     const q = filters.q?.trim()
     if (q) {
@@ -119,6 +146,7 @@ export class DrizzleRatesDao implements RatesDao {
         validFrom: row.validFrom,
         validTo: row.validTo,
         source: row.source,
+        isActive: row.isActive ?? true,
       })
       .returning()
 
@@ -142,5 +170,38 @@ export class DrizzleRatesDao implements RatesDao {
       .limit(1)
 
     return row ?? null
+  }
+
+  async update(
+    organizationId: string,
+    id: string,
+    patch: RateUpdate
+  ): Promise<RateRow | null> {
+    const [updated] = await this.db
+      .update(rateCatalog)
+      .set(patch)
+      .where(
+        and(
+          eq(rateCatalog.organizationId, organizationId),
+          eq(rateCatalog.id, id)
+        )
+      )
+      .returning()
+
+    return updated ?? null
+  }
+
+  async delete(organizationId: string, id: string): Promise<boolean> {
+    const deleted = await this.db
+      .delete(rateCatalog)
+      .where(
+        and(
+          eq(rateCatalog.organizationId, organizationId),
+          eq(rateCatalog.id, id)
+        )
+      )
+      .returning({ id: rateCatalog.id })
+
+    return deleted.length > 0
   }
 }
