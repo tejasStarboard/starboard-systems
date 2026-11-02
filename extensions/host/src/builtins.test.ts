@@ -74,14 +74,15 @@ describe("driving built-in manifests (076)", () => {
     expect(view?.extensionId).toBe("quoting.document")
     expect(view?.entries?.[0]?.opens).toEqual({
       viewType: "quote.list",
-      resourceId: "all",
-      title: "All quotes",
+      resourceId: "/",
+      title: "Quotes",
     })
     expect(contributions.editors.map((e) => e.viewType)).toEqual([
       "quote",
       "quote.list",
     ])
     expect(contributions.editors[0]?.deepLink).toBe("/quote/:resourceId")
+    expect(contributions.editors[1]?.deepLink).toBe("/")
   })
 
   test("optional extensions keep their nav / slots", () => {

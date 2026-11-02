@@ -7,6 +7,7 @@ import {
 
 import {
   isKernelOnlyFlag,
+  legacyShellContributions,
   resolveWorkbenchContributions,
 } from "./contributions"
 import { buildDeepLink, deepLinksCollide, matchDeepLink } from "./deep-link"
@@ -55,14 +56,19 @@ describe("deep links", () => {
     expect(matchDeepLink("/quote/q-123/", editors)?.resourceId).toBe("q-123")
   })
 
-  test("legacy pages fall back to page editor; home is not a tab", () => {
+  test("legacy pages fall back to page editor; home opens the list editor", () => {
     expect(matchDeepLink("/settings/team", editors)).toEqual({
       viewType: "page",
       resourceId: "/settings/team",
     })
     expect(matchDeepLink("/customers", editors)?.viewType).toBe("page")
     expect(matchDeepLink("/customers/c1", editors)?.viewType).toBe("customer")
-    expect(matchDeepLink("/", editors)).toBeNull()
+    expect(matchDeepLink("/", editors)).toEqual({
+      viewType: "quote.list",
+      resourceId: "/",
+    })
+    // Without a home editor `/` never falls back to the catch-all page.
+    expect(matchDeepLink("/", legacyShellContributions().editors)).toBeNull()
   })
 
   test("buildDeepLink round-trips; stub editors have no route", () => {
@@ -111,14 +117,29 @@ describe("tab host", () => {
     expect(state.activeTabId).toBeNull()
   })
 
-  test("route sync opens quote tab; home deselects but keeps tabs", () => {
+  test("route sync opens quote tab; home opens the list; no home editor deselects", () => {
     let state = run({ type: "route", pathname: "/quote/q1", editors })
     expect(state.activeTabId).toBe("quote:q1")
     expect(state.tabs[0]?.title).toBe("Quote q1")
     expect(tabHref(state.tabs[0]!, editors)).toBe("/quote/q1")
     state = tabsReducer(state, { type: "route", pathname: "/", editors })
-    expect(state.activeTabId).toBeNull()
-    expect(state.tabs).toHaveLength(1)
+    expect(state.activeTabId).toBe("quote.list:/")
+    expect(state.tabs.map((t) => t.id)).toEqual(["quote:q1", "quote.list:/"])
+    expect(tabHref(state.tabs[1]!, editors)).toBe("/")
+
+    const legacyOnly = legacyShellContributions().editors
+    let bare = run({
+      type: "route",
+      pathname: "/customers/c1",
+      editors: legacyOnly,
+    })
+    bare = tabsReducer(bare, {
+      type: "route",
+      pathname: "/",
+      editors: legacyOnly,
+    })
+    expect(bare.activeTabId).toBeNull()
+    expect(bare.tabs).toHaveLength(1)
   })
 })
 

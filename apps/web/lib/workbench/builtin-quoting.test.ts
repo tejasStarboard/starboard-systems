@@ -37,12 +37,22 @@ describe("077 quoting.document in the workbench", () => {
     expect(tabHref(state.tabs[0]!, merged.editors)).toBe("/quote/q-1")
   })
 
-  test("sidebar entry opens the full list editor tab (no route)", () => {
+  test("home `/` auto-opens the quote.list editor and round-trips", () => {
+    const state = tabsReducer(initialTabsState(), {
+      type: "route",
+      pathname: "/",
+      editors: merged.editors,
+    })
+    expect(state.activeTabId).toBe("quote.list:/")
+    expect(tabHref(state.tabs[0]!, merged.editors)).toBe("/")
+  })
+
+  test("sidebar entry opens the list editor tab on the same route", () => {
     const opens = merged.views.find((v) => v.id === "quoting.document.list")!
       .entries[0]!.opens!
     const state = tabsReducer(initialTabsState(), { type: "open", ...opens })
-    expect(state.activeTabId).toBe("quote.list:all")
-    expect(tabHref(state.tabs[0]!, merged.editors)).toBeNull()
+    expect(state.activeTabId).toBe("quote.list:/")
+    expect(tabHref(state.tabs[0]!, merged.editors)).toBe("/")
     expect(typeof builtinEditors["quote.list"]).toBe("function")
   })
 

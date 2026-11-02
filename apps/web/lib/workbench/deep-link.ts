@@ -19,13 +19,15 @@ function safeDecode(value: string): string {
 
 export type DeepLinkMatch = { viewType: string; resourceId: string }
 
-/** Resolve a pathname to `{ viewType, resourceId }` via editor deep-link patterns. */
+/**
+ * Resolve a pathname to `{ viewType, resourceId }` via editor deep-link patterns.
+ * Patterns are `/segment/:resourceId`, static (`/`, `/quotes`), or `/*` fallback.
+ */
 export function matchDeepLink(
   pathname: string,
   editors: readonly WorkbenchEditor[]
 ): DeepLinkMatch | null {
   const path = normalizePath(pathname)
-  if (path === "/") return null
 
   const segments = path.split("/").filter(Boolean)
 
@@ -34,6 +36,14 @@ export function matchDeepLink(
     if (!pattern || pattern === WILDCARD) continue
     const patternSegments = pattern.split("/").filter(Boolean)
     if (patternSegments.length !== segments.length) continue
+
+    // Static pattern (no `:resourceId`, e.g. `/`): resource id = the pathname.
+    if (!patternSegments.includes(RESOURCE_SEGMENT)) {
+      if (patternSegments.every((part, index) => part === segments[index])) {
+        return { viewType: editor.viewType, resourceId: path }
+      }
+      continue
+    }
 
     let resourceId: string | null = null
     const matches = patternSegments.every((part, index) => {
@@ -48,6 +58,8 @@ export function matchDeepLink(
     }
   }
 
+  // Home (`/`) never falls back to the catch-all page editor.
+  if (path === "/") return null
   const fallback = editors.find((editor) => editor.deepLink === WILDCARD)
   return fallback ? { viewType: fallback.viewType, resourceId: path } : null
 }

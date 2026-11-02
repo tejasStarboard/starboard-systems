@@ -56,7 +56,7 @@ Convention: `extensions/builtins/<id with dots → dashes>` → `@starboard/ext-
 
 1. Harden host + workbench chrome (**074**, **075**)
 2. Scaffold empty built-in packages + manifests (**076**)
-3. ~~Move **quote** into `quoting.document` (**077**)~~ — done: `quotes` activity, `quoting.document.list` view, `quote` (`/quote/:id`) + `quote.list` editors; legacy shim entries removed. Charge UI still inline (**073** peels it); `customer-combobox` / `port-combobox` / `address-combobox` + a local copy of extension-api/poll helpers ride along until **078** / **073**.
+3. ~~Move **quote** into `quoting.document` (**077**)~~ — done: `quotes` activity, `quoting.document.list` view, `quote` (`/quote/:id`) + `quote.list` (home `/`, auto-opens) editors; legacy shim entries removed. Charge UI still inline (**073** peels it); `customer-combobox` / `port-combobox` / `address-combobox` + a local copy of extension-api/poll helpers ride along until **078** / **073**.
 4. Move CRM + settings (+ geo widgets as deps) (**078**)
 5. Quote-defined slots; peel charges/rateSources (**073**)
 6. QV2 parity inside those packages (**071→070→072**)

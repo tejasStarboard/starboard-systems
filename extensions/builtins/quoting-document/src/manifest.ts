@@ -7,8 +7,9 @@
  *
  * - `quotes` activity + `quoting.document.list` sidebar view (UI factory in
  *   `index.ts` `views`; the static entry opens the full list editor).
- * - `quote` editor owns the `/quote/:resourceId` deep link; `quote.list` is the
- *   table formerly rendered on the shell home page.
+ * - `quote` editor owns the `/quote/:resourceId` deep link; `quote.list` owns
+ *   the workbench home `/` (static deep link) so the quotes table opens by
+ *   default, survives refresh, and is discoverable on mobile.
  */
 export const manifest = {
   id: "quoting.document",
@@ -28,8 +29,8 @@ export const manifest = {
             label: "All quotes",
             opens: {
               viewType: "quote.list",
-              resourceId: "all",
-              title: "All quotes",
+              resourceId: "/",
+              title: "Quotes",
             },
           },
         ],
@@ -41,7 +42,7 @@ export const manifest = {
         displayName: "Quote",
         deepLink: "/quote/:resourceId",
       },
-      { viewType: "quote.list", displayName: "Quotes" },
+      { viewType: "quote.list", displayName: "Quotes", deepLink: "/" },
     ],
   },
   enabled: true,
