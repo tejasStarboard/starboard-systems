@@ -2,7 +2,7 @@
 id: 079
 wave: 06-platform
 title: Reusable React hooks under apps/web/hooks
-status: in_progress
+status: done
 depends_on: [074]
 epic: SYS-SHELL
 docs:

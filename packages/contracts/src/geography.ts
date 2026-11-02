@@ -40,9 +40,6 @@ export const facilityOptionSchema = formOptionSchema.extend({
 
 export type FacilityOption = z.infer<typeof facilityOptionSchema>
 
-/** @deprecated Use facilityOptionSchema — kept for quote picker FormOption mapping. */
-export const portOptionSchema = facilityOptionSchema
-
 export const listPortsResponseSchema = z.object({
   ports: z.array(facilityOptionSchema),
 })

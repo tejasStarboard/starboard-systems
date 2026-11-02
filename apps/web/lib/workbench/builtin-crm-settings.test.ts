@@ -53,14 +53,14 @@ describe("078 crm.parties in the workbench", () => {
     expect(tabHref(state.tabs[0]!, merged.editors)).toBe("/customers")
   })
 
-  test("unplugged: no customer contributions (route falls back to page)", () => {
+  test("unplugged: no customer contributions (no deep-link match)", () => {
     const off = resolveWorkbenchContributions({
       kernelOnly: false,
       hostContributions: getActiveWorkbenchContributions("credit", []),
     })
     expect(off.editors.find((e) => e.viewType === "customer")).toBeUndefined()
     expect(off.activity.find((a) => a.id === "customers")).toBeUndefined()
-    expect(matchDeepLink("/customers/c-1", off.editors)?.viewType).toBe("page")
+    expect(matchDeepLink("/customers/c-1", off.editors)).toBeNull()
   })
 })
 

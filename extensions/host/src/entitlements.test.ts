@@ -67,30 +67,30 @@ describe("entitlement filter", () => {
     expect(contributions.uiSlots).toHaveLength(0)
   })
 
-  test("enabled ingestion.fcl_v6 contributes rates.upload for credit plan", () => {
+  test("enabled ingestion.fcl_v6 contributes API for credit plan", () => {
     const contributions = getActiveContributions("credit", listManifests())
-    expect(contributions.uiSlots).toContain("rates.upload")
-    expect(
-      contributions.nav.some((item) => item.href === "/rates/upload")
-    ).toBe(true)
     expect(
       contributions.api.some((item) =>
         item.pathPrefix.includes("ingestion.fcl_v6")
       )
     ).toBe(true)
+    expect(
+      listActiveExtensions("credit", listManifests()).some(
+        (m) => m.id === "ingestion.fcl_v6"
+      )
+    ).toBe(true)
   })
 
-  test("enabled messaging.msgraph contributes inbox only on enterprise", () => {
-    const onCredit = getActiveContributions("credit", listManifests())
-    expect(onCredit.uiSlots).not.toContain("messaging.inbox")
-    expect(onCredit.nav.some((item) => item.href === "/messaging/inbox")).toBe(
-      false
-    )
-
-    const onEnterprise = getActiveContributions("enterprise", listManifests())
-    expect(onEnterprise.uiSlots).toContain("messaging.inbox")
+  test("enabled messaging.msgraph is active only on enterprise", () => {
     expect(
-      onEnterprise.nav.some((item) => item.href === "/messaging/inbox")
+      listActiveExtensions("credit", listManifests()).some(
+        (m) => m.id === "messaging.msgraph"
+      )
+    ).toBe(false)
+    expect(
+      listActiveExtensions("enterprise", listManifests()).some(
+        (m) => m.id === "messaging.msgraph"
+      )
     ).toBe(true)
   })
 

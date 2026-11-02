@@ -9,16 +9,30 @@ const stubManifests = [
     displayName: "Ocean FCL ingestion (v6)",
     requiredPlan: ["credit", "enterprise"],
     contributes: {
-      nav: [
+      activity: [{ id: "rates", label: "Rates", icon: "upload" }],
+      views: [
         {
-          id: "rates-upload",
-          label: "Rate upload",
-          href: "/rates/upload",
+          id: "ingestion.fcl_v6.upload",
+          name: "Rate upload",
+          activityId: "rates",
+          entries: [
+            {
+              id: "ingestion.fcl_v6.upload.link",
+              label: "Upload CSV",
+              href: "/rates/upload",
+            },
+          ],
+        },
+      ],
+      editors: [
+        {
+          viewType: "rates.upload",
+          displayName: "Rate upload",
+          deepLink: "/rates/upload",
         },
       ],
       jobs: [{ type: "ingestion.fcl_v6.pipeline" }],
       api: [{ pathPrefix: "/api/extensions/ingestion.fcl_v6" }],
-      uiSlots: ["rates.upload"],
     },
     worker: {
       kind: "python-temporal",
@@ -34,16 +48,30 @@ const stubManifests = [
     displayName: "Microsoft Graph email",
     requiredPlan: ["enterprise"],
     contributes: {
-      nav: [
+      activity: [{ id: "messaging", label: "Messaging", icon: "mail" }],
+      views: [
         {
-          id: "inbox",
-          label: "Inbox",
-          href: "/messaging/inbox",
+          id: "messaging.msgraph.inbox",
+          name: "Inbox",
+          activityId: "messaging",
+          entries: [
+            {
+              id: "messaging.msgraph.inbox.link",
+              label: "Inbox",
+              href: "/messaging/inbox",
+            },
+          ],
+        },
+      ],
+      editors: [
+        {
+          viewType: "messaging.inbox",
+          displayName: "Inbox",
+          deepLink: "/messaging/inbox",
         },
       ],
       jobs: [{ type: "messaging.msgraph.sync" }],
       api: [{ pathPrefix: "/api/extensions/messaging.msgraph" }],
-      uiSlots: ["messaging.inbox"],
       settings: [
         {
           key: "sync_interval_minutes",

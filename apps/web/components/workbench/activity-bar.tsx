@@ -2,11 +2,13 @@
 
 import {
   AddressBookIcon,
+  EnvelopeIcon,
   FileTextIcon,
   GearIcon,
   PuzzlePieceIcon,
   ShieldCheckIcon,
   SquaresFourIcon,
+  UploadSimpleIcon,
 } from "@phosphor-icons/react"
 import Link from "next/link"
 
@@ -20,6 +22,8 @@ const ICONS: Record<string, React.ReactNode> = {
   "address-book": <AddressBookIcon />,
   gear: <GearIcon />,
   puzzle: <PuzzlePieceIcon />,
+  upload: <UploadSimpleIcon />,
+  mail: <EnvelopeIcon />,
 }
 
 export function ActivityBar({

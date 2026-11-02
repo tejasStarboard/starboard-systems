@@ -7,7 +7,6 @@ import {
 
 import {
   isKernelOnlyFlag,
-  legacyShellContributions,
   resolveWorkbenchContributions,
 } from "./contributions"
 import { buildDeepLink, deepLinksCollide, matchDeepLink } from "./deep-link"
@@ -34,7 +33,6 @@ describe("kernel-only workbench", () => {
   test("no contributions → empty regions, no tabs for any path", () => {
     const contributions = resolveWorkbenchContributions({
       kernelOnly: true,
-      extensionNav: [{ id: "x", label: "X", href: "/x" }],
     })
     expect(contributions).toEqual(EMPTY_CONTRIBUTIONS)
     const state = run({
@@ -56,9 +54,9 @@ describe("deep links", () => {
     expect(matchDeepLink("/quote/q-123/", editors)?.resourceId).toBe("q-123")
   })
 
-  test("unclaimed pages fall back to page editor; home opens the list editor", () => {
+  test("rates/messaging/settings/customers resolve; home opens the list editor", () => {
     expect(matchDeepLink("/rates/upload", editors)).toEqual({
-      viewType: "page",
+      viewType: "rates.upload",
       resourceId: "/rates/upload",
     })
     expect(matchDeepLink("/settings/team", editors)?.viewType).toBe("settings")
@@ -68,8 +66,20 @@ describe("deep links", () => {
       viewType: "quote.list",
       resourceId: "/",
     })
-    // Without a home editor `/` never falls back to the catch-all page.
-    expect(matchDeepLink("/", legacyShellContributions().editors)).toBeNull()
+    // Without a matching editor, unknown paths do not open a tab.
+    expect(matchDeepLink("/unknown/path", editors)).toBeNull()
+  })
+
+  test("messaging inbox editor is enterprise-only", () => {
+    const enterpriseEditors = resolveWorkbenchContributions({
+      kernelOnly: false,
+      hostContributions: getActiveWorkbenchContributions("enterprise"),
+    }).editors
+    expect(matchDeepLink("/messaging/inbox", enterpriseEditors)).toEqual({
+      viewType: "messaging.inbox",
+      resourceId: "/messaging/inbox",
+    })
+    expect(matchDeepLink("/messaging/inbox", editors)).toBeNull()
   })
 
   test("buildDeepLink round-trips; stub editors have no route", () => {
@@ -118,7 +128,7 @@ describe("tab host", () => {
     expect(state.activeTabId).toBeNull()
   })
 
-  test("route sync opens quote tab; home opens the list; no home editor deselects", () => {
+  test("route sync opens quote tab; home opens the list; empty editors deselect", () => {
     let state = run({ type: "route", pathname: "/quote/q1", editors })
     expect(state.activeTabId).toBe("quote:q1")
     expect(state.tabs[0]?.title).toBe("Quote q1")
@@ -128,19 +138,18 @@ describe("tab host", () => {
     expect(state.tabs.map((t) => t.id)).toEqual(["quote:q1", "quote.list:/"])
     expect(tabHref(state.tabs[1]!, editors)).toBe("/")
 
-    const legacyOnly = legacyShellContributions().editors
     let bare = run({
       type: "route",
       pathname: "/customers/c1",
-      editors: legacyOnly,
+      editors: [],
     })
     bare = tabsReducer(bare, {
       type: "route",
       pathname: "/",
-      editors: legacyOnly,
+      editors: [],
     })
     expect(bare.activeTabId).toBeNull()
-    expect(bare.tabs).toHaveLength(1)
+    expect(bare.tabs).toHaveLength(0)
   })
 })
 
@@ -168,8 +177,12 @@ describe("extension-host contributions (075)", () => {
         },
         // targets an activity nobody contributes → dropped
         { id: "ghost.view", name: "Ghost", activityId: "ghost" },
-        // shadows a legacy view id → ignored
-        { id: "extensions.nav", name: "Evil", activityId: "extensions" },
+        // shadows a rates view id → ignored when rates already contributed
+        {
+          id: "ingestion.fcl_v6.upload",
+          name: "Evil",
+          activityId: "rates",
+        },
       ],
       editors: [
         {
@@ -177,47 +190,49 @@ describe("extension-host contributions (075)", () => {
           displayName: "Note",
           deepLink: "/notes/:resourceId",
         },
-        { viewType: "page", displayName: "Shadow page" },
+        { viewType: "rates.upload", displayName: "Shadow rates" },
       ],
     },
   })
 
-  test("host contributions merge after legacy shim without shadowing it", () => {
+  test("host contributions merge; base wins on duplicate ids", () => {
+    const base = getActiveWorkbenchContributions("credit")
     const merged = resolveWorkbenchContributions({
       kernelOnly: false,
-      extensionNav: [{ id: "inbox", label: "Inbox", href: "/messaging/inbox" }],
-      hostContributions: getActiveWorkbenchContributions("credit", [notes]),
+      hostContributions: getActiveWorkbenchContributions("credit", [
+        ...listManifests(),
+        notes,
+      ]),
     })
     expect(merged.activity.map((a) => a.id)).toContain("notes")
+    expect(merged.activity.map((a) => a.id)).toContain("rates")
     expect(merged.views.map((v) => v.id)).toContain("notes.list")
     expect(merged.views.map((v) => v.id)).not.toContain("ghost.view")
-    expect(merged.views.find((v) => v.id === "extensions.nav")?.name).toBe(
-      "Extensions"
-    )
-    expect(merged.editors.find((e) => e.viewType === "page")?.deepLink).toBe(
-      "/*"
-    )
+    expect(
+      merged.views.find((v) => v.id === "ingestion.fcl_v6.upload")?.name
+    ).toBe("Rate upload")
+    expect(
+      merged.editors.find((e) => e.viewType === "rates.upload")?.deepLink
+    ).toBe("/rates/upload")
     expect(matchDeepLink("/notes/n1", merged.editors)).toEqual({
       viewType: "note",
       resourceId: "n1",
     })
+    expect(base.editors.some((e) => e.viewType === "rates.upload")).toBe(true)
   })
 
-  test("inactive extension contributes nothing; legacy nav still works", () => {
+  test("inactive extension contributes nothing", () => {
     const merged = resolveWorkbenchContributions({
       kernelOnly: false,
-      extensionNav: [{ id: "inbox", label: "Inbox", href: "/messaging/inbox" }],
       hostContributions: getActiveWorkbenchContributions("credit", [
         { ...notes, enabled: false },
       ]),
     })
     expect(merged.activity.map((a) => a.id)).not.toContain("notes")
-    expect(
-      merged.views.find((v) => v.id === "extensions.nav")?.entries
-    ).toEqual([{ id: "inbox", label: "Inbox", href: "/messaging/inbox" }])
+    expect(merged.views.map((v) => v.id)).not.toContain("notes.list")
   })
 
-  test("host editors cannot steal routes claimed by legacy deepLink patterns", () => {
+  test("host editors cannot steal routes claimed by existing deepLink patterns", () => {
     const thief = manifest({
       id: "thief.ext",
       contributes: {
@@ -232,7 +247,11 @@ describe("extension-host contributions (075)", () => {
             displayName: "Fake",
             deepLink: "/customers/:resourceId",
           },
-          { viewType: "fake-wild", displayName: "Fake", deepLink: "/*" },
+          {
+            viewType: "fake-rates",
+            displayName: "Fake",
+            deepLink: "/rates/upload",
+          },
           { viewType: "ok", displayName: "Ok", deepLink: "/ok/:resourceId" },
         ],
       },
@@ -247,7 +266,7 @@ describe("extension-host contributions (075)", () => {
     const viewTypes = merged.editors.map((e) => e.viewType)
     expect(viewTypes).not.toContain("fake-quote")
     expect(viewTypes).not.toContain("fake-customer")
-    expect(viewTypes).not.toContain("fake-wild")
+    expect(viewTypes).not.toContain("fake-rates")
     expect(viewTypes).toContain("ok")
     expect(matchDeepLink("/quote/q1", merged.editors)?.viewType).toBe("quote")
     expect(matchDeepLink("/customers/c1", merged.editors)?.viewType).toBe(
@@ -257,7 +276,7 @@ describe("extension-host contributions (075)", () => {
       "settings"
     )
     expect(matchDeepLink("/rates/upload", merged.editors)?.viewType).toBe(
-      "page"
+      "rates.upload"
     )
   })
 

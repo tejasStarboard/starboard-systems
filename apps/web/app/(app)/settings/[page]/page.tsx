@@ -1,7 +1,7 @@
 /**
  * Deep-link anchor (078). `/settings/:page` is claimed by the `org.settings`
  * `settings` editor (company, team, profile, …); see `settings/page.tsx`.
- * Static `settings/customers` redirect shims below take precedence.
+ * Static `/settings/customers` routes redirect to `/customers` permanently.
  */
 export default function SettingsPageDeepLinkPage() {
   return (

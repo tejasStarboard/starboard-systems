@@ -74,7 +74,7 @@ function TabStrip() {
 
 /**
  * Editor group: tab strip + content. Extension-provided editors render their
- * built-in component; route-backed legacy editors render the Next route
+ * built-in component; route-backed editors (deepLink) render the Next route
  * `children`; other viewTypes render a generic stub editor.
  */
 export function EditorGroup({ children }: { children: React.ReactNode }) {

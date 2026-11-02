@@ -32,8 +32,8 @@ export type WorkbenchEditor = {
   viewType: string
   displayName: string
   /**
-   * Route-backed editor (compatibility shim). Pattern is either
-   * `/segment/:resourceId` or `/*` (resource id = full pathname).
+   * Route-backed editor deep link. Pattern is `/segment/:resourceId`, a static
+   * path (`/rates/upload`), or (rarely) `/*` as a last-resort fallback.
    * Editors without `deepLink` render the generic stub editor.
    */
   deepLink?: string

@@ -35,7 +35,7 @@ function pick<T extends object, K extends keyof T>(
 /**
  * Append extension-host contributions to a base set. Base wins on duplicate
  * ids/viewTypes and on colliding editor `deepLink` patterns (so a stray
- * extension cannot shadow or steal kernel/legacy routes); views pointing at an
+ * extension cannot shadow or steal routes already claimed); views pointing at an
  * unknown activity are dropped (fail closed).
  */
 export function mergeHostContributions(
@@ -44,8 +44,8 @@ export function mergeHostContributions(
 ): WorkbenchContributions {
   if (!host) return base
 
-  // Host activities lead the bar (driving built-ins such as Quotes come first);
-  // legacy shim activities follow. Base wins on duplicate ids.
+  // Host activities lead the bar (driving built-ins such as Quotes come first).
+  // Base wins on duplicate ids.
   const activityIds = new Set(base.activity.map((item) => item.id))
   const hostActivity: WorkbenchActivity[] = []
   for (const item of host.activity) {
@@ -77,8 +77,8 @@ export function mergeHostContributions(
   const editors = [...base.editors]
   for (const item of host.editors) {
     if (viewTypes.has(item.viewType)) continue
-    // Legacy deepLink patterns win: a host editor may not claim routes already
-    // claimed by an existing editor (fail closed — the editor is dropped).
+    // Existing deepLink patterns win: a host editor may not claim routes
+    // already claimed (fail closed — the editor is dropped).
     if (
       item.deepLink &&
       editors.some(
@@ -99,57 +99,15 @@ export function mergeHostContributions(
 }
 
 /**
- * TEMPORARY compatibility shim (074).
- *
- * Quote moved into `quoting.document` (077); customers into `crm.parties` and
- * settings into `org.settings` (078). What remains here is only the
- * extension-nav activity (optional workers' `contributes.nav` links) and the
- * catch-all `page` editor for the remaining route-owned pages (rates upload,
- * messaging inbox, …). 075: extension-host contributions
- * (`getActiveWorkbenchContributions`) are merged with `mergeHostContributions`.
- * Delete this once those pages become contributed views/editors.
+ * Resolve shell workbench contributions from the extension host.
+ * Kernel-only lab → empty. Otherwise host contributions alone (no legacy shim).
  */
-export function legacyShellContributions(
-  extensionNav: ReadonlyArray<{ id: string; label: string; href: string }> = []
-): WorkbenchContributions {
-  return {
-    activity:
-      extensionNav.length > 0
-        ? [{ id: "extensions", label: "Extensions", icon: "puzzle" }]
-        : [],
-    views:
-      extensionNav.length > 0
-        ? [
-            {
-              id: "extensions.nav",
-              name: "Extensions",
-              activityId: "extensions",
-              entries: extensionNav.map((item) => ({
-                id: item.id,
-                label: item.label,
-                href: item.href,
-              })),
-            },
-          ]
-        : [],
-    editors: [
-      // Catch-all for remaining legacy pages (rates upload, inbox, …).
-      { viewType: "page", displayName: "Page", deepLink: "/*" },
-    ],
-  }
-}
-
 export function resolveWorkbenchContributions(options: {
   kernelOnly: boolean
-  extensionNav?: ReadonlyArray<{ id: string; label: string; href: string }>
-  /** Active extension-host workbench contributions (075); merged after the legacy shim. */
   hostContributions?: HostWorkbenchContributions
 }): WorkbenchContributions {
   if (options.kernelOnly) return EMPTY_CONTRIBUTIONS
-  return mergeHostContributions(
-    legacyShellContributions(options.extensionNav),
-    options.hostContributions
-  )
+  return mergeHostContributions(EMPTY_CONTRIBUTIONS, options.hostContributions)
 }
 
 /** `WORKBENCH_KERNEL_ONLY` = `1` | `true` → empty workbench lab. */
