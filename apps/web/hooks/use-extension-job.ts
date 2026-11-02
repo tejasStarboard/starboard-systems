@@ -59,6 +59,8 @@ export function useExtensionJob() {
       if (options.poll === false) {
         return result
       }
+      const failTitle = options.failTitle ?? "Job failed"
+      setPending(true)
       setJobStatus({ status: "running" })
       try {
         const status = await pollExtensionJob({
@@ -72,7 +74,17 @@ export function useExtensionJob() {
         if (err instanceof DOMException && err.name === "AbortError") {
           return { ok: false as const, aborted: true as const }
         }
-        throw err
+        toast.add({
+          type: "error",
+          title: failTitle,
+          description:
+            err instanceof Error
+              ? err.message
+              : "Something went wrong. Try again.",
+        })
+        return { ok: false as const }
+      } finally {
+        setPending(false)
       }
     },
     [enqueue]

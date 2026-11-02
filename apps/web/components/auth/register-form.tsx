@@ -2,6 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod"
 import Link from "next/link"
+import { useSearchParams } from "next/navigation"
 import { useState } from "react"
 import { Controller, useForm } from "react-hook-form"
 
@@ -22,8 +23,15 @@ import {
 } from "@/lib/domain/auth/auth-forms.schema"
 import { toastFormErrors } from "@/lib/form-toast"
 
+function safeNextPath(raw: string | null): string | undefined {
+  if (!raw || !raw.startsWith("/") || raw.startsWith("//")) return undefined
+  return raw
+}
+
 export function RegisterForm() {
   const { signUpEmail } = useAuth()
+  const searchParams = useSearchParams()
+  const callbackURL = safeNextPath(searchParams.get("next"))
   const [success, setSuccess] = useState(false)
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerFormSchema),
@@ -31,7 +39,7 @@ export function RegisterForm() {
   })
 
   async function onSubmit(values: RegisterFormValues) {
-    const result = await signUpEmail(values)
+    const result = await signUpEmail({ ...values, callbackURL })
     if (result.ok) setSuccess(true)
   }
 
@@ -63,7 +71,7 @@ export function RegisterForm() {
         </p>
       </div>
 
-      <GoogleButton label="Sign up with Google" />
+      <GoogleButton callbackURL={callbackURL} label="Sign up with Google" />
       <FieldSeparator>or</FieldSeparator>
 
       <form

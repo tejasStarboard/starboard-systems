@@ -44,7 +44,6 @@ export function useImpersonation() {
             title: "Unable to switch organization",
             description: result.message,
           })
-          setPending(false)
           return { ok: false as const }
         }
         router.push("/")
@@ -59,8 +58,9 @@ export function useImpersonation() {
               ? err.message
               : "Something went wrong. Try again.",
         })
-        setPending(false)
         return { ok: false as const }
+      } finally {
+        setPending(false)
       }
     },
     [router]
