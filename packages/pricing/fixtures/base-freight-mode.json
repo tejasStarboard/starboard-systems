@@ -1,0 +1,24 @@
+{
+  "cases": [
+    {
+      "id": "per-eq multiplies container count",
+      "amount": 100,
+      "containerCount": 3,
+      "buy": 300
+    },
+    {
+      "id": "equipment amounts sum per container type",
+      "equipment": [
+        { "containerType": "20GP", "amount": 100, "count": 2 },
+        { "containerType": "40HC", "amount": 180, "count": 1 }
+      ],
+      "buy": 380
+    },
+    {
+      "id": "flat ignores container count",
+      "amount": 100,
+      "containerCount": 3,
+      "buy": 100
+    }
+  ]
+}

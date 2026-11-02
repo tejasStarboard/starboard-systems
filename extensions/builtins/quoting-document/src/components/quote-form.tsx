@@ -18,6 +18,7 @@ import {
   buildLaneUsageQuantities,
   calculateManualRateTotals,
   createManualRateLine,
+  resolveSelectedManualRate,
   deriveExcludedBuckets,
   emptyLaneFormValues,
   isDoorAddressEmpty,
@@ -150,18 +151,38 @@ export function QuoteForm({
     ? Boolean(manualRatesVisibleByLane[selectedLaneId])
     : false
 
-  const totals = useMemo(
-    () =>
-      calculateManualRateTotals({
-        lines: selectedLane?.manualRates ?? [],
-        markupType: selectedLane?.markupType ?? "amount",
-        markupValue: Number(selectedLane?.markupValue) || 0,
-        usage: usageFromLane(selectedLane),
-        scope: { excluded_buckets: excludedBuckets },
-        globalCharges: globalCharges ?? [],
-      }),
-    [selectedLane, excludedBuckets, globalCharges]
-  )
+  const totals = useMemo(() => {
+    const selectedRate = resolveSelectedManualRate(
+      selectedLane?.manualRates ?? [],
+      selectedLane?.selectedRateId
+    )
+    const equipmentAmounts = (selectedRate?.equipmentAmounts ?? []).map(
+      (row) => ({
+        ...row,
+        count:
+          selectedLane?.containers.find(
+            (container) => container.containerType === row.containerType
+          )?.count ?? 0,
+      })
+    )
+    return calculateManualRateTotals({
+      lines: selectedRate
+        ? [
+            {
+              amount: selectedRate.amount,
+              baseMode: selectedRate.baseMode,
+              equipmentAmounts,
+              surcharges: selectedRate.surcharges,
+            },
+          ]
+        : [],
+      markupType: selectedLane?.markupType ?? "amount",
+      markupValue: Number(selectedLane?.markupValue) || 0,
+      usage: usageFromLane(selectedLane),
+      scope: { excluded_buckets: excludedBuckets },
+      globalCharges: globalCharges ?? [],
+    })
+  }, [selectedLane, excludedBuckets, globalCharges])
 
   function onSubmit(values: QuoteFormValues) {
     startTransition(async () => {
@@ -230,7 +251,24 @@ export function QuoteForm({
         [selectedLaneId]: true,
       }))
     }
-    appendRate(createManualRateLine({ label: "Freight" }))
+    const line = createManualRateLine({ label: "Freight" })
+    appendRate(line)
+    form.setValue(`${lanePath}.selectedRateId`, line.id, { shouldDirty: true })
+  }
+
+  function handleRemoveRate(index: number) {
+    const rates = form.getValues(`${lanePath}.manualRates`)
+    const removed = rates[index]
+    removeRate(index)
+    const remaining = form.getValues(`${lanePath}.manualRates`)
+    if (
+      removed &&
+      form.getValues(`${lanePath}.selectedRateId`) === removed.id
+    ) {
+      form.setValue(`${lanePath}.selectedRateId`, remaining[0]?.id ?? "", {
+        shouldDirty: true,
+      })
+    }
   }
 
   function handleApplyRate({
@@ -245,6 +283,7 @@ export function QuoteForm({
       }))
     }
     appendRate(line)
+    form.setValue(`${lanePath}.selectedRateId`, line.id, { shouldDirty: true })
 
     const quoteCurrency = (form.getValues("currencyCode") ?? "").toUpperCase()
     const rateCurrency = appliedCurrency.toUpperCase()
@@ -306,8 +345,14 @@ export function QuoteForm({
       if (hasChargeTable) setRatesOpen(true)
     },
     onAddManualRate: handleAddManualRate,
-    onAppendRate: () => appendRate(createManualRateLine()),
-    onRemoveRate: removeRate,
+    onAppendRate: () => {
+      const line = createManualRateLine({ label: "Rate" })
+      appendRate(line)
+      form.setValue(`${lanePath}.selectedRateId`, line.id, {
+        shouldDirty: true,
+      })
+    },
+    onRemoveRate: handleRemoveRate,
     onCancel: handleCancel,
   }
 

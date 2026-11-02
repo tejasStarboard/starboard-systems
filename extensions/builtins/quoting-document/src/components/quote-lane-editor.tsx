@@ -119,6 +119,7 @@ export function QuoteLaneEditor({
   const chargeTableProps: ChargeTableSlotProps = {
     control,
     register,
+    setValue,
     lanePath,
     rateFields,
     currencyCode,

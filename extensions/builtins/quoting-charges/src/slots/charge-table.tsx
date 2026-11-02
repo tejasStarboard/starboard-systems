@@ -1,128 +1,211 @@
 "use client"
 
 import { PlusIcon, TrashIcon } from "@phosphor-icons/react"
+import { useWatch } from "react-hook-form"
 
+import {
+  resolveSelectedManualRate,
+  type RateBaseMode,
+} from "@starboard/lib-contracts"
 import type {
   ChargeTableSlotProps,
   SlotComponentProps,
 } from "@starboard/ext-quoting-document/slots"
 import { Button } from "@starboard/lib-ui/components/button"
 import { Input } from "@starboard/lib-ui/components/input"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@starboard/lib-ui/components/table"
 
+import { GlobalChargesEditor } from "../components/global-charges-editor"
 import { RateSurchargesEditor } from "../components/rate-surcharges-editor"
 
 /**
- * `quoting.charges.table` → `quoting.slots.chargeTable`: manual rate rows with
- * per-rate surcharge editors (behavior moved verbatim from the quote lane
- * editor; QV2 grid parity is a later ticket).
+ * `quoting.charges.table` → `quoting.slots.chargeTable`.
+ * One grid for the selected rate alternative. Add charge appends a line.
  */
 export function ChargeTable({
   control,
   register,
+  setValue,
   lanePath,
-  rateFields,
   currencyCode,
   excludedBuckets,
   onAppendRate,
   onRemoveRate,
 }: SlotComponentProps<ChargeTableSlotProps>) {
+  const rates = useWatch({ control, name: `${lanePath}.manualRates` }) ?? []
+  const selectedRateId =
+    useWatch({ control, name: `${lanePath}.selectedRateId` }) ?? ""
+  const containers = useWatch({ control, name: `${lanePath}.containers` }) ?? []
+  const selected = resolveSelectedManualRate(rates, selectedRateId)
+  const selectedIndex = selected
+    ? rates.findIndex((rate) => rate.id === selected.id)
+    : -1
+
+  function selectRate(id: string) {
+    setValue(`${lanePath}.selectedRateId`, id, { shouldDirty: true })
+  }
+
   return (
     <div className="space-y-4">
       <div className="space-y-1">
-        <h3 className="text-sm font-medium">Manual rates</h3>
+        <h3 className="text-sm font-medium">Charges</h3>
         <p className="text-xs text-muted-foreground">
-          Build an invoice-style breakdown for this lane.
+          Rates are alternatives. Totals use the selected rate only.
         </p>
       </div>
 
-      <div className="space-y-3">
-        {rateFields.length ? (
-          rateFields.map((field, index) => (
-            <div key={field.id} className="overflow-hidden rounded-none border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Charge</TableHead>
-                    <TableHead className="w-40 text-right">Amount</TableHead>
-                    <TableHead className="w-10" />
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  <TableRow>
-                    <TableCell>
-                      <Input
-                        placeholder="Rate label"
-                        {...register(`${lanePath}.manualRates.${index}.label`)}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Input
-                        type="number"
-                        step="0.01"
-                        className="text-right tabular-nums"
-                        {...register(
-                          `${lanePath}.manualRates.${index}.amount`,
-                          {
-                            valueAsNumber: true,
-                          }
-                        )}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon-sm"
-                        aria-label="Remove charge"
-                        onClick={() => onRemoveRate(index)}
-                      >
-                        <TrashIcon />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
-              <RateSurchargesEditor
-                control={control}
-                register={register}
-                lanePath={lanePath}
-                rateIndex={index}
-                currencyCode={currencyCode}
-                excludedBuckets={excludedBuckets}
+      {rates.length > 0 ? (
+        <div className="flex flex-wrap gap-1">
+          {rates.map((rate) => {
+            const active = rate.id === selected?.id
+            return (
+              <Button
+                key={rate.id}
+                type="button"
+                size="sm"
+                variant={active ? "default" : "outline"}
+                onClick={() => selectRate(rate.id)}
+              >
+                {rate.label.trim() || "Rate"}
+              </Button>
+            )
+          })}
+        </div>
+      ) : (
+        <p className="text-xs text-muted-foreground">No rates yet.</p>
+      )}
+
+      {selectedIndex >= 0 ? (
+        <div className="space-y-3 rounded-none border p-3">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
+            <label className="flex flex-1 flex-col gap-1">
+              <span className="text-xs text-muted-foreground">
+                Base freight
+              </span>
+              <Input
+                placeholder="Rate label"
+                {...register(`${lanePath}.manualRates.${selectedIndex}.label`)}
               />
-            </div>
-          ))
-        ) : (
-          <div className="overflow-x-auto rounded-none border">
-            <Table>
-              <TableBody>
-                <TableRow>
-                  <TableCell className="h-16 text-center text-muted-foreground">
-                    No charges yet.
-                  </TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
+            </label>
+            <label className="flex flex-col gap-1">
+              <span className="text-xs text-muted-foreground">Basis</span>
+              <select
+                className="h-8 border bg-background px-2 text-xs"
+                value={rates[selectedIndex]?.baseMode ?? "flat"}
+                onChange={(event) => {
+                  setValue(
+                    `${lanePath}.manualRates.${selectedIndex}.baseMode`,
+                    event.target.value as RateBaseMode,
+                    { shouldDirty: true }
+                  )
+                }}
+              >
+                <option value="flat">Flat</option>
+                <option value="per_eq">Per Eq</option>
+              </select>
+            </label>
+            <label className="flex w-36 flex-col gap-1">
+              <span className="text-xs text-muted-foreground">Amount</span>
+              <Input
+                type="number"
+                step="0.01"
+                className="text-right tabular-nums"
+                {...register(
+                  `${lanePath}.manualRates.${selectedIndex}.amount`,
+                  { valueAsNumber: true }
+                )}
+              />
+            </label>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-sm"
+              aria-label="Remove rate"
+              onClick={() => onRemoveRate(selectedIndex)}
+            >
+              <TrashIcon />
+            </Button>
           </div>
-        )}
+
+          {rates[selectedIndex]?.baseMode === "per_eq" &&
+          containers.length > 0 ? (
+            <div className="space-y-2">
+              <p className="text-xs text-muted-foreground">
+                Equipment amounts. Empty rows use the amount above times
+                container count.
+              </p>
+              {containers.map((container, containerIndex) => {
+                const equipment = rates[selectedIndex]?.equipmentAmounts ?? []
+                const current = equipment.find(
+                  (row) => row.containerType === container.containerType
+                )
+                return (
+                  <label
+                    key={container.id || containerIndex}
+                    className="flex items-center gap-2 text-xs"
+                  >
+                    <span className="w-24 font-mono">
+                      {container.containerType || "Eq"} × {container.count}
+                    </span>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      className="w-32 text-right tabular-nums"
+                      value={current?.amount ?? ""}
+                      onChange={(event) => {
+                        const amount = Number(event.target.value)
+                        const next = equipment.filter(
+                          (row) => row.containerType !== container.containerType
+                        )
+                        if (
+                          event.target.value !== "" &&
+                          Number.isFinite(amount)
+                        ) {
+                          next.push({
+                            containerType: container.containerType,
+                            amount,
+                          })
+                        }
+                        setValue(
+                          `${lanePath}.manualRates.${selectedIndex}.equipmentAmounts`,
+                          next,
+                          { shouldDirty: true }
+                        )
+                      }}
+                    />
+                  </label>
+                )
+              })}
+            </div>
+          ) : null}
+
+          <div className="space-y-2">
+            <p className="text-xs font-medium">
+              Origin / Freight / Destination
+            </p>
+            <RateSurchargesEditor
+              control={control}
+              register={register}
+              lanePath={lanePath}
+              rateIndex={selectedIndex}
+              currencyCode={currencyCode}
+              excludedBuckets={excludedBuckets}
+            />
+          </div>
+        </div>
+      ) : null}
+
+      <div className="space-y-2 border-t pt-3">
+        <p className="text-xs font-medium">Globals</p>
+        <GlobalChargesEditor
+          control={control}
+          register={register}
+          currencyCode={currencyCode}
+        />
       </div>
 
-      <Button
-        type="button"
-        variant="ghost"
-        size="sm"
-        onClick={() => onAppendRate()}
-      >
+      <Button type="button" variant="outline" size="sm" onClick={onAppendRate}>
         <PlusIcon data-icon="inline-start" />
-        Add charge
+        Add rate
       </Button>
     </div>
   )

@@ -10,6 +10,7 @@ import {
 } from "react-hook-form"
 
 import { createSurchargeLine, type UsageUnit } from "@starboard/lib-contracts"
+import { USAGE_UNIT_LABELS } from "./usage-labels"
 import { Button } from "@starboard/lib-ui/components/button"
 import { Checkbox } from "@starboard/lib-ui/components/checkbox"
 import { Input } from "@starboard/lib-ui/components/input"
@@ -23,19 +24,7 @@ import {
 
 import type { QuoteFormValues } from "@starboard/lib-contracts"
 
-const USAGE_UNITS: { value: UsageUnit; label: string }[] = [
-  { value: "flat", label: "Flat" },
-  { value: "container", label: "Container" },
-  { value: "teu", label: "TEU" },
-  { value: "cbm", label: "CBM" },
-  { value: "kg", label: "Kg" },
-  { value: "ton", label: "Ton" },
-  { value: "wm", label: "W/M" },
-  { value: "pallet", label: "Pallet" },
-  { value: "per_time", label: "Per time" },
-  { value: "percentage", label: "% freight" },
-  { value: "unknown", label: "Unknown" },
-]
+const USAGE_UNITS = USAGE_UNIT_LABELS
 
 export function GlobalChargesEditor({
   control,

@@ -7,8 +7,7 @@
  *
  * Contributes into `quoting.document`'s `quoting.slots.chargeTable` (the slot
  * host mounts these only while that owner is active, in this order):
- * - `quoting.charges.table` — manual rate rows + per-rate surcharges
- * - `quoting.charges.globals` — quote-wide global charges
+ * - `quoting.charges.table` — selected-rate grid (base, legs, globals)
  */
 export const manifest = {
   id: "quoting.charges",
@@ -19,7 +18,6 @@ export const manifest = {
     points: {
       "quoting.slots.chargeTable": [
         { id: "quoting.charges.table", label: "Charge table" },
-        { id: "quoting.charges.globals", label: "Global charges" },
       ],
     },
   },

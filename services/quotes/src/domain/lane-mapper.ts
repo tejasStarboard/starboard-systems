@@ -21,6 +21,7 @@ export type LaneRow = {
   cargo: Cargo[]
   markupType: LaneFormValues["markupType"]
   markupValue: number
+  selectedRateId: string | null
 }
 
 export type RateRow = {
@@ -29,6 +30,8 @@ export type RateRow = {
   currencyCode: string
   label: string
   rate: number
+  baseMode: LaneFormValues["manualRates"][number]["baseMode"]
+  equipmentAmounts: LaneFormValues["manualRates"][number]["equipmentAmounts"]
   validFrom: Date
   validTo: Date
 }
@@ -264,6 +267,8 @@ export function laneFormToRows(
       currencyCode: currency,
       label: line.label,
       rate: line.amount,
+      baseMode: line.baseMode,
+      equipmentAmounts: line.equipmentAmounts,
       validFrom: validity.validFrom,
       validTo: validity.validTo,
     })
@@ -286,6 +291,7 @@ export function laneFormToRows(
       cargo: cargoFromLaneForm(lane),
       markupType: lane.markupType,
       markupValue: lane.markupValue,
+      selectedRateId: emptyToNull(lane.selectedRateId),
     },
     rates,
     surcharges,
@@ -321,10 +327,13 @@ export function rowsToLaneForm(
       id: rate.id,
       label: rate.label,
       amount: rate.rate,
+      baseMode: rate.baseMode === "per_eq" ? "per_eq" : "flat",
+      equipmentAmounts: rate.equipmentAmounts ?? [],
       surcharges: (surchargesByRateId.get(rate.id) ?? []).map(
         surchargeRowToLine
       ),
     })),
+    selectedRateId: row.selectedRateId ?? "",
     markupType: row.markupType,
     markupValue: row.markupValue,
   }

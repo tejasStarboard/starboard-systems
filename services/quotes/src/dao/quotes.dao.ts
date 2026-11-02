@@ -219,6 +219,7 @@ export class DrizzleQuotesDao implements QuotesDao {
         cargo: lane.cargo,
         markupType: lane.markupType,
         markupValue: lane.markupValue,
+        selectedRateId: lane.selectedRateId,
       })
       .from(lane)
       .where(eq(lane.quoteId, quoteId))
@@ -235,6 +236,8 @@ export class DrizzleQuotesDao implements QuotesDao {
               currencyCode: rate.currencyCode,
               label: rate.label,
               rate: rate.rate,
+              baseMode: rate.baseMode,
+              equipmentAmounts: rate.equipmentAmounts,
               validFrom: rate.validFrom,
               validTo: rate.validTo,
             })
@@ -450,6 +453,7 @@ export class DrizzleQuotesDao implements QuotesDao {
         cargo: mapped.lane.cargo,
         markupType: mapped.lane.markupType,
         markupValue: mapped.lane.markupValue,
+        selectedRateId: mapped.lane.selectedRateId,
         legOrder: [],
       })
 
@@ -461,6 +465,8 @@ export class DrizzleQuotesDao implements QuotesDao {
             currencyCode: rateRow.currencyCode,
             label: rateRow.label,
             rate: rateRow.rate,
+            baseMode: rateRow.baseMode,
+            equipmentAmounts: rateRow.equipmentAmounts,
             validFrom: rateRow.validFrom,
             validTo: rateRow.validTo,
           }))

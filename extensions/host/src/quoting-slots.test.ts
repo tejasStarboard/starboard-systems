@@ -42,15 +42,12 @@ describe("quoting.document defines slots (073)", () => {
     }
   })
 
-  test("quoting.charges contributes surcharge + globals to chargeTable", () => {
+  test("quoting.charges contributes one charge table", () => {
     expect(
       getContributionsToPoint("quoting.slots.chargeTable", "credit").map(
         (c) => [c.id, c.extensionId]
       )
-    ).toEqual([
-      ["quoting.charges.table", "quoting.charges"],
-      ["quoting.charges.globals", "quoting.charges"],
-    ])
+    ).toEqual([["quoting.charges.table", "quoting.charges"]])
   })
 
   test("catalog + spot contribute only to rateSources; spot first, catalog last", () => {
@@ -84,7 +81,7 @@ describe("quoting.document defines slots (073)", () => {
     const result = getContributionsForOwner("quoting.document", "credit")
     expect(Object.keys(result)).toEqual([...SLOTS, "quoting.totalsHooks"])
     expect(result["quoting.slots.headerFields"]).toEqual([])
-    expect(result["quoting.slots.chargeTable"]).toHaveLength(2)
+    expect(result["quoting.slots.chargeTable"]).toHaveLength(1)
     expect(result["quoting.slots.rateSources"]).toHaveLength(4)
   })
 

@@ -49,11 +49,14 @@ describe("lane-mapper", () => {
         count: 2,
       }),
     ]
+    lane.selectedRateId = "rate-1"
     lane.manualRates = [
       createManualRateLine({
         id: "rate-1",
         label: "Ocean freight",
         amount: 1500,
+        baseMode: "per_eq",
+        equipmentAmounts: [{ containerType: "40HC", amount: 800 }],
         surcharges: [
           createSurchargeLine({
             id: "sch-1",
@@ -104,11 +107,14 @@ describe("lane-mapper", () => {
       containerCount: 2,
       weight: 12000,
     })
+    expect(mapped.lane.selectedRateId).toBe("rate-1")
     expect(mapped.rates[0]).toMatchObject({
       id: "rate-1",
       label: "Ocean freight",
       rate: 1500,
       currencyCode: "USD",
+      baseMode: "per_eq",
+      equipmentAmounts: [{ containerType: "40HC", amount: 800 }],
     })
     expect(mapped.surcharges).toHaveLength(1)
     expect(mapped.surcharges[0]).toMatchObject({
@@ -129,6 +135,7 @@ describe("lane-mapper", () => {
       delivery: expect.objectContaining({ city: "Brambleton" }),
       markupType: "percent",
       markupValue: 10,
+      selectedRateId: "rate-1",
       containers: [
         {
           id: "ctr-1",

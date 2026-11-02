@@ -72,10 +72,23 @@ export const containerLineSchema = z.object({
 
 export type ContainerLine = z.infer<typeof containerLineSchema>
 
+export const rateBaseModeSchema = z.enum(["flat", "per_eq"])
+export type RateBaseMode = z.infer<typeof rateBaseModeSchema>
+
+export const equipmentAmountSchema = z.object({
+  containerType: z.string(),
+  amount: z.number(),
+})
+export type EquipmentAmount = z.infer<typeof equipmentAmountSchema>
+
 export const manualRateLineSchema = z.object({
   id: z.string(),
   label: z.string(),
   amount: z.number(),
+  /** Flat amount, or per-container amount when `baseMode` is `per_eq` and no equipment rows are set. */
+  baseMode: rateBaseModeSchema,
+  /** Lean per-equipment buys. Empty means one amount × container count. */
+  equipmentAmounts: z.array(equipmentAmountSchema),
   /** Always present on form values; factories default to []. */
   surcharges: z.array(surchargeLineSchema),
 })
@@ -101,6 +114,8 @@ export const laneFormSchema = z.object({
   palletCount: z.number(),
   palletType: z.string(),
   manualRates: z.array(manualRateLineSchema),
+  /** Alternative that prices the lane. Empty selects the first rate. */
+  selectedRateId: z.string(),
   markupType: markupTypeSchema,
   markupValue: z.number(),
 })
@@ -255,9 +270,23 @@ export function emptyLaneFormValues(mode: LaneMode = "fcl"): LaneFormValues {
     palletCount: 0,
     palletType: "",
     manualRates: [],
+    selectedRateId: "",
     markupType: "amount",
     markupValue: 0,
   }
+}
+
+export function resolveSelectedManualRate<T extends { id: string }>(
+  rates: readonly T[],
+  selectedRateId: string | null | undefined
+): T | null {
+  if (rates.length === 0) {
+    return null
+  }
+  const match = selectedRateId
+    ? rates.find((rate) => rate.id === selectedRateId)
+    : undefined
+  return match ?? rates[0] ?? null
 }
 
 /** Rate actions unlock once origin + destination ports/airports are set. */
@@ -272,6 +301,8 @@ export function createManualRateLine(
     id: crypto.randomUUID(),
     label: "",
     amount: 0,
+    baseMode: "flat",
+    equipmentAmounts: [],
     surcharges: [],
     ...overrides,
   }

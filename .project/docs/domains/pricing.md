@@ -27,7 +27,7 @@ Single implementation + fixture conformance suite. No TS/Python/add-in twins.
 | `isBaseFreightRow`          | Stamp or name-allowlist base-freight predicate          |
 | `findBaseFreightRow`        | Elect base freight from a surcharge list                |
 
-`computeManualLaneTotals` accepts optional `scope.excluded_buckets` and quote-level `globalCharges` (`source: "global"` — immune to bucket scope). Schemas for quote/catalog charge lines live in `@starboard/lib-contracts` (`surchargeLineSchema`). Persistence: ticket **065** (`quotes.surcharge`), **068** (`quotes.global_charge`). Amount engine: **066**.
+`computeManualLaneTotals` accepts optional `scope.excluded_buckets` and quote-level `globalCharges` (`source: "global"` — immune to bucket scope). The quote UI passes **one** selected rate line. `baseMode: "per_eq"` multiplies `amount` by container count, or sums `equipmentAmounts` (`amount × count`) when those rows are present. Flat mode ignores container count. Schemas for quote/catalog charge lines live in `@starboard/lib-contracts` (`surchargeLineSchema`). Persistence: ticket **065** (`quotes.surcharge`), **068** (`quotes.global_charge`), **071** (`quotes.lane.selected_rate_id`, `quotes.rate.base_mode`, `quotes.rate.equipment_amounts`). Amount engine: **066**.
 
 ## Fixtures
 
