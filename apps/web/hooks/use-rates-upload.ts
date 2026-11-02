@@ -37,6 +37,12 @@ export function useRatesUpload() {
       })
     } else if (status.status === "completed") {
       toast.add({ type: "success", title: "Ingestion completed" })
+    } else if (status.status === "running") {
+      toast.add({
+        type: "error",
+        title: "Ingestion still running",
+        description: status.error ?? "Timed out waiting for the job.",
+      })
     }
   }, [enqueueAndPoll, file])
 

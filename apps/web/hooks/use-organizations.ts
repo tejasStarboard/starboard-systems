@@ -48,19 +48,22 @@ export function useOrganizations() {
   const enterOrganization = useCallback(
     async (organizationId: string) => {
       setEnteringId(organizationId)
-      const result = await setActiveOrganizationRequest(organizationId)
-      if (!result.ok) {
+      try {
+        const result = await setActiveOrganizationRequest(organizationId)
+        if (!result.ok) {
+          toast.add({
+            type: "error",
+            title: "Unable to enter organization",
+            description: result.message,
+          })
+          return { ok: false as const }
+        }
+        router.push("/")
+        router.refresh()
+        return { ok: true as const }
+      } finally {
         setEnteringId(null)
-        toast.add({
-          type: "error",
-          title: "Unable to enter organization",
-          description: result.message,
-        })
-        return { ok: false as const }
       }
-      router.push("/")
-      router.refresh()
-      return { ok: true as const }
     },
     [router]
   )

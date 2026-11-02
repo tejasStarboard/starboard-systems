@@ -2,6 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod"
 import Link from "next/link"
+import { useSearchParams } from "next/navigation"
 import { Controller, useForm } from "react-hook-form"
 
 import { Button } from "@starboard/lib-ui/components/button"
@@ -22,15 +23,22 @@ import {
 } from "@/lib/domain/auth/auth-forms.schema"
 import { toastFormErrors } from "@/lib/form-toast"
 
+function safeNextPath(raw: string | null): string | undefined {
+  if (!raw || !raw.startsWith("/") || raw.startsWith("//")) return undefined
+  return raw
+}
+
 export function LoginForm() {
   const { signInEmail } = useAuth()
+  const searchParams = useSearchParams()
+  const callbackURL = safeNextPath(searchParams.get("next"))
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginFormSchema),
     defaultValues: { email: "", password: "" },
   })
 
   async function onSubmit(values: LoginFormValues) {
-    await signInEmail(values)
+    await signInEmail({ ...values, callbackURL })
   }
 
   return (
@@ -42,7 +50,7 @@ export function LoginForm() {
         </p>
       </div>
 
-      <GoogleButton />
+      <GoogleButton callbackURL={callbackURL} />
       <FieldSeparator>or</FieldSeparator>
 
       <form
