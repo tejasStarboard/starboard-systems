@@ -8,9 +8,8 @@ import {
   SignOutIcon,
 } from "@phosphor-icons/react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
 
-import { authClient } from "@/lib/auth-client"
+import { useAuth } from "@/hooks/use-auth"
 import {
   Avatar,
   AvatarFallback,
@@ -50,15 +49,9 @@ export function NavUser({
     image?: string | null
   }
 }) {
-  const router = useRouter()
+  const { signOut } = useAuth()
   const { isMobile } = useSidebar()
   const fallback = initials(user.name) || "SB"
-
-  async function handleSignOut() {
-    await authClient.signOut()
-    router.push("/login")
-    router.refresh()
-  }
 
   return (
     <SidebarMenu>
@@ -123,7 +116,7 @@ export function NavUser({
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem onClick={() => void handleSignOut()}>
+              <DropdownMenuItem onClick={() => void signOut()}>
                 <SignOutIcon />
                 Log out
               </DropdownMenuItem>

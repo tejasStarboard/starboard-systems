@@ -2,8 +2,7 @@
 
 import { Buildings, Plus } from "@phosphor-icons/react"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useRouter } from "next/navigation"
-import { useCallback, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import { Controller, useForm } from "react-hook-form"
 
 import { Button } from "@starboard/lib-ui/components/button"
@@ -16,20 +15,13 @@ import {
 } from "@starboard/lib-ui/components/field"
 import { Input } from "@starboard/lib-ui/components/input"
 import { Spinner } from "@starboard/lib-ui/components/spinner"
-import { toast } from "@starboard/lib-ui/components/toast"
 
+import { useOrganizations } from "@/hooks/use-organizations"
 import {
   createOrganizationFormSchema,
   type CreateOrganizationFormValues,
 } from "@/lib/domain/auth/auth-forms.schema"
 import { toastFormErrors } from "@/lib/form-toast"
-import { authClient } from "@/lib/auth-client"
-
-type Organization = {
-  id: string
-  name: string
-  slug: string
-}
 
 function toSlug(name: string) {
   return name
@@ -40,10 +32,13 @@ function toSlug(name: string) {
 }
 
 export function SelectOrgForm() {
-  const router = useRouter()
-  const [organizations, setOrganizations] = useState<Organization[]>([])
-  const [loading, setLoading] = useState(true)
-  const [enteringId, setEnteringId] = useState<string | null>(null)
+  const {
+    organizations,
+    loading,
+    enteringId,
+    enterOrganization,
+    createAndEnter,
+  } = useOrganizations()
   const [showCreate, setShowCreate] = useState(false)
 
   const form = useForm<CreateOrganizationFormValues>({
@@ -51,86 +46,14 @@ export function SelectOrgForm() {
     defaultValues: { name: "", slug: "" },
   })
 
-  const loadOrganizations = useCallback(async () => {
-    setLoading(true)
-
-    const { data, error: listError } = await authClient.organization.list()
-
-    if (listError) {
-      toast.add({
-        type: "error",
-        title: "Unable to load organizations",
-        description: listError.message ?? "Something went wrong. Try again.",
-      })
-      setOrganizations([])
-    } else {
-      setOrganizations(data ?? [])
-      if (!data?.length) {
-        setShowCreate(true)
-      }
-    }
-
-    setLoading(false)
-  }, [])
-
   useEffect(() => {
-    void loadOrganizations()
-  }, [loadOrganizations])
-
-  async function enterOrganization(organizationId: string) {
-    setEnteringId(organizationId)
-
-    const { error: activeError } = await authClient.organization.setActive({
-      organizationId,
-    })
-
-    if (activeError) {
-      setEnteringId(null)
-      toast.add({
-        type: "error",
-        title: "Unable to enter organization",
-        description: activeError.message ?? "Something went wrong. Try again.",
-      })
-      return
+    if (!loading && organizations.length === 0) {
+      setShowCreate(true)
     }
-
-    router.push("/")
-    router.refresh()
-  }
+  }, [loading, organizations.length])
 
   async function onCreate(values: CreateOrganizationFormValues) {
-    const { data, error: createError } = await authClient.organization.create({
-      name: values.name,
-      slug: values.slug,
-    })
-
-    if (createError || !data) {
-      toast.add({
-        type: "error",
-        title: "Unable to create organization",
-        description: createError?.message ?? "Something went wrong. Try again.",
-      })
-      return
-    }
-
-    const { error: activeError } = await authClient.organization.setActive({
-      organizationId: data.id,
-    })
-
-    if (activeError) {
-      toast.add({
-        type: "error",
-        title: "Organization created",
-        description:
-          activeError.message ??
-          "Created, but could not enter it. Try selecting it below.",
-      })
-      await loadOrganizations()
-      return
-    }
-
-    router.push("/")
-    router.refresh()
+    await createAndEnter(values)
   }
 
   if (loading) {

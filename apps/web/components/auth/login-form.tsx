@@ -2,7 +2,6 @@
 
 import { zodResolver } from "@hookform/resolvers/zod"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
 import { Controller, useForm } from "react-hook-form"
 
 import { Button } from "@starboard/lib-ui/components/button"
@@ -14,41 +13,24 @@ import {
   FieldSeparator,
 } from "@starboard/lib-ui/components/field"
 import { Input } from "@starboard/lib-ui/components/input"
-import { toast } from "@starboard/lib-ui/components/toast"
 
 import { GoogleButton } from "@/components/auth/google-button"
+import { useAuth } from "@/hooks/use-auth"
 import {
   loginFormSchema,
   type LoginFormValues,
 } from "@/lib/domain/auth/auth-forms.schema"
 import { toastFormErrors } from "@/lib/form-toast"
-import { authClient } from "@/lib/auth-client"
 
 export function LoginForm() {
-  const router = useRouter()
+  const { signInEmail } = useAuth()
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginFormSchema),
     defaultValues: { email: "", password: "" },
   })
 
   async function onSubmit(values: LoginFormValues) {
-    const { error: signInError } = await authClient.signIn.email({
-      email: values.email,
-      password: values.password,
-      callbackURL: "/select-org",
-    })
-
-    if (signInError) {
-      toast.add({
-        type: "error",
-        title: "Unable to sign in",
-        description: signInError.message ?? "Something went wrong. Try again.",
-      })
-      return
-    }
-
-    router.push("/select-org")
-    router.refresh()
+    await signInEmail(values)
   }
 
   return (

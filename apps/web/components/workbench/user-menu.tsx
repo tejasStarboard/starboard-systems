@@ -7,9 +7,8 @@ import {
   SignOutIcon,
 } from "@phosphor-icons/react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
 
-import { authClient } from "@/lib/auth-client"
+import { useAuth } from "@/hooks/use-auth"
 import {
   Avatar,
   AvatarFallback,
@@ -39,14 +38,8 @@ export function WorkbenchUserMenu({
 }: {
   user: { name: string; email: string; image?: string | null }
 }) {
-  const router = useRouter()
+  const { signOut } = useAuth()
   const fallback = initials(user.name) || "SB"
-
-  async function handleSignOut() {
-    await authClient.signOut()
-    router.push("/login")
-    router.refresh()
-  }
 
   return (
     <DropdownMenu>
@@ -88,7 +81,7 @@ export function WorkbenchUserMenu({
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem onClick={() => void handleSignOut()}>
+          <DropdownMenuItem onClick={() => void signOut()}>
             <SignOutIcon />
             Log out
           </DropdownMenuItem>

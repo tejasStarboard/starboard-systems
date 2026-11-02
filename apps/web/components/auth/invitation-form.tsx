@@ -2,86 +2,24 @@
 
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
-import { useEffect, useState } from "react"
 
 import { Button } from "@starboard/lib-ui/components/button"
-import { toast } from "@starboard/lib-ui/components/toast"
 
-import { authClient, useSession } from "@/lib/auth-client"
+import { useAuth } from "@/hooks/use-auth"
+import { useOrganizationInvitation } from "@/hooks/use-organizations"
 
 export function InvitationForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const invitationId = searchParams.get("invitationId")
-  const { data: session, isPending: sessionPending } = useSession()
-
-  const [organizationName, setOrganizationName] = useState<string | null>(null)
-  const [loadFailed, setLoadFailed] = useState(false)
-  const [pending, setPending] = useState(false)
-  const [loadingInvite, setLoadingInvite] = useState(true)
-
-  useEffect(() => {
-    if (!invitationId) {
-      setLoadingInvite(false)
-      return
-    }
-
-    let cancelled = false
-
-    async function loadInvitation() {
-      const { data, error: inviteError } =
-        await authClient.organization.getInvitation({
-          query: { id: invitationId! },
-        })
-
-      if (cancelled) return
-
-      if (inviteError) {
-        setLoadFailed(true)
-        toast.add({
-          type: "error",
-          title: "Invitation not found",
-          description:
-            inviteError.message ?? "Something went wrong. Try again.",
-        })
-      } else if (data) {
-        setOrganizationName(data.organizationName)
-      }
-
-      setLoadingInvite(false)
-    }
-
-    void loadInvitation()
-
-    return () => {
-      cancelled = true
-    }
-  }, [invitationId])
-
-  async function acceptInvitation() {
-    if (!invitationId) return
-
-    setPending(true)
-
-    const { error: acceptError } =
-      await authClient.organization.acceptInvitation({
-        invitationId,
-      })
-
-    setPending(false)
-
-    if (acceptError) {
-      toast.add({
-        type: "error",
-        title: "Unable to accept invitation",
-        description: acceptError.message ?? "Something went wrong. Try again.",
-      })
-      return
-    }
-
-    router.push("/select-org")
-    router.refresh()
-  }
+  const { session, sessionPending } = useAuth()
+  const {
+    organizationName,
+    loadFailed,
+    loadingInvite,
+    pending,
+    acceptInvitation,
+  } = useOrganizationInvitation(invitationId)
 
   if (!invitationId) {
     return (
@@ -156,7 +94,11 @@ export function InvitationForm() {
         </p>
       </div>
 
-      <Button className="w-full" disabled={pending} onClick={acceptInvitation}>
+      <Button
+        className="w-full"
+        disabled={pending}
+        onClick={() => void acceptInvitation()}
+      >
         {pending ? "Accepting..." : "Accept invitation"}
       </Button>
     </div>
