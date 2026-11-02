@@ -17,7 +17,7 @@ export type StaffSettingView = {
   label: string
   description?: string
   type: ExtensionSettingType
-  scope: "platform"
+  scope: "platform" | "organization"
   required: boolean
   options?: Array<{ value: string; label: string }>
   value?: SettingScalar

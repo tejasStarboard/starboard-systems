@@ -2,7 +2,7 @@
 id: 069
 wave: 06-product
 title: Org carrier credentials in settings (not env)
-status: open
+status: in_progress
 depends_on: [057, 058, 061]
 epic: SYS-EXT-SPOT
 docs:
@@ -32,20 +32,20 @@ Spot workers resolve credentials from stored settings for the active `organizati
 
 ### Storage + encryption
 
-- [ ] `spot.maersk` and `spot.cma` declare `contributes.settings` secret fields for the credential keys the plugins already expect (e.g. username/password/customerCode — match current ports)
-- [ ] `scope: "organization"` is supported for extension settings storage + APIs (unique per org + extension + key); platform-scoped settings unchanged
-- [ ] Secret values are **encrypted before write** (authenticated encryption, e.g. AES-GCM) with a dedicated env secret analogous to `BETTER_AUTH_SECRET`; ciphertext only in Postgres; plaintext never persisted
-- [ ] GET/list responses never return decrypted secrets — only `configured: true | false` (and optional `validatedAt` / last validation status)
-- [ ] Decrypt only when issuing credentials to the spot worker / validate path; secrets never logged
+- [x] `spot.maersk` and `spot.cma` declare `contributes.settings` secret fields for the credential keys the plugins already expect (e.g. username/password/customerCode — match current ports)
+- [x] `scope: "organization"` is supported for extension settings storage + APIs (unique per org + extension + key); platform-scoped settings unchanged
+- [x] Secret values are **encrypted before write** (authenticated encryption, e.g. AES-GCM) with a dedicated env secret analogous to `BETTER_AUTH_SECRET`; ciphertext only in Postgres; plaintext never persisted
+- [x] GET/list responses never return decrypted secrets — only `configured: true | false` (and optional `validatedAt` / last validation status)
+- [x] Decrypt only when issuing credentials to the spot worker / validate path; secrets never logged
 
 ### Validate after save
 
-- [ ] After credentials are saved (or explicitly “Validate”), BFF enqueues/calls a **carrier-specific `validate` method** with the decrypted creds
-- [ ] Each carrier plugin owns custom validation logic later (e.g. rates-search probe for API scrapers; login/session check for web scrapers). **This ticket stubs** `validate` as: sleep ~5s → return `{ ok: true }` (no network)
-- [ ] UI shows a clear **Validating…** loading state for that carrier while the async validate is in flight; disable save/re-validate until settled
-- [ ] On stub success, surface validated state (e.g. “Credentials validated”); on failure (when real validate exists later), show error without echoing secret values
-- [ ] Missing settings → clear `missing_credentials` for search (same as today); env JSON is documented as **dev fallback only**
-- [ ] Domain / extensions docs updated (encryption secret, validate stub → real probes in 062)
+- [x] After credentials are saved (or explicitly “Validate”), BFF enqueues/calls a **carrier-specific `validate` method** with the decrypted creds
+- [x] Each carrier plugin owns custom validation logic later (e.g. rates-search probe for API scrapers; login/session check for web scrapers). **This ticket stubs** `validate` as: sleep ~5s → return `{ ok: true }` (no network)
+- [x] UI shows a clear **Validating…** loading state for that carrier while the async validate is in flight; disable save/re-validate until settled
+- [x] On stub success, surface validated state (e.g. “Credentials validated”); on failure (when real validate exists later), show error without echoing secret values
+- [x] Missing settings → clear `missing_credentials` for search (same as today); env JSON is documented as **dev fallback only**
+- [x] Domain / extensions docs updated (encryption secret, validate stub → real probes in 062)
 
 ## Files to touch
 

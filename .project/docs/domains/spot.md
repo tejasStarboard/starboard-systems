@@ -18,8 +18,8 @@ Structured carrier failures return as activity `{ rates: [], error: { code, mess
 
 ## Credentials
 
-Today Maersk/CMA credential ports read org maps from env (`SPOT_MAERSK_CREDENTIALS` / `SPOT_CMA_CREDENTIALS`). Target ([069](../../tickets/todo/069-org-carrier-credentials-settings.md)): org-scoped secret settings in the shell, **encrypted at rest** with an app secret (Better Auth–style), plus a post-save **per-carrier `validate`** (stub: ~5s → ok; real API/login probes can reuse live clients). Env remains a local/dev fallback.
+Maersk/CMA search prefers org secret settings (`username` / `password` / `customerCode`, `apiKey` / `clientId`) decrypted by the BFF (`GET /api/internal/carrier-credentials`). Those values are encrypted at rest with `EXTENSION_SETTINGS_SECRET` and are not placed on the Temporal job. `SPOT_MAERSK_CREDENTIALS` / `SPOT_CMA_CREDENTIALS` remain a local/dev fallback when the settings lookup is empty. After save, each plugin `validate` stub sleeps ~5s and returns `{ ok: true }` ([069](../../tickets/in_progress/069-org-carrier-credentials-settings.md)). Real API or login probes stay with the live clients.
 
 ## Next tickets
 
-[069](../../tickets/todo/069-org-carrier-credentials-settings.md) org credentials (settings-backed ports). Done: [040](../../tickets/done/040-spot-extension-host.md), [041](../../tickets/done/041-ext-spot-maersk.md), [042](../../tickets/done/042-ext-spot-cma.md), [062](../../tickets/in_progress/062-live-spot-strategies.md) live strategies.
+Org credentials are the [069](../../tickets/in_progress/069-org-carrier-credentials-settings.md) settings path above. Done: [040](../../tickets/done/040-spot-extension-host.md), [041](../../tickets/done/041-ext-spot-maersk.md), [042](../../tickets/done/042-ext-spot-cma.md), [062](../../tickets/in_progress/062-live-spot-strategies.md) live strategies.

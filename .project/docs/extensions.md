@@ -209,25 +209,33 @@ Use contributions / activation helpers. Domain pages owned by a single slot (e.g
 
 ### 7b. Admin settings
 
-Declared on `contributes.settings`. v1 `scope` is `"platform"` only. Stored in Postgres schema `platform`, table `extension_setting` (`extension_id`, `key`, `value` jsonb, `updated_at`, `updated_by`), unique on `(extension_id, key)`.
+Declared on `contributes.settings`. `scope` is `"platform"` or `"organization"`. Stored in Postgres schema `platform`, table `extension_setting` (`organization_id`, `extension_id`, `key`, `value` jsonb, `updated_at`, `updated_by`). Platform rows use an empty `organization_id`. Unique on `(organization_id, extension_id, key)`.
 
-| Call                                 | Behavior                                                                                                                                                                          |
-| ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GET /api/admin/extensions/settings` | Staff only. Every extension’s declarations plus effective values. Missing row uses the manifest `default`. Secrets return `{ configured: true \| false }` and omit the raw value. |
-| `PUT /api/admin/extensions/settings` | Body `{ extensionId, values }`. Unknown key or wrong type → **400**. Unknown extension → **404**.                                                                                 |
-| Auth                                 | No session → **401**. Signed-in non-staff → **404** (`requireStaffApiSession`).                                                                                                   |
-| Audit                                | `platform_audit_log` action `extension_setting.update` records the changed keys, not secret values.                                                                               |
+Secret values are AES-256-GCM envelopes keyed by `EXTENSION_SETTINGS_SECRET` (same role as `BETTER_AUTH_SECRET`, never the database URL). Ciphertext only in Postgres. List responses return `{ configured: true | false }` and omit plaintext. Decrypt happens in the BFF when a spot worker asks for org credentials, or when a save runs carrier `validate`.
+
+| Call                                              | Behavior                                                                                                                                                                          |
+| ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET /api/admin/extensions/settings`              | Staff only. Every extension’s declarations plus effective values. Missing row uses the manifest `default`. Secrets return `{ configured: true \| false }` and omit the raw value. |
+| `PUT /api/admin/extensions/settings`              | Body `{ extensionId, values }`. Platform scope only. Unknown key or wrong type → **400**. Unknown extension → **404**. Organization-scoped keys are rejected here.                |
+| `GET /api/settings/carrier-credentials`           | Active org session. Maersk and CMA secret fields plus validation status. No plaintext.                                                                                            |
+| `PUT /api/settings/carrier-credentials`           | Saves org secrets (blank fields keep the stored value), then calls carrier `validate`.                                                                                            |
+| `POST /api/settings/carrier-credentials/validate` | Re-validates stored secrets. The handler waits on the stub (~5s → `{ ok: true }`).                                                                                                |
+| `GET /api/internal/carrier-credentials`           | Service token. Query `extensionId` and `organizationId`. Returns decrypted credentials for the spot worker.                                                                       |
+| Auth                                              | No session → **401**. Signed-in non-staff → **404** (`requireStaffApiSession`).                                                                                                   |
+| Audit                                             | `platform_audit_log` action `extension_setting.update` records the changed keys, not secret values.                                                                               |
 
 **Runtime read path (061):** BFF managers call `getPlatformManager().getExtensionSettings(extensionId)` when enqueueing jobs. Missing DB rows use the manifest `default` via `resolveExtensionSettingValues`. Non-secret values are forwarded on the worker job body (`liveStrategy` for `spot.maersk` / `spot.cma`, `syncIntervalMinutes` for `messaging.msgraph`). `settingsForJobInput` strips `type: "secret"` keys so secrets never land in Temporal history or logs. Workers do **not** read Postgres directly.
 
-**Live spot (062):** When `liveStrategy` is true, Maersk/CMA workers use HTTPS `LiveOfferStrategy` (env creds until 069). Fixture path when false. CI uses `httpx.MockTransport` — no carrier network.
+**Live spot (062):** When `liveStrategy` is true, Maersk/CMA workers use HTTPS `LiveOfferStrategy`. Fixture path when false. CI uses `httpx.MockTransport` — no carrier network.
+
+**Org carrier credentials (069):** Integrations settings edits `spot.maersk` (`username`, `password`, `customerCode`) and `spot.cma` (`apiKey`, `clientId`). After save, the BFF calls `POST /extensions/spot.<carrier>/validate` (stub sleeps ~5s and returns ok; real probes stay with live strategies). The search activity loads decrypted credentials from the internal BFF route and does not put them on the Temporal job. `SPOT_MAERSK_CREDENTIALS` / `SPOT_CMA_CREDENTIALS` remain a dev fallback when that lookup is empty. `extension_credential_check` stores status and `validated_at` only. Schema push: `pnpm --filter @starboard/lib-db db:push`.
 
 ### 8. Unplug checklist (verified post-055)
 
 1. Set `enabled: false` in the registry **or** org rollout `off` (admin).
 2. Confirm shell: `listActiveWorkbenchContributions` / `isExtensionActive` omit the extension; `requireActiveExtension` + generic route → **404**. Covered by `apps/web/lib/extensions-all-off.test.ts`.
 3. Stop deploying the worker process / plugin package for that carrier.
-4. Expand/contract drop optional schema if the extension owned any (most stubs: none). Delete that extension’s rows in `platform.extension_setting` (`extension_id`, `key`). Nothing drops those rows automatically.
+4. Expand/contract drop optional schema if the extension owned any (most stubs: none). Delete that extension’s rows in `platform.extension_setting` and `platform.extension_credential_check`. Nothing drops those rows automatically.
 5. Delete the plugin package + registry row + Python POST route. **Zero** surgical edits to unrelated shell feature components.
 
 ### 9. Test matrix

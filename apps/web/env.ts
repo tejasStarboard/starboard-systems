@@ -31,6 +31,9 @@ export const env = createEnv({
     /** Comma-separated Better Auth user ids allowed on /admin. Empty = nobody. */
     PLATFORM_STAFF_USER_IDS: z.string().optional(),
 
+    /** AES-GCM key for extension secret settings. Not the database URL. */
+    EXTENSION_SETTINGS_SECRET: z.string().min(32),
+
     /** `1`/`true` = kernel-only lab: workbench with no contributions (ticket 074). */
     WORKBENCH_KERNEL_ONLY: z.enum(["0", "1", "true", "false"]).optional(),
   },
@@ -64,6 +67,7 @@ export const env = createEnv({
     SPOT_SERVICE_URL: process.env.SPOT_SERVICE_URL,
     INTERNAL_SERVICE_TOKEN: process.env.INTERNAL_SERVICE_TOKEN,
     PLATFORM_STAFF_USER_IDS: process.env.PLATFORM_STAFF_USER_IDS,
+    EXTENSION_SETTINGS_SECRET: process.env.EXTENSION_SETTINGS_SECRET,
     WORKBENCH_KERNEL_ONLY: process.env.WORKBENCH_KERNEL_ONLY,
   },
   emptyStringAsUndefined: true,

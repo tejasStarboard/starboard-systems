@@ -47,6 +47,11 @@ export interface SpotClient {
     workflowId: string,
     organizationId: string
   ): Promise<ExtensionJobStatusResult>
+  validateCredentials(
+    extensionId: string,
+    organizationId: string,
+    credentials: Record<string, string>
+  ): Promise<{ ok: boolean; error?: string }>
 }
 
 class HttpSpotClient implements SpotClient {
@@ -116,6 +121,28 @@ class HttpSpotClient implements SpotClient {
       options
     )
     return parseJsonResponse(response, "Failed to load spot job status")
+  }
+
+  async validateCredentials(
+    extensionId: string,
+    organizationId: string,
+    credentials: Record<string, string>
+  ): Promise<{ ok: boolean; error?: string }> {
+    assertSpotExtension(extensionId)
+    const options = createServiceOptions({
+      baseUrl: this.options.baseUrl,
+      organizationId,
+    })
+    const response = await serviceFetch(
+      `/extensions/${extensionId}/validate`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ credentials }),
+      },
+      { ...options, timeoutMs: 15_000 }
+    )
+    return parseJsonResponse(response, "Carrier validation failed")
   }
 }
 

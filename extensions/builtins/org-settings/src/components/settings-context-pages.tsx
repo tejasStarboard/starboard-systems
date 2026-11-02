@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 
+import { CarrierCredentialsPanel } from "./carrier-credentials-panel"
 import { ConnectOutlook } from "./connect-outlook"
 import type { SettingsContext } from "../lib/settings-context"
 
@@ -82,18 +83,6 @@ export function IntegrationsSettings() {
   if (state.status !== "ready") return <Pending state={state} />
 
   const { integrations } = state.context
-  if (integrations.length === 0) {
-    return (
-      <div className="flex flex-col gap-6 p-6">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-sm font-medium">Integrations</h1>
-          <p className="text-sm text-muted-foreground">
-            No connection-based integrations are active for this organization.
-          </p>
-        </div>
-      </div>
-    )
-  }
 
   return (
     <div className="flex flex-col gap-6 p-6">
@@ -104,24 +93,32 @@ export function IntegrationsSettings() {
         </p>
       </div>
 
-      <ul className="divide-y divide-border border">
-        {integrations.map((integration) => (
-          <li
-            key={integration.extensionId}
-            className="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
-          >
-            <div className="flex flex-col gap-0.5">
-              <span className="text-sm font-medium">
-                {integration.displayName}
-              </span>
-              <span className="font-mono text-xs text-muted-foreground">
-                {integration.extensionId}
-              </span>
-            </div>
-            <ConnectOutlook initialStatus={integration.status} />
-          </li>
-        ))}
-      </ul>
+      <CarrierCredentialsPanel />
+
+      {integrations.length === 0 ? (
+        <p className="text-sm text-muted-foreground">
+          No connection-based integrations are active for this organization.
+        </p>
+      ) : (
+        <ul className="divide-y divide-border border">
+          {integrations.map((integration) => (
+            <li
+              key={integration.extensionId}
+              className="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+            >
+              <div className="flex flex-col gap-0.5">
+                <span className="text-sm font-medium">
+                  {integration.displayName}
+                </span>
+                <span className="font-mono text-xs text-muted-foreground">
+                  {integration.extensionId}
+                </span>
+              </div>
+              <ConnectOutlook initialStatus={integration.status} />
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   )
 }

@@ -1,11 +1,13 @@
 import "server-only"
 
-import { eq, ilike, inArray, or } from "drizzle-orm"
+import { and, eq, ilike, inArray, or } from "drizzle-orm"
 import {
+  extensionCredentialCheck,
   extensionRollout,
   extensionRolloutOrg,
   extensionSetting,
   organization,
+  PLATFORM_SETTING_ORGANIZATION_ID,
   platformAuditLog,
   platformCommonBetaOrg,
 } from "@starboard/lib-db/schema"
@@ -25,6 +27,13 @@ export type ExtensionSettingRow = {
   extensionId: string
   key: string
   value: unknown
+}
+
+export type CredentialCheckRow = {
+  extensionId: string
+  status: "ok" | "error"
+  errorMessage: string | null
+  validatedAt: Date | null
 }
 
 export type OrganizationSummary = {
@@ -155,43 +164,53 @@ export class PlatformDao {
   }
 
   async listExtensionSettings(
-    extensionId?: string
+    extensionId?: string,
+    organizationId: string = PLATFORM_SETTING_ORGANIZATION_ID
   ): Promise<ExtensionSettingRow[]> {
-    const query = db
+    const filters = [eq(extensionSetting.organizationId, organizationId)]
+    if (extensionId) {
+      filters.push(eq(extensionSetting.extensionId, extensionId))
+    }
+
+    return db
       .select({
         extensionId: extensionSetting.extensionId,
         key: extensionSetting.key,
         value: extensionSetting.value,
       })
       .from(extensionSetting)
-
-    if (!extensionId) {
-      return query
-    }
-
-    return query.where(eq(extensionSetting.extensionId, extensionId))
+      .where(and(...filters))
   }
 
   async upsertExtensionSettings(input: {
     extensionId: string
     entries: Array<{ key: string; value: unknown }>
     actorUserId: string
+    organizationId?: string
   }) {
     if (input.entries.length === 0) {
       return
     }
 
+    const organizationId =
+      input.organizationId ?? PLATFORM_SETTING_ORGANIZATION_ID
+
     for (const entry of input.entries) {
       await db
         .insert(extensionSetting)
         .values({
+          organizationId,
           extensionId: input.extensionId,
           key: entry.key,
           value: entry.value,
           updatedByUserId: input.actorUserId,
         })
         .onConflictDoUpdate({
-          target: [extensionSetting.extensionId, extensionSetting.key],
+          target: [
+            extensionSetting.organizationId,
+            extensionSetting.extensionId,
+            extensionSetting.key,
+          ],
           set: {
             value: entry.value,
             updatedByUserId: input.actorUserId,
@@ -203,11 +222,64 @@ export class PlatformDao {
     await this.appendAudit({
       actorUserId: input.actorUserId,
       action: "extension_setting.update",
+      organizationId: organizationId || null,
       extensionId: input.extensionId,
       detail: JSON.stringify({
         keys: input.entries.map((entry) => entry.key),
       }),
     })
+  }
+
+  async getCredentialCheck(
+    organizationId: string,
+    extensionId: string
+  ): Promise<CredentialCheckRow | null> {
+    const rows = await db
+      .select({
+        extensionId: extensionCredentialCheck.extensionId,
+        status: extensionCredentialCheck.status,
+        errorMessage: extensionCredentialCheck.errorMessage,
+        validatedAt: extensionCredentialCheck.validatedAt,
+      })
+      .from(extensionCredentialCheck)
+      .where(
+        and(
+          eq(extensionCredentialCheck.organizationId, organizationId),
+          eq(extensionCredentialCheck.extensionId, extensionId)
+        )
+      )
+      .limit(1)
+    return rows[0] ?? null
+  }
+
+  async upsertCredentialCheck(input: {
+    organizationId: string
+    extensionId: string
+    status: "ok" | "error"
+    errorMessage: string | null
+    validatedAt: Date
+  }) {
+    await db
+      .insert(extensionCredentialCheck)
+      .values({
+        organizationId: input.organizationId,
+        extensionId: input.extensionId,
+        status: input.status,
+        errorMessage: input.errorMessage,
+        validatedAt: input.validatedAt,
+      })
+      .onConflictDoUpdate({
+        target: [
+          extensionCredentialCheck.organizationId,
+          extensionCredentialCheck.extensionId,
+        ],
+        set: {
+          status: input.status,
+          errorMessage: input.errorMessage,
+          validatedAt: input.validatedAt,
+          updatedAt: new Date(),
+        },
+      })
   }
 
   async searchOrganizations(query: string, limit = 25) {

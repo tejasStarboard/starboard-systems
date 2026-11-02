@@ -11,15 +11,27 @@ import {
   type StaffSettingView,
 } from "@starboard/ext-host"
 
+import { env } from "@/env"
 import {
   clearImpersonationCookie,
   setImpersonationCookie,
 } from "@/lib/auth/impersonation"
 import {
+  isCarrierExtensionId,
+  materializeSettingRows,
+  missingRequiredSecrets,
+  openSecretValues,
+  organizationScopedSettings,
+  sealSettingEntries,
+} from "@/lib/domain/platform/carrier-credentials"
+import {
   getPlatformDao,
+  type CredentialCheckRow,
   type OrganizationSummary,
   type PlatformDao,
 } from "@/lib/domain/platform/platform.dao"
+import { getSpotClient } from "@/lib/domain/spot/spot.client"
+import { ServiceClientError } from "@/lib/clients/http"
 
 export class ExtensionSettingsError extends Error {
   readonly status: 400 | 404
@@ -35,6 +47,19 @@ export type StaffExtensionSettings = {
   extensionId: string
   displayName: string
   settings: StaffSettingView[]
+}
+
+export type CarrierCredentialValidation = {
+  status: "ok" | "error" | null
+  validatedAt: string | null
+  errorMessage: string | null
+}
+
+export type OrgCarrierCredentials = {
+  extensionId: string
+  displayName: string
+  settings: StaffSettingView[]
+  validation: CarrierCredentialValidation
 }
 
 export class PlatformManager {
@@ -82,7 +107,9 @@ export class PlatformManager {
       extensionId: manifest.id,
       displayName: manifest.displayName,
       settings: resolveStaffSettings(
-        getDeclaredSettings(manifest),
+        getDeclaredSettings(manifest).filter(
+          (setting) => setting.scope === "platform"
+        ),
         stored.filter((row) => row.extensionId === manifest.id)
       ),
     }))
@@ -100,7 +127,9 @@ export class PlatformManager {
       throw new ExtensionSettingsError("Unknown extension", 404)
     }
 
-    const declarations = getDeclaredSettings(manifest)
+    const declarations = getDeclaredSettings(manifest).filter(
+      (setting) => setting.scope === "platform"
+    )
     const parsed = validateSettingValues(declarations, input.values)
     if (!parsed.ok) {
       throw new ExtensionSettingsError(parsed.message, 400)
@@ -108,7 +137,11 @@ export class PlatformManager {
 
     await this.dao.upsertExtensionSettings({
       extensionId: input.extensionId,
-      entries: parsed.entries,
+      entries: sealSettingEntries(
+        declarations,
+        parsed.entries,
+        env.EXTENSION_SETTINGS_SECRET
+      ),
       actorUserId: input.actorUserId,
     })
 
@@ -124,8 +157,200 @@ export class PlatformManager {
       return {}
     }
 
+    const declarations = getDeclaredSettings(manifest).filter(
+      (setting) => setting.scope === "platform"
+    )
     const stored = await this.dao.listExtensionSettings(extensionId)
-    return resolveExtensionSettingValues(getDeclaredSettings(manifest), stored)
+    return resolveExtensionSettingValues(
+      declarations,
+      materializeSettingRows(
+        declarations,
+        stored,
+        env.EXTENSION_SETTINGS_SECRET
+      )
+    )
+  }
+
+  async listOrgCarrierCredentials(
+    organizationId: string
+  ): Promise<OrgCarrierCredentials[]> {
+    const manifests = listManifests().filter((manifest) =>
+      isCarrierExtensionId(manifest.id)
+    )
+    const carriers: OrgCarrierCredentials[] = []
+    for (const manifest of manifests) {
+      carriers.push(
+        await this.orgCarrierView(
+          organizationId,
+          manifest.id,
+          manifest.displayName
+        )
+      )
+    }
+    return carriers
+  }
+
+  async saveOrgCarrierCredentials(input: {
+    organizationId: string
+    extensionId: string
+    values: Record<string, unknown>
+    actorUserId: string
+  }): Promise<OrgCarrierCredentials> {
+    const manifest = this.requireCarrier(input.extensionId)
+    const declarations = organizationScopedSettings(
+      getDeclaredSettings(manifest)
+    )
+    const stored = await this.dao.listExtensionSettings(
+      input.extensionId,
+      input.organizationId
+    )
+    const missing = missingRequiredSecrets(
+      declarations,
+      new Set(stored.map((row) => row.key)),
+      input.values
+    )
+    if (missing) {
+      throw new ExtensionSettingsError(missing, 400)
+    }
+
+    const parsed = validateSettingValues(declarations, input.values)
+    if (!parsed.ok) {
+      throw new ExtensionSettingsError(parsed.message, 400)
+    }
+
+    if (parsed.entries.length > 0) {
+      await this.dao.upsertExtensionSettings({
+        extensionId: input.extensionId,
+        organizationId: input.organizationId,
+        entries: sealSettingEntries(
+          declarations,
+          parsed.entries,
+          env.EXTENSION_SETTINGS_SECRET
+        ),
+        actorUserId: input.actorUserId,
+      })
+    }
+
+    return this.validateOrgCarrierCredentials({
+      organizationId: input.organizationId,
+      extensionId: input.extensionId,
+    })
+  }
+
+  async validateOrgCarrierCredentials(input: {
+    organizationId: string
+    extensionId: string
+  }): Promise<OrgCarrierCredentials> {
+    const manifest = this.requireCarrier(input.extensionId)
+    const declarations = organizationScopedSettings(
+      getDeclaredSettings(manifest)
+    )
+    const stored = await this.dao.listExtensionSettings(
+      input.extensionId,
+      input.organizationId
+    )
+    const credentials = openSecretValues(
+      declarations,
+      stored,
+      env.EXTENSION_SETTINGS_SECRET
+    )
+
+    let status: "ok" | "error" = "error"
+    let errorMessage: string | null = "Validation failed"
+    if (Object.keys(credentials).length === 0) {
+      errorMessage = "missing_credentials"
+    } else {
+      try {
+        const result = await getSpotClient().validateCredentials(
+          input.extensionId,
+          input.organizationId,
+          credentials
+        )
+        if (result.ok) {
+          status = "ok"
+          errorMessage = null
+        } else {
+          errorMessage = "Validation failed"
+        }
+      } catch (error) {
+        if (error instanceof ServiceClientError) {
+          errorMessage = "Carrier validation is unavailable"
+        }
+      }
+    }
+
+    await this.dao.upsertCredentialCheck({
+      organizationId: input.organizationId,
+      extensionId: input.extensionId,
+      status,
+      errorMessage,
+      validatedAt: new Date(),
+    })
+
+    return this.orgCarrierView(
+      input.organizationId,
+      manifest.id,
+      manifest.displayName
+    )
+  }
+
+  async getDecryptedCarrierCredentials(
+    organizationId: string,
+    extensionId: string
+  ): Promise<Record<string, string> | null> {
+    if (!isCarrierExtensionId(extensionId)) {
+      throw new ExtensionSettingsError("Unknown extension", 404)
+    }
+    const manifest = listManifests().find((item) => item.id === extensionId)
+    if (!manifest) {
+      throw new ExtensionSettingsError("Unknown extension", 404)
+    }
+    const declarations = organizationScopedSettings(
+      getDeclaredSettings(manifest)
+    )
+    const stored = await this.dao.listExtensionSettings(
+      extensionId,
+      organizationId
+    )
+    const credentials = openSecretValues(
+      declarations,
+      stored,
+      env.EXTENSION_SETTINGS_SECRET
+    )
+    return Object.keys(credentials).length > 0 ? credentials : null
+  }
+
+  private requireCarrier(extensionId: string) {
+    if (!isCarrierExtensionId(extensionId)) {
+      throw new ExtensionSettingsError("Unknown extension", 404)
+    }
+    const manifest = listManifests().find((item) => item.id === extensionId)
+    if (!manifest) {
+      throw new ExtensionSettingsError("Unknown extension", 404)
+    }
+    return manifest
+  }
+
+  private async orgCarrierView(
+    organizationId: string,
+    extensionId: string,
+    displayName: string
+  ): Promise<OrgCarrierCredentials> {
+    const manifest = listManifests().find((item) => item.id === extensionId)
+    const declarations = organizationScopedSettings(
+      manifest ? getDeclaredSettings(manifest) : []
+    )
+    const stored = await this.dao.listExtensionSettings(
+      extensionId,
+      organizationId
+    )
+    const check = await this.dao.getCredentialCheck(organizationId, extensionId)
+    return {
+      extensionId,
+      displayName,
+      settings: resolveStaffSettings(declarations, stored),
+      validation: toValidation(check),
+    }
   }
 
   async startImpersonation(input: {
@@ -159,6 +384,19 @@ export class PlatformManager {
       action: "impersonation.end",
       organizationId: input.organizationId ?? null,
     })
+  }
+}
+
+function toValidation(
+  check: CredentialCheckRow | null
+): CarrierCredentialValidation {
+  if (!check) {
+    return { status: null, validatedAt: null, errorMessage: null }
+  }
+  return {
+    status: check.status,
+    validatedAt: check.validatedAt ? check.validatedAt.toISOString() : null,
+    errorMessage: check.errorMessage,
   }
 }
 

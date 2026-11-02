@@ -8,18 +8,35 @@ from spot.plugins.base import NoopCredentialPort, SearchRequest, SpotSearchError
 from spot.plugins.cma.credentials import EnvCmaCredentialPort
 from spot.plugins.cma.plugin import CmaSpotPlugin
 from spot.plugins.cma.strategy import resolve_strategy as resolve_cma_strategy
+from spot.plugins.credential_resolve import (
+    fetch_org_credentials,
+    resolve_carrier_credentials,
+)
 from spot.plugins.maersk.credentials import EnvMaerskCredentialPort
 from spot.plugins.maersk.plugin import MaerskSpotPlugin
 from spot.plugins.maersk.strategy import resolve_strategy as resolve_maersk_strategy
 from spot.plugins.registry import get_plugin
 
 
-def _load_credentials(plugin_id: str, organization_id: str) -> dict[str, str] | None:
+def _env_credentials(
+    plugin_id: str, organization_id: str
+) -> dict[str, str] | None:
     if plugin_id == "maersk":
         return EnvMaerskCredentialPort().get(organization_id, "maersk")
     if plugin_id == "cma":
         return EnvCmaCredentialPort().get(organization_id, "cma")
     return NoopCredentialPort().get(organization_id, plugin_id)
+
+
+def _load_credentials(plugin_id: str, organization_id: str) -> dict[str, str] | None:
+    env_credentials = _env_credentials(plugin_id, organization_id)
+    if plugin_id not in {"maersk", "cma"}:
+        return env_credentials
+    settings = fetch_org_credentials(f"spot.{plugin_id}", organization_id)
+    return resolve_carrier_credentials(
+        settings=settings,
+        env_credentials=env_credentials,
+    )
 
 
 def _resolve_plugin(plugin_id: str, live_strategy: bool | None):

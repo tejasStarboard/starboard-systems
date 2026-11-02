@@ -8,12 +8,21 @@ import {
   timestamp,
 } from "drizzle-orm/pg-core"
 
-/** Platform-admin extension settings. Rollout tables stay in public. */
+/**
+ * Extension settings. `organization_id` is empty for platform scope.
+ * Secret values are ciphertext envelopes, never plaintext.
+ */
 export const platformSchema = pgSchema("platform")
+
+/** Platform-scoped rows use this organization id. */
+export const PLATFORM_SETTING_ORGANIZATION_ID = ""
 
 export const extensionSetting = platformSchema.table(
   "extension_setting",
   {
+    organizationId: text("organization_id")
+      .notNull()
+      .default(PLATFORM_SETTING_ORGANIZATION_ID),
     extensionId: text("extension_id").notNull(),
     key: text("key").notNull(),
     value: jsonb("value").notNull(),
@@ -25,8 +34,34 @@ export const extensionSetting = platformSchema.table(
   },
   (table) => [
     primaryKey({
-      columns: [table.extensionId, table.key],
+      columns: [table.organizationId, table.extensionId, table.key],
       name: "extension_setting_pk",
+    }),
+    index("extension_setting_extension_idx").on(
+      table.organizationId,
+      table.extensionId
+    ),
+  ]
+)
+
+/** Last carrier-credential validate result. No secret material. */
+export const extensionCredentialCheck = platformSchema.table(
+  "extension_credential_check",
+  {
+    organizationId: text("organization_id").notNull(),
+    extensionId: text("extension_id").notNull(),
+    status: text("status").$type<"ok" | "error">().notNull(),
+    errorMessage: text("error_message"),
+    validatedAt: timestamp("validated_at"),
+    updatedAt: timestamp("updated_at")
+      .defaultNow()
+      .$onUpdate(() => /* @__PURE__ */ new Date())
+      .notNull(),
+  },
+  (table) => [
+    primaryKey({
+      columns: [table.organizationId, table.extensionId],
+      name: "extension_credential_check_pk",
     }),
   ]
 )
