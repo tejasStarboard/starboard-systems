@@ -17,13 +17,13 @@ import {
   parseSpotSearchResult,
   spotOfferToManualLine,
   type SpotOffer,
-} from "@/lib/domain/quotes/apply-rate-to-lane"
-import { extensionApiPath } from "@/lib/extension-api-path"
+} from "../lib/apply-rate-to-lane"
 import {
+  extensionApiPath,
   pollExtensionJob,
   type PolledJobStatus,
-} from "@/lib/poll-extension-job"
-import type { SpotRateSource } from "@/lib/spot-rate-source"
+} from "../lib/extension-api"
+import type { SpotRateSource } from "../lib/spot-rate-source"
 
 export type ApplyRatePayload = {
   line: ManualRateLine

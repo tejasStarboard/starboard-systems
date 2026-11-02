@@ -26,14 +26,14 @@ import {
 } from "@starboard/lib-ui/components/toggle-group"
 import { cn } from "@starboard/lib-ui/lib/utils"
 
-import { GlobalChargesEditor } from "@/components/quotes/global-charges-editor"
-import { LaneFields } from "@/components/quotes/lane-fields"
-import { RateSurchargesEditor } from "@/components/quotes/rate-surcharges-editor"
+import { GlobalChargesEditor } from "./global-charges-editor"
+import { LaneFields } from "./lane-fields"
+import { RateSurchargesEditor } from "./rate-surcharges-editor"
 import type {
   LaneFormValues,
   QuoteFormOption,
   QuoteFormValues,
-} from "@/lib/domain/quotes/quotes.schema"
+} from "../lib/quotes.schema"
 
 function formatMoney(value: number, currencyCode: string) {
   try {

@@ -1,42 +1,48 @@
 /**
- * Manifest for driving built-in `quoting.document` (ticket 076 stub).
+ * Manifest for driving built-in `quoting.document` (ticket 077).
  *
  * Plain data (no imports) so the host registry can bundle it and the
  * `@starboard/ext-host` Zod schema validates it at load. Default-on for
  * credit + enterprise; missing rollout row = on.
  *
- * Stub contributions only — the real quote editor moves here in 077.
- * - `quotes` activity: same id as the legacy shell shim (base wins on merge);
- *   077 deletes the shim and this contribution takes over.
- * - `quote.stub` editor: distinct viewType so it does not collide with the
- *   route-backed legacy `quote` editor. 077 renames it to `quote`.
+ * - `quotes` activity + `quoting.document.list` sidebar view (UI factory in
+ *   `index.ts` `views`; the static entry opens the full list editor).
+ * - `quote` editor owns the `/quote/:resourceId` deep link; `quote.list` is the
+ *   table formerly rendered on the shell home page.
  */
 export const manifest = {
   id: "quoting.document",
-  version: "0.0.0",
-  displayName: "Quote documents (stub)",
+  version: "0.1.0",
+  displayName: "Quote documents",
   requiredPlan: ["credit", "enterprise"],
   contributes: {
     activity: [{ id: "quotes", label: "Quotes", icon: "file-text" }],
     views: [
       {
-        id: "quoting.document.stub",
-        name: "Quotes (stub)",
+        id: "quoting.document.list",
+        name: "Quotes",
         activityId: "quotes",
         entries: [
           {
-            id: "quoting.document.stub.open",
-            label: "Open stub quote",
+            id: "quoting.document.all",
+            label: "All quotes",
             opens: {
-              viewType: "quote.stub",
-              resourceId: "stub-1",
-              title: "Stub quote",
+              viewType: "quote.list",
+              resourceId: "all",
+              title: "All quotes",
             },
           },
         ],
       },
     ],
-    editors: [{ viewType: "quote.stub", displayName: "Quote (stub)" }],
+    editors: [
+      {
+        viewType: "quote",
+        displayName: "Quote",
+        deepLink: "/quote/:resourceId",
+      },
+      { viewType: "quote.list", displayName: "Quotes" },
+    ],
   },
   enabled: true,
 } as const

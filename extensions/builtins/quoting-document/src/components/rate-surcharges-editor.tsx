@@ -26,7 +26,7 @@ import {
 } from "@starboard/lib-ui/components/select"
 import { cn } from "@starboard/lib-ui/lib/utils"
 
-import type { QuoteFormValues } from "@/lib/domain/quotes/quotes.schema"
+import type { QuoteFormValues } from "../lib/quotes.schema"
 
 const LEGS: { value: SurchargeLeg; label: string }[] = [
   { value: "origin", label: "Origin" },

@@ -1,19 +1,28 @@
 "use client"
 
-import { useRouter } from "next/navigation"
 import { useTransition } from "react"
 import { PlusIcon } from "@phosphor-icons/react"
 
 import { Button } from "@starboard/lib-ui/components/button"
 import { toast } from "@starboard/lib-ui/components/toast"
 
-export function CreateQuoteButton() {
-  const router = useRouter()
+import type { BuiltinHost } from "../host"
+
+export function CreateQuoteButton({
+  host,
+  onCreated,
+  size,
+}: {
+  host: BuiltinHost
+  onCreated?: () => void
+  size?: "default" | "sm"
+}) {
   const [pending, startTransition] = useTransition()
 
   return (
     <Button
       type="button"
+      size={size}
       disabled={pending}
       onClick={() => {
         startTransition(async () => {
@@ -31,8 +40,8 @@ export function CreateQuoteButton() {
           }
 
           const payload = (await response.json()) as { id: string }
-          router.push(`/quote/${payload.id}`)
-          router.refresh()
+          host.openEditor({ viewType: "quote", resourceId: payload.id })
+          onCreated?.()
         })
       }}
     >

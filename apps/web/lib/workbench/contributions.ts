@@ -44,13 +44,16 @@ export function mergeHostContributions(
 ): WorkbenchContributions {
   if (!host) return base
 
+  // Host activities lead the bar (driving built-ins such as Quotes come first);
+  // legacy shim activities follow until 078 moves them. Base wins on duplicate ids.
   const activityIds = new Set(base.activity.map((item) => item.id))
-  const activity = [...base.activity]
+  const hostActivity: WorkbenchActivity[] = []
   for (const item of host.activity) {
     if (activityIds.has(item.id)) continue
     activityIds.add(item.id)
-    activity.push(pick(item, ["id", "label", "icon"]) as WorkbenchActivity)
+    hostActivity.push(pick(item, ["id", "label", "icon"]) as WorkbenchActivity)
   }
+  const activity = [...hostActivity, ...base.activity]
 
   const viewIds = new Set(base.views.map((item) => item.id))
   const views = [...base.views]
@@ -98,12 +101,12 @@ export function mergeHostContributions(
 /**
  * TEMPORARY compatibility shim (074).
  *
- * Today's quote / customers / settings / extension pages are still owned by
- * `apps/web` route trees. This describes them as workbench contributions so the
- * kernel shell can host them. Ticket 077 moves quote into `quoting.document`
- * (contributing its own sidebar view + `quote` editor); 078 does CRM + settings.
+ * Today's customers / settings / extension pages are still owned by `apps/web`
+ * route trees. This describes them as workbench contributions so the kernel
+ * shell can host them. Quote moved into `quoting.document` in 077 (its own
+ * activity, sidebar view and `quote` editor); 078 does CRM + settings.
  * 075: extension-host contributions (`getActiveWorkbenchContributions`) are merged
- * on top via `mergeHostContributions`. Delete the legacy part once built-ins
+ * with `mergeHostContributions`. Delete the legacy part once built-ins
  * contribute through the extension host.
  */
 export function legacyShellContributions(
@@ -121,7 +124,6 @@ export function legacyShellContributions(
 
   return {
     activity: [
-      { id: "quotes", label: "Quotes", icon: "file-text" },
       { id: "customers", label: "Customers", icon: "address-book" },
       { id: "settings", label: "Settings", icon: "gear" },
       ...(extensionNav.length > 0
@@ -129,12 +131,6 @@ export function legacyShellContributions(
         : []),
     ],
     views: [
-      {
-        id: "quotes.list",
-        name: "Quotes",
-        activityId: "quotes",
-        entries: [{ id: "quotes.all", label: "All quotes", href: "/" }],
-      },
       {
         id: "customers.list",
         name: "Customers",
@@ -169,11 +165,6 @@ export function legacyShellContributions(
         : []),
     ],
     editors: [
-      {
-        viewType: "quote",
-        displayName: "Quote",
-        deepLink: "/quote/:resourceId",
-      },
       {
         viewType: "customer",
         displayName: "Customer",

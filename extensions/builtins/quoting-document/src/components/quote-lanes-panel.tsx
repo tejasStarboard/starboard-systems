@@ -6,10 +6,7 @@ import type { FieldArrayWithId } from "react-hook-form"
 import { Button } from "@starboard/lib-ui/components/button"
 import { cn } from "@starboard/lib-ui/lib/utils"
 
-import type {
-  LaneFormValues,
-  QuoteFormValues,
-} from "@/lib/domain/quotes/quotes.schema"
+import type { LaneFormValues, QuoteFormValues } from "../lib/quotes.schema"
 
 function laneListLabel(lane: LaneFormValues | undefined, index: number) {
   if (!lane) {

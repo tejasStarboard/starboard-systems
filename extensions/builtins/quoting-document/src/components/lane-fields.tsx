@@ -37,14 +37,14 @@ import {
   ToggleGroupItem,
 } from "@starboard/lib-ui/components/toggle-group"
 
-import { AddressCombobox } from "@/components/quotes/address-combobox"
-import { PortCombobox } from "@/components/quotes/port-combobox"
+import { AddressCombobox } from "./address-combobox"
+import { PortCombobox } from "./port-combobox"
 import {
   createContainerLine,
   type LaneMode,
   type QuoteFormOption,
   type QuoteFormValues,
-} from "@/lib/domain/quotes/quotes.schema"
+} from "../lib/quotes.schema"
 
 export function LaneFields({
   control,

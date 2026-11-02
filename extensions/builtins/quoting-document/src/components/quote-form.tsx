@@ -7,14 +7,11 @@ import { useFieldArray, useForm, useWatch } from "react-hook-form"
 import { useBreakpoint } from "@starboard/lib-ui/hooks/use-breakpoint"
 import { toast } from "@starboard/lib-ui/components/toast"
 
-import { QuoteFormDesktop } from "@/components/quotes/quote-form-desktop"
-import type { QuoteFormLayoutProps } from "@/components/quotes/quote-form-layout-props"
-import { QuoteFormMobile } from "@/components/quotes/quote-form-mobile"
-import { QuoteFormTablet } from "@/components/quotes/quote-form-tablet"
-import {
-  RatesSearchSheet,
-  type ApplyRatePayload,
-} from "@/components/quotes/rates-search-sheet"
+import { QuoteFormDesktop } from "./quote-form-desktop"
+import type { QuoteFormLayoutProps } from "./quote-form-layout-props"
+import { QuoteFormMobile } from "./quote-form-mobile"
+import { QuoteFormTablet } from "./quote-form-tablet"
+import { RatesSearchSheet, type ApplyRatePayload } from "./rates-search-sheet"
 import {
   buildLaneUsageQuantities,
   calculateManualRateTotals,
@@ -27,8 +24,8 @@ import {
   type LaneFormValues,
   type QuoteFormOption,
   type QuoteFormValues,
-} from "@/lib/domain/quotes/quotes.schema"
-import type { SpotRateSource } from "@/lib/spot-rate-source"
+} from "../lib/quotes.schema"
+import type { SpotRateSource } from "../lib/spot-rate-source"
 
 function usageFromLane(lane: LaneFormValues | undefined) {
   if (!lane) {

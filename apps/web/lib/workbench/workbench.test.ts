@@ -2,18 +2,21 @@ import { describe, expect, test } from "bun:test"
 import {
   extensionManifestSchema,
   getActiveWorkbenchContributions,
+  listManifests,
 } from "@starboard/ext-host"
 
 import {
   isKernelOnlyFlag,
-  legacyShellContributions,
   resolveWorkbenchContributions,
 } from "./contributions"
 import { buildDeepLink, deepLinksCollide, matchDeepLink } from "./deep-link"
 import { initialTabsState, tabHref, tabsReducer, type TabsAction } from "./tabs"
 import { EMPTY_CONTRIBUTIONS } from "./types"
 
-const editors = legacyShellContributions().editors
+const editors = resolveWorkbenchContributions({
+  kernelOnly: false,
+  hostContributions: getActiveWorkbenchContributions("credit"),
+}).editors
 
 function run(...actions: TabsAction[]) {
   return actions.reduce(tabsReducer, initialTabsState())
@@ -144,7 +147,7 @@ describe("extension-host contributions (075)", () => {
         // targets an activity nobody contributes → dropped
         { id: "ghost.view", name: "Ghost", activityId: "ghost" },
         // shadows a legacy view id → ignored
-        { id: "quotes.list", name: "Evil", activityId: "quotes" },
+        { id: "customers.list", name: "Evil", activityId: "customers" },
       ],
       editors: [
         {
@@ -152,7 +155,7 @@ describe("extension-host contributions (075)", () => {
           displayName: "Note",
           deepLink: "/notes/:resourceId",
         },
-        { viewType: "quote", displayName: "Shadow quote" },
+        { viewType: "customer", displayName: "Shadow customer" },
       ],
     },
   })
@@ -165,12 +168,12 @@ describe("extension-host contributions (075)", () => {
     expect(merged.activity.map((a) => a.id)).toContain("notes")
     expect(merged.views.map((v) => v.id)).toContain("notes.list")
     expect(merged.views.map((v) => v.id)).not.toContain("ghost.view")
-    expect(merged.views.find((v) => v.id === "quotes.list")?.name).toBe(
-      "Quotes"
+    expect(merged.views.find((v) => v.id === "customers.list")?.name).toBe(
+      "Customers"
     )
-    expect(merged.editors.find((e) => e.viewType === "quote")?.deepLink).toBe(
-      "/quote/:resourceId"
-    )
+    expect(
+      merged.editors.find((e) => e.viewType === "customer")?.deepLink
+    ).toBe("/customers/:resourceId")
     expect(matchDeepLink("/notes/n1", merged.editors)).toEqual({
       viewType: "note",
       resourceId: "n1",
@@ -213,7 +216,10 @@ describe("extension-host contributions (075)", () => {
     })
     const merged = resolveWorkbenchContributions({
       kernelOnly: false,
-      hostContributions: getActiveWorkbenchContributions("credit", [thief]),
+      hostContributions: getActiveWorkbenchContributions("credit", [
+        ...listManifests(),
+        thief,
+      ]),
     })
     const viewTypes = merged.editors.map((e) => e.viewType)
     expect(viewTypes).not.toContain("fake-quote")

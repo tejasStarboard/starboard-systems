@@ -25,12 +25,12 @@ import {
 import { toast } from "@starboard/lib-ui/components/toast"
 import { cn } from "@starboard/lib-ui/lib/utils"
 
-import { CustomerCombobox } from "@/components/quotes/customer-combobox"
+import { CustomerCombobox } from "./customer-combobox"
 import {
   quoteStatusSchema,
   type QuoteFormOption,
   type QuoteFormValues,
-} from "@/lib/domain/quotes/quotes.schema"
+} from "../lib/quotes.schema"
 
 const quoteStatusOptions = quoteStatusSchema.options
 

@@ -4,8 +4,8 @@ import { createColumnHelper } from "@tanstack/react-table"
 
 import { Badge } from "@starboard/lib-ui/components/badge"
 
-import { type DataTableFeatures } from "@/components/quotes/data-table-features"
-import { type QuoteListItem } from "@/lib/domain/quotes/quotes.schema"
+import { type DataTableFeatures } from "./data-table-features"
+import { type QuoteListItem } from "../lib/quotes.schema"
 
 const columnHelper = createColumnHelper<DataTableFeatures, QuoteListItem>()
 
