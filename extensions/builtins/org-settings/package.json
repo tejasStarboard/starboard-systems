@@ -15,6 +15,10 @@
       "types": "./src/index.ts",
       "default": "./src/index.ts"
     },
+    "./permissions": {
+      "types": "./src/lib/permissions.ts",
+      "default": "./src/lib/permissions.ts"
+    },
     "./manifest": {
       "types": "./src/manifest.ts",
       "default": "./src/manifest.ts"
