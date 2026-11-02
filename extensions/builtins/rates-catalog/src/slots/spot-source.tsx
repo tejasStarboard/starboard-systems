@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 
 import type {
   RateSourcesSlotProps,
@@ -45,6 +45,10 @@ export function SpotSource({
   const [spotStatus, setSpotStatus] = useState<PolledJobStatus | null>(null)
   const [spotPending, setSpotPending] = useState(false)
 
+  // Abort the in-flight enqueue/poll when the sheet closes (unmount).
+  const abortRef = useRef<AbortController | null>(null)
+  useEffect(() => () => abortRef.current?.abort(), [])
+
   const spotOffers = useMemo((): SpotOffer[] => {
     if (spotStatus?.status !== "completed") {
       return []
@@ -54,6 +58,10 @@ export function SpotSource({
   }, [spotStatus])
 
   async function enqueueSpotSearch() {
+    abortRef.current?.abort()
+    const controller = new AbortController()
+    abortRef.current = controller
+    const { signal } = controller
     setSpotPending(true)
     setSpotJob(null)
     setSpotStatus(null)
@@ -62,6 +70,7 @@ export function SpotSource({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ origin, destination, mode: "fcl" }),
+        signal,
       })
       const payload = (await response.json().catch(() => null)) as {
         workflowId?: string
@@ -79,7 +88,9 @@ export function SpotSource({
       const status = await pollExtensionJob({
         extensionId,
         workflowId: payload.workflowId,
+        signal,
       })
+      if (signal.aborted) return
       setSpotStatus(status)
       if (status.status === "failed" || status.status === "cancelled") {
         toast.add({
@@ -100,6 +111,7 @@ export function SpotSource({
         }
       }
     } catch (err: unknown) {
+      if (signal.aborted) return
       toast.add({
         type: "error",
         title: "Unable to start spot search",
@@ -109,7 +121,7 @@ export function SpotSource({
             : "Something went wrong. Try again.",
       })
     } finally {
-      setSpotPending(false)
+      if (!signal.aborted) setSpotPending(false)
     }
   }
 

@@ -49,7 +49,7 @@ export function RatesSearchSheet({
         <SheetHeader>
           <SheetTitle>Search rates</SheetTitle>
           <SheetDescription>
-            Catalog rates matching this lane
+            Rates matching this lane
             {origin || destination
               ? ` (${[origin, destination].filter(Boolean).join(" → ")})`
               : ""}
