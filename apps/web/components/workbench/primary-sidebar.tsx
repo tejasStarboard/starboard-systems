@@ -2,8 +2,10 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import * as React from "react"
 
 import { useWorkbench } from "@/components/workbench/workbench-context"
+import { builtinViews } from "@/lib/workbench/builtin-editors"
 import {
   Sheet,
   SheetContent,
@@ -23,6 +25,18 @@ function SidebarViews({ onNavigate }: { onNavigate?: () => void }) {
     useWorkbench()
 
   const activeTab = tabs.find((tab) => tab.id === activeTabId)
+  const host = React.useMemo(
+    () => ({
+      openEditor: (input: Parameters<typeof openEditor>[0]) => {
+        openEditor(input)
+        onNavigate?.()
+      },
+      activeEditor: activeTab
+        ? { viewType: activeTab.viewType, resourceId: activeTab.resourceId }
+        : null,
+    }),
+    [openEditor, onNavigate, activeTab]
+  )
   const views = contributions.views.filter(
     (view) => view.activityId === activeActivityId
   )
@@ -33,47 +47,51 @@ function SidebarViews({ onNavigate }: { onNavigate?: () => void }) {
     )
   }
 
-  return views.map((view) => (
-    <section key={view.id} className="py-2">
-      <h2 className="px-4 pb-1 text-xs font-medium tracking-wide text-muted-foreground uppercase">
-        {view.name}
-      </h2>
-      <ul>
-        {view.entries.map((entry) => (
-          <li key={entry.id}>
-            {entry.opens ? (
-              <button
-                type="button"
-                onClick={() => {
-                  openEditor(entry.opens!)
-                  onNavigate?.()
-                }}
-                className={cn(
-                  "block w-full px-4 py-1.5 text-left text-sm hover:bg-muted",
-                  activeTab?.viewType === entry.opens.viewType &&
-                    activeTab.resourceId === entry.opens.resourceId &&
-                    "bg-muted font-medium"
-                )}
-              >
-                {entry.label}
-              </button>
-            ) : entry.href ? (
-              <Link
-                href={entry.href}
-                onClick={onNavigate}
-                className={cn(
-                  "block px-4 py-1.5 text-sm hover:bg-muted",
-                  isActive(pathname, entry.href) && "bg-muted font-medium"
-                )}
-              >
-                {entry.label}
-              </Link>
-            ) : null}
-          </li>
-        ))}
-      </ul>
-    </section>
-  ))
+  return views.map((view) => {
+    const Provided = builtinViews[view.id]
+    return (
+      <section key={view.id} className="py-2">
+        <h2 className="px-4 pb-1 text-xs font-medium tracking-wide text-muted-foreground uppercase">
+          {view.name}
+        </h2>
+        <ul>
+          {view.entries.map((entry) => (
+            <li key={entry.id}>
+              {entry.opens ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    openEditor(entry.opens!)
+                    onNavigate?.()
+                  }}
+                  className={cn(
+                    "block w-full px-4 py-1.5 text-left text-sm hover:bg-muted",
+                    activeTab?.viewType === entry.opens.viewType &&
+                      activeTab.resourceId === entry.opens.resourceId &&
+                      "bg-muted font-medium"
+                  )}
+                >
+                  {entry.label}
+                </button>
+              ) : entry.href ? (
+                <Link
+                  href={entry.href}
+                  onClick={onNavigate}
+                  className={cn(
+                    "block px-4 py-1.5 text-sm hover:bg-muted",
+                    isActive(pathname, entry.href) && "bg-muted font-medium"
+                  )}
+                >
+                  {entry.label}
+                </Link>
+              ) : null}
+            </li>
+          ))}
+        </ul>
+        {Provided ? <Provided host={host} /> : null}
+      </section>
+    )
+  })
 }
 
 /** Inline sidebar on md+; overlay drawer on mobile (toggled via activity bar). */

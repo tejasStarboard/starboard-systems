@@ -41,7 +41,7 @@ From `RatesSearchSheet`, catalog rows and completed spot offers **Apply to lane*
 
 ## Product model
 
-Quote UI/data activation is the driving built-in **`quoting.document`** (not kernel). It **defines** extension points (`quoting.slots.*`, menus) that charges / Incoterm / markup / spot contribute into — [extension-points.md](../extension-points.md), [ADR 0006](../adr/0006-shell-built-ins-extensions.md).
+Quote UI/data activation is the driving built-in **`quoting.document`** (not kernel); its UI lives in `extensions/builtins/quoting-document` (077) and loads via `/api/quotes/**` (incl. `/:id/editor-context`). It **defines** extension points (`quoting.slots.*`, menus) that charges / Incoterm / markup / spot contribute into — [extension-points.md](../extension-points.md), [ADR 0006](../adr/0006-shell-built-ins-extensions.md).
 
 ## Product parity (refactor rule)
 

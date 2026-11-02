@@ -1,6 +1,7 @@
 "use client"
 
 import { XIcon } from "@phosphor-icons/react"
+import * as React from "react"
 
 import { useWorkbench } from "@/components/workbench/workbench-context"
 import { builtinEditors } from "@/lib/workbench/builtin-editors"
@@ -69,22 +70,40 @@ function TabStrip() {
 }
 
 /**
- * Editor group: tab strip + content. Route-backed editors (compat shim) render
- * the Next route `children`; other viewTypes render a generic stub editor.
+ * Editor group: tab strip + content. Extension-provided editors render their
+ * built-in component; route-backed legacy editors render the Next route
+ * `children`; other viewTypes render a generic stub editor.
  */
 export function EditorGroup({ children }: { children: React.ReactNode }) {
-  const { tabs, activeTabId, contributions } = useWorkbench()
+  const { tabs, activeTabId, contributions, openEditor } = useWorkbench()
   const active = tabs.find((tab) => tab.id === activeTabId)
   const editor = active
     ? contributions.editors.find((e) => e.viewType === active.viewType)
     : undefined
 
-  const Provided =
-    editor && !editor.deepLink ? builtinEditors[editor.viewType] : undefined
+  // Extension-provided UI wins over route children, but only for editors the
+  // host actually contributed (unplug = no render).
+  const Provided = editor ? builtinEditors[editor.viewType] : undefined
+  const host = React.useMemo(
+    () => ({
+      openEditor,
+      activeEditor: active
+        ? { viewType: active.viewType, resourceId: active.resourceId }
+        : null,
+    }),
+    [openEditor, active]
+  )
 
   let content: React.ReactNode
   if (active && Provided) {
-    content = <Provided resourceId={active.resourceId} title={active.title} />
+    content = (
+      <Provided
+        key={active.id}
+        resourceId={active.resourceId}
+        title={active.title}
+        host={host}
+      />
+    )
   } else if (active && !editor?.deepLink) {
     content = (
       <div

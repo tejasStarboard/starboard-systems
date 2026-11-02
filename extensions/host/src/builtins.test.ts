@@ -65,19 +65,24 @@ describe("driving built-in manifests (076)", () => {
     expect(contributions.activity).toEqual([])
   })
 
-  test("quoting.document contributes stub Quotes view + quote editor", () => {
+  test("quoting.document contributes Quotes list view + quote / list editors", () => {
     const contributions = getActiveWorkbenchContributions("credit")
     expect(contributions.activity.map((a) => a.id)).toEqual(["quotes"])
     const view = contributions.views.find(
-      (v) => v.id === "quoting.document.stub"
+      (v) => v.id === "quoting.document.list"
     )
     expect(view?.extensionId).toBe("quoting.document")
     expect(view?.entries?.[0]?.opens).toEqual({
-      viewType: "quote.stub",
-      resourceId: "stub-1",
-      title: "Stub quote",
+      viewType: "quote.list",
+      resourceId: "/",
+      title: "Quotes",
     })
-    expect(contributions.editors.map((e) => e.viewType)).toEqual(["quote.stub"])
+    expect(contributions.editors.map((e) => e.viewType)).toEqual([
+      "quote",
+      "quote.list",
+    ])
+    expect(contributions.editors[0]?.deepLink).toBe("/quote/:resourceId")
+    expect(contributions.editors[1]?.deepLink).toBe("/")
   })
 
   test("optional extensions keep their nav / slots", () => {

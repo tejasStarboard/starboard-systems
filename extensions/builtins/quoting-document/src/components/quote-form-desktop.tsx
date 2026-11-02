@@ -10,10 +10,10 @@ import {
   QuoteExpiryField,
   QuoteIdField,
   QuoteStatusField,
-} from "@/components/quotes/quote-form-fields"
-import type { QuoteFormLayoutProps } from "@/components/quotes/quote-form-layout-props"
-import { QuoteLaneEditor } from "@/components/quotes/quote-lane-editor"
-import { QuoteLanesPanel } from "@/components/quotes/quote-lanes-panel"
+} from "./quote-form-fields"
+import type { QuoteFormLayoutProps } from "./quote-form-layout-props"
+import { QuoteLaneEditor } from "./quote-lane-editor"
+import { QuoteLanesPanel } from "./quote-lanes-panel"
 
 export function QuoteFormDesktop(props: QuoteFormLayoutProps) {
   return (

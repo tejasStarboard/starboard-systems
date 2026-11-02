@@ -10,32 +10,39 @@ import {
   QuoteExpiryField,
   QuoteIdField,
   QuoteStatusField,
-} from "@/components/quotes/quote-form-fields"
-import type { QuoteFormLayoutProps } from "@/components/quotes/quote-form-layout-props"
-import { QuoteLaneEditor } from "@/components/quotes/quote-lane-editor"
-import { QuoteLanesPanel } from "@/components/quotes/quote-lanes-panel"
+} from "./quote-form-fields"
+import type { QuoteFormLayoutProps } from "./quote-form-layout-props"
+import { QuoteLaneEditor } from "./quote-lane-editor"
+import { QuoteLanesPanel } from "./quote-lanes-panel"
 
-export function QuoteFormTablet(props: QuoteFormLayoutProps) {
+export function QuoteFormMobile(props: QuoteFormLayoutProps) {
   return (
     <>
-      <div className="grid grid-cols-4 gap-3 border-b pb-4">
-        <QuoteIdField quoteId={props.quoteId} />
-        <QuoteStatusField control={props.control} className="w-full" />
+      <div className="flex flex-col gap-3 border-b pb-4">
+        <div className="flex items-end justify-between gap-3">
+          <QuoteIdField quoteId={props.quoteId} />
+          <QuoteStatusField
+            control={props.control}
+            className="w-[8.5rem] shrink-0"
+          />
+        </div>
         <QuoteCustomerField
           control={props.control}
           customerOptions={props.customerOptions}
-          className="col-span-2 w-full"
-        />
-        <QuoteCurrencyField
-          control={props.control}
-          currencyOptions={props.currencyOptions}
           className="w-full"
         />
-        <QuoteEffectiveField
-          register={props.register}
-          errors={props.errors}
-          className="w-full"
-        />
+        <div className="grid grid-cols-2 gap-3">
+          <QuoteCurrencyField
+            control={props.control}
+            currencyOptions={props.currencyOptions}
+            className="w-full"
+          />
+          <QuoteEffectiveField
+            register={props.register}
+            errors={props.errors}
+            className="w-full"
+          />
+        </div>
         <QuoteExpiryField
           register={props.register}
           errors={props.errors}
@@ -70,6 +77,7 @@ export function QuoteFormTablet(props: QuoteFormLayoutProps) {
           portOptions={props.portOptions}
           containerTypeOptions={props.containerTypeOptions}
           palletTypeOptions={props.palletTypeOptions}
+          fullWidthActions
           onSearchRates={props.onSearchRates}
           onAddManualRate={props.onAddManualRate}
           onAppendRate={props.onAppendRate}
@@ -78,16 +86,21 @@ export function QuoteFormTablet(props: QuoteFormLayoutProps) {
       </div>
 
       <Separator />
-      <div className="flex items-center justify-end gap-3">
+      <div className="flex items-center gap-3">
         <Button
           type="button"
           variant="outline"
           size="sm"
+          className="flex-1"
           onClick={props.onCancel}
         >
           Cancel
         </Button>
-        <Button type="submit" disabled={props.pending || !props.isDirty}>
+        <Button
+          type="submit"
+          className="flex-1"
+          disabled={props.pending || !props.isDirty}
+        >
           {props.pending ? "Saving..." : "Save"}
         </Button>
       </div>

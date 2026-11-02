@@ -164,7 +164,7 @@ For an existing `service` (`spot` / `ingestion` / `messaging`), **no new dispatc
 ### 6. UI — contributions only
 
 - Spot rate sources: `listActiveSpotRateSources` in [`apps/web/lib/extensions.ts`](../../apps/web/lib/extensions.ts) (slot `quote.rateSources`).
-- Rates sheet enqueue/poll: [`apps/web/components/quotes/rates-search-sheet.tsx`](../../apps/web/components/quotes/rates-search-sheet.tsx) uses `extensionApiPath` + `pollExtensionJob` with the active extension id — no new sheet for a new carrier.
+- Rates sheet enqueue/poll: [`extensions/builtins/quoting-document/src/components/rates-search-sheet.tsx`](../../extensions/builtins/quoting-document/src/components/rates-search-sheet.tsx) uses `extensionApiPath` + `pollExtensionJob` with the active extension id — no new sheet for a new carrier.
 - Nav / other slots: declare `contributes.nav` / `uiSlots`; shell reads `listActiveExtensionNav` / `listActiveUiSlots`.
 - Workbench activity / views / editors / commands and defined points: see [Workbench contributions + defined points](#workbench-contributions--defined-points-075).
 

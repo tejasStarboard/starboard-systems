@@ -12,7 +12,7 @@ import {
 } from "@starboard/lib-ui/components/combobox"
 import { toast } from "@starboard/lib-ui/components/toast"
 
-import { type QuoteFormOption } from "@/lib/domain/quotes/quotes.schema"
+import { type QuoteFormOption } from "../lib/quotes.schema"
 
 export function CustomerCombobox({
   options: initialOptions,

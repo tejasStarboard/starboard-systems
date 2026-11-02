@@ -11,7 +11,7 @@ import {
   ComboboxList,
 } from "@starboard/lib-ui/components/combobox"
 
-import { type QuoteFormOption } from "@/lib/domain/quotes/quotes.schema"
+import { type QuoteFormOption } from "../lib/quotes.schema"
 
 const DEBOUNCE_MS = 150
 

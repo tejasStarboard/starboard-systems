@@ -1,8 +1,7 @@
 "use client"
 
 import { CaretLeftIcon, CaretRightIcon } from "@phosphor-icons/react"
-import { useRouter } from "next/navigation"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useState } from "react"
 import { useTable, type ColumnDef } from "@tanstack/react-table"
 
 import type { ListQuotesViewResponse } from "@starboard/lib-contracts"
@@ -17,11 +16,9 @@ import {
 } from "@starboard/lib-ui/components/table"
 import { toast } from "@starboard/lib-ui/components/toast"
 
-import {
-  features,
-  type DataTableFeatures,
-} from "@/components/quotes/data-table-features"
-import { type QuoteListItem } from "@/lib/domain/quotes/quotes.schema"
+import { features, type DataTableFeatures } from "./data-table-features"
+import type { BuiltinHost } from "../host"
+import { type QuoteListItem } from "../lib/quotes.schema"
 
 const QUOTES_PAGE_SIZE = 25
 
@@ -31,30 +28,25 @@ function totalPages(total: number, pageSize: number) {
 
 interface QuotesDataTableProps {
   columns: ColumnDef<DataTableFeatures, QuoteListItem>[]
-  initial: ListQuotesViewResponse
+  host: BuiltinHost
 }
 
-export function QuotesDataTable({ columns, initial }: QuotesDataTableProps) {
-  const router = useRouter()
-  const [data, setData] = useState<QuoteListItem[]>(initial.quotes)
-  const [total, setTotal] = useState(initial.total)
-  const [pageSize] = useState(initial.pageSize || QUOTES_PAGE_SIZE)
-  const [listQuery, setListQuery] = useState({ page: initial.page, q: "" })
-  const [loading, setLoading] = useState(false)
-  const skipFetchRef = useRef(true)
+function openQuote(host: BuiltinHost, quote: QuoteListItem) {
+  host.openEditor({
+    viewType: "quote",
+    resourceId: quote.id,
+    title: quote.quoteId,
+  })
+}
+
+export function QuotesDataTable({ columns, host }: QuotesDataTableProps) {
+  const [data, setData] = useState<QuoteListItem[]>([])
+  const [total, setTotal] = useState(0)
+  const [pageSize] = useState(QUOTES_PAGE_SIZE)
+  const [listQuery, setListQuery] = useState({ page: 1, q: "" })
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    setData(initial.quotes)
-    setTotal(initial.total)
-    setListQuery({ page: initial.page, q: "" })
-  }, [initial])
-
-  useEffect(() => {
-    if (skipFetchRef.current) {
-      skipFetchRef.current = false
-      return
-    }
-
     let cancelled = false
     async function load() {
       setLoading(true)
@@ -131,11 +123,11 @@ export function QuotesDataTable({ columns, initial }: QuotesDataTableProps) {
                 key={row.id}
                 className="cursor-pointer"
                 tabIndex={0}
-                onClick={() => router.push(`/quote/${row.original.id}`)}
+                onClick={() => openQuote(host, row.original)}
                 onKeyDown={(event) => {
                   if (event.key === "Enter" || event.key === " ") {
                     event.preventDefault()
-                    router.push(`/quote/${row.original.id}`)
+                    openQuote(host, row.original)
                   }
                 }}
               >
