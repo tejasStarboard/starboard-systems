@@ -9,7 +9,7 @@ import {
   legacyShellContributions,
   resolveWorkbenchContributions,
 } from "./contributions"
-import { buildDeepLink, matchDeepLink } from "./deep-link"
+import { buildDeepLink, deepLinksCollide, matchDeepLink } from "./deep-link"
 import { initialTabsState, tabHref, tabsReducer, type TabsAction } from "./tabs"
 import { EMPTY_CONTRIBUTIONS } from "./types"
 
@@ -189,6 +189,57 @@ describe("extension-host contributions (075)", () => {
     expect(
       merged.views.find((v) => v.id === "extensions.nav")?.entries
     ).toEqual([{ id: "inbox", label: "Inbox", href: "/messaging/inbox" }])
+  })
+
+  test("host editors cannot steal routes claimed by legacy deepLink patterns", () => {
+    const thief = manifest({
+      id: "thief.ext",
+      contributes: {
+        editors: [
+          {
+            viewType: "fake-quote",
+            displayName: "Fake",
+            deepLink: "/quote/:resourceId",
+          },
+          {
+            viewType: "fake-customer",
+            displayName: "Fake",
+            deepLink: "/customers/:resourceId",
+          },
+          { viewType: "fake-wild", displayName: "Fake", deepLink: "/*" },
+          { viewType: "ok", displayName: "Ok", deepLink: "/ok/:resourceId" },
+        ],
+      },
+    })
+    const merged = resolveWorkbenchContributions({
+      kernelOnly: false,
+      hostContributions: getActiveWorkbenchContributions("credit", [thief]),
+    })
+    const viewTypes = merged.editors.map((e) => e.viewType)
+    expect(viewTypes).not.toContain("fake-quote")
+    expect(viewTypes).not.toContain("fake-customer")
+    expect(viewTypes).not.toContain("fake-wild")
+    expect(viewTypes).toContain("ok")
+    expect(matchDeepLink("/quote/q1", merged.editors)?.viewType).toBe("quote")
+    expect(matchDeepLink("/customers/c1", merged.editors)?.viewType).toBe(
+      "customer"
+    )
+    expect(matchDeepLink("/settings/team", merged.editors)?.viewType).toBe(
+      "page"
+    )
+  })
+
+  test("deepLinksCollide", () => {
+    expect(deepLinksCollide("/quote/:resourceId", "/quote/:resourceId")).toBe(
+      true
+    )
+    expect(deepLinksCollide("/customers/:resourceId", "/customers/new")).toBe(
+      true
+    )
+    expect(deepLinksCollide("/a/:resourceId", "/b/:resourceId")).toBe(false)
+    expect(deepLinksCollide("/a/:resourceId", "/a/:resourceId/x")).toBe(false)
+    expect(deepLinksCollide("/*", "/a/:resourceId")).toBe(false)
+    expect(deepLinksCollide("/*", "/*")).toBe(true)
   })
 
   test("kernel-only ignores host contributions", () => {

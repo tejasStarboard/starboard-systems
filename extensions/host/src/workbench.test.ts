@@ -264,6 +264,30 @@ describe("getActiveWorkbenchContributions", () => {
     expect(result.points).toEqual({})
   })
 
+  test("drops views whose activity is not contributed by an active extension", () => {
+    const orphan = manifest({
+      id: "orphan.views",
+      contributes: {
+        views: [{ id: "orphan.list", name: "Orphan", activityId: "missing" }],
+      },
+    })
+    const result = getActiveWorkbenchContributions("credit", [owner, orphan])
+    expect(result.views.map((view) => view.id)).toEqual(["quotes.list"])
+    // activity owner inactive → its views and a sibling's views for it vanish
+    const sibling = manifest({
+      id: "sibling",
+      contributes: {
+        views: [{ id: "sib.list", name: "Sib", activityId: "quotes" }],
+      },
+    })
+    expect(
+      getActiveWorkbenchContributions("credit", [
+        { ...owner, enabled: false },
+        sibling,
+      ]).views
+    ).toEqual([])
+  })
+
   test("first registered wins on duplicate ids", () => {
     const dup = manifest({
       id: "dup",

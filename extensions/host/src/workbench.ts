@@ -135,17 +135,23 @@ export function getActiveWorkbenchContributions(
     }
   }
 
+  const activity = collect(
+    active,
+    (manifest) => manifest.contributes.activity,
+    (item) => item.id
+  )
+  const activityIds = new Set(activity.map((item) => item.id))
+
   return {
-    activity: collect(
-      active,
-      (manifest) => manifest.contributes.activity,
-      (item) => item.id
-    ),
+    activity,
+    // Fail closed: a view whose activity is not contributed by an active
+    // extension is dropped (views for kernel-owned activities are not
+    // contributed through the host).
     views: collect(
       active,
       (manifest) => manifest.contributes.views,
       (item) => item.id
-    ),
+    ).filter((view) => activityIds.has(view.activityId)),
     editors: collect(
       active,
       (manifest) => manifest.contributes.editors,

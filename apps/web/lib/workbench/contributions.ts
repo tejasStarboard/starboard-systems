@@ -1,3 +1,4 @@
+import { deepLinksCollide } from "./deep-link"
 import {
   EMPTY_CONTRIBUTIONS,
   type WorkbenchActivity,
@@ -33,8 +34,9 @@ function pick<T extends object, K extends keyof T>(
 
 /**
  * Append extension-host contributions to a base set. Base wins on duplicate
- * ids/viewTypes (so a stray extension cannot shadow kernel/legacy entries) and
- * views pointing at an unknown activity are dropped (fail closed).
+ * ids/viewTypes and on colliding editor `deepLink` patterns (so a stray
+ * extension cannot shadow or steal kernel/legacy routes); views pointing at an
+ * unknown activity are dropped (fail closed).
  */
 export function mergeHostContributions(
   base: WorkbenchContributions,
@@ -71,6 +73,18 @@ export function mergeHostContributions(
   const editors = [...base.editors]
   for (const item of host.editors) {
     if (viewTypes.has(item.viewType)) continue
+    // Legacy deepLink patterns win: a host editor may not claim routes already
+    // claimed by an existing editor (fail closed — the editor is dropped).
+    if (
+      item.deepLink &&
+      editors.some(
+        (existing) =>
+          existing.deepLink &&
+          deepLinksCollide(existing.deepLink, item.deepLink!)
+      )
+    ) {
+      continue
+    }
     viewTypes.add(item.viewType)
     editors.push(
       pick(item, ["viewType", "displayName", "deepLink"]) as WorkbenchEditor

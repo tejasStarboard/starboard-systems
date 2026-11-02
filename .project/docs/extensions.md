@@ -75,7 +75,7 @@ Host APIs (`@starboard/ext-host`, all activation-aware = `enabled ∩ entitled �
 | `getContributionsToPoint(pointId, plan, manifests?, rollout?)` | Contributions to a defined point; **empty if the owner is inactive** (fail closed)                  |
 | `validateManifestSet(manifests)`                               | Single owner per point + unique ids (registry load throws on errors)                                |
 
-BFF: `listActiveWorkbenchContributions(plan, orgId)` / `listActivePointContributions(pointId, plan, orgId)` in [`apps/web/lib/extensions.ts`](../../apps/web/lib/extensions.ts) (rollout-map failure → empty). `app/(app)/layout.tsx` merges them into the workbench through `mergeHostContributions` in [`apps/web/lib/workbench/contributions.ts`](../../apps/web/lib/workbench/contributions.ts); legacy shim entries win on duplicate ids, and views targeting an unknown activity are dropped.
+BFF: `listActiveWorkbenchContributions(plan, orgId)` / `listActivePointContributions(pointId, plan, orgId)` in [`apps/web/lib/extensions.ts`](../../apps/web/lib/extensions.ts) (rollout-map failure → empty). `app/(app)/layout.tsx` merges them into the workbench through `mergeHostContributions` in [`apps/web/lib/workbench/contributions.ts`](../../apps/web/lib/workbench/contributions.ts); legacy shim entries win on duplicate ids **and on colliding editor `deepLink` patterns** (host editors cannot steal legacy routes), and views whose `activityId` is not contributed by an active extension are dropped (in the host and again in the merge).
 
 Add a driving built-in (owner):
 

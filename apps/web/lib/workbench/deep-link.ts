@@ -52,6 +52,25 @@ export function matchDeepLink(
   return fallback ? { viewType: fallback.viewType, resourceId: path } : null
 }
 
+/**
+ * True when two deep-link patterns can match the same pathname (same segment
+ * count, and every segment pair is equal or involves `:resourceId`). Two
+ * wildcards (`/*`) collide; a wildcard never collides with a specific pattern
+ * because wildcards are only a fallback.
+ */
+export function deepLinksCollide(a: string, b: string): boolean {
+  if (a === WILDCARD || b === WILDCARD) return a === b
+  const left = a.split("/").filter(Boolean)
+  const right = b.split("/").filter(Boolean)
+  if (left.length !== right.length) return false
+  return left.every(
+    (part, index) =>
+      part === right[index] ||
+      part === RESOURCE_SEGMENT ||
+      right[index] === RESOURCE_SEGMENT
+  )
+}
+
 /** Inverse of `matchDeepLink`; null for stub editors (no route). */
 export function buildDeepLink(
   editor: WorkbenchEditor | undefined,
