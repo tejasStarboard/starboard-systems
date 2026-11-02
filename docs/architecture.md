@@ -74,6 +74,7 @@ pnpm --filter @starboard/lib-contracts build
 pnpm --filter @starboard/lib-service-kit build
 pnpm --filter @starboard/lib-db build
 # drizzle.config schemaFilter includes public + geo + quotes (default is public-only)
+# db:push uses --force + prefers a non-pooler Neon URL; schema pull often takes 1–2 min
 pnpm --filter @starboard/lib-db db:push
 pnpm --filter @starboard/lib-db db:seed
 pnpm dev   # turbo: web + Bun services + Temporal OSS (Docker) + ingestion
