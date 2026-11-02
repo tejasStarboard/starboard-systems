@@ -196,6 +196,21 @@
         "baseFreightAmount": null
       },
       "expected": { "buy": 100, "sell": 100, "effectiveUsage": 2 }
+    },
+    {
+      "id": "sell-amount-replaces-mirrored-buy",
+      "input": {
+        "usageUnit": "container",
+        "rate": 50,
+        "ratePercentage": null,
+        "rawUsage": 2,
+        "freeUsage": null,
+        "minUsage": null,
+        "maxUsage": null,
+        "baseFreightAmount": null,
+        "sellAmount": 180
+      },
+      "expected": { "buy": 100, "sell": 180, "effectiveUsage": 2 }
     }
   ]
 }

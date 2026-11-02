@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test"
 
 import baseFreightModeFixtures from "../fixtures/base-freight-mode.json"
+import chargeLineEconomicsFixtures from "../fixtures/charge-line-economics.json"
 import globalScopeFixtures from "../fixtures/global-scope-totals.json"
 import manualRateFixtures from "../fixtures/manual-rate-totals.json"
 import {
@@ -284,4 +285,16 @@ describe("computeManualLaneTotals — base freight mode", () => {
     })
     expect(totals.buy).toBe(400)
   })
+})
+
+const chargeLineCases = (
+  chargeLineEconomicsFixtures as { cases: GlobalScopeCase[] }
+).cases
+
+describe("computeManualLaneTotals — charge line economics", () => {
+  for (const fixture of chargeLineCases) {
+    test(fixture.id, () => {
+      expect(computeManualLaneTotals(fixture.input)).toEqual(fixture.expected)
+    })
+  }
 })

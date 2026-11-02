@@ -36,6 +36,11 @@ export type CalculateSurchargeAmountInput = {
   maxUsage?: number | null
   /** Lane-currency base freight for percentage rows (FX stub = identity). */
   baseFreightAmount?: number | null
+  /**
+   * Line sell total. When finite, replaces the mirrored buy.
+   * This is the row amount, not a second unit rate.
+   */
+  sellAmount?: number | null
 }
 
 export type SurchargeAmounts = {
@@ -58,12 +63,12 @@ function finiteOrNull(value: number | null | undefined): number | null {
 /**
  * Compute native-currency buy/sell for one surcharge row.
  *
- * Lean port of starboard-2 `computeSurchargeRow` without tiered matrices,
- * dollar min/max/free charge clamps, or user amount overrides.
- * Sell mirrors buy (no sell-rate overrides in the rewrite contract yet).
+ * Lean port of starboard-2 `computeSurchargeRow` without tiered matrices
+ * or dollar min/max/free charge clamps.
+ * Sell mirrors buy unless `sellAmount` is a finite line total.
  *
  * Rollup callers should gate with {@link isIncludedInTotal}; this helper only
- * prices the row.
+ * prices the row. `is_visible` is not an input — Split is presentation.
  */
 export function calculateSurchargeAmount(
   input: CalculateSurchargeAmountInput
@@ -113,5 +118,10 @@ export function calculateSurchargeAmount(
   }
 
   const rounded = roundMoney(buy)
-  return { buy: rounded, sell: rounded, effectiveUsage }
+  const sellOverride = finiteOrNull(input.sellAmount)
+  return {
+    buy: rounded,
+    sell: sellOverride != null ? roundMoney(sellOverride) : rounded,
+    effectiveUsage,
+  }
 }

@@ -33,6 +33,8 @@ export type ManualSurchargeLineInput = {
   leg?: string | null
   scopeOverride?: "include" | "exclude" | null
   source?: string | null
+  /** Line sell total. Finite values replace the mirrored buy for this row. */
+  sellAmount?: number | null
 }
 
 export type ManualRateBaseMode = "flat" | "per_eq"
@@ -138,12 +140,12 @@ function rawUsageForUnit(
   }
 }
 
-function surchargeBuy(
+function surchargeAmounts(
   surcharge: ManualSurchargeLineInput,
   baseFreightAmount: number,
   usage: LaneUsageQuantities | null | undefined,
   scope?: ScopeContext | null
-): number {
+): { buy: number; sell: number } {
   if (
     !isIncludedInTotal(
       {
@@ -159,10 +161,10 @@ function surchargeBuy(
       scope
     )
   ) {
-    return 0
+    return { buy: 0, sell: 0 }
   }
 
-  return calculateSurchargeAmount({
+  const priced = calculateSurchargeAmount({
     usageUnit: surcharge.usageUnit,
     rate: surcharge.rate,
     ratePercentage: surcharge.ratePercentage,
@@ -171,7 +173,9 @@ function surchargeBuy(
     minUsage: surcharge.minUsage,
     maxUsage: surcharge.maxUsage,
     baseFreightAmount,
-  }).buy
+    sellAmount: surcharge.sellAmount,
+  })
+  return { buy: priced.buy, sell: priced.sell }
 }
 
 function baseFreightBuy(
@@ -194,21 +198,27 @@ function baseFreightBuy(
   return Number.isFinite(line.amount) ? line.amount : 0
 }
 
-function lineBuy(
+function lineAmounts(
   line: ManualLaneTotalsInput["lines"][number],
   usage: LaneUsageQuantities | null | undefined,
   scope?: ScopeContext | null
-): number {
+): { buy: number; sell: number } {
   const base = baseFreightBuy(line, usage)
   const surcharges = line.surcharges ?? []
   if (surcharges.length === 0) {
-    return base
+    return { buy: base, sell: base }
   }
   const surchargeTotal = surcharges.reduce(
-    (sum, row) => sum + surchargeBuy(row, base, usage, scope),
-    0
+    (sum, row) => {
+      const amounts = surchargeAmounts(row, base, usage, scope)
+      return { buy: sum.buy + amounts.buy, sell: sum.sell + amounts.sell }
+    },
+    { buy: 0, sell: 0 }
   )
-  return base + surchargeTotal
+  return {
+    buy: base + surchargeTotal.buy,
+    sell: base + surchargeTotal.sell,
+  }
 }
 
 function linesBaseFreight(
@@ -222,6 +232,8 @@ function linesBaseFreight(
  * Sum manual rate lines as buy seed, apply amount/percent markup, derive sell.
  * When lines carry surcharges, included rows are priced via
  * {@link calculateSurchargeAmount} using {@link ManualLaneTotalsInput.usage}.
+ * A finite `sellAmount` replaces that row's sell; the gap vs buy is added to
+ * markup so sell = buy + markup still holds. `isVisible` does not change math.
  * Optional {@link ManualLaneTotalsInput.scope} drops origin/destination buckets.
  * Optional {@link ManualLaneTotalsInput.globalCharges} roll in after lane lines.
  * Non-finite line amounts and markup values are treated as 0. Outputs are rounded.
@@ -230,30 +242,38 @@ export function computeManualLaneTotals(
   input: ManualLaneTotalsInput
 ): ManualLaneTotals {
   const scope = input.scope ?? null
-  const laneBuy = input.lines.reduce(
-    (sum, line) => sum + lineBuy(line, input.usage, scope),
-    0
+  const lane = input.lines.reduce(
+    (sum, line) => {
+      const amounts = lineAmounts(line, input.usage, scope)
+      return { buy: sum.buy + amounts.buy, sell: sum.sell + amounts.sell }
+    },
+    { buy: 0, sell: 0 }
   )
   const globals = input.globalCharges ?? []
-  const globalBuy =
+  const baseFreight = linesBaseFreight(input.lines, input.usage)
+  const globalAmounts =
     globals.length === 0
-      ? 0
+      ? { buy: 0, sell: 0 }
       : globals.reduce(
-          (sum, row) =>
-            sum +
-            surchargeBuy(
+          (sum, row) => {
+            const amounts = surchargeAmounts(
               { ...row, source: row.source ?? "global" },
-              linesBaseFreight(input.lines, input.usage),
+              baseFreight,
               input.usage,
               scope
-            ),
-          0
+            )
+            return { buy: sum.buy + amounts.buy, sell: sum.sell + amounts.sell }
+          },
+          { buy: 0, sell: 0 }
         )
-  const buy = roundMoney(laneBuy + globalBuy)
+  const buy = roundMoney(lane.buy + globalAmounts.buy)
+  const sellSeed = roundMoney(lane.sell + globalAmounts.sell)
   const markupValue = Number.isFinite(input.markupValue) ? input.markupValue : 0
-  const markup = roundMoney(
+  const dial = roundMoney(
     input.markupType === "percent" ? (buy * markupValue) / 100 : markupValue
   )
+  const rowUplift = roundMoney(sellSeed - buy)
+  const markup = roundMoney(rowUplift + dial)
 
   return {
     buy,
