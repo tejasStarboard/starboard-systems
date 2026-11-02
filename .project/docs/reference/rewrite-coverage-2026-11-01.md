@@ -10,15 +10,15 @@ Legend: **Done** · **Partial** · **Ticketed** · **Not started** · **Out of s
 
 ## Summary
 
-| Area                                      | Status                                                        |
-| ----------------------------------------- | ------------------------------------------------------------- |
-| Kernel (auth, org, workbench host)        | Partial — multi-page today; **074** workbench                 |
-| Extension platform (host, jobs, settings) | Done — needs `defines.extensionPoints` (**074**/**073**)      |
-| Driving quote built-in + QV2 money        | Partial — 060–068 done; parity **071/070/072**; slots **073** |
-| Live spot / messaging / CRM               | Done / Partial (creds → **069**)                              |
-| Outlook/Gmail/Companion/Public API/OS/ML  | Not started / Deferred / Won’t                                |
+| Area                                      | Status                                                                              |
+| ----------------------------------------- | ----------------------------------------------------------------------------------- |
+| Kernel (auth, org, workbench host)        | Partial — multi-page today; **074** workbench                                       |
+| Extension platform (host, jobs, settings) | Done — needs `defines.extensionPoints` (**074**/**073**)                            |
+| Driving quote built-in + QV2 money        | Partial — 060–068, **071**, **070** done; **072** lean row economics; slots **073** |
+| Live spot / messaging / CRM               | Done / Partial (creds → **069**)                                                    |
+| Outlook/Gmail/Companion/Public API/OS/ML  | Not started / Deferred / Won’t                                                      |
 
-**Waves 0–5 done.** Wave 6a **060–068 done**. **Phase A (now):** **074→075→076→077→078→073** (workbench + migrate builtins). **Phase B:** **071→070→072**. **Phase C:** **069**. See [migration inventory](extension-migration-inventory-2026-11-02.md).
+**Waves 0–5 done.** Wave 6a **060–068 done**. **Phase A (now):** **074→075→076→077→078→073** (workbench + migrate builtins). **Phase B:** **071** and **070** done; **072** lean subset (sell, Split, scope override, free/min/max; one lane markup dial). **Phase C:** **069**. See [migration inventory](extension-migration-inventory-2026-11-02.md).
 
 ---
 
@@ -39,25 +39,25 @@ Legend: **Done** · **Partial** · **Ticketed** · **Not started** · **Out of s
 
 ## 2. Quoting
 
-| Prod feature                      | Rewrite              | Notes                                                              |
-| --------------------------------- | -------------------- | ------------------------------------------------------------------ |
-| RFQ v2 email → quote              | **Partial**          | Messaging stub only; no full extract pipeline                      |
-| QGS multi-lane editor             | **Partial**          | Lanes persist; charge UX ≠ QV2 (**071**)                           |
-| ONE MATH                          | **Partial**          | Lean engine; scope/markup still diverge (**070**/**072**)          |
-| Markups / tiers / FX              | **Partial**          | Lane markup only — prod is dial/per-CT (**072**)                   |
-| Surcharges (legs, units, globals) | **Partial**          | Nested under multi-rate cards; not QV2 grid (**071**)              |
-| Rate alternatives (tabs)          | **Partial**          | Apply appends rates then **sums all** — prod selects one (**071**) |
-| Incoterm scope                    | **Partial**          | Door knock-out shipped; prod is Incoterm×role (**070**)            |
-| Quote stages / lifecycle          | **Not started**      |                                                                    |
-| PDF / Excel / templates           | **Not started**      |                                                                    |
-| Send reply                        | **Partial**          | Messaging send stub (030)                                          |
-| RFR / recurring RFR               | **Not started**      |                                                                    |
-| Autonomous modes                  | **Not started**      |                                                                    |
-| Agentic extraction                | **Not started**      |                                                                    |
-| CargoWise sync                    | **Not started**      |                                                                    |
-| Ocean booking                     | **Won’t / deferred** | Dev-only in prod                                                   |
-| Sailing schedules                 | **Not started**      |                                                                    |
-| Apply catalog/spot → lane         | **Ticketed**         | [060](../../tickets/todo/060-apply-rate-to-quote-lane.md)          |
+| Prod feature                      | Rewrite              | Notes                                                                                                                       |
+| --------------------------------- | -------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| RFQ v2 email → quote              | **Partial**          | Messaging stub only; no full extract pipeline                                                                               |
+| QGS multi-lane editor             | **Partial**          | Lanes persist; charge UX ≠ QV2 (**071**)                                                                                    |
+| ONE MATH                          | **Partial**          | Lean engine. Incoterm scope **070**. **072** adds line sell + Split presentation                                            |
+| Markups / tiers / FX              | **Partial**          | One lane `$`/`%` dial, including mixed equipment (**072** fixture). Distinct per-CT dials, tiers, and row FX still deferred |
+| Surcharges (legs, units, globals) | **Partial**          | Nested under multi-rate cards; not QV2 grid (**071**)                                                                       |
+| Rate alternatives (tabs)          | **Partial**          | Apply appends rates then **sums all** — prod selects one (**071**)                                                          |
+| Incoterm scope                    | **Partial**          | Door knock-out shipped; prod is Incoterm×role (**070**)                                                                     |
+| Quote stages / lifecycle          | **Not started**      |                                                                                                                             |
+| PDF / Excel / templates           | **Not started**      |                                                                                                                             |
+| Send reply                        | **Partial**          | Messaging send stub (030)                                                                                                   |
+| RFR / recurring RFR               | **Not started**      |                                                                                                                             |
+| Autonomous modes                  | **Not started**      |                                                                                                                             |
+| Agentic extraction                | **Not started**      |                                                                                                                             |
+| CargoWise sync                    | **Not started**      |                                                                                                                             |
+| Ocean booking                     | **Won’t / deferred** | Dev-only in prod                                                                                                            |
+| Sailing schedules                 | **Not started**      |                                                                                                                             |
+| Apply catalog/spot → lane         | **Ticketed**         | [060](../../tickets/todo/060-apply-rate-to-quote-lane.md)                                                                   |
 
 ---
 
@@ -198,12 +198,13 @@ Legend: **Done** · **Partial** · **Ticketed** · **Not started** · **Out of s
 
 See [build-priority-2026-11-01.md](build-priority-2026-11-01.md).
 
-| ID            | Title                                       | Status                    |
-| ------------- | ------------------------------------------- | ------------------------- |
-| 060–068       | Money foundation                            | **done**                  |
-| 074–078, 073  | Workbench + host + migrate builtins + slots | **open** (Phase A — next) |
-| 071, 070, 072 | QV2 money parity                            | **open** (Phase B)        |
-| 069           | Org carrier credentials                     | **open** (Phase C)        |
+| ID           | Title                                       | Status                    |
+| ------------ | ------------------------------------------- | ------------------------- |
+| 060–068      | Money foundation                            | **done**                  |
+| 074–078, 073 | Workbench + host + migrate builtins + slots | **open** (Phase A — next) |
+| 071, 070     | QV2 charge grid + Incoterm scope            | **done**                  |
+| 072          | QV2 row economics (lean subset)             | **in progress**           |
+| 069          | Org carrier credentials                     | **open** (Phase C)        |
 
 ---
 

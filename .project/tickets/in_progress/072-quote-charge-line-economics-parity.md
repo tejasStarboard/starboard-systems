@@ -2,7 +2,7 @@
 id: 072
 wave: 06-product
 title: Quote charge-line economics parity (markup, sell, Split, guardrails)
-status: open
+status: in_progress
 depends_on: [071, 070]
 epic: SYS-PRICING
 docs:
@@ -45,12 +45,12 @@ Port the QV2 charge-row money UX onto the **071** grid, driven by `@starboard/li
 
 ## Acceptance criteria
 
-- [ ] Markup matches prod for single-CT and multi-CT FCL footers (or documented lean subset with fixture proof)
-- [ ] Include + Split behavior matches prod visibility/absorb rules
-- [ ] Editable buy/sell (or dial) on rows; totals use sell path like prod
-- [ ] scope_override UI when Incoterm scope active (**070**)
-- [ ] free/min/max usage fields on add/edit charge
-- [ ] Domain docs + fixtures updated
+- [x] Markup matches prod for single-CT and multi-CT FCL footers (or documented lean subset with fixture proof)
+- [x] Include + Split behavior matches prod visibility/absorb rules
+- [x] Editable buy/sell (or dial) on rows; totals use sell path like prod
+- [x] scope_override UI when Incoterm scope active (**070**)
+- [x] free/min/max usage fields on add/edit charge
+- [x] Domain docs + fixtures updated
 
 ## Out of scope
 

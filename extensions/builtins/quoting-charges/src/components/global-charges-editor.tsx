@@ -10,6 +10,7 @@ import {
 } from "react-hook-form"
 
 import { createSurchargeLine, type UsageUnit } from "@starboard/lib-contracts"
+import { ChargeGuardrails } from "./charge-guardrails"
 import { USAGE_UNIT_LABELS } from "./usage-labels"
 import { Button } from "@starboard/lib-ui/components/button"
 import { Checkbox } from "@starboard/lib-ui/components/checkbox"
@@ -86,87 +87,93 @@ export function GlobalChargesEditor({
               field.usageUnit) as UsageUnit
             const isPercentage = usageUnit === "percentage"
             return (
-              <div
-                key={field.id}
-                className="grid grid-cols-[minmax(0,1.4fr)_7rem_7rem_auto_auto] items-center gap-2"
-              >
-                <Input
-                  placeholder="Name"
-                  className="h-8"
-                  {...register(`${prefix}.name`)}
-                />
-                <Controller
-                  control={control}
-                  name={`${prefix}.usageUnit`}
-                  render={({ field: unitField }) => (
-                    <Select
-                      value={unitField.value}
-                      onValueChange={(value) => {
-                        if (value) {
-                          unitField.onChange(value as UsageUnit)
-                        }
-                      }}
-                    >
-                      <SelectTrigger size="sm" className="w-full">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {USAGE_UNITS.map((unit) => (
-                          <SelectItem key={unit.value} value={unit.value}>
-                            {unit.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
-                {isPercentage ? (
+              <div key={field.id} className="space-y-1.5 border px-2 py-2">
+                <div className="grid grid-cols-[minmax(0,1.4fr)_7rem_7rem_auto_auto] items-center gap-2">
                   <Input
-                    type="number"
-                    step="0.01"
-                    placeholder="%"
-                    className="h-8 text-right tabular-nums"
-                    {...register(`${prefix}.ratePercentage`, {
-                      setValueAs: (value) =>
-                        value === "" || value == null ? null : Number(value),
-                    })}
+                    placeholder="Name"
+                    className="h-8"
+                    {...register(`${prefix}.name`)}
                   />
-                ) : (
-                  <Input
-                    type="number"
-                    step="0.01"
-                    placeholder="Rate"
-                    className="h-8 text-right tabular-nums"
-                    {...register(`${prefix}.rate`, {
-                      setValueAs: (value) =>
-                        value === "" || value == null ? null : Number(value),
-                    })}
+                  <Controller
+                    control={control}
+                    name={`${prefix}.usageUnit`}
+                    render={({ field: unitField }) => (
+                      <Select
+                        value={unitField.value}
+                        onValueChange={(value) => {
+                          if (value) {
+                            unitField.onChange(value as UsageUnit)
+                          }
+                        }}
+                      >
+                        <SelectTrigger size="sm" className="w-full">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {USAGE_UNITS.map((unit) => (
+                            <SelectItem key={unit.value} value={unit.value}>
+                              {unit.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
                   />
-                )}
-                <Controller
-                  control={control}
-                  name={`${prefix}.isIncludedInTotal`}
-                  render={({ field: includeField }) => (
-                    <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                      <Checkbox
-                        checked={includeField.value}
-                        onCheckedChange={(checked) =>
-                          includeField.onChange(checked === true)
-                        }
-                      />
-                      Incl.
-                    </label>
+                  {isPercentage ? (
+                    <Input
+                      type="number"
+                      step="0.01"
+                      placeholder="%"
+                      className="h-8 text-right tabular-nums"
+                      {...register(`${prefix}.ratePercentage`, {
+                        setValueAs: (value) =>
+                          value === "" || value == null ? null : Number(value),
+                      })}
+                    />
+                  ) : (
+                    <Input
+                      type="number"
+                      step="0.01"
+                      placeholder="Buy"
+                      title="Buy rate"
+                      className="h-8 text-right tabular-nums"
+                      {...register(`${prefix}.rate`, {
+                        setValueAs: (value) =>
+                          value === "" || value == null ? null : Number(value),
+                      })}
+                    />
                   )}
+                  <Controller
+                    control={control}
+                    name={`${prefix}.isIncludedInTotal`}
+                    render={({ field: includeField }) => (
+                      <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                        <Checkbox
+                          checked={includeField.value}
+                          onCheckedChange={(checked) =>
+                            includeField.onChange(checked === true)
+                          }
+                        />
+                        Incl.
+                      </label>
+                    )}
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    aria-label="Remove global charge"
+                    onClick={() => remove(index)}
+                  >
+                    <TrashIcon />
+                  </Button>
+                </div>
+                <ChargeGuardrails
+                  control={control}
+                  register={register}
+                  prefix={prefix}
+                  showScope={false}
                 />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon-sm"
-                  aria-label="Remove global charge"
-                  onClick={() => remove(index)}
-                >
-                  <TrashIcon />
-                </Button>
               </div>
             )
           })}

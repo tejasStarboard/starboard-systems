@@ -1,0 +1,161 @@
+{
+  "$schema_version": "1.0.0",
+  "description": "072 lean charge-line economics. One lane $/% markup dial applies to the rolled buy for both a single container and mixed equipment (20GP + 40HC). Prod per-container markup footers are the same dial, not a separate markup per container type. A finite sellAmount replaces that row's sell; markup includes the uplift so sell = buy + markup. isVisible false (Split off / absorbed) still contributes. Include and scope_override follow the existing inclusion predicate.",
+  "cases": [
+    {
+      "id": "single-ct-percent-markup",
+      "input": {
+        "lines": [
+          {
+            "amount": 1000,
+            "baseMode": "per_eq",
+            "surcharges": []
+          }
+        ],
+        "markupType": "percent",
+        "markupValue": 10,
+        "usage": { "container": 1 }
+      },
+      "expected": { "buy": 1000, "markup": 100, "sell": 1100 }
+    },
+    {
+      "id": "multi-ct-flat-markup",
+      "input": {
+        "lines": [
+          {
+            "amount": 0,
+            "baseMode": "per_eq",
+            "equipmentAmounts": [
+              { "containerType": "20GP", "amount": 800, "count": 2 },
+              { "containerType": "40HC", "amount": 1200, "count": 1 }
+            ]
+          }
+        ],
+        "markupType": "amount",
+        "markupValue": 150,
+        "usage": { "container": 3 }
+      },
+      "expected": { "buy": 2800, "markup": 150, "sell": 2950 }
+    },
+    {
+      "id": "sell-amount-uplift-is-markup",
+      "input": {
+        "lines": [
+          {
+            "amount": 1000,
+            "baseMode": "flat",
+            "surcharges": [
+              {
+                "usageUnit": "flat",
+                "rate": 100,
+                "sellAmount": 180,
+                "source": "manual",
+                "isIncludedInTotal": true,
+                "isVisible": true,
+                "leg": "freight"
+              }
+            ]
+          }
+        ],
+        "markupType": "amount",
+        "markupValue": 0
+      },
+      "expected": { "buy": 1100, "markup": 80, "sell": 1180 }
+    },
+    {
+      "id": "sell-amount-plus-percent-dial",
+      "input": {
+        "lines": [
+          {
+            "amount": 1000,
+            "baseMode": "flat",
+            "surcharges": [
+              {
+                "usageUnit": "flat",
+                "rate": 100,
+                "sellAmount": 180,
+                "source": "manual",
+                "isIncludedInTotal": true,
+                "leg": "freight"
+              }
+            ]
+          }
+        ],
+        "markupType": "percent",
+        "markupValue": 10
+      },
+      "expected": { "buy": 1100, "markup": 190, "sell": 1290 }
+    },
+    {
+      "id": "split-off-still-in-total",
+      "input": {
+        "lines": [
+          {
+            "amount": 1000,
+            "surcharges": [
+              {
+                "usageUnit": "flat",
+                "rate": 50,
+                "source": "carrier",
+                "isIncludedInTotal": true,
+                "isVisible": false,
+                "leg": "origin"
+              }
+            ]
+          }
+        ],
+        "markupType": "amount",
+        "markupValue": 0
+      },
+      "expected": { "buy": 1050, "markup": 0, "sell": 1050 }
+    },
+    {
+      "id": "include-off-drops-sell-override",
+      "input": {
+        "lines": [
+          {
+            "amount": 1000,
+            "surcharges": [
+              {
+                "usageUnit": "flat",
+                "rate": 50,
+                "sellAmount": 999,
+                "source": "manual",
+                "isIncludedInTotal": false,
+                "isVisible": true,
+                "leg": "freight"
+              }
+            ]
+          }
+        ],
+        "markupType": "amount",
+        "markupValue": 0
+      },
+      "expected": { "buy": 1000, "markup": 0, "sell": 1000 }
+    },
+    {
+      "id": "free-usage-reduces-container-buy",
+      "input": {
+        "lines": [
+          {
+            "amount": 500,
+            "surcharges": [
+              {
+                "usageUnit": "container",
+                "rate": 10,
+                "freeUsage": 2,
+                "source": "carrier",
+                "isIncludedInTotal": true,
+                "leg": "freight"
+              }
+            ]
+          }
+        ],
+        "markupType": "amount",
+        "markupValue": 0,
+        "usage": { "container": 5 }
+      },
+      "expected": { "buy": 530, "markup": 0, "sell": 530 }
+    }
+  ]
+}

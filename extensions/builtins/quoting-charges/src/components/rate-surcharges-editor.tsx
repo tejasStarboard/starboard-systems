@@ -28,6 +28,7 @@ import { cn } from "@starboard/lib-ui/lib/utils"
 
 import type { QuoteFormValues } from "@starboard/lib-contracts"
 
+import { ChargeGuardrails } from "./charge-guardrails"
 import { USAGE_UNIT_LABELS } from "./usage-labels"
 
 const LEGS: { value: SurchargeLeg; label: string }[] = [
@@ -114,129 +115,147 @@ export function RateSurchargesEditor({
                 {group.items.map(({ field, index, usageUnit, leg }) => {
                   const prefix = `${surchargesPath}.${index}` as const
                   const isPercentage = usageUnit === "percentage"
-                  const scopedOut = excludedBuckets.includes(leg)
+                  const scopeOverride = watched[index]?.scopeOverride ?? null
+                  const forcedOut = scopeOverride === "exclude"
+                  const forcedIn = scopeOverride === "include"
+                  const scopedOut =
+                    forcedOut || (!forcedIn && excludedBuckets.includes(leg))
+                  const showScope =
+                    excludedBuckets.length > 0 || scopeOverride != null
                   return (
                     <div
                       key={field.id}
                       className={cn(
-                        "grid grid-cols-[minmax(0,1.4fr)_7rem_7rem_6rem_auto_auto] items-center gap-2",
+                        "space-y-1.5 border px-2 py-2",
                         scopedOut && "opacity-50"
                       )}
                       title={scopedOut ? "Excluded by Incoterm" : undefined}
                     >
-                      <Input
-                        placeholder="Name"
-                        className="h-8"
-                        {...register(`${prefix}.name`)}
-                      />
-                      <Controller
-                        control={control}
-                        name={`${prefix}.leg`}
-                        render={({ field: legField }) => (
-                          <Select
-                            value={legField.value}
-                            onValueChange={(value) => {
-                              if (
-                                value === "origin" ||
-                                value === "freight" ||
-                                value === "destination"
-                              ) {
-                                legField.onChange(value)
-                              }
-                            }}
-                          >
-                            <SelectTrigger size="sm" className="w-full">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {LEGS.map((option) => (
-                                <SelectItem
-                                  key={option.value}
-                                  value={option.value}
-                                >
-                                  {option.label}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        )}
-                      />
-                      <Controller
-                        control={control}
-                        name={`${prefix}.usageUnit`}
-                        render={({ field: unitField }) => (
-                          <Select
-                            value={unitField.value}
-                            onValueChange={(value) => {
-                              if (value) {
-                                unitField.onChange(value as UsageUnit)
-                              }
-                            }}
-                          >
-                            <SelectTrigger size="sm" className="w-full">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {USAGE_UNITS.map((unit) => (
-                                <SelectItem key={unit.value} value={unit.value}>
-                                  {unit.label}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        )}
-                      />
-                      {isPercentage ? (
+                      <div className="grid grid-cols-[minmax(0,1.4fr)_7rem_7rem_6rem_auto_auto] items-center gap-2">
                         <Input
-                          type="number"
-                          step="0.01"
-                          placeholder="%"
-                          className="h-8 text-right tabular-nums"
-                          {...register(`${prefix}.ratePercentage`, {
-                            setValueAs: (value) =>
-                              value === "" || value == null
-                                ? null
-                                : Number(value),
-                          })}
+                          placeholder="Name"
+                          className="h-8"
+                          {...register(`${prefix}.name`)}
                         />
-                      ) : (
-                        <Input
-                          type="number"
-                          step="0.01"
-                          placeholder="Rate"
-                          className="h-8 text-right tabular-nums"
-                          {...register(`${prefix}.rate`, {
-                            setValueAs: (value) =>
-                              value === "" || value == null
-                                ? null
-                                : Number(value),
-                          })}
+                        <Controller
+                          control={control}
+                          name={`${prefix}.leg`}
+                          render={({ field: legField }) => (
+                            <Select
+                              value={legField.value}
+                              onValueChange={(value) => {
+                                if (
+                                  value === "origin" ||
+                                  value === "freight" ||
+                                  value === "destination"
+                                ) {
+                                  legField.onChange(value)
+                                }
+                              }}
+                            >
+                              <SelectTrigger size="sm" className="w-full">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {LEGS.map((option) => (
+                                  <SelectItem
+                                    key={option.value}
+                                    value={option.value}
+                                  >
+                                    {option.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          )}
                         />
-                      )}
-                      <Controller
-                        control={control}
-                        name={`${prefix}.isIncludedInTotal`}
-                        render={({ field: includeField }) => (
-                          <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                            <Checkbox
-                              checked={includeField.value}
-                              onCheckedChange={(checked) =>
-                                includeField.onChange(checked === true)
-                              }
-                            />
-                            Incl.
-                          </label>
+                        <Controller
+                          control={control}
+                          name={`${prefix}.usageUnit`}
+                          render={({ field: unitField }) => (
+                            <Select
+                              value={unitField.value}
+                              onValueChange={(value) => {
+                                if (value) {
+                                  unitField.onChange(value as UsageUnit)
+                                }
+                              }}
+                            >
+                              <SelectTrigger size="sm" className="w-full">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {USAGE_UNITS.map((unit) => (
+                                  <SelectItem
+                                    key={unit.value}
+                                    value={unit.value}
+                                  >
+                                    {unit.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          )}
+                        />
+                        {isPercentage ? (
+                          <Input
+                            type="number"
+                            step="0.01"
+                            placeholder="%"
+                            className="h-8 text-right tabular-nums"
+                            {...register(`${prefix}.ratePercentage`, {
+                              setValueAs: (value) =>
+                                value === "" || value == null
+                                  ? null
+                                  : Number(value),
+                            })}
+                          />
+                        ) : (
+                          <Input
+                            type="number"
+                            step="0.01"
+                            placeholder="Buy"
+                            title="Buy rate"
+                            className="h-8 text-right tabular-nums"
+                            {...register(`${prefix}.rate`, {
+                              setValueAs: (value) =>
+                                value === "" || value == null
+                                  ? null
+                                  : Number(value),
+                            })}
+                          />
                         )}
+                        <Controller
+                          control={control}
+                          name={`${prefix}.isIncludedInTotal`}
+                          render={({ field: includeField }) => (
+                            <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                              <Checkbox
+                                checked={includeField.value}
+                                onCheckedChange={(checked) =>
+                                  includeField.onChange(checked === true)
+                                }
+                              />
+                              Incl.
+                            </label>
+                          )}
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon-sm"
+                          aria-label="Remove surcharge"
+                          onClick={() => remove(index)}
+                        >
+                          <TrashIcon />
+                        </Button>
+                      </div>
+                      <ChargeGuardrails
+                        control={control}
+                        register={register}
+                        prefix={prefix}
+                        showScope={showScope}
                       />
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon-sm"
-                        aria-label="Remove surcharge"
-                        onClick={() => remove(index)}
-                      >
-                        <TrashIcon />
-                      </Button>
                     </div>
                   )
                 })}
