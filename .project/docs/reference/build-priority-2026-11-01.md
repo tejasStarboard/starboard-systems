@@ -1,69 +1,67 @@
-# Build priority — 2026-11-01
+# Build priority — 2026-11-01 (updated 2026-11-02)
 
-Derived from [starboard-2 features](starboard-2-features-2026-11-01.md) and [rewrite coverage](rewrite-coverage-2026-11-01.md).
+**Source of truth for execution order.**
 
-**Principle:** finish the **quote money path** on the web shell using the extension platform we already built. Defer surfaces (Outlook/Gmail), ERP, marketplace, and ML until quoting is honest.
-
----
-
-## P0 — Quote is usable end-to-end (do now)
-
-| Order | Ticket / work                                                                                         | Why                                                         |
-| ----: | ----------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
-|     1 | **[060](../../tickets/todo/060-apply-rate-to-quote-lane.md)** Apply catalog/spot → lane               | Without this, rates/spot/ingest don’t enter the quote       |
-|     2 | **[065](../../tickets/todo/065-surcharge-data-model.md)** Surcharge model + contracts                 | Prod QGS is charge-line driven; flat amounts are not enough |
-|     3 | **[066](../../tickets/todo/066-surcharge-pricing-engine.md)** Units + % freight in `packages/pricing` | Makes ONE MATH real for surcharges                          |
-|     4 | **[067](../../tickets/todo/067-surcharge-quote-ui.md)** Surcharges in quote UI / apply path           | User-visible origin/freight/destination + line units        |
-
-Parallel with P0 (small, unblocks live spot):
-
-| Order | Ticket                                                                             | Why                                            |
-| ----: | ---------------------------------------------------------------------------------- | ---------------------------------------------- |
-|     ‖ | **[061](../../tickets/todo/061-extension-settings-runtime.md)** Settings → workers | Admin toggles already exist; wire them through |
+See also: [extension-migration-inventory-2026-11-02.md](extension-migration-inventory-2026-11-02.md) · [ADR 0006](../adr/0006-shell-built-ins-extensions.md) · [extension-points.md](../extension-points.md).
 
 ---
 
-## P1 — Make extensions production-shaped
+## Principles
 
-| Order | Ticket                                                                                                    | Why                                                               |
-| ----: | --------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
-|     5 | **[068](../../tickets/todo/068-global-charges-incoterm-scope.md)** Globals + bucket/incoterm scope        | Completes surcharge story for door-to-door / Incoterms            |
-|     6 | **[069](../../tickets/todo/069-org-carrier-credentials-settings.md)** Org carrier credentials in settings | Replace env JSON; tenants set Maersk/CMA secrets like starboard-2 |
-|     7 | **[062](../../tickets/todo/062-live-spot-strategies.md)** Live Maersk → CMA                               | Real buy rates into 060 (after 061 + 069)                         |
-|     8 | **[063](../../tickets/todo/063-messaging-production-path.md)** Graph OAuth + Neon                         | Email-native loop; can parallel 062                               |
+1. **Platform before more product hardening in the shell** — workbench + host + migrate existing code into built-ins first.
+2. **Refactor, not redesign** — QV2 parity tickets run **after** quote is a built-in (work lands in the right package).
+3. Kernel = auth/org + workbench + host. Driving built-ins **define** nested points (explorer → context menu). Optionals unplug.
 
 ---
 
-## P2 — Shell completeness
+## Phase A — Workbench + extension system (NOW)
 
-| Order | Ticket                                                                                           | Why                                              |
-| ----: | ------------------------------------------------------------------------------------------------ | ------------------------------------------------ |
-|     9 | **[064](../../tickets/todo/064-crm-and-settings-shell.md)** CRM fields/contacts + settings pages | Needed for real tenants; not blocking money math |
-|    10 | Quote stages / validity / PDF export                                                             | Ticket TBD after 067                             |
-|    11 | FCL v6 beyond CSV (Excel/PDF agent)                                                              | Ticket TBD; keep as `ingestion.fcl_v6` extension |
+| # | Ticket | Why |
+| -: | ------ | --- |
+| 1 | **[074](../../tickets/todo/074-workbench-shell.md)** Workbench shell | Region hosts + tab model + deep links |
+| 2 | **[075](../../tickets/todo/075-extension-host-workbench-contributions.md)** Host contributions + `defines` | Manifest/API for views/editors/extension-points |
+| 3 | **[076](../../tickets/todo/076-builtin-extension-packages-scaffold.md)** Scaffold built-in packages | Empty `quoting.document`, crm, settings, … + registry |
+| 4 | **[077](../../tickets/todo/077-migrate-quoting-document-builtin.md)** Migrate quote → built-in | Largest shell extraction |
+| 5 | **[078](../../tickets/todo/078-migrate-crm-settings-builtins.md)** Migrate CRM + settings (+ geo) | Clear kernel of remaining product pages |
+| 6 | **[073](../../tickets/todo/073-quote-contribution-points.md)** Quote-defined slots | Peel charges / rateSources into contributions |
 
----
-
-## P3 — Later (explicitly not next)
-
-- More spot carriers (Hapag, MSC, …) as plugins
-- Air / LCL / cartage / drayage ingest extensions
-- Outlook / Gmail / Front / Companion
-- Public API, Stripe Lite credits, analytics/KPI
-- RFR automation, chat agents, freight index
-- FFW OS, marketplace, auto-margin, rate-choice
-
----
-
-## Sequencing diagram
+`074` ∥ `075` OK if coordinated on contracts.
 
 ```text
-060 apply rate ─────────┐
-061 settings runtime ───┤
-069 org carrier creds ──┼──► 062 live spot
-065 → 066 → 067 surcharges ──► 068 globals/incoterm
-063 messaging (parallel)
-064 CRM/settings (whenever)
+074 workbench ──┐
+075 host APIs ──┴──► 076 scaffold ──► 077 quote migrate ──► 078 crm/settings
+                                              │
+                                              └──► 073 define slots + peel charges
 ```
 
-**Do not start** Outlook or new ingest modes until **060 + 065–067** land.
+---
+
+## Phase B — QV2 money parity (after quote is a built-in)
+
+| # | Ticket | Why |
+| -: | ------ | --- |
+| 7 | **[071](../../tickets/todo/071-quote-charge-table-prod-parity.md)** Charge grid + rate alternatives | Prod table shape |
+| 8 | **[070](../../tickets/todo/070-incoterm-bucket-scope.md)** Incoterm scope | Replace door-only |
+| 9 | **[072](../../tickets/todo/072-quote-charge-line-economics-parity.md)** Line economics | Markup/sell/Split |
+
+Implement inside built-in packages / quote-defined slots — **not** new kernel pages.
+
+---
+
+## Phase C — Optional extension hardening
+
+| # | Ticket | Why |
+| -: | ------ | --- |
+| 10 | **[069](../../tickets/todo/069-org-carrier-credentials-settings.md)** Org carrier credentials | Spot secrets in settings |
+
+---
+
+## Already done (Wave 6a)
+
+060–068 money foundation + live spot/messaging/CRM shell (still multi-page). Optional workers under `extensions/{spot,messaging,ingestion}` exist.
+
+---
+
+## Later
+
+Quote stages/PDF · FCL Excel/PDF · more carriers · Outlook/Gmail · Public API · …

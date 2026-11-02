@@ -12,13 +12,13 @@ Legend: **Done** · **Partial** · **Ticketed** · **Not started** · **Out of s
 
 | Area                                                               | Status                         |
 | ------------------------------------------------------------------ | ------------------------------ |
-| Shell (auth, org, quotes CRUD, geo facilities, rates catalog stub) | Done / Partial                 |
-| Extension platform (host, Temporal jobs, admin rollout + settings) | Done                           |
-| Quote loop (apply rates, surcharges, PDF/send)                     | Ticketed / Not started         |
-| Live spot / real messaging / rich CRM                              | Ticketed / Partial stubs       |
-| Outlook/Gmail/Companion/Public API/OS/ML marketplace               | Not started / Deferred / Won’t |
+| Kernel (auth, org, workbench host) | Partial — multi-page today; **074** workbench |
+| Extension platform (host, jobs, settings) | Done — needs `defines.extensionPoints` (**074**/**073**) |
+| Driving quote built-in + QV2 money | Partial — 060–068 done; parity **071/070/072**; slots **073** |
+| Live spot / messaging / CRM | Done / Partial (creds → **069**) |
+| Outlook/Gmail/Companion/Public API/OS/ML | Not started / Deferred / Won’t |
 
-**Waves 0–5 done** (tickets 001–058). **Wave 6 open:** 060–068. Priority order: [build-priority-2026-11-01.md](build-priority-2026-11-01.md).
+**Waves 0–5 done.** Wave 6a **060–068 done**. **Phase A (now):** **074→075→076→077→078→073** (workbench + migrate builtins). **Phase B:** **071→070→072**. **Phase C:** **069**. See [migration inventory](extension-migration-inventory-2026-11-02.md).
 
 ---
 
@@ -42,10 +42,12 @@ Legend: **Done** · **Partial** · **Ticketed** · **Not started** · **Out of s
 | Prod feature                      | Rewrite              | Notes                                                                        |
 | --------------------------------- | -------------------- | ---------------------------------------------------------------------------- |
 | RFQ v2 email → quote              | **Partial**          | Messaging stub only; no full extract pipeline                                |
-| QGS multi-lane editor             | **Partial**          | Lanes/cargo/manual rates persist (002)                                       |
-| ONE MATH                          | **Partial**          | `packages/pricing`: manual totals + inclusion/usage helpers; not full engine |
-| Markups / tiers / FX              | **Partial**          | Lane markup only                                                             |
-| Surcharges (legs, units, globals) | **Not started**      | Inclusion predicate exists unused; no charge rows                            |
+| QGS multi-lane editor             | **Partial**          | Lanes persist; charge UX ≠ QV2 (**071**)                                     |
+| ONE MATH                          | **Partial**          | Lean engine; scope/markup still diverge (**070**/**072**)                    |
+| Markups / tiers / FX              | **Partial**          | Lane markup only — prod is dial/per-CT (**072**)                             |
+| Surcharges (legs, units, globals) | **Partial**          | Nested under multi-rate cards; not QV2 grid (**071**)                        |
+| Rate alternatives (tabs)          | **Partial**          | Apply appends rates then **sums all** — prod selects one (**071**)           |
+| Incoterm scope                    | **Partial**          | Door knock-out shipped; prod is Incoterm×role (**070**)                      |
 | Quote stages / lifecycle          | **Not started**      |                                                                              |
 | PDF / Excel / templates           | **Not started**      |                                                                              |
 | Send reply                        | **Partial**          | Messaging send stub (030)                                                    |
@@ -188,25 +190,20 @@ Legend: **Done** · **Partial** · **Ticketed** · **Not started** · **Out of s
 | Generic BFF `/api/extensions/[id]/…` | **Done**     | 055     |
 | Admin settings declarations          | **Done**     | 057/058 |
 | Developer cookbook                   | **Done**     | 056     |
-| Settings runtime in workers          | **Ticketed** | 061     |
+| Settings runtime in workers          | **Done**     | 061     |
 
 ---
 
-## 15. Open ticket queue (execute next)
+## 15. Ticket queue (as of 2026-11-02)
 
 See [build-priority-2026-11-01.md](build-priority-2026-11-01.md).
 
-| ID  | Title                                | Band            |
-| --- | ------------------------------------ | --------------- |
-| 060 | Apply catalog/spot rate → quote lane | **P0**          |
-| 061 | Extension settings runtime           | **P0** parallel |
-| 065 | Surcharge data model + contracts     | **P0**          |
-| 066 | Surcharge amount engine              | **P0**          |
-| 067 | Surcharges in quote UI               | **P0**          |
-| 068 | Globals + incoterm scope             | **P1**          |
-| 062 | Live spot Maersk/CMA                 | **P1**          |
-| 063 | Messaging Graph OAuth + Neon         | **P1**          |
-| 064 | CRM + settings shell                 | **P2**          |
+| ID | Title | Status |
+| -- | ----- | ------ |
+| 060–068 | Money foundation | **done** |
+| 074–078, 073 | Workbench + host + migrate builtins + slots | **open** (Phase A — next) |
+| 071, 070, 072 | QV2 money parity | **open** (Phase B) |
+| 069 | Org carrier credentials | **open** (Phase C) |
 
 ---
 
@@ -217,4 +214,7 @@ See [build-priority-2026-11-01.md](build-priority-2026-11-01.md).
 
 ### Changelog
 
+- **2026-11-02** — Reconciled `origin/dev`: 060–068 marked done; next open ticket 069.
+- **2026-11-02** — Quote-form chat: 068 oversold “incoterm”; door scope only. Opened **070**.
+- **2026-11-02** — Platform-first: inventory + Phase A **074→075→076→077→078→073**, then QV2 **071→070→072**, then **069**.
 - **2026-11-01** — Initial coverage tracker vs starboard-2 inventory; Wave 6 tickets 060–064 noted; surcharge gap called out.

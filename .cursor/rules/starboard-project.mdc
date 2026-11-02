@@ -6,7 +6,9 @@ alwaysApply: true
 # Starboard Systems rewrite
 
 - Program docs: `.project/docs/`. Tickets: `.project/tickets/{todo,in_progress,done}/`.
+- **Next ticket:** `.project/docs/reference/build-priority-2026-11-01.md` (not raw `todo/` lexical sort).
 - Default feature loop: skill `starboard-dev-workflow` (select ticket → sync `origin/dev` / reconcile `done/` → plan → `--no-track` branch off `origin/dev` → implement → PR to `dev` + auto-merge). Coding rules: `starboard-ticket`. **One** ticket only.
+- Product model: ADR 0006 + `extension-points.md` — kernel = auth/org/workbench/host; quote = driving built-in that **defines** slots.
 - Orchestration / new tickets: skill `starboard-orchestrator`.
 - Bun services → `starboard-bun-service`; extensions → `starboard-extension`; web BFF → `starboard-shell-bff`.
 - Do not port deprecated lineages (`.project/docs/deprecations.md`). No Linear unless asked.

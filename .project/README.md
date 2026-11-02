@@ -1,56 +1,27 @@
 # Starboard Systems — rewrite program
 
-Greenfield rewrite of production Starboard (`../starboard-2`) into this monorepo.
+Greenfield rewrite of production Starboard (`../starboard-2`).
 
 ## Layout
 
-| Path                                               | Purpose                                                 |
-| -------------------------------------------------- | ------------------------------------------------------- |
-| [docs/](docs/)                                     | Program architecture, ADRs, domain status, deprecations |
-| [docs/reference/](docs/reference/)                 | Dated starboard-2 inventory + rewrite coverage tracker  |
-| [tickets/todo/](tickets/todo/)                     | Open tickets (lexical order = priority)                 |
-| [tickets/in_progress/](tickets/in_progress/)       | Actively being implemented                              |
-| [tickets/done/](tickets/done/)                     | Accepted / merged                                       |
-| [../.agents/](../.agents/)                         | Cursor skills for feature + orchestrator agents         |
-| [../docs/architecture.md](../docs/architecture.md) | Runtime deploy note                                     |
-| [docs/git-workflow.md](docs/git-workflow.md)       | `dev` / `main`, ticket branches, cherry-pick promote    |
+| Path | Purpose |
+|------|---------|
+| [docs/](docs/) | Architecture, ADRs, extension-points |
+| [docs/reference/](docs/reference/) | Inventory, coverage, **build priority**, migration map |
+| [tickets/](tickets/) | `todo` / `in_progress` / `done` |
+| [../.agents/](../.agents/) | Skills |
+| [docs/git-workflow.md](docs/git-workflow.md) | Branches / `dev` / `main` |
 
 ## How to pick the next ticket
 
-Default loop: skill **starboard-dev-workflow** (sync `origin/dev`, reconcile `done/`, plan, `--no-track` branch, implement via **starboard-ticket**, PR to `dev` + auto-merge). See also [git-workflow.md](docs/git-workflow.md). Code is proprietary — see root `LICENSE`.
+Follow **[docs/reference/build-priority-2026-11-01.md](docs/reference/build-priority-2026-11-01.md)** (not raw `todo/` sort).
 
-1. List `.project/tickets/todo/*.md` in lexical order.
-2. Take the **lowest-numbered** ticket whose `depends_on` are all in `done/` (or have `status: done`).
-3. After plan: `git checkout --no-track -b {id} origin/dev` (branch name = ticket id, e.g. `001`); move ticket to `in_progress/`.
-4. PR **into `dev` only** (auto-merge after CI); promote to `main` via cherry-pick PR when asked.
+**Now (Phase A):** [074](tickets/todo/074-workbench-shell.md) → [075](tickets/todo/075-extension-host-workbench-contributions.md) → [076](tickets/todo/076-builtin-extension-packages-scaffold.md) → [077](tickets/todo/077-migrate-quoting-document-builtin.md) → [078](tickets/todo/078-migrate-crm-settings-builtins.md) → [073](tickets/todo/073-quote-contribution-points.md).
 
-**Current focus:** [Build priority 2026-11-01](docs/reference/build-priority-2026-11-01.md) — start **060** (+ **061** parallel), then **065→067** surcharges. Roadmap: [docs/roadmap.md](docs/roadmap.md).
+Then Phase B QV2 parity (**071→070→072**), then **069**.
 
-## Status legend
+See [migration inventory](docs/reference/extension-migration-inventory-2026-11-02.md) · [ADR 0006](docs/adr/0006-shell-built-ins-extensions.md).
 
-| Folder / status         | Meaning                          |
-| ----------------------- | -------------------------------- |
-| `todo` + `open`         | Ready when dependencies are done |
-| `in_progress`           | Someone is implementing          |
-| `blocked` (frontmatter) | Waiting — note why in the ticket |
-| `done/` + `done`        | Merged; domain docs updated      |
+## Agent / orchestrator
 
-## Agent prompt (copy)
-
-```text
-Use the starboard-dev-workflow skill (then starboard-ticket for coding).
-Work the ticket I name, or the next todo. Plan on latest origin/dev, then implement.
-Read its docs: links under .project/docs/. Do not expand scope.
-Do not port deprecated lineages (.project/docs/deprecations.md).
-```
-
-## Orchestrator prompt (copy)
-
-```text
-Use the starboard-orchestrator skill.
-Follow .project/docs/orchestrator.md. Manage .project docs/tickets only unless I ask to code.
-```
-
-## Epics
-
-`SYS-SHELL` · `SYS-EXT-HOST` · `SYS-QUOTES` · `SYS-CRM` · `SYS-GEO` · `SYS-PRICING` · `SYS-RATES` · `SYS-EXT-FCL-V6` · `SYS-EXT-MSGRAPH` · `SYS-EXT-SPOT` · `SYS-BILLING`
+Default loop: **starboard-dev-workflow** + **starboard-ticket**. Orchestrator: **starboard-orchestrator**.

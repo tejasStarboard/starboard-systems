@@ -48,14 +48,15 @@ pnpm --filter @starboard/lib-db db:push
 
 Creates/updates `quotes.surcharge`, `quotes.global_charge`, and `rates.surcharge` (drizzle-kit push; no versioned SQL migrations).
 
-## Deferred
+## Deferred (named — not silent product cuts)
 
-- FX converters / display-currency paths
-- Full `surcharge_matrix.json` parity (tiers, dollar min/max/free charge, user overrides)
-- Full Incoterm code table (lean door-derived buckets shipped in **068**)
-- Auto-margin / tier constraints
+- FX converters / display-currency paths → with **072** or follow-up
+- Full `surcharge_matrix.json` parity (tiers, dollar min/max beyond lean) — document cells left out
+- Full Incoterm × role matrix — **[070](../../tickets/todo/070-incoterm-bucket-scope.md)** (068 = door → bucket only; **product deviation until 070**)
+- QV2 charge grid / rate alternatives / base flat·per-eq — **[071](../../tickets/todo/071-quote-charge-table-prod-parity.md)**
+- Row economics (markup, sell, Split, guardrails) — **[072](../../tickets/todo/072-quote-charge-line-economics-parity.md)**
 - Org settings rate-item admin stamp for globals
 
 ## Next tickets
 
-Spot/carrier quirks stay out of ONE MATH. Quote stages / PDF after money path.
+Execution: [build-priority](../reference/build-priority-2026-11-01.md) — **071 → 070 → 072** (parity), then **073** mounts via quote-defined points. Spot quirks stay out of ONE MATH.
