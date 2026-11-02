@@ -1,78 +1,21 @@
 "use client"
 
-import { useRouter } from "next/navigation"
-import { useState } from "react"
-
 import { Button } from "@starboard/lib-ui/components/button"
 import { Input } from "@starboard/lib-ui/components/input"
-import { toast } from "@starboard/lib-ui/components/toast"
 
-type OrgRow = {
-  id: string
-  name: string
-  slug: string
-  plan: string
-}
+import { useAdminOrganizations } from "@/hooks/use-admin-organizations"
+import { useImpersonation } from "@/hooks/use-impersonation"
 
 export function OrgSearchPanel() {
-  const router = useRouter()
-  const [query, setQuery] = useState("")
-  const [rows, setRows] = useState<OrgRow[]>([])
-  const [pending, setPending] = useState(false)
-
-  async function search() {
-    setPending(true)
-    try {
-      const response = await fetch(
-        `/api/admin/organizations?q=${encodeURIComponent(query)}`
-      )
-      if (!response.ok) {
-        throw new Error("Search failed")
-      }
-      const body = (await response.json()) as { organizations: OrgRow[] }
-      setRows(body.organizations)
-    } catch (err) {
-      toast.add({
-        type: "error",
-        title: "Search failed",
-        description:
-          err instanceof Error
-            ? err.message
-            : "Something went wrong. Try again.",
-      })
-    } finally {
-      setPending(false)
-    }
-  }
-
-  async function switchInto(organizationId: string) {
-    setPending(true)
-    try {
-      const response = await fetch("/api/admin/impersonation", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ organizationId }),
-      })
-      if (!response.ok) {
-        const body = (await response.json().catch(() => null)) as {
-          error?: string
-        } | null
-        throw new Error(body?.error ?? "Could not switch organization")
-      }
-      router.push("/")
-      router.refresh()
-    } catch (err) {
-      toast.add({
-        type: "error",
-        title: "Unable to switch organization",
-        description:
-          err instanceof Error
-            ? err.message
-            : "Something went wrong. Try again.",
-      })
-      setPending(false)
-    }
-  }
+  const {
+    query,
+    setQuery,
+    rows,
+    pending: searchPending,
+    search,
+  } = useAdminOrganizations()
+  const { pending: switchPending, start } = useImpersonation()
+  const pending = searchPending || switchPending
 
   return (
     <div className="space-y-4">
@@ -108,7 +51,7 @@ export function OrgSearchPanel() {
               type="button"
               size="sm"
               disabled={pending}
-              onClick={() => void switchInto(row.id)}
+              onClick={() => void start(row.id)}
             >
               Switch into
             </Button>

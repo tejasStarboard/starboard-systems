@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod"
 import Link from "next/link"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useSearchParams } from "next/navigation"
 import { Controller, useForm } from "react-hook-form"
 
 import { Button } from "@starboard/lib-ui/components/button"
@@ -15,15 +15,15 @@ import {
 import { Input } from "@starboard/lib-ui/components/input"
 import { toast } from "@starboard/lib-ui/components/toast"
 
+import { useAuth } from "@/hooks/use-auth"
 import {
   resetPasswordFormSchema,
   type ResetPasswordFormValues,
 } from "@/lib/domain/auth/auth-forms.schema"
 import { toastFormErrors } from "@/lib/form-toast"
-import { authClient } from "@/lib/auth-client"
 
 export function ResetPasswordForm() {
-  const router = useRouter()
+  const { resetPassword } = useAuth()
   const searchParams = useSearchParams()
   const token = searchParams.get("token")
   const form = useForm<ResetPasswordFormValues>({
@@ -40,24 +40,7 @@ export function ResetPasswordForm() {
       })
       return
     }
-
-    const { error: resetError } = await authClient.resetPassword({
-      newPassword: values.password,
-      token,
-    })
-
-    if (resetError) {
-      toast.add({
-        type: "error",
-        title: "Unable to reset password",
-        description: resetError.message ?? "Something went wrong. Try again.",
-      })
-      return
-    }
-
-    toast.add({ type: "success", title: "Password updated" })
-    router.push("/login")
-    router.refresh()
+    await resetPassword({ password: values.password, token })
   }
 
   if (!token) {

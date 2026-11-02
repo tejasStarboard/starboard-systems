@@ -14,17 +14,16 @@ import {
   FieldSeparator,
 } from "@starboard/lib-ui/components/field"
 import { Input } from "@starboard/lib-ui/components/input"
-import { toast } from "@starboard/lib-ui/components/toast"
-
 import { GoogleButton } from "@/components/auth/google-button"
+import { useAuth } from "@/hooks/use-auth"
 import {
   registerFormSchema,
   type RegisterFormValues,
 } from "@/lib/domain/auth/auth-forms.schema"
 import { toastFormErrors } from "@/lib/form-toast"
-import { authClient } from "@/lib/auth-client"
 
 export function RegisterForm() {
+  const { signUpEmail } = useAuth()
   const [success, setSuccess] = useState(false)
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerFormSchema),
@@ -32,23 +31,8 @@ export function RegisterForm() {
   })
 
   async function onSubmit(values: RegisterFormValues) {
-    const { error: signUpError } = await authClient.signUp.email({
-      name: values.name,
-      email: values.email,
-      password: values.password,
-      callbackURL: "/select-org",
-    })
-
-    if (signUpError) {
-      toast.add({
-        type: "error",
-        title: "Unable to create account",
-        description: signUpError.message ?? "Something went wrong. Try again.",
-      })
-      return
-    }
-
-    setSuccess(true)
+    const result = await signUpEmail(values)
+    if (result.ok) setSuccess(true)
   }
 
   if (success) {

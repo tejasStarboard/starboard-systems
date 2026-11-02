@@ -13,16 +13,15 @@ import {
   FieldLabel,
 } from "@starboard/lib-ui/components/field"
 import { Input } from "@starboard/lib-ui/components/input"
-import { toast } from "@starboard/lib-ui/components/toast"
-
+import { useAuth } from "@/hooks/use-auth"
 import {
   forgotPasswordFormSchema,
   type ForgotPasswordFormValues,
 } from "@/lib/domain/auth/auth-forms.schema"
 import { toastFormErrors } from "@/lib/form-toast"
-import { authClient } from "@/lib/auth-client"
 
 export function ForgotPasswordForm() {
+  const { requestPasswordReset } = useAuth()
   const [success, setSuccess] = useState(false)
   const form = useForm<ForgotPasswordFormValues>({
     resolver: zodResolver(forgotPasswordFormSchema),
@@ -30,21 +29,8 @@ export function ForgotPasswordForm() {
   })
 
   async function onSubmit(values: ForgotPasswordFormValues) {
-    const { error: resetError } = await authClient.requestPasswordReset({
-      email: values.email,
-      redirectTo: `${window.location.origin}/reset-password`,
-    })
-
-    if (resetError) {
-      toast.add({
-        type: "error",
-        title: "Unable to send reset email",
-        description: resetError.message ?? "Something went wrong. Try again.",
-      })
-      return
-    }
-
-    setSuccess(true)
+    const result = await requestPasswordReset(values.email)
+    if (result.ok) setSuccess(true)
   }
 
   if (success) {
