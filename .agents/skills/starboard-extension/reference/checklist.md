@@ -4,6 +4,7 @@ Use with [.project/docs/extensions.md](../../../../.project/docs/extensions.md).
 
 - [ ] Manifest in `extensions/host/src/registry.ts` — stable `domain.name` id, `requiredPlan`, `enabled`, `contributes`, `worker`, `healthPath`
 - [ ] `contributes` covers nav and/or `uiSlots` and/or `api` and/or `jobs` (spot: `quote.rateSources` + `spot.search` + pathPrefix)
+- [ ] Workbench UI (075): `contributes.activity/views/editors/commands`; own nested points via `defines.extensionPoints`; contribute to others via `contributes.points[pointId]` (host `getActiveWorkbenchContributions` / `getContributionsToPoint`; fails closed if owner inactive; no extension ids in kernel)
 - [ ] `worker` block if Python/Temporal needed (`service` + `plugin`)
 - [ ] Plugin under `extensions/{service}/src/.../plugins/<plugin>/`; registered in that service’s plugin registry
 - [ ] Temporal: workflow defn name + id pattern documented (spot: `spot.search` / `spot.search.{pluginId}-{uuid}`)

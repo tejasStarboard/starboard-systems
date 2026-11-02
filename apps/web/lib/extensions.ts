@@ -2,10 +2,14 @@ import "server-only"
 
 import {
   DEFAULT_PLAN,
+  EMPTY_WORKBENCH_CONTRIBUTIONS,
   getActiveContributions,
+  getActiveWorkbenchContributions,
+  getContributionsToPoint,
   isActive,
   listActiveExtensions,
   listManifests,
+  type ActiveWorkbenchContributions,
   type ExtensionManifest,
   type ExtensionNavContribution,
   type Plan,
@@ -44,6 +48,31 @@ export async function listActiveExtensionNav(
     return []
   }
   return getActiveContributions(plan, listManifests(), context).nav
+}
+
+/** Workbench activity/views/editors/commands + defined-point contributions. Fails closed. */
+export async function listActiveWorkbenchContributions(
+  plan: Plan,
+  organizationId: string
+): Promise<ActiveWorkbenchContributions> {
+  const context = await rolloutContext(organizationId)
+  if (!context) {
+    return EMPTY_WORKBENCH_CONTRIBUTIONS
+  }
+  return getActiveWorkbenchContributions(plan, listManifests(), context)
+}
+
+/** Contributions to an extension-defined point; empty when its owner is inactive. */
+export async function listActivePointContributions(
+  pointId: string,
+  plan: Plan,
+  organizationId: string
+) {
+  const context = await rolloutContext(organizationId)
+  if (!context) {
+    return []
+  }
+  return getContributionsToPoint(pointId, plan, listManifests(), context)
 }
 
 export async function listActiveUiSlots(

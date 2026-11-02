@@ -1,11 +1,15 @@
 import { describe, expect, test } from "bun:test"
+import {
+  extensionManifestSchema,
+  getActiveWorkbenchContributions,
+} from "@starboard/ext-host"
 
 import {
   isKernelOnlyFlag,
   legacyShellContributions,
   resolveWorkbenchContributions,
 } from "./contributions"
-import { buildDeepLink, matchDeepLink } from "./deep-link"
+import { buildDeepLink, deepLinksCollide, matchDeepLink } from "./deep-link"
 import { initialTabsState, tabHref, tabsReducer, type TabsAction } from "./tabs"
 import { EMPTY_CONTRIBUTIONS } from "./types"
 
@@ -112,5 +116,138 @@ describe("tab host", () => {
     state = tabsReducer(state, { type: "route", pathname: "/", editors })
     expect(state.activeTabId).toBeNull()
     expect(state.tabs).toHaveLength(1)
+  })
+})
+
+describe("extension-host contributions (075)", () => {
+  const manifest = (overrides: Record<string, unknown>) =>
+    extensionManifestSchema.parse({
+      version: "0.0.0",
+      displayName: "Test",
+      requiredPlan: ["credit", "enterprise"],
+      contributes: {},
+      enabled: true,
+      ...overrides,
+    })
+
+  const notes = manifest({
+    id: "notes.ext",
+    contributes: {
+      activity: [{ id: "notes", label: "Notes" }],
+      views: [
+        {
+          id: "notes.list",
+          name: "Notes",
+          activityId: "notes",
+          entries: [{ id: "n", label: "All notes", href: "/notes" }],
+        },
+        // targets an activity nobody contributes → dropped
+        { id: "ghost.view", name: "Ghost", activityId: "ghost" },
+        // shadows a legacy view id → ignored
+        { id: "quotes.list", name: "Evil", activityId: "quotes" },
+      ],
+      editors: [
+        {
+          viewType: "note",
+          displayName: "Note",
+          deepLink: "/notes/:resourceId",
+        },
+        { viewType: "quote", displayName: "Shadow quote" },
+      ],
+    },
+  })
+
+  test("host contributions merge after legacy shim without shadowing it", () => {
+    const merged = resolveWorkbenchContributions({
+      kernelOnly: false,
+      hostContributions: getActiveWorkbenchContributions("credit", [notes]),
+    })
+    expect(merged.activity.map((a) => a.id)).toContain("notes")
+    expect(merged.views.map((v) => v.id)).toContain("notes.list")
+    expect(merged.views.map((v) => v.id)).not.toContain("ghost.view")
+    expect(merged.views.find((v) => v.id === "quotes.list")?.name).toBe(
+      "Quotes"
+    )
+    expect(merged.editors.find((e) => e.viewType === "quote")?.deepLink).toBe(
+      "/quote/:resourceId"
+    )
+    expect(matchDeepLink("/notes/n1", merged.editors)).toEqual({
+      viewType: "note",
+      resourceId: "n1",
+    })
+  })
+
+  test("inactive extension contributes nothing; legacy nav still works", () => {
+    const merged = resolveWorkbenchContributions({
+      kernelOnly: false,
+      extensionNav: [{ id: "inbox", label: "Inbox", href: "/messaging/inbox" }],
+      hostContributions: getActiveWorkbenchContributions("credit", [
+        { ...notes, enabled: false },
+      ]),
+    })
+    expect(merged.activity.map((a) => a.id)).not.toContain("notes")
+    expect(
+      merged.views.find((v) => v.id === "extensions.nav")?.entries
+    ).toEqual([{ id: "inbox", label: "Inbox", href: "/messaging/inbox" }])
+  })
+
+  test("host editors cannot steal routes claimed by legacy deepLink patterns", () => {
+    const thief = manifest({
+      id: "thief.ext",
+      contributes: {
+        editors: [
+          {
+            viewType: "fake-quote",
+            displayName: "Fake",
+            deepLink: "/quote/:resourceId",
+          },
+          {
+            viewType: "fake-customer",
+            displayName: "Fake",
+            deepLink: "/customers/:resourceId",
+          },
+          { viewType: "fake-wild", displayName: "Fake", deepLink: "/*" },
+          { viewType: "ok", displayName: "Ok", deepLink: "/ok/:resourceId" },
+        ],
+      },
+    })
+    const merged = resolveWorkbenchContributions({
+      kernelOnly: false,
+      hostContributions: getActiveWorkbenchContributions("credit", [thief]),
+    })
+    const viewTypes = merged.editors.map((e) => e.viewType)
+    expect(viewTypes).not.toContain("fake-quote")
+    expect(viewTypes).not.toContain("fake-customer")
+    expect(viewTypes).not.toContain("fake-wild")
+    expect(viewTypes).toContain("ok")
+    expect(matchDeepLink("/quote/q1", merged.editors)?.viewType).toBe("quote")
+    expect(matchDeepLink("/customers/c1", merged.editors)?.viewType).toBe(
+      "customer"
+    )
+    expect(matchDeepLink("/settings/team", merged.editors)?.viewType).toBe(
+      "page"
+    )
+  })
+
+  test("deepLinksCollide", () => {
+    expect(deepLinksCollide("/quote/:resourceId", "/quote/:resourceId")).toBe(
+      true
+    )
+    expect(deepLinksCollide("/customers/:resourceId", "/customers/new")).toBe(
+      true
+    )
+    expect(deepLinksCollide("/a/:resourceId", "/b/:resourceId")).toBe(false)
+    expect(deepLinksCollide("/a/:resourceId", "/a/:resourceId/x")).toBe(false)
+    expect(deepLinksCollide("/*", "/a/:resourceId")).toBe(false)
+    expect(deepLinksCollide("/*", "/*")).toBe(true)
+  })
+
+  test("kernel-only ignores host contributions", () => {
+    expect(
+      resolveWorkbenchContributions({
+        kernelOnly: true,
+        hostContributions: getActiveWorkbenchContributions("credit", [notes]),
+      })
+    ).toEqual(EMPTY_CONTRIBUTIONS)
   })
 })

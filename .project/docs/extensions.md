@@ -14,7 +14,29 @@ type ExtensionManifest = {
   version: string
   displayName: string
   requiredPlan: Array<"credit" | "enterprise">
+  defines?: {
+    // Points THIS extension owns (075). Others contribute via contributes.points.
+    // Ids under `workbench.` / `core.` are kernel-reserved and rejected.
+    extensionPoints?: Array<{ id: string; description?: string }>
+  }
   contributes: {
+    // Kernel workbench points (075) — what the workbench host lists:
+    activity?: Array<{ id: string; label: string; icon?: string }>
+    views?: Array<{
+      id: string
+      name: string
+      activityId: string
+      entries?: Array<{ id: string; label: string; href: string }>
+    }>
+    editors?: Array<{
+      viewType: string
+      displayName: string
+      deepLink?: string
+    }>
+    commands?: Array<{ id: string; title: string }>
+    // Contributions INTO extension-defined points, keyed by point id (075):
+    points?: Record<string, Array<{ id: string; label?: string }>>
+    // Legacy (still supported):
     nav?: Array<{ id: string; label: string; href: string }>
     jobs?: Array<{ type: string; carrier?: string }>
     api?: Array<{ pathPrefix: string }>
@@ -39,6 +61,42 @@ type ExtensionManifest = {
   enabled?: boolean
 }
 ```
+
+## Workbench contributions + defined points (075)
+
+Model: [extension-points.md](extension-points.md), [ADR 0006](adr/0006-shell-built-ins-extensions.md). Kernel never names product points; **driving built-ins define them**, siblings contribute.
+
+Host APIs (`@starboard/ext-host`, all activation-aware = `enabled ∩ entitled ∩ rollout`):
+
+| API                                                            | Purpose                                                                                             |
+| -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `getActiveWorkbenchContributions(plan, manifests?, rollout?)`  | `{ activity, views, editors, commands, points }`, each item tagged `extensionId`; first id wins     |
+| `resolvePointOwner(pointId)` / `resolveActivePointOwner(…)`    | Manifest that `defines` the point (null if undefined/ambiguous); active variant requires activation |
+| `getContributionsToPoint(pointId, plan, manifests?, rollout?)` | Contributions to a defined point; **empty if the owner is inactive** (fail closed)                  |
+| `validateManifestSet(manifests)`                               | Single owner per point + unique ids (registry load throws on errors)                                |
+
+BFF: `listActiveWorkbenchContributions(plan, orgId)` / `listActivePointContributions(pointId, plan, orgId)` in [`apps/web/lib/extensions.ts`](../../apps/web/lib/extensions.ts) (rollout-map failure → empty). `app/(app)/layout.tsx` merges them into the workbench through `mergeHostContributions` in [`apps/web/lib/workbench/contributions.ts`](../../apps/web/lib/workbench/contributions.ts); legacy shim entries win on duplicate ids **and on colliding editor `deepLink` patterns** (host editors cannot steal legacy routes), and views whose `activityId` is not contributed by an active extension are dropped (in the host and again in the merge).
+
+Add a driving built-in (owner):
+
+```ts
+{ id: "quoting.document",
+  defines: { extensionPoints: [{ id: "quoting.slots.chargeTable" }] },
+  contributes: {
+    activity: [{ id: "quotes", label: "Quotes" }],
+    views: [{ id: "quotes.list", name: "Quotes", activityId: "quotes" }],
+    editors: [{ viewType: "quote", displayName: "Quote", deepLink: "/quote/:resourceId" }],
+  } }
+```
+
+Contribute to someone else's point (never import the owner; ask the host):
+
+```ts
+{ id: "quoting.charges",
+  contributes: { points: { "quoting.slots.chargeTable": [{ id: "charges.grid" }] } } }
+```
+
+Rules: point ids are globally unique and owned by exactly one extension; extensions cannot define `workbench.*` / `core.*`; contributions to an undefined or inactive-owner point are silently dropped; the owner's UI reads its points via `listActivePointContributions` — no `if (extensionId === …)` in the kernel. Compat: `nav` and `uiSlots` are unchanged (`listActiveExtensionNav` still feeds the legacy "Extensions" sidebar view).
 
 ## Async job contract
 
@@ -108,6 +166,7 @@ For an existing `service` (`spot` / `ingestion` / `messaging`), **no new dispatc
 - Spot rate sources: `listActiveSpotRateSources` in [`apps/web/lib/extensions.ts`](../../apps/web/lib/extensions.ts) (slot `quote.rateSources`).
 - Rates sheet enqueue/poll: [`apps/web/components/quotes/rates-search-sheet.tsx`](../../apps/web/components/quotes/rates-search-sheet.tsx) uses `extensionApiPath` + `pollExtensionJob` with the active extension id — no new sheet for a new carrier.
 - Nav / other slots: declare `contributes.nav` / `uiSlots`; shell reads `listActiveExtensionNav` / `listActiveUiSlots`.
+- Workbench activity / views / editors / commands and defined points: see [Workbench contributions + defined points](#workbench-contributions--defined-points-075).
 
 ### Forbidden in shell core
 

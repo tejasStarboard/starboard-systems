@@ -21,7 +21,7 @@ Follow the cookbook for new `spot.*` / ingest / messaging plugins. Product work 
 ## Rules
 
 1. Shell must work with the extension **disabled** (and when rollout map read fails — fail closed).
-2. Contribute nav / UI slots / API prefixes via **manifest only** — no `if (extensionId === "…")` in unrelated shell components.
+2. Contribute nav / UI slots / API prefixes / workbench points (`activity`/`views`/`editors`/`commands`, `defines.extensionPoints`, `contributes.points`) via **manifest only** — no `if (extensionId === "…")` in unrelated shell components.
 3. Long work: start Temporal workflow; BFF returns **202 + workflow / run id**; expose **GET job status** `{ status, result?, error? }`.
 4. BFF is **generic** (`/api/extensions/[extensionId]/[[...path]]`) — never add a new per-id Next `route.ts` tree. Spot Python still needs a per-id `POST /extensions/spot.<id>/jobs` today.
 5. One plugin per carrier (`spot.maersk`) or ingest mode (`ingestion.fcl_v6`).

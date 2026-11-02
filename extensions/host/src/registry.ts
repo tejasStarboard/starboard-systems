@@ -1,4 +1,5 @@
 import { extensionManifestSchema, type ExtensionManifest } from "./manifest.js"
+import { validateManifestSet } from "./validate.js"
 
 const stubManifests = [
   {
@@ -140,6 +141,11 @@ const stubManifests = [
 export const extensionRegistry: ExtensionManifest[] = stubManifests.map(
   (manifest) => extensionManifestSchema.parse(manifest)
 )
+
+const registryErrors = validateManifestSet(extensionRegistry)
+if (registryErrors.length > 0) {
+  throw new Error(`Invalid extension registry: ${registryErrors.join("; ")}`)
+}
 
 export function listManifests(): ExtensionManifest[] {
   return extensionRegistry.map((manifest) => ({ ...manifest }))

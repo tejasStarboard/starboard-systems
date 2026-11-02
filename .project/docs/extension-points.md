@@ -135,8 +135,8 @@ Optional extensions should prefer contributing to **driving** points, not invent
 {
   id: "quoting.charges",
   contributes: {
-    // target must match a defined extension point id
-    "quoting.slots.chargeTable": [{ id: "charges.grid", /* factory ref */ }],
+    // keyed by a defined extension point id (075: under `contributes.points`)
+    points: { "quoting.slots.chargeTable": [{ id: "charges.grid" }] },
   },
 }
 
@@ -144,7 +144,7 @@ Optional extensions should prefer contributing to **driving** points, not invent
 {
   id: "spot.maersk",
   contributes: {
-    "quoting.slots.rateSources": [{ id: "spot.maersk.source" }],
+    points: { "quoting.slots.rateSources": [{ id: "spot.maersk.source" }] },
     api: [{ pathPrefix: "/api/extensions/spot.maersk" }],
     jobs: [{ type: "spot.search", carrier: "maersk" }],
   },
