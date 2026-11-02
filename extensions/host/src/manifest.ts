@@ -136,6 +136,18 @@ export const extensionCommandContributionSchema = z.object({
 export const extensionPointContributionSchema = z.object({
   id: z.string().min(1),
   label: z.string().min(1).optional(),
+  /**
+   * UI factory key the owner's slot host resolves (defaults to `id`). Lets
+   * extensions without their own JS package (e.g. spot workers) reuse a
+   * generic panel exported by a built-in.
+   */
+  component: z.string().min(1).optional(),
+  /** Mount order within the point (ascending; default 0, ties keep registry order). */
+  order: z.number().optional(),
+  /** Static JSON props handed to the resolved component. */
+  props: z
+    .record(z.string().min(1), z.union([z.string(), z.number(), z.boolean()]))
+    .optional(),
 })
 
 /** `defines.extensionPoints` — points this extension owns; others contribute here. */

@@ -21,7 +21,7 @@ import {
   SelectValue,
 } from "@starboard/lib-ui/components/select"
 
-import type { QuoteFormValues } from "../lib/quotes.schema"
+import type { QuoteFormValues } from "@starboard/lib-contracts"
 
 const USAGE_UNITS: { value: UsageUnit; label: string }[] = [
   { value: "flat", label: "Flat" },

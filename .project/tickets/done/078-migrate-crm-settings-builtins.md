@@ -2,7 +2,7 @@
 id: 078
 wave: 06-platform
 title: Migrate CRM + org.settings (+ geo widgets) into built-ins
-status: in_progress
+status: done
 depends_on: [076, 077]
 epic: SYS-PLATFORM
 docs:

@@ -85,6 +85,40 @@ export function getContributionsToPoint(
       result.push({ ...contribution, extensionId: manifest.id })
     }
   }
+  // Stable sort: `order` ascending, ties keep registry order.
+  return result
+    .map((item, index) => ({ item, index }))
+    .sort(
+      (a, b) => (a.item.order ?? 0) - (b.item.order ?? 0) || a.index - b.index
+    )
+    .map(({ item }) => item)
+}
+
+/**
+ * Active contributions to every point owned by `ownerId` (keyed by point id;
+ * every defined point is present, possibly empty). Generic: callers pass an
+ * owner id, never slot names. Empty object when the owner is inactive.
+ */
+export function getContributionsForOwner(
+  ownerId: string,
+  plan: Plan,
+  manifests: ExtensionManifest[] = listManifests(),
+  rolloutContext?: RolloutContext
+): Record<string, WithExtensionId<ExtensionPointContribution>[]> {
+  const owner = manifests.find((manifest) => manifest.id === ownerId)
+  if (!owner || !isActive(owner, plan, rolloutContext)) {
+    return {}
+  }
+  const result: Record<string, WithExtensionId<ExtensionPointContribution>[]> =
+    {}
+  for (const point of owner.defines?.extensionPoints ?? []) {
+    result[point.id] = getContributionsToPoint(
+      point.id,
+      plan,
+      manifests,
+      rolloutContext
+    )
+  }
   return result
 }
 

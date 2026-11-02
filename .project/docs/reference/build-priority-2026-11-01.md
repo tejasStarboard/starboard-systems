@@ -23,7 +23,7 @@ See also: [extension-migration-inventory-2026-11-02.md](extension-migration-inve
 |   3 | **[076](../../tickets/todo/076-builtin-extension-packages-scaffold.md)** Scaffold built-in packages        | Empty `quoting.document`, crm, settings, … + registry |
 |   4 | **[077](../../tickets/todo/077-migrate-quoting-document-builtin.md)** Migrate quote → built-in             | Largest shell extraction                              |
 |   5 | **[078](../../tickets/todo/078-migrate-crm-settings-builtins.md)** Migrate CRM + settings (+ geo)          | Clear kernel of remaining product pages               |
-|   6 | **[073](../../tickets/todo/073-quote-contribution-points.md)** Quote-defined slots                         | Peel charges / rateSources into contributions         |
+|   6 | **[073](../../tickets/in_progress/073-quote-contribution-points.md)** Quote-defined slots                  | Peel charges / rateSources into contributions         |
 
 `074` ∥ `075` OK if coordinated on contracts.
 

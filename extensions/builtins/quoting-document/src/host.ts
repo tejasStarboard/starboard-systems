@@ -1,3 +1,5 @@
+import type { SlotComponentRegistry } from "./slots/slot-host"
+
 /**
  * Contract between the workbench hosts (kernel) and `quoting.document` UI.
  * The kernel passes this in; the package never imports kernel / Next modules.
@@ -11,6 +13,12 @@ export type BuiltinHost = {
   }) => void
   /** Currently focused editor tab, if any (sidebar highlight). */
   activeEditor: { viewType: string; resourceId: string } | null
+  /**
+   * UI factories contributed by active extensions into extension-defined
+   * points, keyed by contribution id / `component`. Generic: the kernel merges
+   * every package's `pointComponents` and never names slots.
+   */
+  pointComponents?: SlotComponentRegistry
 }
 
 /** Props every built-in editor factory receives from the workbench editor host. */

@@ -10,12 +10,41 @@
  * - `quote` editor owns the `/quote/:resourceId` deep link; `quote.list` owns
  *   the workbench home `/` (static deep link) so the quotes table opens by
  *   default, survives refresh, and is discoverable on mobile.
+ * - `defines.extensionPoints` (073): the quote editor owns these slots; charges,
+ *   rate sources, Incoterm, markup, … contribute into them. The kernel never
+ *   names them. `quoting.totalsHooks` is headless (declared now; consumed by
+ *   the ONE MATH pipeline in 072).
  */
 export const manifest = {
   id: "quoting.document",
   version: "0.1.0",
   displayName: "Quote documents",
   requiredPlan: ["credit", "enterprise"],
+  defines: {
+    extensionPoints: [
+      {
+        id: "quoting.slots.headerFields",
+        description: "Header region of the quote editor (extra fields).",
+      },
+      {
+        id: "quoting.slots.chargeTable",
+        description: "Charge grid region of the selected lane.",
+      },
+      {
+        id: "quoting.slots.totals",
+        description: "Footer / markup region below the charge grid.",
+      },
+      {
+        id: "quoting.slots.rateSources",
+        description: "Search/apply rates sheet (catalog, spot, …).",
+      },
+      {
+        id: "quoting.totalsHooks",
+        description:
+          "Headless hooks into the totals pipeline (not hosted yet).",
+      },
+    ],
+  },
   contributes: {
     activity: [{ id: "quotes", label: "Quotes", icon: "file-text" }],
     views: [

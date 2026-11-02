@@ -65,6 +65,7 @@ export { DEFAULT_PLAN, parsePlan } from "./plan.js"
 export {
   EMPTY_WORKBENCH_CONTRIBUTIONS,
   getActiveWorkbenchContributions,
+  getContributionsForOwner,
   getContributionsToPoint,
   resolveActivePointOwner,
   resolvePointOwner,

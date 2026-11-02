@@ -2,7 +2,7 @@
 id: 073
 wave: 06-platform
 title: quoting.document defines slots; peel charge/rate contributions
-status: open
+status: in_progress
 depends_on: [077, 075]
 epic: SYS-PLATFORM
 docs:
@@ -24,10 +24,10 @@ After quote lives in **`quoting.document`**:
 
 ## Acceptance
 
-- [ ] Manifest `defines` + contributions resolve; inactive owner → no mounts
-- [ ] Charge UI not imported by kernel or by document package except via slot host
-- [ ] Spot/catalog still appear when those extensions active
-- [ ] Cookbook + inventory updated
+- [x] Manifest `defines` + contributions resolve; inactive owner → no mounts
+- [x] Charge UI not imported by kernel or by document package except via slot host
+- [x] Spot/catalog still appear when those extensions active
+- [x] Cookbook + inventory updated
 
 ## Non-goals
 

@@ -35,12 +35,21 @@ type ExtensionManifest = {
     }>
     commands?: Array<{ id: string; title: string }>
     // Contributions INTO extension-defined points, keyed by point id (075):
-    points?: Record<string, Array<{ id: string; label?: string }>>
+    points?: Record<
+      string,
+      Array<{
+        id: string
+        label?: string
+        component?: string // UI factory key (default: id)
+        order?: number // ascending, default 0
+        props?: Record<string, string | number | boolean>
+      }>
+    >
     // Legacy (still supported):
     nav?: Array<{ id: string; label: string; href: string }>
     jobs?: Array<{ type: string; carrier?: string }>
     api?: Array<{ pathPrefix: string }>
-    uiSlots?: string[] // e.g. "quote.rateSources", "rates.upload"
+    uiSlots?: string[] // legacy string tags, e.g. "rates.upload"
     settings?: Array<{
       key: string
       label: string
@@ -68,12 +77,13 @@ Model: [extension-points.md](extension-points.md), [ADR 0006](adr/0006-shell-bui
 
 Host APIs (`@starboard/ext-host`, all activation-aware = `enabled ∩ entitled ∩ rollout`):
 
-| API                                                            | Purpose                                                                                             |
-| -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| `getActiveWorkbenchContributions(plan, manifests?, rollout?)`  | `{ activity, views, editors, commands, points }`, each item tagged `extensionId`; first id wins     |
-| `resolvePointOwner(pointId)` / `resolveActivePointOwner(…)`    | Manifest that `defines` the point (null if undefined/ambiguous); active variant requires activation |
-| `getContributionsToPoint(pointId, plan, manifests?, rollout?)` | Contributions to a defined point; **empty if the owner is inactive** (fail closed)                  |
-| `validateManifestSet(manifests)`                               | Single owner per point + unique ids (registry load throws on errors)                                |
+| API                                                             | Purpose                                                                                             |
+| --------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `getActiveWorkbenchContributions(plan, manifests?, rollout?)`   | `{ activity, views, editors, commands, points }`, each item tagged `extensionId`; first id wins     |
+| `resolvePointOwner(pointId)` / `resolveActivePointOwner(…)`     | Manifest that `defines` the point (null if undefined/ambiguous); active variant requires activation |
+| `getContributionsToPoint(pointId, plan, manifests?, rollout?)`  | Contributions to a defined point; **empty if the owner is inactive** (fail closed)                  |
+| `getContributionsForOwner(ownerId, plan, manifests?, rollout?)` | Contributions to **every** point `ownerId` defines, keyed by point id (073); `{}` if owner inactive |
+| `validateManifestSet(manifests)`                                | Single owner per point + unique ids (registry load throws on errors)                                |
 
 BFF: `listActiveWorkbenchContributions(plan, orgId)` / `listActivePointContributions(pointId, plan, orgId)` in [`apps/web/lib/extensions.ts`](../../apps/web/lib/extensions.ts) (rollout-map failure → empty). `app/(app)/layout.tsx` merges them into the workbench through `mergeHostContributions` in [`apps/web/lib/workbench/contributions.ts`](../../apps/web/lib/workbench/contributions.ts); legacy shim entries win on duplicate ids **and on colliding editor `deepLink` patterns** (host editors cannot steal legacy routes), and views whose `activityId` is not contributed by an active extension are dropped (in the host and again in the merge).
 
@@ -93,10 +103,24 @@ Contribute to someone else's point (never import the owner; ask the host):
 
 ```ts
 { id: "quoting.charges",
-  contributes: { points: { "quoting.slots.chargeTable": [{ id: "charges.grid" }] } } }
+  contributes: { points: { "quoting.slots.chargeTable": [{ id: "quoting.charges.table" }] } } }
 ```
 
 Rules: point ids are globally unique and owned by exactly one extension; extensions cannot define `workbench.*` / `core.*`; contributions to an undefined or inactive-owner point are silently dropped; the owner's UI reads its points via `listActivePointContributions` — no `if (extensionId === …)` in the kernel. Compat: `nav` and `uiSlots` are unchanged (`listActiveExtensionNav` still feeds the legacy "Extensions" sidebar view).
+
+### Cookbook: contribute UI to a `quoting.document` slot (073)
+
+1. **Manifest** (pure data, `extensions/builtins/<id>/src/manifest.ts` or `registry.ts` for workers): `contributes.points["quoting.slots.<slot>"] = [{ id, label?, component?, order?, props? }]`. Slots: `headerFields`, `chargeTable`, `totals`, `rateSources` (+ headless `quoting.totalsHooks`, declared only).
+2. **UI factory**: export `pointComponents: { [contributionId or component]: Component }` from the package `index.ts`. Props = the slot's contract + `contribution` (types: `@starboard/ext-quoting-document/slots` — import **types only**; never import the document's components, and the document never imports yours).
+3. **Register once**: spread the package's `pointComponents` into `builtinPointComponents` in [`builtin-editors.ts`](../../apps/web/lib/workbench/builtin-editors.ts) (+ `apps/web` dep and `transpilePackages`). Optional workers with no JS package reuse a built-in panel via `component` (e.g. `rates.spotSource`).
+4. **Unplug = no mount**: slot host mounts only contributions whose owner **and** contributor are active (rollout-aware, from editor-context `slots`) and whose factory is registered. Owner off → nothing; contributor off → only its mounts vanish. Lane actions that need a slot (Search rates, Add manual rate) hide when the slot is empty.
+
+| Slot                         | Props (besides `contribution`)                                                                       | Mounted today                                            |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| `quoting.slots.chargeTable`  | `control, register, lanePath, rateFields, currencyCode, excludedBuckets, onAppendRate, onRemoveRate` | `quoting.charges` (table + per-rate surcharges, globals) |
+| `quoting.slots.rateSources`  | `origin, destination, onApplyRate`                                                                   | `rates.catalog` (catalog list), `spot.*` panels          |
+| `quoting.slots.totals`       | `control, register, lanePath, currencyCode, totals`                                                  | — (document renders default footer; hosted)              |
+| `quoting.slots.headerFields` | `quoteId, control, register, setValue, errors`                                                       | — (hosted; Incoterm lands here in **070**)               |
 
 ## Async job contract
 
@@ -117,7 +141,7 @@ Register in [`extensions/host/src/registry.ts`](../../extensions/host/src/regist
 - `requiredPlan`, `enabled: true`
 - `contributes.jobs`: `{ type: "spot.search", carrier: "<plugin>" }`
 - `contributes.api`: `{ pathPrefix: "/api/extensions/spot.<plugin>" }`
-- `contributes.uiSlots`: `["quote.rateSources"]` (spot sources in the rates sheet)
+- `contributes.points`: `{ "quoting.slots.rateSources": [{ id: "spot.<plugin>.source", label: "<Display name>", component: "rates.spotSource", props: { carrier: "<plugin>" } }] }` — spot source in the quote rates sheet (**073**; `quoting.document` defines the point, `rates.catalog` ships the generic `rates.spotSource` panel, so no JS package is needed)
 - `worker`: `{ kind: "python-temporal", service: "spot", plugin: "<plugin>" }`
 - `healthPath`: `"/health"`
 
@@ -163,8 +187,8 @@ For an existing `service` (`spot` / `ingestion` / `messaging`), **no new dispatc
 
 ### 6. UI — contributions only
 
-- Spot rate sources: `listActiveSpotRateSources` in [`apps/web/lib/extensions.ts`](../../apps/web/lib/extensions.ts) (slot `quote.rateSources`).
-- Rates sheet enqueue/poll: [`extensions/builtins/quoting-document/src/components/rates-search-sheet.tsx`](../../extensions/builtins/quoting-document/src/components/rates-search-sheet.tsx) uses `extensionApiPath` + `pollExtensionJob` with the active extension id — no new sheet for a new carrier.
+- Quote slots (**073**): `quoting.document` **defines** `quoting.slots.{headerFields,chargeTable,totals,rateSources}` (+ headless `quoting.totalsHooks`). The BFF `GET /api/quotes/:id/editor-context` returns `slots` = `listActiveOwnerPointContributions("quoting.document", …)` (active contributions per defined point; empty when the owner is inactive). The quote editor's slot host (`QuoteSlot`) mounts each contribution via the UI factory registered under its `component ?? id` in a package's `pointComponents` export (merged in [`builtin-editors.ts`](../../apps/web/lib/workbench/builtin-editors.ts); the kernel never names slots).
+- Spot rate sources: contribution to `quoting.slots.rateSources` (above). Enqueue/poll lives in [`extensions/builtins/rates-catalog/src/slots/spot-source.tsx`](../../extensions/builtins/rates-catalog/src/slots/spot-source.tsx) (`extensionApiPath` + `pollExtensionJob` with the contributing `extensionId`) — no new sheet or UI for a new carrier.
 - Nav / other slots: declare `contributes.nav` / `uiSlots`; shell reads `listActiveExtensionNav` / `listActiveUiSlots`.
 - Workbench activity / views / editors / commands and defined points: see [Workbench contributions + defined points](#workbench-contributions--defined-points-075).
 
@@ -253,7 +277,7 @@ async def enqueue_example_search(body: SearchJobBody) -> EnqueueResponse:
 
 Job status route is already parameterized — no new GET handler.
 
-5. **BFF / UI** — nothing new if you only contribute `quote.rateSources`. Active sources appear via `listActiveSpotRateSources`. The rates sheet already does:
+5. **BFF / UI** — nothing new if you only contribute to `quoting.slots.rateSources`. Active sources arrive in the editor-context `slots`, and the generic `rates.spotSource` panel does:
 
 ```ts
 await fetch(extensionApiPath(extensionId, "jobs"), { method: "POST", … })
@@ -275,7 +299,7 @@ Files touched for a thin spot carrier (typical):
 - `extensions/spot/tests/test_example_plugin.py`
 - `.project/docs/extensions.md` (this table)
 
-**Not** touched: `apps/web/app/api/extensions/**` (generic route stays), rates-search-sheet (contribution-driven).
+**Not** touched: `apps/web/app/api/extensions/**` (generic route stays), rates-search-sheet / `rates.catalog` (contribution-driven).
 
 ---
 

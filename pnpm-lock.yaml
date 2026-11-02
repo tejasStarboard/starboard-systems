@@ -50,9 +50,15 @@ importers:
       '@starboard/ext-org-settings':
         specifier: workspace:*
         version: link:../../extensions/builtins/org-settings
+      '@starboard/ext-quoting-charges':
+        specifier: workspace:*
+        version: link:../../extensions/builtins/quoting-charges
       '@starboard/ext-quoting-document':
         specifier: workspace:*
         version: link:../../extensions/builtins/quoting-document
+      '@starboard/ext-rates-catalog':
+        specifier: workspace:*
+        version: link:../../extensions/builtins/rates-catalog
       '@starboard/lib-contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
@@ -227,10 +233,32 @@ importers:
         version: 5.9.3
 
   extensions/builtins/quoting-charges:
+    dependencies:
+      '@phosphor-icons/react':
+        specifier: ^2.1.10
+        version: 2.1.10(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+      '@starboard/ext-quoting-document':
+        specifier: workspace:*
+        version: link:../quoting-document
+      '@starboard/lib-contracts':
+        specifier: workspace:*
+        version: link:../../../packages/contracts
+      '@starboard/lib-ui':
+        specifier: workspace:*
+        version: link:../../../packages/ui
+      react-hook-form:
+        specifier: ^7.91.0
+        version: 7.91.0(@types/react@19.3.0)(react@19.3.1)
     devDependencies:
       '@starboard/tool-typescript-config':
         specifier: workspace:*
         version: link:../../../tooling/typescript-config
+      '@types/react':
+        specifier: ^19
+        version: 19.3.0
+      react:
+        specifier: 19.3.1
+        version: 19.3.1
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
@@ -282,10 +310,29 @@ importers:
         version: 5.9.3
 
   extensions/builtins/rates-catalog:
+    dependencies:
+      '@starboard/ext-quoting-document':
+        specifier: workspace:*
+        version: link:../quoting-document
+      '@starboard/lib-contracts':
+        specifier: workspace:*
+        version: link:../../../packages/contracts
+      '@starboard/lib-ui':
+        specifier: workspace:*
+        version: link:../../../packages/ui
     devDependencies:
       '@starboard/tool-typescript-config':
         specifier: workspace:*
         version: link:../../../tooling/typescript-config
+      '@types/bun':
+        specifier: ^1.3.5
+        version: 1.4.4
+      '@types/react':
+        specifier: ^19
+        version: 19.3.0
+      react:
+        specifier: 19.3.1
+        version: 19.3.1
       typescript:
         specifier: ^5.9.3
         version: 5.9.3

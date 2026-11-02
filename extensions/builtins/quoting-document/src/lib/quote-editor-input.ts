@@ -1,5 +1,5 @@
 import type { QuoteFormOption, QuoteFormValues } from "./quotes.schema"
-import type { SpotRateSource } from "./spot-rate-source"
+import type { QuoteSlotContributions } from "../slots/types"
 
 /** `GET /api/quotes/:id/editor-context` payload (BFF composes service data). */
 export type QuoteEditorContext = {
@@ -12,7 +12,8 @@ export type QuoteEditorContext = {
     containerTypeOptions: QuoteFormOption[]
     palletTypeOptions: QuoteFormOption[]
   }
-  spotRateSources: SpotRateSource[]
+  /** Active contributions to this extension's defined slots (host-resolved). */
+  slots: QuoteSlotContributions
 }
 
 export type QuoteEditorInput = {
@@ -22,7 +23,7 @@ export type QuoteEditorInput = {
   portOptions: QuoteFormOption[]
   containerTypeOptions: QuoteFormOption[]
   palletTypeOptions: QuoteFormOption[]
-  spotRateSources: SpotRateSource[]
+  slots: QuoteSlotContributions
 }
 
 /**
@@ -95,6 +96,6 @@ export function prepareQuoteEditorInput(
     portOptions: ports,
     containerTypeOptions: options.containerTypeOptions,
     palletTypeOptions: options.palletTypeOptions,
-    spotRateSources: context.spotRateSources,
+    slots: context.slots ?? {},
   }
 }

@@ -136,7 +136,12 @@ Optional extensions should prefer contributing to **driving** points, not invent
   id: "quoting.charges",
   contributes: {
     // keyed by a defined extension point id (075: under `contributes.points`)
-    points: { "quoting.slots.chargeTable": [{ id: "charges.grid" }] },
+    points: {
+      "quoting.slots.chargeTable": [
+        { id: "quoting.charges.table" },
+        { id: "quoting.charges.globals" },
+      ],
+    },
   },
 }
 
@@ -162,7 +167,7 @@ Optional extensions should prefer contributing to **driving** points, not invent
 | `core.api` / `jobs` / `preferences`            | Charge/Incoterm/markup imports        |
 | Deep link → `workbench.editors` open           | Feature `page.tsx` as long-term model |
 
-**073:** implement slot **hosts + `defines`** inside `quoting.document`; wire sibling contributions.
+**073 (done):** slot **hosts + `defines`** live inside `quoting.document`; `quoting.charges` → `chargeTable`, `rates.catalog` + `spot.*` → `rateSources`; `headerFields` / `totals` hosted, unclaimed; `quoting.totalsHooks` declared (headless, consumed by 072). How-to: [extensions.md cookbook](extensions.md#cookbook-contribute-ui-to-a-quotingdocument-slot-073).
 
 ---
 
