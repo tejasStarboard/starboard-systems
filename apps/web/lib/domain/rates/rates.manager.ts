@@ -6,6 +6,8 @@ import type {
   GetRateResponse,
   ListRatesQuery,
   Rate,
+  UpdateRateRequest,
+  UpdateRateResponse,
 } from "@starboard/lib-contracts"
 
 import {
@@ -38,6 +40,28 @@ export class RatesManager {
     requestId?: string
   ): Promise<GetRateResponse> {
     return this.ratesClient.getRate(organizationId, rateId, requestId)
+  }
+
+  async updateRateForOrg(
+    organizationId: string,
+    rateId: string,
+    payload: UpdateRateRequest,
+    requestId?: string
+  ): Promise<UpdateRateResponse> {
+    return this.ratesClient.updateRate(
+      organizationId,
+      rateId,
+      payload,
+      requestId
+    )
+  }
+
+  async deleteRateForOrg(
+    organizationId: string,
+    rateId: string,
+    requestId?: string
+  ): Promise<void> {
+    return this.ratesClient.deleteRate(organizationId, rateId, requestId)
   }
 }
 

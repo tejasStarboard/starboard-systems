@@ -4,11 +4,14 @@ import {
   createRateResponseSchema,
   getRateResponseSchema,
   listRatesResponseSchema,
+  updateRateResponseSchema,
   type CreateRateRequest,
   type CreateRateResponse,
   type GetRateResponse,
   type ListRatesQuery,
   type Rate,
+  type UpdateRateRequest,
+  type UpdateRateResponse,
 } from "@starboard/lib-contracts"
 
 import { env } from "@/env"
@@ -34,6 +37,17 @@ export interface RatesClient {
     rateId: string,
     requestId?: string
   ): Promise<GetRateResponse>
+  updateRate(
+    organizationId: string,
+    rateId: string,
+    payload: UpdateRateRequest,
+    requestId?: string
+  ): Promise<UpdateRateResponse>
+  deleteRate(
+    organizationId: string,
+    rateId: string,
+    requestId?: string
+  ): Promise<void>
 }
 
 function buildListPath(query: Partial<ListRatesQuery> = {}): string {
@@ -43,6 +57,7 @@ function buildListPath(query: Partial<ListRatesQuery> = {}): string {
   if (query.destination) params.set("destination", query.destination)
   if (query.customerId) params.set("customerId", query.customerId)
   if (query.validAt) params.set("validAt", query.validAt)
+  if (query.includeInactive) params.set("includeInactive", "true")
   const qs = params.toString()
   return qs ? `/rates?${qs}` : "/rates"
 }
@@ -124,6 +139,53 @@ class HttpRatesClient implements RatesClient {
       throw new Error("Failed to get rate: invalid response")
     }
     return parsed.data
+  }
+
+  async updateRate(
+    organizationId: string,
+    rateId: string,
+    payload: UpdateRateRequest,
+    requestId?: string
+  ): Promise<UpdateRateResponse> {
+    const options = createServiceOptions({
+      baseUrl: this.options.baseUrl,
+      organizationId,
+      requestId,
+    })
+    const response = await serviceFetch(
+      `/rates/${encodeURIComponent(rateId)}`,
+      {
+        method: "PATCH",
+        body: JSON.stringify(payload),
+      },
+      options
+    )
+    const body = await parseJsonResponse(response, "Failed to update rate")
+    const parsed = updateRateResponseSchema.safeParse(body)
+    if (!parsed.success) {
+      throw new Error("Failed to update rate: invalid response")
+    }
+    return parsed.data
+  }
+
+  async deleteRate(
+    organizationId: string,
+    rateId: string,
+    requestId?: string
+  ): Promise<void> {
+    const options = createServiceOptions({
+      baseUrl: this.options.baseUrl,
+      organizationId,
+      requestId,
+    })
+    const response = await serviceFetch(
+      `/rates/${encodeURIComponent(rateId)}`,
+      { method: "DELETE" },
+      options
+    )
+    if (!response.ok && response.status !== 204) {
+      await parseJsonResponse(response, "Failed to delete rate")
+    }
   }
 }
 

@@ -8,7 +8,10 @@ import { pointComponents as quotingChargesPoints } from "@starboard/ext-quoting-
 import { pointComponents as quotingIncotermPoints } from "@starboard/ext-quoting-incoterm"
 import { pointComponents as quotingMarkupPoints } from "@starboard/ext-quoting-markup"
 import { pointComponents as quotingPdfPoints } from "@starboard/ext-quoting-pdf"
-import { pointComponents as ratesCatalogPoints } from "@starboard/ext-rates-catalog"
+import {
+  editors as ratesCatalogEditors,
+  pointComponents as ratesCatalogPoints,
+} from "@starboard/ext-rates-catalog"
 import {
   editors as orgSettingsEditors,
   views as orgSettingsViews,
@@ -41,6 +44,7 @@ export const builtinEditors: Readonly<Record<string, BuiltinEditorComponent>> =
     ...quotingDocumentEditors,
     ...crmPartiesEditors,
     ...orgSettingsEditors,
+    ...ratesCatalogEditors,
   }
 
 export const builtinViews: Readonly<Record<string, BuiltinViewComponent>> = {

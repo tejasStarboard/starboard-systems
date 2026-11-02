@@ -11,6 +11,7 @@ import type {
   ListRatesFilters,
   RateInsert,
   RateRow,
+  RateUpdate,
   RatesDao,
 } from "../dao/rates.dao"
 
@@ -24,6 +25,9 @@ class InMemoryRatesDao implements RatesDao {
     return this.rates
       .filter((row) => row.organizationId === organizationId)
       .filter((row) => {
+        if (!filters.includeInactive && !row.isActive) {
+          return false
+        }
         const q = filters.q?.trim().toLowerCase()
         if (q) {
           const haystack = `${row.label} ${row.carrier ?? ""}`.toLowerCase()
@@ -61,6 +65,7 @@ class InMemoryRatesDao implements RatesDao {
     const now = new Date()
     const created: RateRow = {
       ...row,
+      isActive: row.isActive ?? true,
       createdAt: now,
       updatedAt: now,
     }
@@ -74,6 +79,33 @@ class InMemoryRatesDao implements RatesDao {
         (row) => row.organizationId === organizationId && row.id === id
       ) ?? null
     )
+  }
+
+  async update(
+    organizationId: string,
+    id: string,
+    patch: RateUpdate
+  ): Promise<RateRow | null> {
+    const index = this.rates.findIndex(
+      (row) => row.organizationId === organizationId && row.id === id
+    )
+    if (index < 0) return null
+    const current = this.rates[index]!
+    const updated: RateRow = {
+      ...current,
+      ...patch,
+      updatedAt: new Date(),
+    }
+    this.rates[index] = updated
+    return updated
+  }
+
+  async delete(organizationId: string, id: string): Promise<boolean> {
+    const before = this.rates.length
+    this.rates = this.rates.filter(
+      (row) => !(row.organizationId === organizationId && row.id === id)
+    )
+    return this.rates.length < before
   }
 }
 
@@ -134,6 +166,7 @@ describe("DefaultRatesService org isolation", () => {
 
     const gotA = await service.get("org-a", rateA.id)
     expect(gotA.id).toBe(rateA.id)
+    expect(gotA.isActive).toBe(true)
 
     const contract = listRatesResponseSchema.safeParse({ rates: listA })
     expect(contract.success).toBe(true)
@@ -201,5 +234,42 @@ describe("DefaultRatesService org isolation", () => {
       validAt: "2026-08-15T00:00:00.000Z",
     })
     expect(byValidity.map((row) => row.label)).toEqual(["NGB-NYC"])
+  })
+
+  test("soft-delete hides from default list; hard-delete removes", async () => {
+    const service = new DefaultRatesService(new InMemoryRatesDao())
+    const created = await service.create(
+      "org-a",
+      sampleInput({ label: "Soft me" })
+    )
+
+    const inactive = await service.update("org-a", created.id, {
+      isActive: false,
+    })
+    expect(inactive.isActive).toBe(false)
+
+    const activeOnly = await service.list("org-a", {
+      q: "",
+      origin: "",
+      destination: "",
+      customerId: "",
+      validAt: "",
+    })
+    expect(activeOnly).toEqual([])
+
+    const withInactive = await service.list("org-a", {
+      q: "",
+      origin: "",
+      destination: "",
+      customerId: "",
+      validAt: "",
+      includeInactive: true,
+    })
+    expect(withInactive.map((row) => row.id)).toEqual([created.id])
+
+    await service.delete("org-a", created.id)
+    await expect(service.get("org-a", created.id)).rejects.toBeInstanceOf(
+      RatesNotFoundError
+    )
   })
 })

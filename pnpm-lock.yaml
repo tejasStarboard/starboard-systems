@@ -416,6 +416,12 @@ importers:
 
   extensions/builtins/rates-catalog:
     dependencies:
+      '@hookform/resolvers':
+        specifier: ^6.0.2
+        version: 6.0.2(@standard-schema/spec@1.1.0)(ajv-formats@2.1.1(ajv@8.20.0))(ajv@8.20.0)(react-hook-form@7.91.0(@types/react@19.3.0)(react@19.3.1))(zod@4.6.7)
+      '@phosphor-icons/react':
+        specifier: ^2.1.10
+        version: 2.1.10(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       '@starboard/ext-quoting-document':
         specifier: workspace:*
         version: link:../quoting-document
@@ -425,6 +431,12 @@ importers:
       '@starboard/lib-ui':
         specifier: workspace:*
         version: link:../../../packages/ui
+      react-hook-form:
+        specifier: ^7.91.0
+        version: 7.91.0(@types/react@19.3.0)(react@19.3.1)
+      zod:
+        specifier: ^4.6.7
+        version: 4.6.7
     devDependencies:
       '@starboard/tool-typescript-config':
         specifier: workspace:*

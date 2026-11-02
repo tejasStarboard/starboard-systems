@@ -45,6 +45,8 @@ export const rateCatalog = ratesSchema.table(
     validFrom: timestamp("valid_from").notNull(),
     validTo: timestamp("valid_to").notNull(),
     source: text("source").$type<RateSource>().notNull().default("manual"),
+    /** Soft-delete: false hides from default list / apply-to-lane. */
+    isActive: boolean("is_active").notNull().default(true),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
       .defaultNow()
@@ -65,6 +67,10 @@ export const rateCatalog = ratesSchema.table(
     index("rate_organization_carrier_idx").on(
       table.organizationId,
       table.carrier
+    ),
+    index("rate_organization_active_idx").on(
+      table.organizationId,
+      table.isActive
     ),
     index("rate_valid_range_idx").on(table.validFrom, table.validTo),
   ]

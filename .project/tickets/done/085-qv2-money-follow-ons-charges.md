@@ -2,7 +2,7 @@
 id: 085
 wave: 07-quote-loop
 title: QV2 money follow-ons in quoting.charges (per-CT, row FX, equipment)
-status: in_progress
+status: done
 depends_on: [072, 084]
 epic: SYS-PRICING
 docs:
@@ -51,10 +51,10 @@ Prefer fixture-backed cases under `packages/pricing` / shared QV2 fixtures.
 
 ## Acceptance
 
-- [ ] Behavior lives only in `quoting.charges` contributions + pricing package
-- [ ] Fixtures prove per-CT / FX / equipment cases that are claimed done
-- [ ] Deferred cells explicitly listed in domain docs
-- [ ] `pnpm run ci` green
+- [x] Behavior lives only in `quoting.charges` contributions + pricing package
+- [x] Fixtures prove per-CT / FX / equipment cases that are claimed done
+- [x] Deferred cells explicitly listed in domain docs
+- [x] `pnpm run ci` green
 
 ## Out of scope
 

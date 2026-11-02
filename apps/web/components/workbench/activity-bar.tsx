@@ -24,6 +24,7 @@ const ICONS: Record<string, React.ReactNode> = {
   puzzle: <PuzzlePieceIcon />,
   upload: <UploadSimpleIcon />,
   mail: <EnvelopeIcon />,
+  "squares-four": <SquaresFourIcon />,
 }
 
 export function ActivityBar({

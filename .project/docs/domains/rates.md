@@ -1,10 +1,10 @@
 # Domain: rates
 
-|         |                                |
-| ------- | ------------------------------ |
-| Service | `services/rates`               |
-| Schema  | `rates.*`                      |
-| Status  | Live (catalog create/list/get) |
+|         |                                   |
+| ------- | --------------------------------- |
+| Service | `services/rates`                  |
+| Schema  | `rates.*`                         |
+| Status  | Live (catalog CRUD + soft-delete) |
 
 ## Owns
 
@@ -19,18 +19,25 @@ Default port: `3104` (`RATES_SERVICE_URL`).
 
 Service-token + `X-Organization-Id`:
 
-- `GET /rates` — list/search (`q`, `origin`, `destination`, `customerId`, `validAt`)
-- `POST /rates` — create catalog rate
+- `GET /rates` — list/search (`q`, `origin`, `destination`, `customerId`, `validAt`, `includeInactive`)
+- `POST /rates` — create catalog rate (`isActive: true`)
 - `GET /rates/:id` — get by id (org-scoped)
+- `PATCH /rates/:id` — update fields and/or soft-delete (`isActive: false`) / reactivate
+- `DELETE /rates/:id` — permanent delete
 
-BFF: `apps/web/lib/clients/rates-client.ts`, `/api/rates`, quote
-`RatesSearchSheet` lists matches for the selected lane and can **apply** a
-catalog rate onto the active quote lane as a manual rate line (copy of
-label/amount — not a FK into `rates.rate`). Completed spot offers use the
-same apply path when spot sources are active.
+Default list excludes inactive rates. Apply-to-lane (quote sheet) uses the
+default list, so deactivated rates do not appear.
+
+BFF: `apps/web/lib/domain/rates/*`, `/api/rates`, `/api/rates/:rateId`.
+
+Workbench: driving built-in **`rates.catalog`** contributes Rates activity +
+list/detail editors (`/rates`, `/rates/catalog/:id`) and still contributes
+`quoting.slots.rateSources` for apply-to-lane. It **defines**
+`rates.slots.ingestActions` (stub host; **087** / `ingestion.fcl_v6` will
+inject upload UI). Kernel anchors only — no catalog product imports.
 
 ## Ingestion writes
 
 Extension `ingestion.fcl_v6` (Temporal OSS workflow) POSTs rates with
-`source: "ingestion"` after a blocking gate. See
-[021](../../tickets/in_progress/021-ext-ingestion-fcl-v6.md).
+`source: "ingestion"` after a blocking gate. Upload deep link remains
+`/rates/upload` until fully moved into `rates.slots.ingestActions`.

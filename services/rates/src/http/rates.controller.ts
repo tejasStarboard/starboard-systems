@@ -2,6 +2,7 @@ import { Hono } from "hono"
 import {
   createRateRequestSchema,
   listRatesQuerySchema,
+  updateRateRequestSchema,
 } from "@starboard/lib-contracts"
 import {
   logError,
@@ -29,6 +30,7 @@ export function createRatesController(service: RatesService) {
       destination: c.req.query("destination") ?? "",
       customerId: c.req.query("customerId") ?? "",
       validAt: c.req.query("validAt") ?? "",
+      includeInactive: c.req.query("includeInactive") ?? "",
     })
     if (!query.success) {
       return c.json(
@@ -90,6 +92,51 @@ export function createRatesController(service: RatesService) {
       return c.json(rate)
     } catch (error) {
       return handleError(c, requestId, "get_rate_failed", error)
+    }
+  })
+
+  app.patch("/rates/:id", async (c) => {
+    const requestId = c.get("requestId")
+    const organizationId =
+      c.get("organizationId") || c.req.query("organizationId") || ""
+    const id = c.req.param("id")
+
+    let body: unknown
+    try {
+      body = await c.req.json()
+    } catch {
+      return c.json({ error: "Invalid JSON body" }, 400)
+    }
+
+    const parsed = updateRateRequestSchema.safeParse(body)
+    if (!parsed.success) {
+      return c.json(
+        { error: parsed.error.issues[0]?.message ?? "Invalid request" },
+        400
+      )
+    }
+
+    try {
+      const updated = await service.update(organizationId, id, parsed.data)
+      logInfo("rates", requestId, "update_rate", { id: updated.id })
+      return c.json(updated)
+    } catch (error) {
+      return handleError(c, requestId, "update_rate_failed", error)
+    }
+  })
+
+  app.delete("/rates/:id", async (c) => {
+    const requestId = c.get("requestId")
+    const organizationId =
+      c.get("organizationId") || c.req.query("organizationId") || ""
+    const id = c.req.param("id")
+
+    try {
+      await service.delete(organizationId, id)
+      logInfo("rates", requestId, "delete_rate", { id })
+      return c.body(null, 204)
+    } catch (error) {
+      return handleError(c, requestId, "delete_rate_failed", error)
     }
   })
 

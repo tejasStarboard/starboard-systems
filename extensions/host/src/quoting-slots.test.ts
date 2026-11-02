@@ -75,8 +75,18 @@ describe("quoting.document defines slots (073)", () => {
 
   test("only quoting.document defines quoting.* points", () => {
     for (const manifest of manifests.filter((m) => m.id !== document.id)) {
-      expect(manifest.defines?.extensionPoints ?? []).toEqual([])
+      const quotingDefines = (manifest.defines?.extensionPoints ?? []).filter(
+        (point) => point.id.startsWith("quoting.")
+      )
+      expect(quotingDefines).toEqual([])
     }
+  })
+
+  test("rates.catalog defines ingestActions for 086/087", () => {
+    const catalog = manifests.find((m) => m.id === "rates.catalog")!
+    expect(catalog.defines?.extensionPoints?.map((p) => p.id)).toEqual([
+      "rates.slots.ingestActions",
+    ])
   })
 
   test("quoting.charges contributes one charge table", () => {

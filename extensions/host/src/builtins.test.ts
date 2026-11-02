@@ -70,9 +70,10 @@ describe("driving built-in manifests (076)", () => {
     expect(
       contributions.editors.every((e) => !BUILTIN_IDS.includes(e.extensionId))
     ).toBe(true)
+    // rates.catalog owns the rates activity (086); off → no rates bar entry.
+    // ingestion keeps an upload editor but no longer declares activity.
     expect(contributions.activity.map((a) => a.id).sort()).toEqual([
       "messaging",
-      "rates",
     ])
   })
 
@@ -81,8 +82,8 @@ describe("driving built-in manifests (076)", () => {
     expect(contributions.activity.map((a) => a.id)).toEqual([
       "quotes",
       "customers",
-      "settings",
       "rates",
+      "settings",
     ])
 
     const view = contributions.views.find(
