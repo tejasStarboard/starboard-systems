@@ -300,7 +300,7 @@ describe("getActiveWorkbenchContributions", () => {
     expect(result.editors[0]?.extensionId).toBe("quoting.document")
   })
 
-  test("registry contributes quoting.document (077), crm.parties + org.settings (078); no points yet", () => {
+  test("registry contributes quoting.document (077), crm.parties + org.settings (078); slot points resolve (073)", () => {
     const result = getActiveWorkbenchContributions("enterprise")
     expect(result.activity.map((a) => a.extensionId)).toEqual([
       "quoting.document",
@@ -315,6 +315,9 @@ describe("getActiveWorkbenchContributions", () => {
       "org.settings",
       "org.settings",
     ])
-    expect(result.points).toEqual({})
+    expect(Object.keys(result.points)).toEqual([
+      "quoting.slots.chargeTable",
+      "quoting.slots.rateSources",
+    ])
   })
 })

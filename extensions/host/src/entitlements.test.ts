@@ -107,9 +107,8 @@ describe("entitlement filter", () => {
     ])
   })
 
-  test("enabled spot.fake contributes quote.rateSources and spot.search for credit", () => {
+  test("enabled spot.fake contributes spot.search for credit", () => {
     const contributions = getActiveContributions("credit", listManifests())
-    expect(contributions.uiSlots).toContain("quote.rateSources")
     expect(
       contributions.jobs.some(
         (job) => job.type === "spot.search" && job.carrier === "fake"
@@ -125,7 +124,7 @@ describe("entitlement filter", () => {
     ).toBe(true)
   })
 
-  test("enabled spot.maersk contributes quote.rateSources and spot.search for credit", () => {
+  test("enabled spot.maersk contributes spot.search for credit", () => {
     const contributions = getActiveContributions("credit", listManifests())
     expect(
       contributions.jobs.some(
@@ -142,7 +141,7 @@ describe("entitlement filter", () => {
     ).toBe(true)
   })
 
-  test("enabled spot.cma contributes quote.rateSources and spot.search for credit", () => {
+  test("enabled spot.cma contributes spot.search for credit", () => {
     const contributions = getActiveContributions("credit", listManifests())
     expect(
       contributions.jobs.some(

@@ -71,7 +71,16 @@ const stubManifests = [
     contributes: {
       jobs: [{ type: "spot.search", carrier: "fake" }],
       api: [{ pathPrefix: "/api/extensions/spot.fake" }],
-      uiSlots: ["quote.rateSources"],
+      points: {
+        "quoting.slots.rateSources": [
+          {
+            id: "spot.fake.source",
+            label: "Fake spot rates",
+            component: "rates.spotSource",
+            props: { carrier: "fake" },
+          },
+        ],
+      },
     },
     worker: {
       kind: "python-temporal",
@@ -89,7 +98,16 @@ const stubManifests = [
     contributes: {
       jobs: [{ type: "spot.search", carrier: "maersk" }],
       api: [{ pathPrefix: "/api/extensions/spot.maersk" }],
-      uiSlots: ["quote.rateSources"],
+      points: {
+        "quoting.slots.rateSources": [
+          {
+            id: "spot.maersk.source",
+            label: "Maersk spot rates",
+            component: "rates.spotSource",
+            props: { carrier: "maersk" },
+          },
+        ],
+      },
       settings: [
         {
           key: "live_strategy",
@@ -117,7 +135,16 @@ const stubManifests = [
     contributes: {
       jobs: [{ type: "spot.search", carrier: "cma" }],
       api: [{ pathPrefix: "/api/extensions/spot.cma" }],
-      uiSlots: ["quote.rateSources"],
+      points: {
+        "quoting.slots.rateSources": [
+          {
+            id: "spot.cma.source",
+            label: "CMA CGM spot rates",
+            component: "rates.spotSource",
+            props: { carrier: "cma" },
+          },
+        ],
+      },
       settings: [
         {
           key: "live_strategy",

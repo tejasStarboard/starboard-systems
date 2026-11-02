@@ -124,7 +124,16 @@ describe("driving built-in manifests (076)", () => {
     expect(byId("messaging.msgraph").contributes.nav?.[0]?.href).toBe(
       "/messaging/inbox"
     )
-    expect(byId("spot.fake").contributes.uiSlots).toEqual(["quote.rateSources"])
+    expect(byId("spot.fake").contributes.points).toEqual({
+      "quoting.slots.rateSources": [
+        {
+          id: "spot.fake.source",
+          label: "Fake spot rates",
+          component: "rates.spotSource",
+          props: { carrier: "fake" },
+        },
+      ],
+    })
     for (const id of OPTIONAL_IDS) {
       expect(byId(id).worker?.kind).toBe("python-temporal")
     }
