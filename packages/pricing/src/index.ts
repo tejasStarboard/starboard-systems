@@ -1,8 +1,15 @@
 export { roundMoney } from "./money"
 export {
+  convertToQuoteCurrency,
+  tryConvertCurrency,
+  tryGetFxRate,
+  type FxRates,
+} from "./fx"
+export {
   buildLaneUsageQuantities,
   calculateManualRateTotals,
   computeManualLaneTotals,
+  surchargeAppliesToEquipment,
   type LaneUsageQuantities,
   type ManualLaneTotals,
   type ManualLaneTotalsInput,

@@ -95,6 +95,8 @@ export function buildQuotePdfModel(quote: QuoteFormValues): QuotePdfModel {
       usage: usageFromLane(lane),
       scope: { excluded_buckets: excludedBuckets },
       globalCharges: index === 0 ? (quote.globalCharges ?? []) : [],
+      quoteCurrency: quote.currencyCode || null,
+      fxRates: quote.exchangeRates ?? {},
     })
 
     const charges: PdfChargeRow[] = []

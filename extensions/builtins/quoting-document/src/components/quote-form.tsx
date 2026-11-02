@@ -121,6 +121,10 @@ export function QuoteForm({
     control: form.control,
     name: "currencyCode",
   })
+  const exchangeRates = useWatch({
+    control: form.control,
+    name: "exchangeRates",
+  })
   const incoterm = useWatch({
     control: form.control,
     name: "incoterm",
@@ -190,8 +194,18 @@ export function QuoteForm({
       usage: usageFromLane(selectedLane),
       scope: { excluded_buckets: excludedBuckets },
       globalCharges: globalCharges ?? [],
+      quoteCurrency: currencyCode || null,
+      fxRates: exchangeRates ?? {},
     })
-  }, [selectedLane, excludedBuckets, globalCharges, incoterm, customerRole])
+  }, [
+    selectedLane,
+    excludedBuckets,
+    globalCharges,
+    incoterm,
+    customerRole,
+    currencyCode,
+    exchangeRates,
+  ])
 
   function onSubmit(values: QuoteFormValues) {
     startTransition(async () => {

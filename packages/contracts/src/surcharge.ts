@@ -55,6 +55,11 @@ export const surchargeLineSchema = z.object({
   buyAmount: z.number().nullable(),
   sellAmount: z.number().nullable(),
   scopeOverride: scopeOverrideSchema.nullable(),
+  /**
+   * Prod `equipment_type`. Null / empty = Default (applies to every CT).
+   * A concrete type (e.g. `20GP`) scopes the line to that equipment only.
+   */
+  equipmentType: z.string().nullable(),
 })
 
 export type SurchargeLine = z.infer<typeof surchargeLineSchema>
@@ -80,6 +85,7 @@ export function createSurchargeLine(
     buyAmount: null,
     sellAmount: null,
     scopeOverride: null,
+    equipmentType: null,
     ...overrides,
   }
 }

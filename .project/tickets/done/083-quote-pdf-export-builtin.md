@@ -2,7 +2,7 @@
 id: 083
 wave: 07-quote-loop
 title: Quote PDF export as quoting.pdf built-in
-status: in_progress
+status: done
 depends_on: [082, 066]
 epic: SYS-QUOTE
 docs:

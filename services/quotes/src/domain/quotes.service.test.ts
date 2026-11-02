@@ -104,6 +104,7 @@ class InMemoryQuotesDao implements QuotesDao {
       status: row.status,
       customerId: row.customerId ?? "",
       currencyCode: row.currencyCode ?? "",
+      exchangeRates: row.exchangeRates ?? {},
       incoterm: oceanIncotermSchema.safeParse(row.incoterm).success
         ? oceanIncotermSchema.parse(row.incoterm)
         : "",

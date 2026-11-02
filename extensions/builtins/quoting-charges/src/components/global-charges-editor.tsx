@@ -7,11 +7,14 @@ import {
   useWatch,
   type Control,
   type UseFormRegister,
+  type UseFormSetValue,
 } from "react-hook-form"
 
-import { createSurchargeLine, type UsageUnit } from "@starboard/lib-contracts"
-import { ChargeGuardrails } from "./charge-guardrails"
-import { USAGE_UNIT_LABELS } from "./usage-labels"
+import {
+  createSurchargeLine,
+  type QuoteFormValues,
+  type UsageUnit,
+} from "@starboard/lib-contracts"
 import { Button } from "@starboard/lib-ui/components/button"
 import { Checkbox } from "@starboard/lib-ui/components/checkbox"
 import { Input } from "@starboard/lib-ui/components/input"
@@ -23,17 +26,21 @@ import {
   SelectValue,
 } from "@starboard/lib-ui/components/select"
 
-import type { QuoteFormValues } from "@starboard/lib-contracts"
+import { ChargeGuardrails } from "./charge-guardrails"
+import { RowFxHint } from "./row-fx-hint"
+import { USAGE_UNIT_LABELS } from "./usage-labels"
 
 const USAGE_UNITS = USAGE_UNIT_LABELS
 
 export function GlobalChargesEditor({
   control,
   register,
+  setValue,
   currencyCode,
 }: {
   control: Control<QuoteFormValues>
   register: UseFormRegister<QuoteFormValues>
+  setValue: UseFormSetValue<QuoteFormValues>
   currencyCode: string
 }) {
   const { fields, append, remove } = useFieldArray({
@@ -46,6 +53,19 @@ export function GlobalChargesEditor({
       control,
       name: "globalCharges",
     }) ?? []
+  const exchangeRates = useWatch({ control, name: "exchangeRates" }) ?? {}
+  const quoteCurrency = currencyCode || "USD"
+
+  function setFxRate(from: string, to: string, rate: number) {
+    const next = {
+      ...exchangeRates,
+      [from]: {
+        ...(exchangeRates[from] ?? {}),
+        [to]: rate,
+      },
+    }
+    setValue("exchangeRates", next, { shouldDirty: true })
+  }
 
   return (
     <div className="space-y-3 rounded-none border border-dashed bg-muted/10 px-3 py-3">
@@ -65,7 +85,7 @@ export function GlobalChargesEditor({
           onClick={() =>
             append(
               createSurchargeLine({
-                currencyCode: currencyCode || "USD",
+                currencyCode: quoteCurrency,
                 source: "global",
                 leg: "freight",
               })
@@ -86,9 +106,10 @@ export function GlobalChargesEditor({
             const usageUnit = (watched[index]?.usageUnit ??
               field.usageUnit) as UsageUnit
             const isPercentage = usageUnit === "percentage"
+            const lineCurrency = watched[index]?.currencyCode ?? quoteCurrency
             return (
               <div key={field.id} className="space-y-1.5 border px-2 py-2">
-                <div className="grid grid-cols-[minmax(0,1.4fr)_7rem_7rem_auto_auto] items-center gap-2">
+                <div className="grid grid-cols-[minmax(0,1.4fr)_7rem_7rem_5rem_auto_auto] items-center gap-2">
                   <Input
                     placeholder="Name"
                     className="h-8"
@@ -143,6 +164,13 @@ export function GlobalChargesEditor({
                       })}
                     />
                   )}
+                  <Input
+                    placeholder="CCY"
+                    maxLength={3}
+                    className="h-8 uppercase"
+                    title="Line currency"
+                    {...register(`${prefix}.currencyCode`)}
+                  />
                   <Controller
                     control={control}
                     name={`${prefix}.isIncludedInTotal`}
@@ -168,6 +196,12 @@ export function GlobalChargesEditor({
                     <TrashIcon />
                   </Button>
                 </div>
+                <RowFxHint
+                  lineCurrency={lineCurrency}
+                  quoteCurrency={quoteCurrency}
+                  exchangeRates={exchangeRates}
+                  onSetRate={setFxRate}
+                />
                 <ChargeGuardrails
                   control={control}
                   register={register}

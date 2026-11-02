@@ -71,6 +71,11 @@ export const quote = quotesSchema.table(
     expiryAt: timestamp("expiry_at"),
     /** Opaque currency code from geography service. */
     currencyCode: varchar("currency_code", { length: 3 }),
+    /** Quote FX map from→to→rate (starboard-2 exchange_rates). */
+    exchangeRates: jsonb("exchange_rates")
+      .$type<Record<string, Record<string, number>>>()
+      .notNull()
+      .default({}),
     /** Ocean Incoterm code. Empty means no bucket knock-out. */
     incoterm: varchar("incoterm", { length: 3 }).notNull().default(""),
     /** shipper | consignee */
@@ -152,7 +157,14 @@ export const rate = quotesSchema.table(
       .notNull()
       .default("flat"),
     equipmentAmounts: jsonb("equipment_amounts")
-      .$type<Array<{ containerType: string; amount: number }>>()
+      .$type<
+        Array<{
+          containerType: string
+          amount: number
+          markupType?: "amount" | "percent" | null
+          markupValue?: number | null
+        }>
+      >()
       .notNull()
       .default([]),
     validFrom: timestamp("valid_from").notNull(),
@@ -201,6 +213,8 @@ export const surcharge = quotesSchema.table(
     scopeOverride: varchar("scope_override", {
       length: 16,
     }).$type<ScopeOverride | null>(),
+    /** Prod equipment_type. Null = Default (all CTs). */
+    equipmentType: varchar("equipment_type", { length: 16 }),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
       .defaultNow()
@@ -243,6 +257,8 @@ export const globalCharge = quotesSchema.table(
     scopeOverride: varchar("scope_override", {
       length: 16,
     }).$type<ScopeOverride | null>(),
+    /** Prod equipment_type. Null = Default (all CTs). */
+    equipmentType: varchar("equipment_type", { length: 16 }),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
       .defaultNow()

@@ -39,6 +39,7 @@
     "@phosphor-icons/react": "^2.1.10",
     "@starboard/ext-quoting-document": "workspace:*",
     "@starboard/lib-contracts": "workspace:*",
+    "@starboard/lib-pricing": "workspace:*",
     "@starboard/lib-ui": "workspace:*",
     "react-hook-form": "^7.91.0"
   }

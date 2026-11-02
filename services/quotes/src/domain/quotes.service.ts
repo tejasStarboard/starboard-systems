@@ -120,6 +120,7 @@ export class DefaultQuotesService implements QuotesService {
       effectiveFrom: null,
       expiryAt: null,
       currencyCode,
+      exchangeRates: {},
       incoterm: "",
       customerRole: "shipper",
     })
@@ -146,6 +147,7 @@ export class DefaultQuotesService implements QuotesService {
       effectiveFrom: parseOptionalDate(data.effectiveFrom),
       expiryAt: parseOptionalDate(data.expiryAt),
       currencyCode,
+      exchangeRates: data.exchangeRates ?? {},
       incoterm: data.incoterm,
       customerRole: data.customerRole,
     }

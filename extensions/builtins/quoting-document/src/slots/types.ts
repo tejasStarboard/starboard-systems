@@ -97,7 +97,10 @@ export type ChargeTableSlotProps = Pick<
   onRemoveRate: (index: number) => void
 }
 
-export type TotalsSlotProps = Pick<Form, "control" | "register"> & {
+export type TotalsSlotProps = Pick<
+  Form,
+  "control" | "register" | "setValue"
+> & {
   lanePath: `lanes.${number}`
   currencyCode: string
   totals: { subtotal: number; markup: number; total: number }

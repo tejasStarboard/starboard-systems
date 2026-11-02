@@ -2,7 +2,7 @@
 id: 085
 wave: 07-quote-loop
 title: QV2 money follow-ons in quoting.charges (per-CT, row FX, equipment)
-status: todo
+status: in_progress
 depends_on: [072, 084]
 epic: SYS-PRICING
 docs:

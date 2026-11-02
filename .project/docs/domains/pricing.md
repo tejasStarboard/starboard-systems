@@ -15,20 +15,22 @@ Single implementation + fixture conformance suite. No TS/Python/add-in twins.
 
 ## Exported API
 
-| Export                       | Role                                                           |
-| ---------------------------- | -------------------------------------------------------------- |
-| `roundMoney`                 | Half-up money rounding (default 2 dp)                          |
-| `computeManualLaneTotals`    | Canonical `{ buy, markup, sell }` for manual rate lines        |
-| `calculateManualRateTotals`  | UI alias `{ subtotal, markup, total }`                         |
-| `isIncludedInTotal`          | Surcharge inclusion predicate (sell / buy / rollup_buy)        |
-| `deriveExcludedBuckets`      | Legacy door presence helper (068). Quote UI no longer calls it |
-| `excludedBucketsForIncoterm` | Incoterm × shipper/consignee → excluded buckets (070)          |
-| `getEffectiveUsageAmount`    | free → min → max usage → billable qty                          |
-| `calculateSurchargeAmount`   | Unit / flat / % of base freight → `{ buy, sell }`              |
-| `isBaseFreightRow`           | Stamp or name-allowlist base-freight predicate                 |
-| `findBaseFreightRow`         | Elect base freight from a surcharge list                       |
+| Export                                | Role                                                           |
+| ------------------------------------- | -------------------------------------------------------------- |
+| `roundMoney`                          | Half-up money rounding (default 2 dp)                          |
+| `computeManualLaneTotals`             | Canonical `{ buy, markup, sell }` for manual rate lines        |
+| `calculateManualRateTotals`           | UI alias `{ subtotal, markup, total }`                         |
+| `isIncludedInTotal`                   | Surcharge inclusion predicate (sell / buy / rollup_buy)        |
+| `deriveExcludedBuckets`               | Legacy door presence helper (068). Quote UI no longer calls it |
+| `excludedBucketsForIncoterm`          | Incoterm × shipper/consignee → excluded buckets (070)          |
+| `getEffectiveUsageAmount`             | free → min → max usage → billable qty                          |
+| `calculateSurchargeAmount`            | Unit / flat / % of base freight → `{ buy, sell }`              |
+| `isBaseFreightRow`                    | Stamp or name-allowlist base-freight predicate                 |
+| `findBaseFreightRow`                  | Elect base freight from a surcharge list                       |
+| `tryGetFxRate` / `tryConvertCurrency` | Quote FX lookup + convert (085; starboard-2 port)              |
+| `surchargeAppliesToEquipment`         | Default vs CT filter for surcharge lines                       |
 
-`computeManualLaneTotals` accepts optional `scope.excluded_buckets` and quote-level `globalCharges` (`source: "global"` — immune to bucket scope). The quote UI passes **one** selected rate line. `baseMode: "per_eq"` multiplies `amount` by container count, or sums `equipmentAmounts` (`amount × count`) when those rows are present. Flat mode ignores container count. One lane `$` / `%` markup dial applies to that rolled buy for a single container and for mixed equipment. A finite `sellAmount` replaces that row’s calculated sell; the gap vs buy is included in `markup` so `sell = buy + markup`. `isVisible` does not change the total (Split off absorbs the line into the total). Schemas for quote/catalog charge lines live in `@starboard/lib-contracts` (`surchargeLineSchema`). Persistence: ticket **065** (`quotes.surcharge`), **068** (`quotes.global_charge`), **071** (`quotes.lane.selected_rate_id`, `quotes.rate.base_mode`, `quotes.rate.equipment_amounts`). Amount engine: **066**. Row sell / Split / usage bounds: **072**.
+`computeManualLaneTotals` accepts optional `scope.excluded_buckets`, quote-level `globalCharges`, `quoteCurrency`, and `fxRates`. The quote UI passes **one** selected rate line. `baseMode: "per_eq"` with `equipmentAmounts` prices each CT like starboard-2 (`unit buy + dial` × count); surcharge `equipmentType` filters per CT. Flat / no-equipment keeps one lane dial on the rolled buy. A finite `sellAmount` replaces that row’s calculated sell; the gap vs buy is included in `markup` so `sell = buy + markup`. `isVisible` does not change the total. Schemas: `@starboard/lib-contracts` (`surchargeLineSchema`). Persistence: **065** / **068** / **071** / **085** (`equipment_type`, `exchange_rates`, per-CT dial fields on `equipment_amounts`).
 
 ## Fixtures
 
@@ -40,7 +42,7 @@ Under `packages/pricing/fixtures/`:
 - `base-freight-row-identity.json` — copied from legacy `shared-fixtures/qv2` (SB-6190)
 - `surcharge-amount-cases.json` — lean rewrite cases for unit / flat / % freight
 - `global-scope-totals.json` — globals + door-bucket scope rollup cases
-- `charge-line-economics.json` — lane markup (single-CT and mixed equipment), sell override, Split-off still in the total, Include off, free usage
+- `charge-line-economics.json` — per-CT dials, equipmentType filter, row FX, sell override, Split / Include / free usage
 
 ## Schema push (surcharge tables)
 
@@ -52,13 +54,12 @@ Creates/updates `quotes.surcharge`, `quotes.global_charge`, and `rates.surcharge
 
 ## Deferred (named — not silent product cuts)
 
-- FX converters / display-currency paths — still deferred after **072** (rows stay in the quote currency; no row FX popover)
 - Full `surcharge_matrix.json` parity (tiers, dollar min/max beyond lean free/min/max usage) — cells left out
 - **070** is the quote default: Incoterm × role excludes buckets. **068** door-only `deriveExcludedBuckets` remains in the package and is not used by the quote form. Globals (`source: global`) stay in the total. Deferred: trucking remaps and non-ocean incoterms.
 - QV2 charge grid / rate alternatives / base flat·per-eq — **[071](../../tickets/done/071-quote-charge-table-prod-parity.md)** shipped
-- Row economics — **[072](../../tickets/in_progress/072-quote-charge-line-economics-parity.md)** lean subset: editable buy rate, line `sellAmount`, Include, Split (`isVisible`, presentation only), `scopeOverride` when an Incoterm bucket is excluded, free/min/max. Deferred: a distinct markup dial per container type (the fixture uses one lane dial), surcharge-line equipment “default” column (`equipmentAmounts` stay on the rate), row FX
+- Row economics — **[072](../../tickets/done/072-quote-charge-line-economics-parity.md)** + **[085](../../tickets/in_progress/085-qv2-money-follow-ons-charges.md)**: multi-CT FCL prices each CT like starboard-2 `deriveFclRateTotals` (unit × count) with per-CT dials on `equipmentAmounts`; surcharge `equipmentType` (Default vs CT); row FX via quote `exchangeRates` (`tryConvertCurrency`). Still deferred: full finStore live FX / frozen-send corpus, CT-filtered global replication quirks, surcharge_matrix tiers
 - Org settings rate-item admin stamp for globals
 
 ## Next tickets
 
-Execution: [build-priority](../reference/build-priority-2026-11-01.md) — **071** and **070** shipped; **072** is the lean row-economics subset above. **073** mounts via quote-defined points. Spot quirks stay out of ONE MATH.
+Execution: [build-priority](../reference/build-priority-2026-11-01.md) — **085** money follow-ons in `quoting.charges` / markup. Spot quirks stay out of ONE MATH.
