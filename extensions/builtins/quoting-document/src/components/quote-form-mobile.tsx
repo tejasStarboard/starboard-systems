@@ -11,6 +11,7 @@ import {
   QuoteIdField,
   QuoteStatusField,
 } from "./quote-form-fields"
+import { QuoteHeaderSlot } from "./quote-header-slot"
 import type { QuoteFormLayoutProps } from "./quote-form-layout-props"
 import { QuoteLaneEditor } from "./quote-lane-editor"
 import { QuoteLanesPanel } from "./quote-lanes-panel"
@@ -49,6 +50,8 @@ export function QuoteFormMobile(props: QuoteFormLayoutProps) {
           className="w-full"
         />
       </div>
+
+      <QuoteHeaderSlot {...props} />
 
       <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden">
         <QuoteLanesPanel

@@ -16,7 +16,7 @@ function context(overrides: Partial<QuoteEditorContext> = {}) {
       containerTypeOptions: [{ value: "40HC", label: "40HC" }],
       palletTypeOptions: [],
     },
-    spotRateSources: [],
+    slots: {},
     ...overrides,
   } satisfies QuoteEditorContext
 }

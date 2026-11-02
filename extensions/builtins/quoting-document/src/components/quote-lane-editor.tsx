@@ -1,6 +1,6 @@
 "use client"
 
-import { MagnifyingGlassIcon, PlusIcon, TrashIcon } from "@phosphor-icons/react"
+import { MagnifyingGlassIcon, PlusIcon } from "@phosphor-icons/react"
 import {
   Controller,
   type Control,
@@ -13,22 +13,18 @@ import { Button } from "@starboard/lib-ui/components/button"
 import { Field, FieldLabel } from "@starboard/lib-ui/components/field"
 import { Input } from "@starboard/lib-ui/components/input"
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@starboard/lib-ui/components/table"
-import {
   ToggleGroup,
   ToggleGroupItem,
 } from "@starboard/lib-ui/components/toggle-group"
 import { cn } from "@starboard/lib-ui/lib/utils"
 
-import { GlobalChargesEditor } from "./global-charges-editor"
 import { LaneFields } from "./lane-fields"
-import { RateSurchargesEditor } from "./rate-surcharges-editor"
+import { QuoteSlot, useQuoteSlotEntries } from "../slots/slot-host"
+import {
+  QUOTING_SLOTS,
+  type ChargeTableSlotProps,
+  type TotalsSlotProps,
+} from "../slots/types"
 import type {
   LaneFormValues,
   QuoteFormOption,
@@ -112,6 +108,31 @@ export function QuoteLaneEditor({
   onAppendRate: () => void
   onRemoveRate: (index: number) => void
 }) {
+  // Rate sources / charge grid are contributed; with none mounted the matching
+  // lane actions disappear (nothing could render or apply the result).
+  const hasRateSources =
+    useQuoteSlotEntries(QUOTING_SLOTS.rateSources).length > 0
+  const hasChargeTable =
+    useQuoteSlotEntries(QUOTING_SLOTS.chargeTable).length > 0
+
+  const chargeTableProps: ChargeTableSlotProps = {
+    control,
+    register,
+    lanePath,
+    rateFields,
+    currencyCode,
+    excludedBuckets,
+    onAppendRate,
+    onRemoveRate,
+  }
+  const totalsProps: TotalsSlotProps = {
+    control,
+    register,
+    lanePath,
+    currencyCode,
+    totals,
+  }
+
   return (
     <section className="flex min-h-0 min-w-0 flex-1 flex-col gap-4 overflow-y-auto">
       <div className="space-y-1">
@@ -141,130 +162,38 @@ export function QuoteLaneEditor({
           fullWidthActions ? "flex-col" : "flex-wrap"
         )}
       >
-        <Button
-          type="button"
-          variant="outline"
-          className={cn(fullWidthActions && "w-full")}
-          disabled={!laneReady}
-          onClick={onSearchRates}
-        >
-          <MagnifyingGlassIcon data-icon="inline-start" />
-          Search rates
-        </Button>
-        <Button
-          type="button"
-          variant="outline"
-          className={cn(fullWidthActions && "w-full")}
-          disabled={!laneReady}
-          onClick={onAddManualRate}
-        >
-          <PlusIcon data-icon="inline-start" />
-          Add manual rate
-        </Button>
-      </div>
-
-      {manualRatesVisible ? (
-        <div className="space-y-4 border-t pt-4">
-          <div className="space-y-1">
-            <h3 className="text-sm font-medium">Manual rates</h3>
-            <p className="text-xs text-muted-foreground">
-              Build an invoice-style breakdown for this lane.
-            </p>
-          </div>
-
-          <div className="space-y-3">
-            {rateFields.length ? (
-              rateFields.map((field, index) => (
-                <div
-                  key={field.id}
-                  className="overflow-hidden rounded-none border"
-                >
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Charge</TableHead>
-                        <TableHead className="w-40 text-right">
-                          Amount
-                        </TableHead>
-                        <TableHead className="w-10" />
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      <TableRow>
-                        <TableCell>
-                          <Input
-                            placeholder="Rate label"
-                            {...register(
-                              `${lanePath}.manualRates.${index}.label`
-                            )}
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <Input
-                            type="number"
-                            step="0.01"
-                            className="text-right tabular-nums"
-                            {...register(
-                              `${lanePath}.manualRates.${index}.amount`,
-                              {
-                                valueAsNumber: true,
-                              }
-                            )}
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon-sm"
-                            aria-label="Remove charge"
-                            onClick={() => onRemoveRate(index)}
-                          >
-                            <TrashIcon />
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    </TableBody>
-                  </Table>
-                  <RateSurchargesEditor
-                    control={control}
-                    register={register}
-                    lanePath={lanePath}
-                    rateIndex={index}
-                    currencyCode={currencyCode}
-                    excludedBuckets={excludedBuckets}
-                  />
-                </div>
-              ))
-            ) : (
-              <div className="overflow-x-auto rounded-none border">
-                <Table>
-                  <TableBody>
-                    <TableRow>
-                      <TableCell className="h-16 text-center text-muted-foreground">
-                        No charges yet.
-                      </TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
-              </div>
-            )}
-          </div>
-
+        {hasRateSources ? (
           <Button
             type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => onAppendRate()}
+            variant="outline"
+            className={cn(fullWidthActions && "w-full")}
+            disabled={!laneReady}
+            onClick={onSearchRates}
+          >
+            <MagnifyingGlassIcon data-icon="inline-start" />
+            Search rates
+          </Button>
+        ) : null}
+        {hasChargeTable ? (
+          <Button
+            type="button"
+            variant="outline"
+            className={cn(fullWidthActions && "w-full")}
+            disabled={!laneReady}
+            onClick={onAddManualRate}
           >
             <PlusIcon data-icon="inline-start" />
-            Add charge
+            Add manual rate
           </Button>
+        ) : null}
+      </div>
 
-          <GlobalChargesEditor
-            control={control}
-            register={register}
-            currencyCode={currencyCode}
+      {manualRatesVisible && hasChargeTable ? (
+        <div className="space-y-4 border-t pt-4">
+          <QuoteSlot
+            point={QUOTING_SLOTS.chargeTable}
+            props={chargeTableProps}
+            className="space-y-4"
           />
 
           {excludedBuckets.length > 0 ? (
@@ -326,6 +255,12 @@ export function QuoteLaneEditor({
                 {formatMoney(totals.total, currencyCode)}
               </span>
             </div>
+
+            <QuoteSlot
+              point={QUOTING_SLOTS.totals}
+              props={totalsProps}
+              className="flex flex-col gap-3"
+            />
           </div>
         </div>
       ) : null}

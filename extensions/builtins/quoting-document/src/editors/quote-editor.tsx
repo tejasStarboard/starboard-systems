@@ -4,11 +4,14 @@ import { useEffect, useState } from "react"
 
 import type { BuiltinEditorProps } from "../host"
 import { QuoteForm } from "../components/quote-form"
+import { QuoteSlotsProvider } from "../slots/slot-host"
 import {
   prepareQuoteEditorInput,
   type QuoteEditorContext,
   type QuoteEditorInput,
 } from "../lib/quote-editor-input"
+
+const NO_COMPONENTS = {} as const
 
 type LoadState =
   | { status: "loading" }
@@ -18,9 +21,10 @@ type LoadState =
 /**
  * `quote` editor: loads the quote + form options from the BFF
  * (`/api/quotes/:id/editor-context`) and mounts `QuoteForm`. Save still PUTs
- * `/api/quotes/:id`.
+ * `/api/quotes/:id`. The editor-context `slots` (active contributions to the
+ * slots this extension defines) + `host.pointComponents` feed the slot hosts.
  */
-export function QuoteEditor({ resourceId }: BuiltinEditorProps) {
+export function QuoteEditor({ resourceId, host }: BuiltinEditorProps) {
   const [state, setState] = useState<LoadState>({ status: "loading" })
 
   useEffect(() => {
@@ -82,9 +86,15 @@ export function QuoteEditor({ resourceId }: BuiltinEditorProps) {
     )
   }
 
+  const { slots, ...formInput } = state.input
   return (
     <div className="flex flex-1 flex-col p-3 sm:p-4">
-      <QuoteForm key={resourceId} {...state.input} />
+      <QuoteSlotsProvider
+        slots={slots}
+        components={host.pointComponents ?? NO_COMPONENTS}
+      >
+        <QuoteForm key={resourceId} {...formInput} />
+      </QuoteSlotsProvider>
     </div>
   )
 }

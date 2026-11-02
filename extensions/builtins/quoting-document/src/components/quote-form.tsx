@@ -25,7 +25,6 @@ import {
   type QuoteFormOption,
   type QuoteFormValues,
 } from "../lib/quotes.schema"
-import type { SpotRateSource } from "../lib/spot-rate-source"
 
 function usageFromLane(lane: LaneFormValues | undefined) {
   if (!lane) {
@@ -56,7 +55,6 @@ export function QuoteForm({
   portOptions,
   containerTypeOptions,
   palletTypeOptions,
-  spotRateSources = [],
 }: {
   defaultValues: QuoteFormValues
   customerOptions: QuoteFormOption[]
@@ -64,7 +62,6 @@ export function QuoteForm({
   portOptions: QuoteFormOption[]
   containerTypeOptions: QuoteFormOption[]
   palletTypeOptions: QuoteFormOption[]
-  spotRateSources?: SpotRateSource[]
 }) {
   const breakpoint = useBreakpoint()
   const [pending, startTransition] = useTransition()
@@ -328,7 +325,6 @@ export function QuoteForm({
         onOpenChange={setRatesOpen}
         origin={selectedLane?.origin || undefined}
         destination={selectedLane?.destination || undefined}
-        spotRateSources={spotRateSources}
         onApplyRate={handleApplyRate}
       />
     </div>

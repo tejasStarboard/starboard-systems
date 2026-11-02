@@ -5,9 +5,9 @@ import {
   EMPTY_WORKBENCH_CONTRIBUTIONS,
   getActiveContributions,
   getActiveWorkbenchContributions,
+  getContributionsForOwner,
   getContributionsToPoint,
   isActive,
-  listActiveExtensions,
   listManifests,
   type ActiveWorkbenchContributions,
   type ExtensionManifest,
@@ -17,11 +17,8 @@ import {
 
 import { loadRolloutContext } from "@/lib/extensions-rollout"
 import { getPlatformManager } from "@/lib/domain/platform/platform.manager"
-import type { SpotRateSource } from "@/lib/spot-rate-source"
 
 export const DEFAULT_ORG_PLAN: Plan = DEFAULT_PLAN
-
-export type { SpotRateSource }
 
 export function listRegisteredExtensions(): ExtensionManifest[] {
   return listManifests()
@@ -86,30 +83,21 @@ export async function listActiveUiSlots(
   return getActiveContributions(plan, listManifests(), context).uiSlots
 }
 
-export async function listActiveSpotRateSources(
+/**
+ * Active contributions to every point owned by `ownerId` (keyed by point id).
+ * Generic: callers pass an owner extension id; the kernel never names slots.
+ * Empty when the owner is inactive / rollout unavailable (fails closed).
+ */
+export async function listActiveOwnerPointContributions(
+  ownerId: string,
   plan: Plan,
   organizationId: string
-): Promise<SpotRateSource[]> {
+) {
   const context = await rolloutContext(organizationId)
   if (!context) {
-    return []
+    return {}
   }
-  return listActiveExtensions(plan, listManifests(), context)
-    .filter(
-      (manifest) =>
-        manifest.contributes.uiSlots?.includes("quote.rateSources") ||
-        manifest.contributes.jobs?.some((job) => job.type === "spot.search")
-    )
-    .map((manifest) => {
-      const searchJob = manifest.contributes.jobs?.find(
-        (job) => job.type === "spot.search"
-      )
-      return {
-        id: manifest.id,
-        displayName: manifest.displayName,
-        carrier: searchJob?.carrier,
-      }
-    })
+  return getContributionsForOwner(ownerId, plan, listManifests(), context)
 }
 
 export async function isExtensionActive(

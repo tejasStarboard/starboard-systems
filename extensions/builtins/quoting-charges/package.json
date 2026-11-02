@@ -1,7 +1,7 @@
 {
   "name": "@starboard/ext-quoting-charges",
   "version": "0.0.1",
-  "description": "Driving built-in extension `quoting.charges` (stub scaffold)",
+  "description": "Driving built-in extension `quoting.charges` (surcharge + global charge editors contributed into quoting.document's chargeTable slot)",
   "private": true,
   "license": "UNLICENSED",
   "type": "module",
@@ -28,6 +28,18 @@
   },
   "devDependencies": {
     "@starboard/tool-typescript-config": "workspace:*",
+    "@types/react": "^19",
+    "react": "19.3.1",
     "typescript": "^5.9.3"
+  },
+  "peerDependencies": {
+    "react": "19.3.1"
+  },
+  "dependencies": {
+    "@phosphor-icons/react": "^2.1.10",
+    "@starboard/ext-quoting-document": "workspace:*",
+    "@starboard/lib-contracts": "workspace:*",
+    "@starboard/lib-ui": "workspace:*",
+    "react-hook-form": "^7.91.0"
   }
 }

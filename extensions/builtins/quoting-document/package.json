@@ -18,6 +18,10 @@
     "./manifest": {
       "types": "./src/manifest.ts",
       "default": "./src/manifest.ts"
+    },
+    "./slots": {
+      "types": "./src/slots/types.ts",
+      "default": "./src/slots/types.ts"
     }
   },
   "files": [

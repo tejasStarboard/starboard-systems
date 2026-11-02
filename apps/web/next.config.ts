@@ -7,6 +7,8 @@ const nextConfig: NextConfig = {
     "@starboard/ext-crm-parties",
     "@starboard/ext-geo-gazetteer",
     "@starboard/ext-org-settings",
+    "@starboard/ext-quoting-charges",
+    "@starboard/ext-rates-catalog",
   ],
 }
 

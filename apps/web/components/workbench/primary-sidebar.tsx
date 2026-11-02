@@ -5,7 +5,10 @@ import { usePathname } from "next/navigation"
 import * as React from "react"
 
 import { useWorkbench } from "@/components/workbench/workbench-context"
-import { builtinViews } from "@/lib/workbench/builtin-editors"
+import {
+  builtinPointComponents,
+  builtinViews,
+} from "@/lib/workbench/builtin-editors"
 import {
   Sheet,
   SheetContent,
@@ -34,6 +37,7 @@ function SidebarViews({ onNavigate }: { onNavigate?: () => void }) {
       activeEditor: activeTab
         ? { viewType: activeTab.viewType, resourceId: activeTab.resourceId }
         : null,
+      pointComponents: builtinPointComponents,
     }),
     [openEditor, onNavigate, activeTab]
   )

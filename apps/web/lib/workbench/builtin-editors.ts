@@ -4,6 +4,8 @@ import {
   editors as crmPartiesEditors,
   views as crmPartiesViews,
 } from "@starboard/ext-crm-parties"
+import { pointComponents as quotingChargesPoints } from "@starboard/ext-quoting-charges"
+import { pointComponents as ratesCatalogPoints } from "@starboard/ext-rates-catalog"
 import {
   editors as orgSettingsEditors,
   views as orgSettingsViews,
@@ -41,4 +43,17 @@ export const builtinViews: Readonly<Record<string, BuiltinViewComponent>> = {
   ...quotingDocumentViews,
   ...crmPartiesViews,
   ...orgSettingsViews,
+}
+
+/**
+ * UI factories contributed into extension-defined points (slots), keyed by
+ * contribution id / `component`. Generic like editors/views: the kernel never
+ * names a slot; the owning editor's slot host resolves entries from the
+ * host-provided active contributions.
+ */
+export const builtinPointComponents: Readonly<
+  Record<string, ComponentType<never>>
+> = {
+  ...quotingChargesPoints,
+  ...ratesCatalogPoints,
 }

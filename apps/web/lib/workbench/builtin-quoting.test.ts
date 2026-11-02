@@ -1,7 +1,11 @@
 import { describe, expect, test } from "bun:test"
 import { getActiveWorkbenchContributions } from "@starboard/ext-host"
 
-import { builtinEditors, builtinViews } from "./builtin-editors"
+import {
+  builtinEditors,
+  builtinPointComponents,
+  builtinViews,
+} from "./builtin-editors"
 import { resolveWorkbenchContributions } from "./contributions"
 import { matchDeepLink } from "./deep-link"
 import { initialTabsState, tabHref, tabsReducer } from "./tabs"
@@ -72,5 +76,21 @@ describe("077 quoting.document in the workbench", () => {
         hostContributions: getActiveWorkbenchContributions("enterprise"),
       })
     ).toEqual(EMPTY_CONTRIBUTIONS)
+  })
+
+  test("073: every active slot contribution resolves to a UI factory", () => {
+    const { points } = getActiveWorkbenchContributions("credit")
+    const all = Object.values(points).flat()
+    expect(all.length).toBeGreaterThan(0)
+    for (const contribution of all) {
+      const key = contribution.component ?? contribution.id
+      expect(typeof builtinPointComponents[key]).toBe("function")
+    }
+    // The kernel registry is keyed by contribution/component ids, never by slot.
+    expect(
+      Object.keys(builtinPointComponents).some((key) =>
+        key.startsWith("quoting.slots.")
+      )
+    ).toBe(false)
   })
 })

@@ -1,6 +1,6 @@
 /**
  * Browser helpers for calling optional extension APIs (spot rate search jobs).
- * Local to `quoting.document` until 073 moves rate sources behind a quote slot;
+ * Owned by `rates.catalog` (rate sources contributed into the quote slot);
  * the kernel keeps its own copy for messaging / rates-upload.
  */
 

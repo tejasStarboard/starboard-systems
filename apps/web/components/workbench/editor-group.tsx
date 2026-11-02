@@ -4,7 +4,10 @@ import { XIcon } from "@phosphor-icons/react"
 import * as React from "react"
 
 import { useWorkbench } from "@/components/workbench/workbench-context"
-import { builtinEditors } from "@/lib/workbench/builtin-editors"
+import {
+  builtinEditors,
+  builtinPointComponents,
+} from "@/lib/workbench/builtin-editors"
 import {
   Empty,
   EmptyDescription,
@@ -90,6 +93,7 @@ export function EditorGroup({ children }: { children: React.ReactNode }) {
       activeEditor: active
         ? { viewType: active.viewType, resourceId: active.resourceId }
         : null,
+      pointComponents: builtinPointComponents,
     }),
     [openEditor, active]
   )
