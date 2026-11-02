@@ -24,10 +24,12 @@ cp .env.example .env   # fill secrets + INTERNAL_SERVICE_TOKEN + service URLs
 pnpm --filter @starboard/lib-contracts build
 pnpm --filter @starboard/lib-service-kit build
 pnpm --filter @starboard/lib-db build
-pnpm --filter @starboard/lib-db db:push
+pnpm --filter @starboard/lib-db db:push   # --force; schema pull vs Neon often takes 1–2 min
 pnpm --filter @starboard/lib-db db:seed
 pnpm dev
 ```
+
+CI `db:push:ci` only validates against empty Postgres — it does **not** update your Neon DB. Run `db:push` locally (or in deploy) for that. If push pauses after "Pulling schema…" on create/rename prompts, pick **create** (not rename) for new tables.
 
 ## UI components
 
