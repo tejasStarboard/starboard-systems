@@ -4,10 +4,7 @@ import { env } from "@/env"
 import { requireOrganizationContext } from "@/lib/auth/organization-context"
 import { getOrganizationPlan } from "@/lib/billing/plan"
 import { getPlatformManager } from "@/lib/domain/platform/platform.manager"
-import {
-  listActiveExtensionNav,
-  listActiveWorkbenchContributions,
-} from "@/lib/extensions"
+import { listActiveWorkbenchContributions } from "@/lib/extensions"
 import {
   isKernelOnlyFlag,
   resolveWorkbenchContributions,
@@ -23,15 +20,11 @@ export default async function AppLayout({
 
   const kernelOnly = isKernelOnlyFlag(env.WORKBENCH_KERNEL_ONLY)
   const plan = await getOrganizationPlan(organizationId)
-  const extensionNav = kernelOnly
-    ? []
-    : await listActiveExtensionNav(plan, organizationId)
   const hostContributions = kernelOnly
     ? undefined
     : await listActiveWorkbenchContributions(plan, organizationId)
   const contributions = resolveWorkbenchContributions({
     kernelOnly,
-    extensionNav,
     hostContributions,
   })
 

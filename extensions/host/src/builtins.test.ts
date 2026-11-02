@@ -60,9 +60,17 @@ describe("driving built-in manifests (076)", () => {
       manifests,
       context
     )
-    expect(contributions.editors).toEqual([])
-    expect(contributions.views).toEqual([])
-    expect(contributions.activity).toEqual([])
+    // Built-ins off; optional workers (ingestion / messaging) still contribute.
+    expect(
+      contributions.activity.every((a) => !BUILTIN_IDS.includes(a.extensionId))
+    ).toBe(true)
+    expect(
+      contributions.editors.every((e) => !BUILTIN_IDS.includes(e.extensionId))
+    ).toBe(true)
+    expect(contributions.activity.map((a) => a.id).sort()).toEqual([
+      "messaging",
+      "rates",
+    ])
   })
 
   test("quoting.document contributes Quotes list view + quote / list editors", () => {
@@ -71,7 +79,9 @@ describe("driving built-in manifests (076)", () => {
       "quotes",
       "customers",
       "settings",
+      "rates",
     ])
+
     const view = contributions.views.find(
       (v) => v.id === "quoting.document.list"
     )
@@ -115,13 +125,13 @@ describe("driving built-in manifests (076)", () => {
     )
   })
 
-  test("optional extensions keep their nav / slots", () => {
+  test("optional extensions contribute workbench editors / spot points", () => {
     const manifests = listManifests()
     const byId = (id: string) => manifests.find((m) => m.id === id)!
-    expect(byId("ingestion.fcl_v6").contributes.nav?.[0]?.href).toBe(
+    expect(byId("ingestion.fcl_v6").contributes.editors?.[0]?.deepLink).toBe(
       "/rates/upload"
     )
-    expect(byId("messaging.msgraph").contributes.nav?.[0]?.href).toBe(
+    expect(byId("messaging.msgraph").contributes.editors?.[0]?.deepLink).toBe(
       "/messaging/inbox"
     )
     expect(byId("spot.fake").contributes.points).toEqual({

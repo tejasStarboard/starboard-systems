@@ -3,13 +3,12 @@ import { redirect } from "next/navigation"
 import { RatesUploadForm } from "@/components/rates/rates-upload-form"
 import { requireOrganizationContext } from "@/lib/auth/organization-context"
 import { getOrganizationPlan } from "@/lib/billing/plan"
-import { listActiveUiSlots } from "@/lib/extensions"
+import { isExtensionActive } from "@/lib/extensions"
 
 export default async function RatesUploadPage() {
   const { organizationId } = await requireOrganizationContext()
   const plan = await getOrganizationPlan(organizationId)
-  const slots = await listActiveUiSlots(plan, organizationId)
-  if (!slots.includes("rates.upload")) {
+  if (!(await isExtensionActive("ingestion.fcl_v6", plan, organizationId))) {
     redirect("/")
   }
 

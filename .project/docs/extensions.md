@@ -45,11 +45,11 @@ type ExtensionManifest = {
         props?: Record<string, string | number | boolean>
       }>
     >
-    // Legacy (still supported):
-    nav?: Array<{ id: string; label: string; href: string }>
+    // Optional / legacy-compatible:
+    nav?: Array<{ id: string; label: string; href: string }> // prefer activity/views
     jobs?: Array<{ type: string; carrier?: string }>
     api?: Array<{ pathPrefix: string }>
-    uiSlots?: string[] // legacy string tags, e.g. "rates.upload"
+    uiSlots?: string[] // optional entitlement tags (prefer isExtensionActive)
     settings?: Array<{
       key: string
       label: string
@@ -85,7 +85,7 @@ Host APIs (`@starboard/ext-host`, all activation-aware = `enabled ∩ entitled �
 | `getContributionsForOwner(ownerId, plan, manifests?, rollout?)` | Contributions to **every** point `ownerId` defines, keyed by point id (073); `{}` if owner inactive |
 | `validateManifestSet(manifests)`                                | Single owner per point + unique ids (registry load throws on errors)                                |
 
-BFF: `listActiveWorkbenchContributions(plan, orgId)` / `listActivePointContributions(pointId, plan, orgId)` in [`apps/web/lib/extensions.ts`](../../apps/web/lib/extensions.ts) (rollout-map failure → empty). `app/(app)/layout.tsx` merges them into the workbench through `mergeHostContributions` in [`apps/web/lib/workbench/contributions.ts`](../../apps/web/lib/workbench/contributions.ts); legacy shim entries win on duplicate ids **and on colliding editor `deepLink` patterns** (host editors cannot steal legacy routes), and views whose `activityId` is not contributed by an active extension are dropped (in the host and again in the merge).
+BFF: `listActiveWorkbenchContributions(plan, orgId)` / `listActivePointContributions(pointId, plan, orgId)` in [`apps/web/lib/extensions.ts`](../../apps/web/lib/extensions.ts) (rollout-map failure → empty). `app/(app)/layout.tsx` resolves them through `resolveWorkbenchContributions` / `mergeHostContributions` in [`apps/web/lib/workbench/contributions.ts`](../../apps/web/lib/workbench/contributions.ts). First contribution wins on duplicate ids **and on colliding editor `deepLink` patterns**; views whose `activityId` is not contributed by an active extension are dropped (in the host and again in the merge).
 
 Add a driving built-in (owner):
 
@@ -106,7 +106,7 @@ Contribute to someone else's point (never import the owner; ask the host):
   contributes: { points: { "quoting.slots.chargeTable": [{ id: "quoting.charges.table" }] } } }
 ```
 
-Rules: point ids are globally unique and owned by exactly one extension; extensions cannot define `workbench.*` / `core.*`; contributions to an undefined or inactive-owner point are silently dropped; the owner's UI reads its points via `listActivePointContributions` — no `if (extensionId === …)` in the kernel. Compat: `nav` and `uiSlots` are unchanged (`listActiveExtensionNav` still feeds the legacy "Extensions" sidebar view).
+Rules: point ids are globally unique and owned by exactly one extension; extensions cannot define `workbench.*` / `core.*`; contributions to an undefined or inactive-owner point are silently dropped; the owner's UI reads its points via `listActivePointContributions` — no `if (extensionId === …)` in the kernel. Optional workers (`ingestion.fcl_v6`, `messaging.msgraph`) contribute workbench activity/views/editors directly (080); `nav` / `uiSlots` remain in the schema for older stubs but the shell no longer builds an Extensions sidebar from them.
 
 ### Cookbook: contribute UI to a `quoting.document` slot (073)
 
@@ -189,7 +189,7 @@ For an existing `service` (`spot` / `ingestion` / `messaging`), **no new dispatc
 
 - Quote slots (**073**): `quoting.document` **defines** `quoting.slots.{headerFields,chargeTable,totals,rateSources}` (+ headless `quoting.totalsHooks`). The BFF `GET /api/quotes/:id/editor-context` returns `slots` = `listActiveOwnerPointContributions("quoting.document", …)` (active contributions per defined point; empty when the owner is inactive). The quote editor's slot host (`QuoteSlot`) mounts each contribution via the UI factory registered under its `component ?? id` in a package's `pointComponents` export (merged in [`builtin-editors.ts`](../../apps/web/lib/workbench/builtin-editors.ts); the kernel never names slots).
 - Spot rate sources: contribution to `quoting.slots.rateSources` (above). Enqueue/poll lives in [`extensions/builtins/rates-catalog/src/slots/spot-source.tsx`](../../extensions/builtins/rates-catalog/src/slots/spot-source.tsx) (`extensionApiPath` + `pollExtensionJob` with the contributing `extensionId`) — no new sheet or UI for a new carrier.
-- Nav / other slots: declare `contributes.nav` / `uiSlots`; shell reads `listActiveExtensionNav` / `listActiveUiSlots`.
+- Workbench UI: declare `contributes.activity` / `views` / `editors`; shell reads `listActiveWorkbenchContributions`. Gate route pages with `isExtensionActive`.
 - Workbench activity / views / editors / commands and defined points: see [Workbench contributions + defined points](#workbench-contributions--defined-points-075).
 
 ### Forbidden in shell core
@@ -225,7 +225,7 @@ Declared on `contributes.settings`. v1 `scope` is `"platform"` only. Stored in P
 ### 8. Unplug checklist (verified post-055)
 
 1. Set `enabled: false` in the registry **or** org rollout `off` (admin).
-2. Confirm shell: `listActiveExtensionNav` / `listActiveUiSlots` / `listActiveSpotRateSources` omit the extension; `requireActiveExtension` + generic route → **404**. Covered by `apps/web/lib/extensions-all-off.test.ts`.
+2. Confirm shell: `listActiveWorkbenchContributions` / `isExtensionActive` omit the extension; `requireActiveExtension` + generic route → **404**. Covered by `apps/web/lib/extensions-all-off.test.ts`.
 3. Stop deploying the worker process / plugin package for that carrier.
 4. Expand/contract drop optional schema if the extension owned any (most stubs: none). Delete that extension’s rows in `platform.extension_setting` (`extension_id`, `key`). Nothing drops those rows automatically.
 5. Delete the plugin package + registry row + Python POST route. **Zero** surgical edits to unrelated shell feature components.

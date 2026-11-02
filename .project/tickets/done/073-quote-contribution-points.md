@@ -2,7 +2,7 @@
 id: 073
 wave: 06-platform
 title: quoting.document defines slots; peel charge/rate contributions
-status: in_progress
+status: done
 depends_on: [077, 075]
 epic: SYS-PLATFORM
 docs:

@@ -6,8 +6,9 @@
  * credit + enterprise; missing rollout row = on.
  *
  * Contributes no workbench UI: it exports port / address combobox widgets
- * (`widgets`) that quote consumes until 073 defines quote slots to contribute
- * into. Data comes from `/api/geography/*` (BFF → `services/geography`).
+ * (`widgets`) consumed by quote lane fields (and available for slot
+ * contributions later). Data comes from `/api/geography/*` (BFF →
+ * `services/geography`).
  */
 export const manifest = {
   id: "geo.gazetteer",

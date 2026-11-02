@@ -4,11 +4,11 @@ What exists today vs target packages. Optional workers already live under `exten
 
 ## Already extension-shaped (optional)
 
-| Id                                                          | Code today                                                                                                                                | Gap                                           |
-| ----------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
-| `spot.fake` / `maersk` / `cma` — **slot-contributed (073)** | `extensions/spot` + host registry; contribute `quoting.slots.rateSources` (`component: rates.spotSource`, panel owned by `rates.catalog`) | **069** creds                                 |
-| `messaging.msgraph`                                         | `extensions/messaging` + `/messaging/inbox` page gated by slot                                                                            | Page should become workbench view/editor      |
-| `ingestion.fcl_v6`                                          | `extensions/ingestion` + `/rates/upload`                                                                                                  | Same — contribute view, not shell route owner |
+| Id                                                          | Code today                                                                                                                                | Gap                                          |
+| ----------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
+| `spot.fake` / `maersk` / `cma` — **slot-contributed (073)** | `extensions/spot` + host registry; contribute `quoting.slots.rateSources` (`component: rates.spotSource`, panel owned by `rates.catalog`) | **069** creds                                |
+| `messaging.msgraph` — **workbench (080)**                   | `extensions/messaging` + `/messaging/inbox` route anchor; contributes `messaging` activity / inbox editor                                 | Thin page remains; UI package optional later |
+| `ingestion.fcl_v6` — **workbench (080)**                    | `extensions/ingestion` + `/rates/upload` route anchor; contributes `rates` activity / upload editor                                       | Thin page remains; UI package optional later |
 
 ## Still in shell — package as driving built-ins
 
@@ -57,7 +57,8 @@ Convention: `extensions/builtins/<id with dots → dashes>` → `@starboard/ext-
 1. Harden host + workbench chrome (**074**, **075**)
 2. Scaffold empty built-in packages + manifests (**076**)
 3. ~~Move **quote** into `quoting.document` (**077**)~~ — done: `quotes` activity, `quoting.document.list` view, `quote` (`/quote/:id`) + `quote.list` (home `/`, auto-opens) editors; legacy shim entries removed. Charge UI peeled in **073**.
-4. ~~Move CRM + settings (+ geo widgets as deps) (**078**)~~ — done: `customers` activity (`customer.list` `/customers`, `customer` `/customers/:id`), `settings` activity (`settings.index` `/settings`, `settings` `/settings/:slug`), `geo.gazetteer` widgets; legacy customers/settings shim entries removed from `legacyShellContributions` (only extension nav + catch-all `page` remain). Messaging inbox / rates upload stay route-owned (`page` editor) — deferred.
+4. ~~Move CRM + settings (+ geo widgets as deps) (**078**)~~ — done: `customers` activity (`customer.list` `/customers`, `customer` `/customers/:id`), `settings` activity (`settings.index` `/settings`, `settings` `/settings/:slug`), `geo.gazetteer` widgets.
 5. ~~Quote-defined slots; peel charges/rateSources (**073**)~~ — done: `quoting.document` `defines` `quoting.slots.{headerFields,chargeTable,totals,rateSources}` + `quoting.totalsHooks` (declared, headless); slot host `QuoteSlot` mounts contributions resolved by the editor-context `slots` payload + `builtinPointComponents`; `quoting.charges` → `chargeTable`; `rates.catalog` + `spot.*` → `rateSources` only. `headerFields` / `totals` hosted but unclaimed (070 / 072 land there). Legacy `uiSlots: ["quote.rateSources"]` removed.
-6. QV2 parity inside those packages (**071→070→072**)
-7. Org carrier secrets (**069**)
+6. ~~Retire legacy shell shim (**080**)~~ — done: `legacyShellContributions` / catch-all `page` removed; `ingestion.fcl_v6` + `messaging.msgraph` contribute workbench activity/views/editors; pages gated with `isExtensionActive`.
+7. QV2 parity inside those packages (**071→070→072**)
+8. Org carrier secrets (**069**)

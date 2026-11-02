@@ -4,13 +4,12 @@ import { InboxPanel } from "@/components/messaging/inbox-panel"
 import { requireOrganizationContext } from "@/lib/auth/organization-context"
 import { getOrganizationPlan } from "@/lib/billing/plan"
 import { getMessagingManager } from "@/lib/domain/messaging/messaging.manager"
-import { listActiveUiSlots } from "@/lib/extensions"
+import { isExtensionActive } from "@/lib/extensions"
 
 export default async function MessagingInboxPage() {
   const { organizationId } = await requireOrganizationContext()
   const plan = await getOrganizationPlan(organizationId)
-  const slots = await listActiveUiSlots(plan, organizationId)
-  if (!slots.includes("messaging.inbox")) {
+  if (!(await isExtensionActive("messaging.msgraph", plan, organizationId))) {
     redirect("/")
   }
 
