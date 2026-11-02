@@ -2,7 +2,7 @@
 id: 077
 wave: 06-platform
 title: Migrate quote UI into quoting.document built-in
-status: open
+status: in_progress
 depends_on: [074, 075, 076]
 epic: SYS-PLATFORM
 docs:
@@ -26,11 +26,11 @@ Keep behavior (including current charge UI) working — parity fixes are **071+*
 
 ## Acceptance
 
-- [ ] Opening a quote is a workbench editor tab via contribution
-- [ ] Quotes list is a contributed sidebar/view
-- [ ] Kernel has no direct import of quote form modules (only workbench hosts)
-- [ ] Save/load quote still works; CI green
-- [ ] Inventory doc updated (quote row → migrated)
+- [x] Opening a quote is a workbench editor tab via contribution
+- [x] Quotes list is a contributed sidebar/view
+- [x] Kernel has no direct import of quote form modules (only workbench hosts)
+- [x] Save/load quote still works; CI green
+- [x] Inventory doc updated (quote row → migrated)
 
 ## Non-goals
 

@@ -2,7 +2,7 @@
 id: 076
 wave: 06-platform
 title: Scaffold driving built-in extension packages + manifests
-status: in_progress
+status: done
 depends_on: [075]
 epic: SYS-PLATFORM
 docs:
