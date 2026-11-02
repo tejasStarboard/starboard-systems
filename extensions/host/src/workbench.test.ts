@@ -320,7 +320,9 @@ describe("getActiveWorkbenchContributions", () => {
       "messaging.msgraph",
     ])
     expect(Object.keys(result.points)).toEqual([
+      "quoting.slots.headerFields",
       "quoting.slots.chargeTable",
+      "quoting.slots.totals",
       "quoting.slots.rateSources",
       "quoting.slots.lifecycle",
       "quoting.commands",

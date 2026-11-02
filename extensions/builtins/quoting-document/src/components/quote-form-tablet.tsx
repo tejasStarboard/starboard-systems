@@ -4,12 +4,7 @@ import { Button } from "@starboard/lib-ui/components/button"
 import { Separator } from "@starboard/lib-ui/components/separator"
 import { cn } from "@starboard/lib-ui/lib/utils"
 
-import {
-  QuoteCurrencyField,
-  QuoteCustomerField,
-  QuoteCustomerRoleField,
-  QuoteIncotermField,
-} from "./quote-form-fields"
+import { QuoteCurrencyField, QuoteCustomerField } from "./quote-form-fields"
 import { QuoteCommandsSlot } from "./quote-commands-slot"
 import { QuoteHeaderSlot } from "./quote-header-slot"
 import { QuoteLifecycleSlot } from "./quote-lifecycle-slot"
@@ -39,20 +34,9 @@ export function QuoteFormTablet(props: QuoteFormLayoutProps) {
           className="w-full"
           disabled={locked}
         />
-        <QuoteIncotermField
-          control={props.control}
-          className="w-full"
-          disabled={locked}
-        />
-        <QuoteCustomerRoleField
-          control={props.control}
-          className="w-full"
-          disabled={locked}
-        />
+        <QuoteHeaderSlot props={props} layout="tablet" />
         <QuoteCommandsSlot props={props} className="col-span-4" />
       </div>
-
-      <QuoteHeaderSlot {...props} />
 
       <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden">
         <QuoteLanesPanel

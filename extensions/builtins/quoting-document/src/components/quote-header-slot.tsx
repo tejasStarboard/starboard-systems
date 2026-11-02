@@ -5,22 +5,33 @@ import { QUOTING_SLOTS, type HeaderFieldsSlotProps } from "../slots/types"
 import type { QuoteFormLayoutProps } from "./quote-form-layout-props"
 
 /**
- * `quoting.slots.headerFields` host: extra header fields (Incoterm, …) from
- * sibling extensions. Renders nothing when no active contribution.
+ * `quoting.slots.headerFields` host: Incoterm / Role (and later siblings) from
+ * contributed packages. Uses `contents` so fields participate in the parent
+ * flex/grid. Renders nothing when no active contribution.
  */
-export function QuoteHeaderSlot(props: QuoteFormLayoutProps) {
+export function QuoteHeaderSlot({
+  props,
+  layout,
+  className = "contents",
+}: {
+  props: QuoteFormLayoutProps
+  layout: HeaderFieldsSlotProps["layout"]
+  className?: string
+}) {
   const slotProps: HeaderFieldsSlotProps = {
     quoteId: props.quoteId,
     control: props.control,
     register: props.register,
     setValue: props.setValue,
     errors: props.errors,
+    commercialEditable: props.commercialEditable,
+    layout,
   }
   return (
     <QuoteSlot
       point={QUOTING_SLOTS.headerFields}
       props={slotProps}
-      className="flex flex-wrap items-end gap-3 border-b pb-4"
+      className={className}
     />
   )
 }

@@ -119,8 +119,8 @@ Rules: point ids are globally unique and owned by exactly one extension; extensi
 | ---------------------------- | ---------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
 | `quoting.slots.chargeTable`  | `control, register, lanePath, rateFields, currencyCode, excludedBuckets, onAppendRate, onRemoveRate` | `quoting.charges` (table + per-rate surcharges, globals) |
 | `quoting.slots.rateSources`  | `origin, destination, onApplyRate`                                                                   | `rates.catalog` (catalog list), `spot.*` panels          |
-| `quoting.slots.totals`       | `control, register, lanePath, currencyCode, totals`                                                  | — (document renders default footer; hosted)              |
-| `quoting.slots.headerFields` | `quoteId, control, register, setValue, errors`                                                       | — (hosted; Incoterm lands here in **070**)               |
+| `quoting.slots.totals`       | `control, register, lanePath, currencyCode, totals`                                                  | `quoting.markup` (**084**)                               |
+| `quoting.slots.headerFields` | `quoteId, control, register, setValue, errors, commercialEditable, layout`                           | `quoting.incoterm` (**084**)                             |
 | `quoting.commands`           | `quoteId, status, exportAllowed`                                                                     | `quoting.pdf` Export PDF (**083**)                       |
 
 ## Async job contract

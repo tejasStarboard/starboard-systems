@@ -56,6 +56,23 @@ describe("quoting.document defines slots (073)", () => {
     ).toEqual([["quoting.pdf.export", "quoting.pdf"]])
   })
 
+  test("quoting.incoterm contributes header fields (084)", () => {
+    expect(
+      getContributionsToPoint("quoting.slots.headerFields", "credit").map(
+        (c) => [c.id, c.extensionId]
+      )
+    ).toEqual([["quoting.incoterm.fields", "quoting.incoterm"]])
+  })
+
+  test("quoting.markup contributes totals footer (084)", () => {
+    expect(
+      getContributionsToPoint("quoting.slots.totals", "credit").map((c) => [
+        c.id,
+        c.extensionId,
+      ])
+    ).toEqual([["quoting.markup.footer", "quoting.markup"]])
+  })
+
   test("only quoting.document defines quoting.* points", () => {
     for (const manifest of manifests.filter((m) => m.id !== document.id)) {
       expect(manifest.defines?.extensionPoints ?? []).toEqual([])
@@ -100,7 +117,8 @@ describe("quoting.document defines slots (073)", () => {
   test("getContributionsForOwner keys every defined point, no slot names needed", () => {
     const result = getContributionsForOwner("quoting.document", "credit")
     expect(Object.keys(result)).toEqual([...SLOTS, "quoting.totalsHooks"])
-    expect(result["quoting.slots.headerFields"]).toEqual([])
+    expect(result["quoting.slots.headerFields"]).toHaveLength(1)
+    expect(result["quoting.slots.totals"]).toHaveLength(1)
     expect(result["quoting.slots.chargeTable"]).toHaveLength(1)
     expect(result["quoting.slots.rateSources"]).toHaveLength(4)
     expect(result["quoting.slots.lifecycle"]).toHaveLength(1)
@@ -117,6 +135,30 @@ describe("quoting.document defines slots (073)", () => {
     )
     expect(result["quoting.commands"]).toEqual([])
     expect(result["quoting.slots.lifecycle"]).toHaveLength(1)
+    expect(result["quoting.slots.chargeTable"]).toHaveLength(1)
+  })
+
+  test("unplug quoting.incoterm → empty headerFields; other slots intact", () => {
+    const result = getContributionsForOwner(
+      "quoting.document",
+      "credit",
+      manifests,
+      off("quoting.incoterm")
+    )
+    expect(result["quoting.slots.headerFields"]).toEqual([])
+    expect(result["quoting.slots.totals"]).toHaveLength(1)
+    expect(result["quoting.slots.chargeTable"]).toHaveLength(1)
+  })
+
+  test("unplug quoting.markup → empty totals; other slots intact", () => {
+    const result = getContributionsForOwner(
+      "quoting.document",
+      "credit",
+      manifests,
+      off("quoting.markup")
+    )
+    expect(result["quoting.slots.totals"]).toEqual([])
+    expect(result["quoting.slots.headerFields"]).toHaveLength(1)
     expect(result["quoting.slots.chargeTable"]).toHaveLength(1)
   })
 

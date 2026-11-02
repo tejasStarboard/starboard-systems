@@ -56,6 +56,12 @@ importers:
       '@starboard/ext-quoting-document':
         specifier: workspace:*
         version: link:../../extensions/builtins/quoting-document
+      '@starboard/ext-quoting-incoterm':
+        specifier: workspace:*
+        version: link:../../extensions/builtins/quoting-incoterm
+      '@starboard/ext-quoting-markup':
+        specifier: workspace:*
+        version: link:../../extensions/builtins/quoting-markup
       '@starboard/ext-quoting-pdf':
         specifier: workspace:*
         version: link:../../extensions/builtins/quoting-pdf
@@ -312,6 +318,59 @@ importers:
         specifier: ^5.9.3
         version: 5.9.3
 
+  extensions/builtins/quoting-incoterm:
+    dependencies:
+      '@starboard/ext-quoting-document':
+        specifier: workspace:*
+        version: link:../quoting-document
+      '@starboard/lib-contracts':
+        specifier: workspace:*
+        version: link:../../../packages/contracts
+      '@starboard/lib-ui':
+        specifier: workspace:*
+        version: link:../../../packages/ui
+      react-hook-form:
+        specifier: ^7.91.0
+        version: 7.91.0(@types/react@19.3.0)(react@19.3.1)
+    devDependencies:
+      '@starboard/tool-typescript-config':
+        specifier: workspace:*
+        version: link:../../../tooling/typescript-config
+      '@types/react':
+        specifier: ^19
+        version: 19.3.0
+      react:
+        specifier: 19.3.1
+        version: 19.3.1
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+
+  extensions/builtins/quoting-markup:
+    dependencies:
+      '@starboard/ext-quoting-document':
+        specifier: workspace:*
+        version: link:../quoting-document
+      '@starboard/lib-ui':
+        specifier: workspace:*
+        version: link:../../../packages/ui
+      react-hook-form:
+        specifier: ^7.91.0
+        version: 7.91.0(@types/react@19.3.0)(react@19.3.1)
+    devDependencies:
+      '@starboard/tool-typescript-config':
+        specifier: workspace:*
+        version: link:../../../tooling/typescript-config
+      '@types/react':
+        specifier: ^19
+        version: 19.3.0
+      react:
+        specifier: 19.3.1
+        version: 19.3.1
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+
   extensions/builtins/quoting-pdf:
     dependencies:
       '@phosphor-icons/react':
@@ -398,6 +457,12 @@ importers:
       '@starboard/ext-quoting-document':
         specifier: workspace:*
         version: link:../builtins/quoting-document
+      '@starboard/ext-quoting-incoterm':
+        specifier: workspace:*
+        version: link:../builtins/quoting-incoterm
+      '@starboard/ext-quoting-markup':
+        specifier: workspace:*
+        version: link:../builtins/quoting-markup
       '@starboard/ext-quoting-pdf':
         specifier: workspace:*
         version: link:../builtins/quoting-pdf

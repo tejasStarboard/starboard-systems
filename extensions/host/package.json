@@ -37,6 +37,8 @@
     "@starboard/ext-org-settings": "workspace:*",
     "@starboard/ext-quoting-charges": "workspace:*",
     "@starboard/ext-quoting-document": "workspace:*",
+    "@starboard/ext-quoting-incoterm": "workspace:*",
+    "@starboard/ext-quoting-markup": "workspace:*",
     "@starboard/ext-quoting-pdf": "workspace:*",
     "@starboard/ext-rates-catalog": "workspace:*",
     "@starboard/tool-typescript-config": "workspace:*",

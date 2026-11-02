@@ -5,6 +5,8 @@ import {
   views as crmPartiesViews,
 } from "@starboard/ext-crm-parties"
 import { pointComponents as quotingChargesPoints } from "@starboard/ext-quoting-charges"
+import { pointComponents as quotingIncotermPoints } from "@starboard/ext-quoting-incoterm"
+import { pointComponents as quotingMarkupPoints } from "@starboard/ext-quoting-markup"
 import { pointComponents as quotingPdfPoints } from "@starboard/ext-quoting-pdf"
 import { pointComponents as ratesCatalogPoints } from "@starboard/ext-rates-catalog"
 import {
@@ -58,6 +60,8 @@ export const builtinPointComponents: Readonly<
 > = {
   ...quotingDocumentPoints,
   ...quotingChargesPoints,
+  ...quotingIncotermPoints,
+  ...quotingMarkupPoints,
   ...quotingPdfPoints,
   ...ratesCatalogPoints,
 }
