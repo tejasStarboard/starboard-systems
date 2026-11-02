@@ -35,16 +35,19 @@ export function QuoteEditor({ resourceId }: BuiltinEditorProps) {
         )
         const body = (await response.json().catch(() => null)) as
           (QuoteEditorContext & { error?: string }) | null
-        if (!response.ok || !body?.options) {
+        if (!response.ok || !body?.quote || !body.options) {
           setState({
             status: "error",
-            message: body?.error ?? "Unable to load quote.",
+            message:
+              response.status === 404
+                ? "Quote not found."
+                : (body?.error ?? "Unable to load quote."),
           })
           return
         }
         setState({
           status: "ready",
-          input: prepareQuoteEditorInput(resourceId, body),
+          input: prepareQuoteEditorInput(body),
         })
       } catch (error) {
         if (controller.signal.aborted) return

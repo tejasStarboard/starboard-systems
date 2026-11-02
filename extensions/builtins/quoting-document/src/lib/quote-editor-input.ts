@@ -1,13 +1,10 @@
-import {
-  emptyQuoteFormValues,
-  type QuoteFormOption,
-  type QuoteFormValues,
-} from "./quotes.schema"
+import type { QuoteFormOption, QuoteFormValues } from "./quotes.schema"
 import type { SpotRateSource } from "./spot-rate-source"
 
 /** `GET /api/quotes/:id/editor-context` payload (BFF composes service data). */
 export type QuoteEditorContext = {
-  quote: QuoteFormValues | null
+  /** Always present: the route answers 404 for unknown quotes. */
+  quote: QuoteFormValues
   options: {
     customerOptions: QuoteFormOption[]
     currencyOptions: QuoteFormOption[]
@@ -29,18 +26,15 @@ export type QuoteEditorInput = {
 }
 
 /**
- * Turn the loaded context into `QuoteForm` props: an unsaved quote id gets an
- * empty draft, saved currency / lane port codes are guaranteed to have an
- * option, and the first FCL container gets a default type.
+ * Turn the loaded context into `QuoteForm` props: saved currency / lane port
+ * codes are guaranteed to have an option, and the first FCL container gets a
+ * default type. Never invents a draft for an unknown quote id.
  */
 export function prepareQuoteEditorInput(
-  quoteId: string,
   context: QuoteEditorContext
 ): QuoteEditorInput {
   const { options } = context
-  const defaultValues: QuoteFormValues = structuredClone(
-    context.quote ?? emptyQuoteFormValues({ id: quoteId })
-  )
+  const defaultValues: QuoteFormValues = structuredClone(context.quote)
 
   const currencies = [...options.currencyOptions]
   const ports = [...options.portOptions]

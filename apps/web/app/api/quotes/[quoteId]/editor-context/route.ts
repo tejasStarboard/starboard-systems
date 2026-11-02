@@ -26,6 +26,9 @@ export async function GET(
       quotesManager.loadQuoteFormOptions(organizationId),
       getOrganizationPlan(organizationId),
     ])
+    if (!quote) {
+      return NextResponse.json({ error: "Quote not found" }, { status: 404 })
+    }
     const spotRateSources = await listActiveSpotRateSources(
       plan,
       organizationId
