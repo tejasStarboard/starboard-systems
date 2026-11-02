@@ -35,9 +35,21 @@ export type ManualSurchargeLineInput = {
   source?: string | null
 }
 
+export type ManualRateBaseMode = "flat" | "per_eq"
+
+export type ManualEquipmentAmount = {
+  containerType: string
+  amount: number
+  count: number
+}
+
 export type ManualLaneTotalsInput = {
   lines: Array<{
     amount: number
+    /** Defaults to a single flat amount. */
+    baseMode?: ManualRateBaseMode
+    /** When `per_eq` and non-empty, buy is the sum of amount × count. */
+    equipmentAmounts?: ManualEquipmentAmount[]
     surcharges?: ManualSurchargeLineInput[]
   }>
   markupType: MarkupType
@@ -162,12 +174,32 @@ function surchargeBuy(
   }).buy
 }
 
+function baseFreightBuy(
+  line: ManualLaneTotalsInput["lines"][number],
+  usage: LaneUsageQuantities | null | undefined
+): number {
+  if (line.baseMode === "per_eq") {
+    const equipment = line.equipmentAmounts ?? []
+    if (equipment.length > 0) {
+      return equipment.reduce((sum, row) => {
+        const amount = Number.isFinite(row.amount) ? row.amount : 0
+        const count = Number.isFinite(row.count) ? row.count : 0
+        return sum + amount * count
+      }, 0)
+    }
+    const containers = usage?.container ?? 0
+    const amount = Number.isFinite(line.amount) ? line.amount : 0
+    return amount * containers
+  }
+  return Number.isFinite(line.amount) ? line.amount : 0
+}
+
 function lineBuy(
   line: ManualLaneTotalsInput["lines"][number],
   usage: LaneUsageQuantities | null | undefined,
   scope?: ScopeContext | null
 ): number {
-  const base = Number.isFinite(line.amount) ? line.amount : 0
+  const base = baseFreightBuy(line, usage)
   const surcharges = line.surcharges ?? []
   if (surcharges.length === 0) {
     return base
@@ -179,11 +211,11 @@ function lineBuy(
   return base + surchargeTotal
 }
 
-function linesBaseFreight(lines: ManualLaneTotalsInput["lines"]): number {
-  return lines.reduce((sum, line) => {
-    const amount = Number.isFinite(line.amount) ? line.amount : 0
-    return sum + amount
-  }, 0)
+function linesBaseFreight(
+  lines: ManualLaneTotalsInput["lines"],
+  usage: LaneUsageQuantities | null | undefined
+): number {
+  return lines.reduce((sum, line) => sum + baseFreightBuy(line, usage), 0)
 }
 
 /**
@@ -211,7 +243,7 @@ export function computeManualLaneTotals(
             sum +
             surchargeBuy(
               { ...row, source: row.source ?? "global" },
-              linesBaseFreight(input.lines),
+              linesBaseFreight(input.lines, input.usage),
               input.usage,
               scope
             ),

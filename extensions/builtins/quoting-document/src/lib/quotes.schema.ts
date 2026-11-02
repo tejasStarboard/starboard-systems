@@ -11,6 +11,7 @@ export {
 export {
   createContainerLine,
   createManualRateLine,
+  resolveSelectedManualRate,
   createSurchargeLine,
   emptyLaneFormValues,
   emptyQuoteFormValues,

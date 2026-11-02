@@ -114,6 +114,8 @@ export const lane = quotesSchema.table(
       .notNull()
       .default("amount"),
     markupValue: doublePrecision("markup_value").notNull().default(0),
+    /** Opaque quotes.rate id that prices this lane. */
+    selectedRateId: text("selected_rate_id"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
       .defaultNow()
@@ -138,6 +140,15 @@ export const rate = quotesSchema.table(
     currencyCode: varchar("currency_code", { length: 3 }).notNull(),
     label: text("label").notNull().default(""),
     rate: doublePrecision("rate").notNull(),
+    /** flat | per_eq */
+    baseMode: varchar("base_mode", { length: 16 })
+      .$type<"flat" | "per_eq">()
+      .notNull()
+      .default("flat"),
+    equipmentAmounts: jsonb("equipment_amounts")
+      .$type<Array<{ containerType: string; amount: number }>>()
+      .notNull()
+      .default([]),
     validFrom: timestamp("valid_from").notNull(),
     validTo: timestamp("valid_to").notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),

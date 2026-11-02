@@ -2,7 +2,7 @@
 id: 071
 wave: 06-product
 title: Quote charge table prod parity (QV2 grid + rate alternatives)
-status: open
+status: in_progress
 depends_on: [067, 068, 073]
 epic: SYS-PRICING
 docs:
@@ -51,11 +51,11 @@ This rewrite is a **code refactor**, not a product redesign. QV2 Ocean FCL charg
 
 ## Acceptance criteria
 
-- [ ] One charge table for selected rate; “+ Add charge” adds a **line**
-- [ ] Multiple rates are alternatives; UI selects one; totals do not sum all rates
-- [ ] Base flat vs per-eq (+ equipment-specific path or explicit lean subset)
-- [ ] Globals appear as grid section/leg (persistence may keep `global_charge` table)
-- [ ] Domain + coverage docs updated; no “invoice-style multi charge cards” as product intent
+- [x] One charge table for selected rate; “+ Add charge” adds a **line**
+- [x] Multiple rates are alternatives; UI selects one; totals do not sum all rates
+- [x] Base flat vs per-eq (+ equipment-specific path or explicit lean subset)
+- [x] Globals appear as grid section/leg (persistence may keep `global_charge` table)
+- [x] Domain + coverage docs updated; no “invoice-style multi charge cards” as product intent
 
 ## Out of scope
 

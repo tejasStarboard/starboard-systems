@@ -50,7 +50,10 @@ export type HeaderFieldsSlotProps = Form & {
   errors: FieldErrors<QuoteFormValues>
 }
 
-export type ChargeTableSlotProps = Pick<Form, "control" | "register"> & {
+export type ChargeTableSlotProps = Pick<
+  Form,
+  "control" | "register" | "setValue"
+> & {
   lanePath: `lanes.${number}`
   rateFields: FieldArrayWithId<
     QuoteFormValues,

@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test"
 
+import baseFreightModeFixtures from "../fixtures/base-freight-mode.json"
 import globalScopeFixtures from "../fixtures/global-scope-totals.json"
 import manualRateFixtures from "../fixtures/manual-rate-totals.json"
 import {
@@ -237,4 +238,50 @@ describe("computeManualLaneTotals — global + scope fixtures", () => {
       expect(computeManualLaneTotals(fixture.input)).toEqual(fixture.expected)
     })
   }
+})
+
+type BaseFreightModeCase = {
+  id: string
+  amount?: number
+  containerCount?: number
+  equipment?: Array<{ containerType: string; amount: number; count: number }>
+  buy: number
+}
+
+describe("computeManualLaneTotals — base freight mode", () => {
+  const cases = (baseFreightModeFixtures as { cases: BaseFreightModeCase[] })
+    .cases
+
+  for (const fixture of cases) {
+    test(fixture.id, () => {
+      const totals = computeManualLaneTotals({
+        lines: [
+          {
+            amount: fixture.amount ?? 0,
+            baseMode: fixture.equipment
+              ? "per_eq"
+              : fixture.id.startsWith("flat")
+                ? "flat"
+                : "per_eq",
+            equipmentAmounts: fixture.equipment,
+          },
+        ],
+        markupType: "amount",
+        markupValue: 0,
+        usage: buildLaneUsageQuantities({
+          containerCount: fixture.containerCount ?? 0,
+        }),
+      })
+      expect(totals.buy).toBe(fixture.buy)
+    })
+  }
+
+  test("selected rate is the only line passed in", () => {
+    const totals = computeManualLaneTotals({
+      lines: [{ amount: 400, baseMode: "flat" }],
+      markupType: "amount",
+      markupValue: 0,
+    })
+    expect(totals.buy).toBe(400)
+  })
 })

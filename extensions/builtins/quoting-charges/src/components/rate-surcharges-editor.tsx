@@ -28,25 +28,15 @@ import { cn } from "@starboard/lib-ui/lib/utils"
 
 import type { QuoteFormValues } from "@starboard/lib-contracts"
 
+import { USAGE_UNIT_LABELS } from "./usage-labels"
+
 const LEGS: { value: SurchargeLeg; label: string }[] = [
   { value: "origin", label: "Origin" },
   { value: "freight", label: "Freight" },
   { value: "destination", label: "Destination" },
 ]
 
-const USAGE_UNITS: { value: UsageUnit; label: string }[] = [
-  { value: "flat", label: "Flat" },
-  { value: "container", label: "Container" },
-  { value: "teu", label: "TEU" },
-  { value: "cbm", label: "CBM" },
-  { value: "kg", label: "Kg" },
-  { value: "ton", label: "Ton" },
-  { value: "wm", label: "W/M" },
-  { value: "pallet", label: "Pallet" },
-  { value: "per_time", label: "Per time" },
-  { value: "percentage", label: "% freight" },
-  { value: "unknown", label: "Unknown" },
-]
+const USAGE_UNITS = USAGE_UNIT_LABELS
 
 export function RateSurchargesEditor({
   control,
@@ -107,7 +97,7 @@ export function RateSurchargesEditor({
           }
         >
           <PlusIcon data-icon="inline-start" />
-          Add surcharge
+          Add charge
         </Button>
       </div>
 

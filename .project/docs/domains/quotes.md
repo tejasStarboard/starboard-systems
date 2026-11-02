@@ -19,9 +19,10 @@ Pricing math (`packages/pricing`), geography resolution, CRM customer records, s
 
 Each lane stores `manualRates: ManualRateLine[]` (`label` + `amount` + nested `surcharges`). Quote also stores `globalCharges` (quote-level). Persist shape:
 
-- `quotes.rate` — base rate line (label/amount)
-- `quotes.surcharge` — lean charge rows FK → `quotes.rate` (`leg`, `usage_unit`, rate / rate_percentage, inclusion flags, usage bounds, buy/sell amounts)
-- `quotes.global_charge` — quote-level charges (`source: global`); immune to door bucket scope
+- `quotes.rate` — one alternative (label, flat or per-eq base, optional equipment amounts)
+- `quotes.lane.selected_rate_id` — which alternative prices the lane
+- `quotes.surcharge` — charge lines on that rate (`leg`, `usage_unit`, rate / rate_percentage, inclusion flags, usage bounds, buy/sell amounts)
+- `quotes.global_charge` — quote-level charges (`source: global`); shown in the charge grid Globals section; immune to door bucket scope
 
 Save path is still full lane-tree replace (`replaceLanes`, which also replaces globals); deleting a lane cascades rates → surcharges.
 
@@ -46,6 +47,14 @@ Quote UI/data activation is the driving built-in **`quoting.document`** (not ker
 ## Product parity (refactor rule)
 
 Match **starboard-2 QV2** quote money UX/semantics. Architecture may differ (ONE MATH package, `global_charge` table); **user-visible behavior must not**. Silent simplifications are bugs until ticketed.
+
+## Charge grid (071)
+
+One table for the **selected** rate inside `quoting.charges` (`quoting.slots.chargeTable`). Rate tabs are alternatives; totals do not sum every rate. **Add charge** adds a surcharge line. **Add rate** (and apply catalog/spot) adds an alternative and selects it.
+
+Base freight is flat, or per-eq (`amount ×` container count). Lean equipment buys are `equipmentAmounts` on the rate (amount per container type). No TEU table.
+
+FCL unit labels: `container` Per Eq, `kg` Per KG, `per_time` Per Day. Enum values are unchanged.
 
 ## Current gaps (vs prod QV2)
 
