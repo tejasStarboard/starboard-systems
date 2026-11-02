@@ -21,14 +21,16 @@ export async function GET(
 
   try {
     const quotesManager = getQuotesManager()
-    const [quote, options, plan] = await Promise.all([
+    const [quote, plan] = await Promise.all([
       quotesManager.getQuoteFormValuesForOrg(quoteId, organizationId),
-      quotesManager.loadQuoteFormOptions(organizationId),
       getOrganizationPlan(organizationId),
     ])
     if (!quote) {
       return NextResponse.json({ error: "Quote not found" }, { status: 404 })
     }
+    const options = await quotesManager.loadQuoteFormOptions(organizationId, {
+      customerId: quote.customerId,
+    })
     const spotRateSources = await listActiveSpotRateSources(
       plan,
       organizationId

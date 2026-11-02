@@ -1,13 +1,14 @@
-import { CustomersList } from "@/components/crm/customers-list"
-import { requireOrganizationContext } from "@/lib/auth/organization-context"
-import { getCrmManager } from "@/lib/domain/crm/crm.manager"
-
-export default async function CustomersPage() {
-  const { organizationId } = await requireOrganizationContext()
-  const initial = await getCrmManager().listCustomerRecords(organizationId, {
-    page: 1,
-    pageSize: 25,
-  })
-
-  return <CustomersList initial={initial} />
+/**
+ * Deep-link anchor (078). `/customers` is claimed by the `crm.parties`
+ * `customer.list` editor; when that built-in is active the editor group mounts
+ * the real editor and ignores these children. Only when it is inactive
+ * (unplugged / rolled out off) does this fallback render.
+ */
+export default function CustomersDeepLinkPage() {
+  return (
+    <p role="alert" className="p-4 text-sm text-muted-foreground">
+      Customers are unavailable: the CRM parties extension is not active for
+      this organization.
+    </p>
+  )
 }

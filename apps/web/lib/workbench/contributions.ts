@@ -45,7 +45,7 @@ export function mergeHostContributions(
   if (!host) return base
 
   // Host activities lead the bar (driving built-ins such as Quotes come first);
-  // legacy shim activities follow until 078 moves them. Base wins on duplicate ids.
+  // legacy shim activities follow. Base wins on duplicate ids.
   const activityIds = new Set(base.activity.map((item) => item.id))
   const hostActivity: WorkbenchActivity[] = []
   for (const item of host.activity) {
@@ -101,55 +101,24 @@ export function mergeHostContributions(
 /**
  * TEMPORARY compatibility shim (074).
  *
- * Today's customers / settings / extension pages are still owned by `apps/web`
- * route trees. This describes them as workbench contributions so the kernel
- * shell can host them. Quote moved into `quoting.document` in 077 (its own
- * activity, sidebar view and `quote` editor); 078 does CRM + settings.
- * 075: extension-host contributions (`getActiveWorkbenchContributions`) are merged
- * with `mergeHostContributions`. Delete the legacy part once built-ins
- * contribute through the extension host.
+ * Quote moved into `quoting.document` (077); customers into `crm.parties` and
+ * settings into `org.settings` (078). What remains here is only the
+ * extension-nav activity (optional workers' `contributes.nav` links) and the
+ * catch-all `page` editor for the remaining route-owned pages (rates upload,
+ * messaging inbox, …). 075: extension-host contributions
+ * (`getActiveWorkbenchContributions`) are merged with `mergeHostContributions`.
+ * Delete this once those pages become contributed views/editors.
  */
 export function legacyShellContributions(
   extensionNav: ReadonlyArray<{ id: string; label: string; href: string }> = []
 ): WorkbenchContributions {
-  const settingsPages = [
-    ["company", "Company"],
-    ["team", "Team"],
-    ["profile", "Profile"],
-    ["preferences", "Preferences"],
-    ["integrations", "Integrations"],
-    ["quote-rules", "Quote rules"],
-    ["billing", "Billing"],
-  ] as const
-
   return {
-    activity: [
-      { id: "customers", label: "Customers", icon: "address-book" },
-      { id: "settings", label: "Settings", icon: "gear" },
-      ...(extensionNav.length > 0
+    activity:
+      extensionNav.length > 0
         ? [{ id: "extensions", label: "Extensions", icon: "puzzle" }]
-        : []),
-    ],
-    views: [
-      {
-        id: "customers.list",
-        name: "Customers",
-        activityId: "customers",
-        entries: [
-          { id: "customers.all", label: "All customers", href: "/customers" },
-        ],
-      },
-      {
-        id: "settings.pages",
-        name: "Settings",
-        activityId: "settings",
-        entries: settingsPages.map(([slug, label]) => ({
-          id: `settings.${slug}`,
-          label,
-          href: `/settings/${slug}`,
-        })),
-      },
-      ...(extensionNav.length > 0
+        : [],
+    views:
+      extensionNav.length > 0
         ? [
             {
               id: "extensions.nav",
@@ -162,15 +131,9 @@ export function legacyShellContributions(
               })),
             },
           ]
-        : []),
-    ],
+        : [],
     editors: [
-      {
-        viewType: "customer",
-        displayName: "Customer",
-        deepLink: "/customers/:resourceId",
-      },
-      // Catch-all for remaining legacy pages (settings, rates upload, inbox, …).
+      // Catch-all for remaining legacy pages (rates upload, inbox, …).
       { viewType: "page", displayName: "Page", deepLink: "/*" },
     ],
   }

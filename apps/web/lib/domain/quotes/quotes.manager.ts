@@ -103,19 +103,45 @@ export class QuotesManager {
     return this.quotesClient.saveQuote(values, input, requestId)
   }
 
-  async loadQuoteFormOptions(organizationId: string) {
+  async loadQuoteFormOptions(
+    organizationId: string,
+    saved?: { customerId?: string | null }
+  ) {
     const requestId = crypto.randomUUID()
+    const savedCustomerId = saved?.customerId?.trim() || null
     const [
-      customerOptions,
+      activeCustomerOptions,
       currencyOptions,
       containerTypeOptions,
       palletTypeOptions,
+      savedCustomerNames,
     ] = await Promise.all([
       this.crmManager.listCustomerOptions(organizationId, requestId),
       this.geographyClient.listCurrencyOptions(requestId),
       this.quotesClient.listContainerTypeOptions(requestId),
       this.quotesClient.listPalletTypeOptions(requestId),
+      savedCustomerId
+        ? this.crmManager.getCustomerNamesByIds(
+            organizationId,
+            [savedCustomerId],
+            requestId
+          )
+        : Promise.resolve(new Map<string, string>()),
     ])
+
+    // The saved customer must stay selectable even if it is inactive / absent
+    // from the active list (same pattern as currency and lane ports).
+    const customerOptions = [...activeCustomerOptions]
+    if (
+      savedCustomerId &&
+      !customerOptions.some((option) => option.value === savedCustomerId)
+    ) {
+      customerOptions.push({
+        value: savedCustomerId,
+        label: savedCustomerNames.get(savedCustomerId) ?? savedCustomerId,
+      })
+      customerOptions.sort((a, b) => a.label.localeCompare(b.label))
+    }
 
     // Ports are not SSR-seeded: PortCombobox searches `/api/geography/ports`,
     // and the quote page adds labels for codes already on the lanes.

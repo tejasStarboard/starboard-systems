@@ -38,6 +38,19 @@ export function prepareQuoteEditorInput(
 
   const currencies = [...options.currencyOptions]
   const ports = [...options.portOptions]
+  const customers = [...options.customerOptions]
+
+  // Saved customer stays selectable even if the server list omitted it
+  // (inactive / paged out). The BFF normally supplies the real name.
+  if (
+    defaultValues.customerId &&
+    !customers.some((option) => option.value === defaultValues.customerId)
+  ) {
+    customers.unshift({
+      value: defaultValues.customerId,
+      label: defaultValues.customerId,
+    })
+  }
 
   if (
     defaultValues.currencyCode &&
@@ -77,7 +90,7 @@ export function prepareQuoteEditorInput(
 
   return {
     defaultValues,
-    customerOptions: options.customerOptions,
+    customerOptions: customers,
     currencyOptions: currencies,
     portOptions: ports,
     containerTypeOptions: options.containerTypeOptions,

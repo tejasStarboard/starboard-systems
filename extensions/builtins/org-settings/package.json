@@ -1,7 +1,7 @@
 {
   "name": "@starboard/ext-org-settings",
   "version": "0.0.1",
-  "description": "Driving built-in extension `org.settings` (stub scaffold)",
+  "description": "Driving built-in extension `org.settings` (company / team / profile / quote-rules / billing / integrations editors)",
   "private": true,
   "license": "UNLICENSED",
   "type": "module",
@@ -15,6 +15,10 @@
       "types": "./src/index.ts",
       "default": "./src/index.ts"
     },
+    "./permissions": {
+      "types": "./src/lib/permissions.ts",
+      "default": "./src/lib/permissions.ts"
+    },
     "./manifest": {
       "types": "./src/manifest.ts",
       "default": "./src/manifest.ts"
@@ -24,10 +28,26 @@
     "src"
   ],
   "scripts": {
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "bun test"
   },
   "devDependencies": {
     "@starboard/tool-typescript-config": "workspace:*",
+    "@types/bun": "^1.3.5",
+    "@types/react": "^19",
+    "react": "19.3.1",
     "typescript": "^5.9.3"
+  },
+  "peerDependencies": {
+    "react": "19.3.1"
+  },
+  "dependencies": {
+    "@hookform/resolvers": "^6.0.2",
+    "@phosphor-icons/react": "^2.1.10",
+    "@starboard/lib-ui": "workspace:*",
+    "better-auth": "^1.7.14",
+    "next-themes": "^0.4.6",
+    "react-hook-form": "^7.91.0",
+    "zod": "^4.6.7"
   }
 }

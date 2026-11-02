@@ -1,4 +1,12 @@
-export { manifest, type BuiltinManifest } from "./manifest"
+import { AddressCombobox } from "./components/address-combobox"
+import { PortCombobox } from "./components/port-combobox"
 
-/** Stub: port / address combobox widgets move here in 078. */
-export const widgets = {} as const
+export { manifest, type BuiltinManifest } from "./manifest"
+export { AddressCombobox, PortCombobox }
+export type { ComboboxOption } from "./lib/options"
+
+/** Widget factories consumed by quote (and later contributed into quote-defined slots). */
+export const widgets = {
+  PortCombobox,
+  AddressCombobox,
+} as const

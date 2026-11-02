@@ -1,6 +1,14 @@
 import type { ComponentType } from "react"
 
 import {
+  editors as crmPartiesEditors,
+  views as crmPartiesViews,
+} from "@starboard/ext-crm-parties"
+import {
+  editors as orgSettingsEditors,
+  views as orgSettingsViews,
+} from "@starboard/ext-org-settings"
+import {
   editors as quotingDocumentEditors,
   views as quotingDocumentViews,
   type BuiltinEditorProps,
@@ -25,8 +33,12 @@ export type BuiltinViewComponent = ComponentType<BuiltinViewProps>
 export const builtinEditors: Readonly<Record<string, BuiltinEditorComponent>> =
   {
     ...quotingDocumentEditors,
+    ...crmPartiesEditors,
+    ...orgSettingsEditors,
   }
 
 export const builtinViews: Readonly<Record<string, BuiltinViewComponent>> = {
   ...quotingDocumentViews,
+  ...crmPartiesViews,
+  ...orgSettingsViews,
 }

@@ -40,4 +40,18 @@ describe("prepareQuoteEditorInput", () => {
     // Input context is not mutated.
     expect(quote.lanes[0]!.containers[0]?.containerType ?? "").toBe("")
   })
+
+  test("saved customer is injected when missing from the option list", () => {
+    const quote = emptyQuoteFormValues({ id: "q-3", customerId: "cust-9" })
+    const input = prepareQuoteEditorInput(context({ quote }))
+    expect(input.customerOptions.map((o) => o.value)).toContain("cust-9")
+  })
+
+  test("saved customer keeps its server label when already listed", () => {
+    const quote = emptyQuoteFormValues({ id: "q-4", customerId: "cust-1" })
+    const base = context({ quote })
+    base.options.customerOptions = [{ value: "cust-1", label: "Acme" }]
+    const input = prepareQuoteEditorInput(base)
+    expect(input.customerOptions).toEqual([{ value: "cust-1", label: "Acme" }])
+  })
 })

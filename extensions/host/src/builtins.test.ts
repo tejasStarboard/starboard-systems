@@ -67,7 +67,11 @@ describe("driving built-in manifests (076)", () => {
 
   test("quoting.document contributes Quotes list view + quote / list editors", () => {
     const contributions = getActiveWorkbenchContributions("credit")
-    expect(contributions.activity.map((a) => a.id)).toEqual(["quotes"])
+    expect(contributions.activity.map((a) => a.id)).toEqual([
+      "quotes",
+      "customers",
+      "settings",
+    ])
     const view = contributions.views.find(
       (v) => v.id === "quoting.document.list"
     )
@@ -77,12 +81,38 @@ describe("driving built-in manifests (076)", () => {
       resourceId: "/",
       title: "Quotes",
     })
-    expect(contributions.editors.map((e) => e.viewType)).toEqual([
-      "quote",
-      "quote.list",
+    const quoting = contributions.editors.filter(
+      (e) => e.extensionId === "quoting.document"
+    )
+    expect(quoting.map((e) => e.viewType)).toEqual(["quote", "quote.list"])
+    expect(quoting[0]?.deepLink).toBe("/quote/:resourceId")
+    expect(quoting[1]?.deepLink).toBe("/")
+  })
+
+  test("crm.parties + org.settings contribute customer / settings editors (078)", () => {
+    const contributions = getActiveWorkbenchContributions("credit")
+    const editorsOf = (id: string) =>
+      contributions.editors
+        .filter((e) => e.extensionId === id)
+        .map((e) => [e.viewType, e.deepLink])
+    expect(editorsOf("crm.parties")).toEqual([
+      ["customer", "/customers/:resourceId"],
+      ["customer.list", "/customers"],
     ])
-    expect(contributions.editors[0]?.deepLink).toBe("/quote/:resourceId")
-    expect(contributions.editors[1]?.deepLink).toBe("/")
+    expect(editorsOf("org.settings")).toEqual([
+      ["settings", "/settings/:resourceId"],
+      ["settings.index", "/settings"],
+    ])
+    expect(
+      contributions.views.find((v) => v.id === "crm.parties.list")?.activityId
+    ).toBe("customers")
+    expect(
+      contributions.views.find((v) => v.id === "org.settings.pages")?.activityId
+    ).toBe("settings")
+    // geo.gazetteer exports widgets only: no workbench contributions.
+    expect(contributions.activity.map((a) => a.extensionId)).not.toContain(
+      "geo.gazetteer"
+    )
   })
 
   test("optional extensions keep their nav / slots", () => {
