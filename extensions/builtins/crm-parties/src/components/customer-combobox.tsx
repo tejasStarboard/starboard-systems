@@ -19,11 +19,13 @@ export function CustomerCombobox({
   value,
   onChange,
   invalid,
+  disabled,
 }: {
   options: ComboboxOption[]
   value: string
   onChange: (value: string) => void
   invalid?: boolean
+  disabled?: boolean
 }) {
   const [options, setOptions] = useState(initialOptions)
 
@@ -107,12 +109,13 @@ export function CustomerCombobox({
           className="w-full"
           placeholder="Search or create customer..."
           aria-invalid={invalid}
-          showClear={!!selected}
+          disabled={disabled}
+          showClear={!!selected && !disabled}
           onChange={(event) => setQuery(event.target.value)}
         />
         <ComboboxContent className="w-(--anchor-width)">
           <ComboboxEmpty>
-            {canCreate ? (
+            {canCreate && !disabled ? (
               <button
                 type="button"
                 className="w-full px-2 py-1.5 text-left text-sm text-foreground hover:underline"
@@ -135,7 +138,7 @@ export function CustomerCombobox({
               </ComboboxItem>
             )}
           </ComboboxList>
-          {canCreate && options.length > 0 ? (
+          {canCreate && !disabled && options.length > 0 ? (
             <button
               type="button"
               className="border-t px-2 py-1.5 text-left text-sm text-muted-foreground hover:text-foreground"

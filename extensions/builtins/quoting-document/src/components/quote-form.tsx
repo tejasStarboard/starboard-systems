@@ -11,6 +11,7 @@ import { QuoteFormDesktop } from "./quote-form-desktop"
 import type { QuoteFormLayoutProps } from "./quote-form-layout-props"
 import { QuoteFormMobile } from "./quote-form-mobile"
 import { QuoteFormTablet } from "./quote-form-tablet"
+import { isCommercialEditable } from "../lib/quote-stage"
 import { useQuoteSlotEntries } from "../slots/slot-host"
 import { QUOTING_SLOTS } from "../slots/types"
 import { RatesSearchSheet, type ApplyRatePayload } from "./rates-search-sheet"
@@ -115,6 +116,7 @@ export function QuoteForm({
     control: form.control,
     name: "globalCharges",
   })
+  const status = useWatch({ control: form.control, name: "status" })
   const currencyCode = useWatch({
     control: form.control,
     name: "currencyCode",
@@ -345,6 +347,7 @@ export function QuoteForm({
     currencyCode: currencyCode ?? "",
     pending,
     isDirty: form.formState.isDirty,
+    commercialEditable: isCommercialEditable(status ?? "draft"),
     onSelectLane: setSelectedLaneIndex,
     onAddLane: handleAddLane,
     onRemoveLane: handleRemoveLane,

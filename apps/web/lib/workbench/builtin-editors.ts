@@ -12,6 +12,7 @@ import {
 } from "@starboard/ext-org-settings"
 import {
   editors as quotingDocumentEditors,
+  pointComponents as quotingDocumentPoints,
   views as quotingDocumentViews,
   type BuiltinEditorProps,
   type BuiltinHost,
@@ -54,6 +55,7 @@ export const builtinViews: Readonly<Record<string, BuiltinViewComponent>> = {
 export const builtinPointComponents: Readonly<
   Record<string, ComponentType<never>>
 > = {
+  ...quotingDocumentPoints,
   ...quotingChargesPoints,
   ...ratesCatalogPoints,
 }

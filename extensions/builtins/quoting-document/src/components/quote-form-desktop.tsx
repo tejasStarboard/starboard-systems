@@ -2,67 +2,64 @@
 
 import { Button } from "@starboard/lib-ui/components/button"
 import { Separator } from "@starboard/lib-ui/components/separator"
+import { cn } from "@starboard/lib-ui/lib/utils"
 
 import {
   QuoteCurrencyField,
   QuoteCustomerField,
   QuoteCustomerRoleField,
-  QuoteEffectiveField,
   QuoteIncotermField,
-  QuoteExpiryField,
-  QuoteIdField,
-  QuoteStatusField,
 } from "./quote-form-fields"
+import { QuoteCommandsSlot } from "./quote-commands-slot"
 import { QuoteHeaderSlot } from "./quote-header-slot"
+import { QuoteLifecycleSlot } from "./quote-lifecycle-slot"
 import type { QuoteFormLayoutProps } from "./quote-form-layout-props"
 import { QuoteLaneEditor } from "./quote-lane-editor"
 import { QuoteLanesPanel } from "./quote-lanes-panel"
 
 export function QuoteFormDesktop(props: QuoteFormLayoutProps) {
+  const locked = !props.commercialEditable
   return (
     <>
       <div className="flex items-end justify-between gap-3 border-b pb-4">
-        <QuoteIdField quoteId={props.quoteId} className="shrink-0" />
+        <QuoteLifecycleSlot props={props} layout="desktop" />
         <div className="flex flex-wrap items-end justify-end gap-3">
-          <QuoteStatusField
-            control={props.control}
-            className="w-[8.5rem] shrink-0"
-          />
           <QuoteCustomerField
             control={props.control}
             customerOptions={props.customerOptions}
             className="w-64 shrink-0"
+            disabled={locked}
           />
           <QuoteCurrencyField
             control={props.control}
             currencyOptions={props.currencyOptions}
             className="w-[7.5rem] shrink-0"
+            disabled={locked}
           />
           <QuoteIncotermField
             control={props.control}
             className="w-[6.5rem] shrink-0"
+            disabled={locked}
           />
           <QuoteCustomerRoleField
             control={props.control}
             className="w-[8.5rem] shrink-0"
+            disabled={locked}
           />
-          <QuoteEffectiveField
-            register={props.register}
-            errors={props.errors}
-            className="w-[10.5rem] shrink-0"
-          />
-          <QuoteExpiryField
-            register={props.register}
-            errors={props.errors}
-            className="w-[10.5rem] shrink-0"
-          />
+          <QuoteCommandsSlot props={props} />
         </div>
       </div>
 
       <QuoteHeaderSlot {...props} />
 
       <div className="flex min-h-0 flex-1 gap-0 overflow-hidden">
-        <div className="min-w-0 flex-1 pr-4">
+        <div
+          className={cn(
+            "min-w-0 flex-1 pr-4",
+            locked && "pointer-events-none opacity-60"
+          )}
+          aria-disabled={locked || undefined}
+        >
           <QuoteLaneEditor
             control={props.control}
             register={props.register}
@@ -80,6 +77,7 @@ export function QuoteFormDesktop(props: QuoteFormLayoutProps) {
             portOptions={props.portOptions}
             containerTypeOptions={props.containerTypeOptions}
             palletTypeOptions={props.palletTypeOptions}
+            commercialEditable={props.commercialEditable}
             onSearchRates={props.onSearchRates}
             onAddManualRate={props.onAddManualRate}
             onAppendRate={props.onAppendRate}
@@ -94,6 +92,7 @@ export function QuoteFormDesktop(props: QuoteFormLayoutProps) {
           onSelectLane={props.onSelectLane}
           onAddLane={props.onAddLane}
           onRemoveLane={props.onRemoveLane}
+          commercialEditable={props.commercialEditable}
         />
       </div>
 

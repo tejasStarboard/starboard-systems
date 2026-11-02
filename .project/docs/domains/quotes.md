@@ -64,6 +64,24 @@ FCL unit labels: `container` Per Eq, `kg` Per KG, `per_time` Per Day. Enum value
 
 Each surcharge and global charge row edits a buy rate (`rate`, or `%` when the unit is percentage), an optional line sell (`sellAmount`; blank mirrors the calculated buy), Include (`isIncludedInTotal`), and Split (`isVisible`). Split off marks the line Absorbed: it still counts in the total and is not drawn as its own customer line. Free / min / max usage feed `getEffectiveUsageAmount`. When the quote Incoterm excludes a bucket, the row shows Auto / Include / Exclude (`scopeOverride`). Lane markup stays one `$` / `%` dial on the selected rate, including mixed equipment. Totals are `sell = buy + markup`, and a sell override’s gap vs buy is part of markup.
 
+## Stages, validity, numbering (082)
+
+Persisted on `quotes.quote` and exposed on `QuoteFormValues` / list items:
+
+| Field                        | Meaning                                                                                                                                                                      |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `status`                     | Lean QV2 stages: `draft` \| `review` \| `sent` \| `win` \| `loss` \| `expired` (rewrite SoT; not won/lost)                                                                   |
+| `effectiveFrom` / `expiryAt` | Quote validity window (also copied onto rate `validFrom`/`validTo` on save)                                                                                                  |
+| `quoteId`                    | Human-facing number — **6-char A–Z0–9**, unique per `organizationId` (unique index). Assigned on create via random collision-retry (not a sequential counter; no CargoWise). |
+
+UI chrome (id / stage / dates) mounts only via `quoting.slots.lifecycle`, self-contributed by `quoting.document`. Toolbar actions use `quoting.commands` (empty until **083** PDF). Kernel has no stage imports.
+
+### Lean stage gates
+
+- Free select among enum values on save (no full prod state machine).
+- Terminal `win` / `loss` / `expired` → commercial body read-only (lanes, charges, customer, currency, Incoterm); status + validity stay editable.
+- Export / destructive command contributions: allowed when status ∈ `sent` \| `win` \| `loss` (`exportAllowed` on commands slot props).
+
 ## Current gaps (vs prod QV2)
 
 See [build-priority](../reference/build-priority-2026-11-01.md) · [migration inventory](../reference/extension-migration-inventory-2026-11-02.md).
@@ -71,8 +89,8 @@ See [build-priority](../reference/build-priority-2026-11-01.md) · [migration in
 **Phase A:** workbench (**074**) → host (**075**) → scaffold (**076**) → migrate quote (**077**) → slots (**073**).  
 **Phase B:** charge grid (**071**) and Incoterm (**070**) shipped. Economics (**072**) is the lean subset in [Charge line economics](#charge-line-economics-072). Still deferred: per-container markup dials, row FX, surcharge equipment column, tier matrix.
 
-Also: no quote stages/PDF/delete yet; no catalog/spot provenance FK.
+Also: no PDF/delete yet; no catalog/spot provenance FK. Full prod stage-transition edge cases deferred.
 
 ## Next tickets
 
-After money + workbench wiring: quote stages / validity / PDF.
+**Phase D (cont.):** PDF via **`quoting.pdf`** (**083**); peel Incoterm/markup (**084**); money follow-ons in `quoting.charges` (**085**).

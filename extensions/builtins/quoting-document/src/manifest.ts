@@ -1,5 +1,5 @@
 /**
- * Manifest for driving built-in `quoting.document` (ticket 077).
+ * Manifest for driving built-in `quoting.document` (ticket 077 / 073 / 082).
  *
  * Plain data (no imports) so the host registry can bundle it and the
  * `@starboard/ext-host` Zod schema validates it at load. Default-on for
@@ -10,10 +10,10 @@
  * - `quote` editor owns the `/quote/:resourceId` deep link; `quote.list` owns
  *   the workbench home `/` (static deep link) so the quotes table opens by
  *   default, survives refresh, and is discoverable on mobile.
- * - `defines.extensionPoints` (073): the quote editor owns these slots; charges,
- *   rate sources, Incoterm, markup, … contribute into them. The kernel never
- *   names them. `quoting.totalsHooks` is headless (declared now; consumed by
- *   the ONE MATH pipeline in 072).
+ * - `defines.extensionPoints` (073 / 082): the quote editor owns these slots;
+ *   charges, rate sources, Incoterm, markup, PDF, … contribute into them. The
+ *   kernel never names them. Self-contributes lifecycle chrome into
+ *   `quoting.slots.lifecycle`. `quoting.totalsHooks` is headless.
  */
 export const manifest = {
   id: "quoting.document",
@@ -37,6 +37,14 @@ export const manifest = {
       {
         id: "quoting.slots.rateSources",
         description: "Search/apply rates sheet (catalog, spot, …).",
+      },
+      {
+        id: "quoting.slots.lifecycle",
+        description: "Stage, validity, and quote-number chrome.",
+      },
+      {
+        id: "quoting.commands",
+        description: "Editor toolbar actions (PDF, send, …).",
       },
       {
         id: "quoting.totalsHooks",
@@ -73,6 +81,11 @@ export const manifest = {
       },
       { viewType: "quote.list", displayName: "Quotes", deepLink: "/" },
     ],
+    points: {
+      "quoting.slots.lifecycle": [
+        { id: "quoting.document.lifecycle", label: "Lifecycle" },
+      ],
+    },
   },
   enabled: true,
 } as const

@@ -127,10 +127,12 @@ export function QuoteCustomerField({
   control,
   customerOptions,
   className,
+  disabled,
 }: {
   control: Control<QuoteFormValues>
   customerOptions: QuoteFormOption[]
   className?: string
+  disabled?: boolean
 }) {
   return (
     <Controller
@@ -147,6 +149,7 @@ export function QuoteCustomerField({
             value={field.value}
             onChange={field.onChange}
             invalid={fieldState.invalid}
+            disabled={disabled}
           />
           <FieldError errors={[fieldState.error]} />
         </Field>
@@ -159,10 +162,12 @@ export function QuoteCurrencyField({
   control,
   currencyOptions,
   className,
+  disabled,
 }: {
   control: Control<QuoteFormValues>
   currencyOptions: QuoteFormOption[]
   className?: string
+  disabled?: boolean
 }) {
   return (
     <Controller
@@ -176,6 +181,7 @@ export function QuoteCurrencyField({
           <FieldLabel>Currency</FieldLabel>
           <Select
             value={field.value || null}
+            disabled={disabled}
             onValueChange={(value) => {
               field.onChange(value ?? "")
             }}
@@ -201,9 +207,11 @@ export function QuoteCurrencyField({
 export function QuoteIncotermField({
   control,
   className,
+  disabled,
 }: {
   control: Control<QuoteFormValues>
   className?: string
+  disabled?: boolean
 }) {
   return (
     <Controller
@@ -217,6 +225,7 @@ export function QuoteIncotermField({
           <FieldLabel>Incoterm</FieldLabel>
           <Select
             value={field.value || null}
+            disabled={disabled}
             onValueChange={(value) => {
               field.onChange(value ?? "")
             }}
@@ -242,9 +251,11 @@ export function QuoteIncotermField({
 export function QuoteCustomerRoleField({
   control,
   className,
+  disabled,
 }: {
   control: Control<QuoteFormValues>
   className?: string
+  disabled?: boolean
 }) {
   return (
     <Controller
@@ -258,6 +269,7 @@ export function QuoteCustomerRoleField({
           <FieldLabel>Role</FieldLabel>
           <Select
             value={field.value}
+            disabled={disabled}
             onValueChange={(value) => {
               if (value === "shipper" || value === "consignee") {
                 field.onChange(value)

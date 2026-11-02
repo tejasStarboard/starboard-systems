@@ -322,6 +322,7 @@ describe("getActiveWorkbenchContributions", () => {
     expect(Object.keys(result.points)).toEqual([
       "quoting.slots.chargeTable",
       "quoting.slots.rateSources",
+      "quoting.slots.lifecycle",
     ])
   })
 })

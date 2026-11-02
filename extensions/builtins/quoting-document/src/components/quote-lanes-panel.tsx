@@ -38,6 +38,7 @@ export function QuoteLanesPanel({
   onSelectLane,
   onAddLane,
   onRemoveLane,
+  commercialEditable = true,
 }: {
   variant: "strip" | "sidebar"
   laneFields: FieldArrayWithId<QuoteFormValues, "lanes", "id">[]
@@ -46,6 +47,7 @@ export function QuoteLanesPanel({
   onSelectLane: (index: number) => void
   onAddLane: () => void
   onRemoveLane: (index: number) => void
+  commercialEditable?: boolean
 }) {
   const isStrip = variant === "strip"
 
@@ -64,7 +66,13 @@ export function QuoteLanesPanel({
           </span>
         </div>
         {isStrip ? (
-          <Button type="button" variant="outline" size="sm" onClick={onAddLane}>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={onAddLane}
+            disabled={!commercialEditable}
+          >
             <PlusIcon data-icon="inline-start" />
             Add lane
           </Button>
@@ -105,7 +113,7 @@ export function QuoteLanesPanel({
                     {modeLabel(lane?.mode)}
                   </p>
                 </button>
-                {laneFields.length > 1 ? (
+                {laneFields.length > 1 && commercialEditable ? (
                   <Button
                     type="button"
                     variant="ghost"
@@ -135,6 +143,7 @@ export function QuoteLanesPanel({
           size="sm"
           className="mt-auto w-full"
           onClick={onAddLane}
+          disabled={!commercialEditable}
         >
           <PlusIcon data-icon="inline-start" />
           Add lane
