@@ -5,6 +5,7 @@ import { RateListEditor } from "./editors/rate-list-editor"
 import type { BuiltinEditorProps } from "./host"
 import { CatalogSource } from "./slots/catalog-source"
 import { SpotSource } from "./slots/spot-source"
+import { UploadRatesAction } from "./slots/upload-rates-action"
 
 export { manifest, type BuiltinManifest } from "./manifest"
 export type { BuiltinEditorProps, BuiltinHost, BuiltinViewProps } from "./host"
@@ -25,12 +26,17 @@ export const editors: Readonly<
 export const views = {} as const
 
 /**
- * UI factories keyed by contribution id / `component` key. `rates.spotSource`
- * is the shared panel optional `spot.*` workers reference via `component`.
+ * UI factories keyed by contribution id / `component` key.
+ * - `rates.spotSource` — optional `spot.*` workers into rateSources
+ * - `rates.ingestUpload` — optional `ingestion.*` into ingestActions
  */
 export const pointComponents: Readonly<
-  Record<"rates.catalog.source" | "rates.spotSource", ComponentType<never>>
+  Record<
+    "rates.catalog.source" | "rates.spotSource" | "rates.ingestUpload",
+    ComponentType<never>
+  >
 > = {
   "rates.catalog.source": CatalogSource as ComponentType<never>,
   "rates.spotSource": SpotSource as ComponentType<never>,
+  "rates.ingestUpload": UploadRatesAction as ComponentType<never>,
 }

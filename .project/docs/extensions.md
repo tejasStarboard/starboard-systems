@@ -122,6 +122,7 @@ Rules: point ids are globally unique and owned by exactly one extension; extensi
 | `quoting.slots.totals`       | `control, register, lanePath, currencyCode, totals`                                                  | `quoting.markup` (**084**)                               |
 | `quoting.slots.headerFields` | `quoteId, control, register, setValue, errors, commercialEditable, layout`                           | `quoting.incoterm` (**084**)                             |
 | `quoting.commands`           | `quoteId, status, exportAllowed`                                                                     | `quoting.pdf` Export PDF (**083**)                       |
+| `rates.slots.ingestActions`  | `contribution` (+ optional `host.openEditor`); shared panel `rates.ingestUpload`                     | `ingestion.fcl_v6` Upload rates (**087**)                |
 
 ## Async job contract
 
@@ -314,13 +315,13 @@ Files touched for a thin spot carrier (typical):
 
 ## Registered extensions (stubs)
 
-| id                  | Wave | Worker                | Notes                                  |
-| ------------------- | ---- | --------------------- | -------------------------------------- |
-| `ingestion.fcl_v6`  | 2    | Python + Temporal OSS | Ocean FCL only; gate-first save        |
-| `messaging.msgraph` | 3    | Python + Temporal OSS | First email provider                   |
-| `spot.fake`         | 4    | Python + Temporal OSS | Host test plugin (deterministic)       |
-| `spot.maersk`       | 4    | Python + Temporal OSS | Fixture + live HTTPS (`live_strategy`) |
-| `spot.cma`          | 4    | Python + Temporal OSS | Fixture + live HTTPS (`live_strategy`) |
+| id                  | Wave | Worker                | Notes                                                                                         |
+| ------------------- | ---- | --------------------- | --------------------------------------------------------------------------------------------- |
+| `ingestion.fcl_v6`  | 2    | Python + Temporal OSS | Ocean FCL CSV/XLSX/PDF; gate-first save; `rates.slots.ingestActions` via `rates.ingestUpload` |
+| `messaging.msgraph` | 3    | Python + Temporal OSS | First email provider                                                                          |
+| `spot.fake`         | 4    | Python + Temporal OSS | Host test plugin (deterministic)                                                              |
+| `spot.maersk`       | 4    | Python + Temporal OSS | Fixture + live HTTPS (`live_strategy`)                                                        |
+| `spot.cma`          | 4    | Python + Temporal OSS | Fixture + live HTTPS (`live_strategy`)                                                        |
 
 ## Planned later (not registered yet)
 

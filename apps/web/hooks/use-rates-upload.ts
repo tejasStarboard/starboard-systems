@@ -14,7 +14,7 @@ export function useRatesUpload() {
 
   const upload = useCallback(async () => {
     if (!file) {
-      toast.add({ type: "error", title: "Choose a CSV file" })
+      toast.add({ type: "error", title: "Choose a rate sheet file" })
       return
     }
     const body = new FormData()

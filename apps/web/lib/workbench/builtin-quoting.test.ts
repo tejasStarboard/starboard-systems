@@ -94,7 +94,11 @@ describe("077 quoting.document in the workbench", () => {
         key.startsWith("quoting.slots.")
       )
     ).toBe(false)
-    // 086 stub: ingestActions may be contributed without a factory yet (087).
+    // ingestActions uses rates.ingestUpload (shared panel from rates.catalog).
     expect(points["rates.slots.ingestActions"]?.length).toBeGreaterThan(0)
+    for (const contribution of points["rates.slots.ingestActions"] ?? []) {
+      const key = contribution.component ?? contribution.id
+      expect(typeof builtinPointComponents[key]).toBe("function")
+    }
   })
 })

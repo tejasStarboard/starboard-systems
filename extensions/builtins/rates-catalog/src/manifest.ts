@@ -8,8 +8,8 @@
  * - Workbench: `rates` activity + list/detail editors (`/rates`,
  *   `/rates/catalog/:resourceId` — 3-segment detail avoids colliding with
  *   ingestion's `/rates/upload`).
- * - `defines.rates.slots.ingestActions` so **087** / ingest can inject upload
- *   actions without coupling to the catalog package.
+ * - `defines.rates.slots.ingestActions` so optional ingest can inject upload
+ *   actions (`rates.ingestUpload` shared panel) without coupling.
  * - Still contributes catalog search into `quoting.slots.rateSources`.
  */
 export const manifest = {
@@ -22,7 +22,7 @@ export const manifest = {
       {
         id: "rates.slots.ingestActions",
         description:
-          "Toolbar / actions on the rates catalog list (CSV upload, …).",
+          "Toolbar / actions on the rates catalog list (rate-sheet upload, …).",
       },
     ],
   },

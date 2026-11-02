@@ -4,6 +4,7 @@ import {
   type WorkbenchActivity,
   type WorkbenchContributions,
   type WorkbenchEditor,
+  type WorkbenchPointContribution,
   type WorkbenchView,
 } from "./types"
 
@@ -19,6 +20,7 @@ export type HostWorkbenchContributions = {
     }
   >
   editors: ReadonlyArray<WorkbenchEditor>
+  points?: Readonly<Record<string, ReadonlyArray<WorkbenchPointContribution>>>
 }
 
 function pick<T extends object, K extends keyof T>(
@@ -95,7 +97,29 @@ export function mergeHostContributions(
     )
   }
 
-  return { activity, views, editors }
+  const points: Record<string, WorkbenchPointContribution[]> = {
+    ...base.points,
+  }
+  for (const [pointId, contributions] of Object.entries(host.points ?? {})) {
+    const existing = points[pointId] ?? []
+    const seen = new Set(existing.map((item) => item.id))
+    const merged = [...existing]
+    for (const item of contributions) {
+      if (seen.has(item.id)) continue
+      seen.add(item.id)
+      merged.push({
+        id: item.id,
+        ...(item.label ? { label: item.label } : {}),
+        ...(item.component ? { component: item.component } : {}),
+        ...(item.order !== undefined ? { order: item.order } : {}),
+        ...(item.props ? { props: item.props } : {}),
+        ...(item.extensionId ? { extensionId: item.extensionId } : {}),
+      })
+    }
+    points[pointId] = merged
+  }
+
+  return { activity, views, editors, points }
 }
 
 /**

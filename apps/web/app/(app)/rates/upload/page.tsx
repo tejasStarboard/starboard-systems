@@ -17,8 +17,8 @@ export default async function RatesUploadPage() {
       <div className="flex flex-col gap-1">
         <h1 className="text-sm font-medium">Rate upload</h1>
         <p className="text-sm text-muted-foreground">
-          Upload an ocean FCL CSV sheet. Ingestion runs asynchronously via
-          Temporal; failed gates do not save rates.
+          Upload an ocean FCL CSV, Excel, or PDF sheet. Ingestion runs
+          asynchronously via Temporal; failed gates do not save rates.
         </p>
       </div>
       <RatesUploadForm />

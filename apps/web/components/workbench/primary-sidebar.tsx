@@ -38,8 +38,9 @@ function SidebarViews({ onNavigate }: { onNavigate?: () => void }) {
         ? { viewType: activeTab.viewType, resourceId: activeTab.resourceId }
         : null,
       pointComponents: builtinPointComponents,
+      slots: contributions.points,
     }),
-    [openEditor, onNavigate, activeTab]
+    [openEditor, onNavigate, activeTab, contributions.points]
   )
   const views = contributions.views.filter(
     (view) => view.activityId === activeActivityId
