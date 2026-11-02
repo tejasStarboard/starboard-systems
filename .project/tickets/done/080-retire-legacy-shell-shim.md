@@ -2,7 +2,7 @@
 id: 080
 wave: 06-platform
 title: Retire legacy shell shim and temporary markings
-status: in_progress
+status: done
 depends_on: [073, 078, 079]
 epic: SYS-PLATFORM
 docs:

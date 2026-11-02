@@ -54,7 +54,7 @@ Creates/updates `quotes.surcharge`, `quotes.global_charge`, and `rates.surcharge
 - FX converters / display-currency paths → with **072** or follow-up
 - Full `surcharge_matrix.json` parity (tiers, dollar min/max beyond lean) — document cells left out
 - **070** is the quote default: Incoterm × role excludes buckets. **068** door-only `deriveExcludedBuckets` remains in the package and is not used by the quote form. Globals (`source: global`) stay in the total. Deferred: trucking remaps and non-ocean incoterms.
-- QV2 charge grid / rate alternatives / base flat·per-eq — **071** shipped
+- QV2 charge grid / rate alternatives / base flat·per-eq — **[071](../../tickets/done/071-quote-charge-table-prod-parity.md)** shipped
 - Row economics (markup, sell, Split, guardrails) — **[072](../../tickets/todo/072-quote-charge-line-economics-parity.md)**
 - Org settings rate-item admin stamp for globals
 
