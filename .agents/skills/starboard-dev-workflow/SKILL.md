@@ -19,7 +19,7 @@ Git/branch policy: [.project/docs/git-workflow.md](../../../.project/docs/git-wo
 ## 1. Select ticket
 
 1. If the user named a ticket (`001`, path under `.project/tickets/`): use that file in `todo/` or `in_progress/`.
-2. Else: next open ticket in `.project/tickets/todo/` by **lexical filename** (lowest `NNN-…`). Skip if `depends_on` tickets are not in `done/`.
+2. Else: next open ticket from **[build-priority](../../../.project/docs/reference/build-priority-2026-11-01.md)** execution queue (not raw `todo/` lexical sort — e.g. **074** before **069**). Skip if `depends_on` are not in `done/`.
 3. Read **only** that ticket + its `docs:` frontmatter paths. Do not dump `.project`.
 
 ## 2. Sync `origin/dev` and reconcile done
