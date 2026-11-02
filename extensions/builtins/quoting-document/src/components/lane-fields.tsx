@@ -37,8 +37,7 @@ import {
   ToggleGroupItem,
 } from "@starboard/lib-ui/components/toggle-group"
 
-import { AddressCombobox } from "./address-combobox"
-import { PortCombobox } from "./port-combobox"
+import { AddressCombobox, PortCombobox } from "@starboard/ext-geo-gazetteer"
 import {
   createContainerLine,
   type LaneMode,

@@ -56,12 +56,13 @@ describe("deep links", () => {
     expect(matchDeepLink("/quote/q-123/", editors)?.resourceId).toBe("q-123")
   })
 
-  test("legacy pages fall back to page editor; home opens the list editor", () => {
-    expect(matchDeepLink("/settings/team", editors)).toEqual({
+  test("unclaimed pages fall back to page editor; home opens the list editor", () => {
+    expect(matchDeepLink("/rates/upload", editors)).toEqual({
       viewType: "page",
-      resourceId: "/settings/team",
+      resourceId: "/rates/upload",
     })
-    expect(matchDeepLink("/customers", editors)?.viewType).toBe("page")
+    expect(matchDeepLink("/settings/team", editors)?.viewType).toBe("settings")
+    expect(matchDeepLink("/customers", editors)?.viewType).toBe("customer.list")
     expect(matchDeepLink("/customers/c1", editors)?.viewType).toBe("customer")
     expect(matchDeepLink("/", editors)).toEqual({
       viewType: "quote.list",
@@ -168,7 +169,7 @@ describe("extension-host contributions (075)", () => {
         // targets an activity nobody contributes → dropped
         { id: "ghost.view", name: "Ghost", activityId: "ghost" },
         // shadows a legacy view id → ignored
-        { id: "customers.list", name: "Evil", activityId: "customers" },
+        { id: "extensions.nav", name: "Evil", activityId: "extensions" },
       ],
       editors: [
         {
@@ -176,7 +177,7 @@ describe("extension-host contributions (075)", () => {
           displayName: "Note",
           deepLink: "/notes/:resourceId",
         },
-        { viewType: "customer", displayName: "Shadow customer" },
+        { viewType: "page", displayName: "Shadow page" },
       ],
     },
   })
@@ -184,17 +185,18 @@ describe("extension-host contributions (075)", () => {
   test("host contributions merge after legacy shim without shadowing it", () => {
     const merged = resolveWorkbenchContributions({
       kernelOnly: false,
+      extensionNav: [{ id: "inbox", label: "Inbox", href: "/messaging/inbox" }],
       hostContributions: getActiveWorkbenchContributions("credit", [notes]),
     })
     expect(merged.activity.map((a) => a.id)).toContain("notes")
     expect(merged.views.map((v) => v.id)).toContain("notes.list")
     expect(merged.views.map((v) => v.id)).not.toContain("ghost.view")
-    expect(merged.views.find((v) => v.id === "customers.list")?.name).toBe(
-      "Customers"
+    expect(merged.views.find((v) => v.id === "extensions.nav")?.name).toBe(
+      "Extensions"
     )
-    expect(
-      merged.editors.find((e) => e.viewType === "customer")?.deepLink
-    ).toBe("/customers/:resourceId")
+    expect(merged.editors.find((e) => e.viewType === "page")?.deepLink).toBe(
+      "/*"
+    )
     expect(matchDeepLink("/notes/n1", merged.editors)).toEqual({
       viewType: "note",
       resourceId: "n1",
@@ -252,6 +254,9 @@ describe("extension-host contributions (075)", () => {
       "customer"
     )
     expect(matchDeepLink("/settings/team", merged.editors)?.viewType).toBe(
+      "settings"
+    )
+    expect(matchDeepLink("/rates/upload", merged.editors)?.viewType).toBe(
       "page"
     )
   })

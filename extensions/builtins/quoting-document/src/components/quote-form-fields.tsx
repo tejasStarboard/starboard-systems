@@ -25,7 +25,7 @@ import {
 import { toast } from "@starboard/lib-ui/components/toast"
 import { cn } from "@starboard/lib-ui/lib/utils"
 
-import { CustomerCombobox } from "./customer-combobox"
+import { CustomerCombobox } from "@starboard/ext-crm-parties"
 import {
   quoteStatusSchema,
   type QuoteFormOption,

@@ -18,7 +18,7 @@ import { toast } from "@starboard/lib-ui/components/toast"
 import {
   sendMessageFormSchema,
   type SendMessageFormValues,
-} from "@/lib/domain/settings/settings-forms.schema"
+} from "@/lib/domain/messaging/messaging-forms.schema"
 import { toastFormErrors } from "@/lib/form-toast"
 import { extensionApiPath } from "@/lib/extension-api-path"
 

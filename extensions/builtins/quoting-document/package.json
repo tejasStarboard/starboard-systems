@@ -40,6 +40,8 @@
   "dependencies": {
     "@hookform/resolvers": "^6.0.2",
     "@phosphor-icons/react": "^2.1.10",
+    "@starboard/ext-crm-parties": "workspace:*",
+    "@starboard/ext-geo-gazetteer": "workspace:*",
     "@starboard/lib-contracts": "workspace:*",
     "@starboard/lib-pricing": "workspace:*",
     "@starboard/lib-ui": "workspace:*",
