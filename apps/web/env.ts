@@ -30,6 +30,9 @@ export const env = createEnv({
 
     /** Comma-separated Better Auth user ids allowed on /admin. Empty = nobody. */
     PLATFORM_STAFF_USER_IDS: z.string().optional(),
+
+    /** `1`/`true` = kernel-only lab: workbench with no contributions (ticket 074). */
+    WORKBENCH_KERNEL_ONLY: z.enum(["0", "1", "true", "false"]).optional(),
   },
   client: {
     NEXT_PUBLIC_APP_URL: z.url(),
@@ -61,6 +64,7 @@ export const env = createEnv({
     SPOT_SERVICE_URL: process.env.SPOT_SERVICE_URL,
     INTERNAL_SERVICE_TOKEN: process.env.INTERNAL_SERVICE_TOKEN,
     PLATFORM_STAFF_USER_IDS: process.env.PLATFORM_STAFF_USER_IDS,
+    WORKBENCH_KERNEL_ONLY: process.env.WORKBENCH_KERNEL_ONLY,
   },
   emptyStringAsUndefined: true,
   // Allow `next build` in CI / local without a full .env when explicitly opted in.

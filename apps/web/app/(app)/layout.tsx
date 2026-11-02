@@ -1,9 +1,14 @@
-import { AppShell } from "@/components/app-shell"
 import { ImpersonationBanner } from "@/components/admin/impersonation-banner"
+import { WorkbenchShell } from "@/components/workbench/workbench-shell"
+import { env } from "@/env"
 import { requireOrganizationContext } from "@/lib/auth/organization-context"
 import { getOrganizationPlan } from "@/lib/billing/plan"
 import { getPlatformManager } from "@/lib/domain/platform/platform.manager"
 import { listActiveExtensionNav } from "@/lib/extensions"
+import {
+  isKernelOnlyFlag,
+  resolveWorkbenchContributions,
+} from "@/lib/workbench/contributions"
 
 export default async function AppLayout({
   children,
@@ -13,8 +18,15 @@ export default async function AppLayout({
   const { session, organizationId, impersonation, isStaff } =
     await requireOrganizationContext()
 
+  const kernelOnly = isKernelOnlyFlag(env.WORKBENCH_KERNEL_ONLY)
   const plan = await getOrganizationPlan(organizationId)
-  const extensionNav = await listActiveExtensionNav(plan, organizationId)
+  const extensionNav = kernelOnly
+    ? []
+    : await listActiveExtensionNav(plan, organizationId)
+  const contributions = resolveWorkbenchContributions({
+    kernelOnly,
+    extensionNav,
+  })
 
   let impersonatedOrgName: string | null = null
   if (impersonation) {
@@ -25,13 +37,13 @@ export default async function AppLayout({
   }
 
   return (
-    <AppShell
+    <WorkbenchShell
       user={{
         name: session.user.name,
         email: session.user.email,
         image: session.user.image,
       }}
-      extensionNav={extensionNav}
+      contributions={contributions}
       showAdminNav={isStaff}
       impersonationBanner={
         impersonation ? (
@@ -39,7 +51,8 @@ export default async function AppLayout({
         ) : null
       }
     >
-      {children}
-    </AppShell>
+      {/* Kernel-only lab: never mount product route content. */}
+      {kernelOnly ? null : children}
+    </WorkbenchShell>
   )
 }
