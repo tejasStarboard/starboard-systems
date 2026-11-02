@@ -2,7 +2,7 @@
 id: 082
 wave: 07-quote-loop
 title: Quote stages, validity, and numbering (quoting.document)
-status: in_progress
+status: done
 depends_on: [073, 077]
 epic: SYS-QUOTE
 docs:

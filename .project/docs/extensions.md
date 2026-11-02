@@ -121,6 +121,7 @@ Rules: point ids are globally unique and owned by exactly one extension; extensi
 | `quoting.slots.rateSources`  | `origin, destination, onApplyRate`                                                                   | `rates.catalog` (catalog list), `spot.*` panels          |
 | `quoting.slots.totals`       | `control, register, lanePath, currencyCode, totals`                                                  | — (document renders default footer; hosted)              |
 | `quoting.slots.headerFields` | `quoteId, control, register, setValue, errors`                                                       | — (hosted; Incoterm lands here in **070**)               |
+| `quoting.commands`           | `quoteId, status, exportAllowed`                                                                     | `quoting.pdf` Export PDF (**083**)                       |
 
 ## Async job contract
 

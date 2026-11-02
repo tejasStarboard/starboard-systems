@@ -2,7 +2,7 @@
 id: 083
 wave: 07-quote-loop
 title: Quote PDF export as quoting.pdf built-in
-status: todo
+status: in_progress
 depends_on: [082, 066]
 epic: SYS-QUOTE
 docs:
@@ -50,11 +50,11 @@ Do **not** add `app/(app)/quotes/.../pdf` as product owner. BFF route under quot
 
 ## Acceptance
 
-- [ ] Package registered; default-on for credit + enterprise
-- [ ] Contributes only to `quoting.document`-owned points; kernel has no PDF UI imports
-- [ ] PDF totals match ONE MATH for a golden fixture (Incoterm exclusions honored)
-- [ ] Unplug `quoting.pdf` → no export affordance; quote editor intact
-- [ ] `pnpm run ci` green
+- [x] Package registered; default-on for credit + enterprise
+- [x] Contributes only to `quoting.document`-owned points; kernel has no PDF UI imports
+- [x] PDF totals match ONE MATH for a golden fixture (Incoterm exclusions honored)
+- [x] Unplug `quoting.pdf` → no export affordance; quote editor intact
+- [x] `pnpm run ci` green
 
 ## Out of scope
 

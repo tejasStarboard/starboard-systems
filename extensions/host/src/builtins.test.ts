@@ -9,6 +9,7 @@ import { getActiveWorkbenchContributions } from "./workbench.js"
 const BUILTIN_IDS = [
   "quoting.document",
   "quoting.charges",
+  "quoting.pdf",
   "crm.parties",
   "geo.gazetteer",
   "rates.catalog",
@@ -24,7 +25,7 @@ const OPTIONAL_IDS = [
 ]
 
 describe("driving built-in manifests (076)", () => {
-  test("all six ids are registered and schema-valid", () => {
+  test("all seven ids are registered and schema-valid", () => {
     expect(
       builtinManifests.map((m) => extensionManifestSchema.parse(m).id)
     ).toEqual(BUILTIN_IDS)
