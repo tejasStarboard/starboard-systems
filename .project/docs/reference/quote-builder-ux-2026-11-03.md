@@ -36,13 +36,13 @@ The current quote editor (`quoting.document`) is a single long page: ports, carg
 
 Program default remains PR → `dev` ([git-workflow.md](../git-workflow.md)). **This epic is an exception:**
 
-| Rule | Detail |
-|------|--------|
-| Integration branch | `quote-flow` — long-lived feature branch off `dev` |
-| Ticket branches | `git checkout --no-track -b {id} origin/quote-flow` (e.g. `089`) |
-| PR base | **`quote-flow` only** — never open slice PRs to `dev` / `main` |
-| Landing | **No direct commits / pushes to `quote-flow`**. Every change lands via PR + review/CI |
-| Promote to `dev` | Separate PR `quote-flow` → `dev` when the epic is ready — not per-slice |
+| Rule               | Detail                                                                                |
+| ------------------ | ------------------------------------------------------------------------------------- |
+| Integration branch | `quote-flow` — long-lived feature branch off `dev`                                    |
+| Ticket branches    | `git checkout --no-track -b {id} origin/quote-flow` (e.g. `089`)                      |
+| PR base            | **`quote-flow` only** — never open slice PRs to `dev` / `main`                        |
+| Landing            | **No direct commits / pushes to `quote-flow`**. Every change lands via PR + review/CI |
+| Promote to `dev`   | Separate PR `quote-flow` → `dev` when the epic is ready — not per-slice               |
 
 ---
 
@@ -129,12 +129,12 @@ Terminal stages (`win` / `loss` / `expired`): commercial body read-only (082 rul
 
 ## Ticket map
 
-| Id | Slice | Depends on |
-| -- | ----- | ---------- |
-| 088 | Epic / orchestration (docs) | — |
-| 089 | Multistep shell + preview chrome (stubs OK) | 077, 073 |
-| 090 | FCL world-map ports + geo lat/lng + country filter | 089 |
-| 091 | Rate cards | 089 |
-| 092 | Live PDF + email preview | 089, 083 |
+| Id  | Slice                                              | Depends on |
+| --- | -------------------------------------------------- | ---------- |
+| 088 | Epic / orchestration (docs)                        | —          |
+| 089 | Multistep shell + preview chrome (stubs OK)        | 077, 073   |
+| 090 | FCL world-map ports + geo lat/lng + country filter | 089        |
+| 091 | Rate cards                                         | 089        |
+| 092 | Live PDF + email preview                           | 089, 083   |
 
 Promote `quote-flow` → `dev` only after slices intended for the epic merge are in.

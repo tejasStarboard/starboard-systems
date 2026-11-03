@@ -17,22 +17,22 @@ docs:
 
 ## Git
 
-| Rule | Detail |
-|------|--------|
-| Base | `origin/quote-flow` — `git checkout --no-track -b 090 origin/quote-flow` |
-| PR | Into **`quote-flow` only** |
-| Landing | No direct commits on `quote-flow` |
+| Rule    | Detail                                                                   |
+| ------- | ------------------------------------------------------------------------ |
+| Base    | `origin/quote-flow` — `git checkout --no-track -b 090 origin/quote-flow` |
+| PR      | Into **`quote-flow` only**                                               |
+| Landing | No direct commits on `quote-flow`                                        |
 
 ## Extension model
 
-|                  |                                                                                                      |
-| ---------------- | ---------------------------------------------------------------------------------------------------- |
-| **Packages**     | **`geo.gazetteer`** (port/map UI + API client) contributing into document Route step; geography service contracts |
-| **Layer**        | Built-in geo + `quoting.document` Route step host                                                    |
-| **Defines**      | Optional `quoting.slots.laneRoute` if map should be a contribution point                             |
-| **Contributes**  | Map + country→seaport flow into Route step (FCL only)                                                |
-| **Unplug test**  | Geo off / map contribution off → Route step falls back to `PortCombobox`                             |
-| **Math**         | N/A                                                                                                  |
+|                 |                                                                                                                   |
+| --------------- | ----------------------------------------------------------------------------------------------------------------- |
+| **Packages**    | **`geo.gazetteer`** (port/map UI + API client) contributing into document Route step; geography service contracts |
+| **Layer**       | Built-in geo + `quoting.document` Route step host                                                                 |
+| **Defines**     | Optional `quoting.slots.laneRoute` if map should be a contribution point                                          |
+| **Contributes** | Map + country→seaport flow into Route step (FCL only)                                                             |
+| **Unplug test** | Geo off / map contribution off → Route step falls back to `PortCombobox`                                          |
+| **Math**        | N/A                                                                                                               |
 
 ## Goal
 

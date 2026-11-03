@@ -2,7 +2,7 @@
 id: 089
 wave: 08-quote-builder-ux
 title: Quote builder multistep shell + preview chrome
-status: todo
+status: in_progress
 depends_on: [077, 073, 082, 088]
 epic: SYS-QUOTE-UX
 docs:
@@ -17,22 +17,22 @@ docs:
 
 ## Git
 
-| Rule | Detail |
-|------|--------|
-| Base | `origin/quote-flow` — `git checkout --no-track -b 089 origin/quote-flow` |
-| PR | Into **`quote-flow` only** (not `dev` / `main`) |
-| Landing | No direct commits on `quote-flow` |
+| Rule    | Detail                                                                   |
+| ------- | ------------------------------------------------------------------------ |
+| Base    | `origin/quote-flow` — `git checkout --no-track -b 089 origin/quote-flow` |
+| PR      | Into **`quote-flow` only** (not `dev` / `main`)                          |
+| Landing | No direct commits on `quote-flow`                                        |
 
 ## Extension model
 
-|                  |                                                                                                                                 |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| **Package / id** | **`quoting.document`** (`@starboard/ext-quoting-document`)                                                                      |
-| **Layer**        | Driving built-in                                                                                                                |
-| **Defines**      | Step host + optional `quoting.slots.preview` (and/or step region points) if needed for 090–092 contributions                    |
+|                  |                                                                                                                                       |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| **Package / id** | **`quoting.document`** (`@starboard/ext-quoting-document`)                                                                            |
+| **Layer**        | Driving built-in                                                                                                                      |
+| **Defines**      | Step host + optional `quoting.slots.preview` (and/or step region points) if needed for 090–092 contributions                          |
 | **Contributes**  | N/A (owns chrome); existing slots (`lifecycle`, `headerFields`, `chargeTable`, `totals`, `rateSources`, `commands`) remounted by step |
-| **Unplug test**  | Document off → no editor (unchanged). Preview stub empty when no 092 contributor                                                |
-| **Math**         | Unchanged — totals still ONE MATH                                                                                               |
+| **Unplug test**  | Document off → no editor (unchanged). Preview stub empty when no 092 contributor                                                      |
+| **Math**         | Unchanged — totals still ONE MATH                                                                                                     |
 
 ## Goal
 

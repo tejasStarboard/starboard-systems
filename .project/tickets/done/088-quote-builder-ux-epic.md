@@ -20,13 +20,13 @@ docs:
 
 ## Git (epic exception)
 
-| Rule | Detail |
-|------|--------|
-| Integration branch | **`quote-flow`** (off `dev`) |
-| Slice branches | `git checkout --no-track -b {id} origin/quote-flow` |
-| PR base | **`quote-flow` only** |
-| Landing | **No direct commits on `quote-flow`** — PR + CI only |
-| Promote | `quote-flow` → `dev` when epic ready (not per-slice) |
+| Rule               | Detail                                               |
+| ------------------ | ---------------------------------------------------- |
+| Integration branch | **`quote-flow`** (off `dev`)                         |
+| Slice branches     | `git checkout --no-track -b {id} origin/quote-flow`  |
+| PR base            | **`quote-flow` only**                                |
+| Landing            | **No direct commits on `quote-flow`** — PR + CI only |
+| Promote            | `quote-flow` → `dev` when epic ready (not per-slice) |
 
 ## Goal
 
@@ -37,12 +37,12 @@ docs:
 
 ## Slices
 
-| Id | Title | Notes |
-| -- | ----- | ----- |
-| [089](089-quote-builder-multistep-shell.md) | Multistep shell + preview chrome | Stubs OK for PDF/email panes |
-| [090](090-quote-fcl-world-map-ports.md) | FCL world-map seaport picker | Geo lat/lng + country filter |
-| [091](091-quote-rate-cards.md) | Uber-style rate cards | Hide schedule chips when absent |
-| [092](092-quote-live-pdf-email-preview.md) | Live PDF + react-email preview | Fills 089 preview slot |
+| Id                                          | Title                            | Notes                           |
+| ------------------------------------------- | -------------------------------- | ------------------------------- |
+| [089](089-quote-builder-multistep-shell.md) | Multistep shell + preview chrome | Stubs OK for PDF/email panes    |
+| [090](090-quote-fcl-world-map-ports.md)     | FCL world-map seaport picker     | Geo lat/lng + country filter    |
+| [091](091-quote-rate-cards.md)              | Uber-style rate cards            | Hide schedule chips when absent |
+| [092](092-quote-live-pdf-email-preview.md)  | Live PDF + react-email preview   | Fills 089 preview slot          |
 
 ```text
 088 epic
