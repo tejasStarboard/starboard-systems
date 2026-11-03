@@ -56,9 +56,13 @@ export function createGeographyController(service: GeographyService) {
     const requestId = c.get("requestId")
     try {
       const q = c.req.query("q") ?? ""
-      const ports = await service.searchPorts(q)
+      const country = c.req.query("country") ?? undefined
+      const type = c.req.query("type") ?? undefined
+      const ports = await service.searchPorts(q, { country, type })
       logInfo("geography", requestId, "search_ports", {
         q,
+        country,
+        type,
         count: ports.length,
       })
       return c.json({ ports })

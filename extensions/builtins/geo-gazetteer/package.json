@@ -24,13 +24,18 @@
     "src"
   ],
   "scripts": {
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "build:map": "node scripts/build-world-map.mjs"
   },
   "devDependencies": {
     "@starboard/tool-typescript-config": "workspace:*",
     "@types/react": "^19",
+    "@types/topojson-client": "^3.1.5",
+    "i18n-iso-countries": "^7.14.0",
     "react": "19.3.1",
-    "typescript": "^5.9.3"
+    "topojson-client": "^3.1.0",
+    "typescript": "^5.9.3",
+    "world-atlas": "^2.0.2"
   },
   "peerDependencies": {
     "react": "19.3.1"

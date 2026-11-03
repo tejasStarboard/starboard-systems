@@ -1,6 +1,10 @@
-import { and, asc, desc, ilike, or, sql } from "drizzle-orm"
+import { and, asc, desc, eq, ilike, or, sql } from "drizzle-orm"
 import { currency, facility } from "@starboard/lib-db/schema"
-import type { FacilityOption, FormOption } from "@starboard/lib-contracts"
+import type {
+  FacilityOption,
+  FormOption,
+  ListPortsQuery,
+} from "@starboard/lib-contracts"
 
 import type { GeographyDb } from "./db"
 
@@ -19,7 +23,10 @@ const applyTrgmThresholds = sql`(
 export interface GeographyDao {
   ensureCurrency(code: string): Promise<string>
   listCurrencies(): Promise<FormOption[]>
-  searchPorts(q: string): Promise<FacilityOption[]>
+  searchPorts(
+    q: string,
+    filters?: Pick<ListPortsQuery, "country" | "type">
+  ): Promise<FacilityOption[]>
 }
 
 function toFacilityOption(row: {
@@ -28,6 +35,8 @@ function toFacilityOption(row: {
   name: string
   facilityTypes: string[]
   countryCode: string
+  latitude?: number | null
+  longitude?: number | null
 }): FacilityOption {
   const value = (row.unlocode ?? row.iata ?? "").toUpperCase()
   return {
@@ -35,6 +44,9 @@ function toFacilityOption(row: {
     label: `${value} — ${row.name}`,
     types: row.facilityTypes,
     country: row.countryCode,
+    ...(row.latitude != null && row.longitude != null
+      ? { latitude: row.latitude, longitude: row.longitude }
+      : {}),
   }
 }
 
@@ -44,6 +56,8 @@ type FacilityRow = {
   name: string
   facilityTypes: string[]
   countryCode: string
+  latitude?: number | null
+  longitude?: number | null
   isPrimary: boolean
   rank?: number | null
 }
@@ -72,7 +86,16 @@ export class DrizzleGeographyDao implements GeographyDao {
     }))
   }
 
-  async searchPorts(q: string): Promise<FacilityOption[]> {
+  async searchPorts(
+    q: string,
+    filters: Pick<ListPortsQuery, "country" | "type"> = {}
+  ): Promise<FacilityOption[]> {
+    const scope = and(
+      filters.country ? eq(facility.countryCode, filters.country) : undefined,
+      filters.type
+        ? sql`${filters.type} = any(${facility.facilityTypes})`
+        : undefined
+    )
     const trimmed = q.trim()
     const prefix = trimmed.toUpperCase()
     const namePattern = `%${trimmed}%`
@@ -83,6 +106,8 @@ export class DrizzleGeographyDao implements GeographyDao {
       name: facility.name,
       facilityTypes: facility.facilityTypes,
       countryCode: facility.countryCode,
+      latitude: facility.latitude,
+      longitude: facility.longitude,
       isPrimary: facility.isPrimary,
     }
 
@@ -90,6 +115,7 @@ export class DrizzleGeographyDao implements GeographyDao {
       const rows = await this.db
         .select(selectCols)
         .from(facility)
+        .where(scope)
         .orderBy(desc(facility.isPrimary), asc(facility.name))
         .limit(PORT_SEARCH_LIMIT)
       return rows.map(toFacilityOption)
@@ -106,6 +132,7 @@ export class DrizzleGeographyDao implements GeographyDao {
       .from(facility)
       .where(
         and(
+          scope,
           applyTrgmThresholds,
           or(
             ilike(facility.unlocode, `${prefix}%`),
@@ -148,6 +175,7 @@ export class DrizzleGeographyDao implements GeographyDao {
         .from(facility)
         .where(
           and(
+            scope,
             applyTrgmThresholds,
             or(
               ilike(facility.name, namePattern),
@@ -169,6 +197,7 @@ export class DrizzleGeographyDao implements GeographyDao {
         .from(facility)
         .where(
           and(
+            scope,
             applyTrgmThresholds,
             sql`exists (
               select 1 from unnest(${facility.aliases}) as alias

@@ -15,7 +15,10 @@ import type { GooglePlacesClient } from "../integrations/google-places"
 export interface GeographyService {
   ensureCurrency(code: string): Promise<{ code: string }>
   listCurrencies(): Promise<FormOption[]>
-  searchPorts(q?: string): Promise<FacilityOption[]>
+  searchPorts(
+    q?: string,
+    filters?: { country?: string; type?: string }
+  ): Promise<FacilityOption[]>
   searchAddresses(q?: string, limit?: number): Promise<AddressPrediction[]>
   getAddressDetails(placeId: string): Promise<DoorAddress>
 }
@@ -42,15 +45,25 @@ export class DefaultGeographyService implements GeographyService {
     return this.dao.listCurrencies()
   }
 
-  async searchPorts(q?: string): Promise<FacilityOption[]> {
-    const parsed = listPortsQuerySchema.safeParse({ q: q ?? "" })
+  async searchPorts(
+    q?: string,
+    filters: { country?: string; type?: string } = {}
+  ): Promise<FacilityOption[]> {
+    const parsed = listPortsQuerySchema.safeParse({
+      q: q ?? "",
+      country: filters.country || undefined,
+      type: filters.type || undefined,
+    })
     if (!parsed.success) {
       throw new GeographyValidationError(
         parsed.error.issues[0]?.message ?? "Invalid ports query"
       )
     }
 
-    return this.dao.searchPorts(parsed.data.q)
+    return this.dao.searchPorts(parsed.data.q, {
+      country: parsed.data.country,
+      type: parsed.data.type,
+    })
   }
 
   async searchAddresses(
