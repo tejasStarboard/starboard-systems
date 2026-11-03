@@ -87,7 +87,7 @@ Multistep builder + FCL map + rate cards + live PDF/email preview. Design: [quot
 |  20 | **[091](../../tickets/done/091-quote-rate-cards.md)** Uber-style rate cards                                   | `rates.catalog` / spot → rateSources                                | Card rail + schedule chips                                    |
 |  21 | [092](../../tickets/done/092-quote-live-pdf-email-preview.md) Live PDF + email preview                        | `quoting.pdf` + `packages/email`                                    | Fill preview pane                                             |
 |  22 | [093](../../tickets/done/093-quote-currency-fx-preferences.md) Currency comboboxes + live FX + Preferences    | `quoting.document` / `quoting.charges` / `org-settings` / geography | Base + line CCY search; Frankfurter FX; default base currency |
-|  23 | **[094](../../tickets/in_progress/094-quote-react-pdf-email-templates.md)** react-pdf + react-email templates | `quoting.pdf` / `quoting.email`                                     | Schema-bound templates; tenant letterhead hooks               |
+|  23 | **[094](../../tickets/done/094-quote-react-pdf-email-templates.md)** react-pdf + react-email templates | `quoting.pdf` / `quoting.email`                                     | Schema-bound templates; tenant letterhead hooks               |
 
 ```text
 088 epic
