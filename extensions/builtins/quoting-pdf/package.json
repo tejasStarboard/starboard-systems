@@ -1,7 +1,7 @@
 {
   "name": "@starboard/ext-quoting-pdf",
   "version": "0.0.1",
-  "description": "Driving built-in extension `quoting.pdf` \u2014 Export PDF into quoting.document commands",
+  "description": "Driving built-in extension `quoting.pdf` — react-pdf quote PDF preview + export, defines quoting.pdf.templates",
   "private": true,
   "license": "UNLICENSED",
   "type": "module",
@@ -19,9 +19,21 @@
       "types": "./src/manifest.ts",
       "default": "./src/manifest.ts"
     },
-    "./model": {
-      "types": "./src/lib/build-pdf-model.ts",
-      "default": "./src/lib/build-pdf-model.ts"
+    "./view": {
+      "types": "./src/lib/build-document-view.ts",
+      "default": "./src/lib/build-document-view.ts"
+    },
+    "./server": {
+      "types": "./src/server.ts",
+      "default": "./src/server.ts"
+    },
+    "./templates": {
+      "types": "./src/templates/index.ts",
+      "default": "./src/templates/index.ts"
+    },
+    "./test-fixtures": {
+      "types": "./src/lib/test-fixtures.ts",
+      "default": "./src/lib/test-fixtures.ts"
     }
   },
   "files": [
@@ -43,10 +55,10 @@
   },
   "dependencies": {
     "@phosphor-icons/react": "^2.1.10",
+    "@react-pdf/renderer": "^4.9.0",
     "@starboard/ext-quoting-document": "workspace:*",
     "@starboard/lib-contracts": "workspace:*",
     "@starboard/lib-pricing": "workspace:*",
-    "@starboard/lib-ui": "workspace:*",
-    "pdf-lib": "^1.17.1"
+    "@starboard/lib-ui": "workspace:*"
   }
 }

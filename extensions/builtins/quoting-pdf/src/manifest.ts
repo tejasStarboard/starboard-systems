@@ -7,16 +7,40 @@
  *
  * Contributes Export PDF into `quoting.document`'s `quoting.commands` point
  * and the PDF tab body into `quoting.slots.preview` (092; `props.tab` routes
- * it). Does not define points. Unplug → no export control and a PDF-tab stub;
- * quote editor intact.
+ * it). 094: **defines** `quoting.pdf.templates` (id, label; renderer is
+ * registered by the contributing package) and self-contributes the default
+ * "Standard" plus an alternate "Letterhead" template. The org picks one via
+ * `organization.metadata.quoteTemplates.pdf`; missing/inactive → Standard.
+ * Unplug → no export control and a PDF-tab stub; quote editor intact.
  */
 export const manifest = {
   id: "quoting.pdf",
   version: "0.1.0",
   displayName: "Quote PDF export",
   requiredPlan: ["credit", "enterprise"],
+  defines: {
+    extensionPoints: [
+      {
+        id: "quoting.pdf.templates",
+        description:
+          "PDF layouts bound to QuoteDocumentView (id, label, renderPdf).",
+      },
+    ],
+  },
   contributes: {
     points: {
+      "quoting.pdf.templates": [
+        {
+          id: "quoting.pdf.template.standard",
+          label: "Standard",
+          order: 0,
+        },
+        {
+          id: "quoting.pdf.template.letterhead",
+          label: "Letterhead",
+          order: 10,
+        },
+      ],
       "quoting.commands": [{ id: "quoting.pdf.export", label: "Export PDF" }],
       "quoting.slots.preview": [
         {

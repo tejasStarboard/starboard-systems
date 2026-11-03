@@ -1,7 +1,7 @@
 {
   "name": "@starboard/ext-quoting-email",
   "version": "0.0.1",
-  "description": "Driving built-in extension `quoting.email` — react-email quote draft preview into quoting.document preview slot",
+  "description": "Driving built-in extension `quoting.email` — react-email quote preview into quoting.document preview slot, defines quoting.email.templates",
   "private": true,
   "license": "UNLICENSED",
   "type": "module",
@@ -22,6 +22,10 @@
     "./server": {
       "types": "./src/server.ts",
       "default": "./src/server.ts"
+    },
+    "./templates": {
+      "types": "./src/templates/index.ts",
+      "default": "./src/templates/index.ts"
     }
   },
   "files": [
@@ -43,6 +47,7 @@
   },
   "dependencies": {
     "@phosphor-icons/react": "^2.1.10",
+    "@react-email/components": "^1.0.12",
     "@starboard/ext-quoting-document": "workspace:*",
     "@starboard/ext-quoting-pdf": "workspace:*",
     "@starboard/lib-contracts": "workspace:*",

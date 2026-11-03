@@ -108,13 +108,64 @@ describe("quoting.document defines slots (073)", () => {
     ).toEqual([["quoting.markup.footer", "quoting.markup"]])
   })
 
-  test("only quoting.document defines quoting.* points", () => {
-    for (const manifest of manifests.filter((m) => m.id !== document.id)) {
-      const quotingDefines = (manifest.defines?.extensionPoints ?? []).filter(
-        (point) => point.id.startsWith("quoting.")
-      )
-      expect(quotingDefines).toEqual([])
+  test("quoting.document owns the slots; pdf/email own only their template points (094)", () => {
+    const owned: Record<string, string[]> = {
+      "quoting.pdf": ["quoting.pdf.templates"],
+      "quoting.email": ["quoting.email.templates"],
     }
+    for (const manifest of manifests.filter((m) => m.id !== document.id)) {
+      const quotingDefines = (manifest.defines?.extensionPoints ?? [])
+        .map((point) => point.id)
+        .filter((id) => id.startsWith("quoting."))
+      expect(quotingDefines).toEqual(owned[manifest.id] ?? [])
+    }
+  })
+
+  test("template points self-contribute default + letterhead, org-pickable (094)", () => {
+    expect(
+      getContributionsToPoint("quoting.pdf.templates", "credit").map((c) => [
+        c.id,
+        c.extensionId,
+      ])
+    ).toEqual([
+      ["quoting.pdf.template.standard", "quoting.pdf"],
+      ["quoting.pdf.template.letterhead", "quoting.pdf"],
+    ])
+    expect(
+      getContributionsToPoint("quoting.email.templates", "credit").map(
+        (c) => c.id
+      )
+    ).toEqual([
+      "quoting.email.template.standard",
+      "quoting.email.template.letterhead",
+    ])
+  })
+
+  test("unplug quoting.pdf / quoting.email → their template points go empty (094)", () => {
+    expect(
+      getContributionsToPoint(
+        "quoting.pdf.templates",
+        "credit",
+        manifests,
+        off("quoting.pdf")
+      )
+    ).toEqual([])
+    expect(
+      getContributionsToPoint(
+        "quoting.email.templates",
+        "credit",
+        manifests,
+        off("quoting.email")
+      )
+    ).toEqual([])
+    expect(
+      getContributionsToPoint(
+        "quoting.pdf.templates",
+        "credit",
+        manifests,
+        off("quoting.email")
+      )
+    ).toHaveLength(2)
   })
 
   test("rates.catalog defines ingestActions for 086/087", () => {

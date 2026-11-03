@@ -1,72 +1,34 @@
 import { describe, expect, test } from "bun:test"
 
-import {
-  createManualRateLine,
-  createSurchargeLine,
-  emptyQuoteFormValues,
-} from "@starboard/lib-contracts"
-import { buildQuotePdfModel } from "@starboard/ext-quoting-pdf/model"
+import { quoteDocumentViewSchema } from "@starboard/lib-contracts"
+import { buildQuoteDocumentView } from "@starboard/ext-quoting-pdf/view"
+import { goldenFobShipperQuote } from "@starboard/ext-quoting-pdf/test-fixtures"
 
+import { manifest } from "./manifest"
 import { renderQuoteEmailPreview } from "./server"
+import {
+  DEFAULT_QUOTE_EMAIL_TEMPLATE_ID,
+  LETTERHEAD_QUOTE_EMAIL_TEMPLATE_ID,
+  listQuoteEmailTemplates,
+} from "./templates"
 
-/** Same golden FOB/shipper fixture as the 083 PDF test (ONE MATH = 1100). */
-function goldenFobShipperQuote() {
-  const quote = emptyQuoteFormValues({ id: "q-1", quoteId: "AB12CD" })
-  quote.status = "draft"
-  quote.currencyCode = "USD"
-  quote.incoterm = "FOB"
-  quote.customerRole = "shipper"
-  quote.effectiveFrom = "2026-01-01"
-  quote.expiryAt = "2026-02-01"
-  const line = (
-    id: string,
-    name: string,
-    leg: "origin" | "freight" | "destination",
-    rate: number
-  ) =>
-    createSurchargeLine({
-      id,
-      name,
-      leg,
-      usageUnit: "flat",
-      rate,
-      currencyCode: "USD",
-      source: "carrier",
-    })
-  const rate = createManualRateLine({
-    id: "rate-1",
-    label: "Ocean FCL",
-    amount: 1000,
-    baseMode: "flat",
-    surcharges: [
-      line("s-origin", "Origin THC", "origin", 100),
-      line("s-freight", "BAF", "freight", 50),
-      line("s-dest", "Dest THC", "destination", 75),
-    ],
-  })
-  quote.lanes[0] = {
-    ...quote.lanes[0]!,
-    origin: "CNSHA",
-    destination: "USLAX",
-    markupType: "amount",
-    markupValue: 0,
-    selectedRateId: rate.id,
-    manualRates: [rate],
-    containers: [{ id: "c-1", containerType: "40HC", weight: 1000, count: 1 }],
-  }
-  return quote
-}
+const ACTIVE = [
+  DEFAULT_QUOTE_EMAIL_TEMPLATE_ID,
+  LETTERHEAD_QUOTE_EMAIL_TEMPLATE_ID,
+]
 
-describe("renderQuoteEmailPreview (092)", () => {
-  test("HTML totals match the 083 model (Incoterm exclusions honored)", async () => {
+describe("renderQuoteEmailPreview (092/094)", () => {
+  test("HTML totals match the shared view (Incoterm exclusions honored)", async () => {
     const quote = goldenFobShipperQuote()
-    const model = buildQuotePdfModel(quote)
-    expect(model.grandTotal).toBe(1100)
+    const view = buildQuoteDocumentView(quote)
+    expect(quoteDocumentViewSchema.safeParse(view).success).toBe(true)
+    expect(view.totals.grandTotal).toBe(1100)
 
-    const { subject, html } = await renderQuoteEmailPreview({
+    const { subject, html, templateId } = await renderQuoteEmailPreview({
       quote,
       customerName: "Acme Ltd",
     })
+    expect(templateId).toBe(DEFAULT_QUOTE_EMAIL_TEMPLATE_ID)
     expect(subject).toBe("Quote AB12CD · CNSHA → USLAX")
     expect(html).toContain("Hi Acme Ltd,")
     expect(html).toContain("CNSHA")
@@ -74,5 +36,47 @@ describe("renderQuoteEmailPreview (092)", () => {
     expect(html).toContain("USD 1100.00")
     expect(html).toContain("Excluded by Incoterm")
     expect(html).not.toContain("USD 1225.00")
+  })
+
+  test("manifest defines the point and self-contributes both templates", () => {
+    expect(manifest.defines.extensionPoints.map((p) => p.id)).toEqual([
+      "quoting.email.templates",
+    ])
+    expect(
+      manifest.contributes.points["quoting.email.templates"].map((c) => c.id)
+    ).toEqual(ACTIVE)
+    expect(listQuoteEmailTemplates().map((t) => t.id)).toEqual(
+      expect.arrayContaining(ACTIVE)
+    )
+  })
+
+  test("org-selected letterhead template binds org name/logo/address", async () => {
+    const organization = {
+      name: "Acme Freight",
+      logo: "https://cdn.example.com/logo.png",
+      metadata: JSON.stringify({
+        quoteTemplates: { email: LETTERHEAD_QUOTE_EMAIL_TEMPLATE_ID },
+        letterhead: { addressLines: ["1 Port Rd"], phone: "+31 10 555" },
+      }),
+    }
+    const letter = await renderQuoteEmailPreview({
+      quote: goldenFobShipperQuote(),
+      organization,
+      activeTemplateIds: ACTIVE,
+    })
+    expect(letter.templateId).toBe(LETTERHEAD_QUOTE_EMAIL_TEMPLATE_ID)
+    expect(letter.html).toContain("Acme Freight")
+    expect(letter.html).toContain("https://cdn.example.com/logo.png")
+    expect(letter.html).toContain("1 Port Rd")
+    expect(letter.html).toContain("USD 1100.00")
+
+    // Contributor unplugged → default template.
+    const fallback = await renderQuoteEmailPreview({
+      quote: goldenFobShipperQuote(),
+      organization,
+      activeTemplateIds: [DEFAULT_QUOTE_EMAIL_TEMPLATE_ID],
+    })
+    expect(fallback.templateId).toBe(DEFAULT_QUOTE_EMAIL_TEMPLATE_ID)
+    expect(fallback.html).not.toContain("1 Port Rd")
   })
 })

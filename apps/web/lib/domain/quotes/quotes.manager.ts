@@ -69,6 +69,23 @@ export class QuotesManager {
     )
   }
 
+  /** Org branding/metadata + customer label for quote templates (094). */
+  async getQuoteDocumentContextForOrg(
+    organizationId: string,
+    customerId?: string | null
+  ) {
+    const [organization, customers] = await Promise.all([
+      this.organizationsDao.getOrganizationDocumentRecord(organizationId),
+      customerId
+        ? this.crmManager.getCustomerNamesByIds(organizationId, [customerId])
+        : Promise.resolve(new Map<string, string>()),
+    ])
+    return {
+      organization,
+      customerName: customerId ? (customers.get(customerId) ?? "") : "",
+    }
+  }
+
   async getQuoteFormValuesForOrg(quoteId: string, organizationId: string) {
     return this.quotesClient.getQuoteFormValues(quoteId, organizationId)
   }

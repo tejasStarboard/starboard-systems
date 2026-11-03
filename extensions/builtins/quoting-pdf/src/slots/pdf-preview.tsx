@@ -2,25 +2,49 @@
 
 import { useEffect, useState } from "react"
 
-import { quotePreviewGap } from "@starboard/lib-contracts"
+import {
+  quotePreviewGap,
+  type QuoteDocumentOrg,
+} from "@starboard/lib-contracts"
 import type {
   PreviewSlotProps,
   SlotComponentProps,
 } from "@starboard/ext-quoting-document/slots"
 
-import { renderQuotePdfPreview } from "../lib/preview-pdf"
+import { buildQuoteDocumentView } from "../lib/build-document-view"
+
+type PdfContext = { org: QuoteDocumentOrg; templateId: string }
 
 /**
- * `quoting.pdf.preview` → `quoting.slots.preview` (PDF tab). Renders the 083
- * PDF in the browser from the host's debounced form snapshot into a blob URL.
- * The previous PDF stays visible while the next one renders. Preview is not
- * stage-gated; the Export command keeps its 083 status gates.
+ * `quoting.pdf.preview` → `quoting.slots.preview` (PDF tab). Builds the
+ * `QuoteDocumentView` from the host's debounced form snapshot + org context
+ * (`/api/quotes/preview/pdf-context`: branding + selected template id), then
+ * renders the selected `quoting.pdf.templates` template with
+ * `@react-pdf/renderer` into a blob URL. The previous PDF stays visible while
+ * the next renders. Preview is not stage-gated; Export keeps its status gates.
  */
-export function PdfPreview({ quote }: SlotComponentProps<PreviewSlotProps>) {
+export function PdfPreview({
+  quote,
+  customerName,
+}: SlotComponentProps<PreviewSlotProps>) {
   const gap = quotePreviewGap(quote)
+  const [context, setContext] = useState<PdfContext | null>(null)
   const [url, setUrl] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [pending, setPending] = useState(false)
+
+  useEffect(() => {
+    const controller = new AbortController()
+    fetch("/api/quotes/preview/pdf-context", { signal: controller.signal })
+      .then(async (response) =>
+        response.ok ? ((await response.json()) as PdfContext) : null
+      )
+      .then((payload) => {
+        if (!controller.signal.aborted) setContext(payload)
+      })
+      .catch(() => undefined)
+    return () => controller.abort()
+  }, [])
 
   // Revoke a blob URL only once it is no longer the displayed one: this
   // cleanup runs after the render that swapped `url` (and on unmount), so the
@@ -39,14 +63,21 @@ export function PdfPreview({ quote }: SlotComponentProps<PreviewSlotProps>) {
     }
     let cancelled = false
     setPending(true)
-    renderQuotePdfPreview(quote)
-      .then((bytes) => {
+    // react-pdf is heavy: load it only when a preview actually renders.
+    Promise.all([import("../templates"), import("../templates/render")])
+      .then(([{ resolveQuotePdfTemplate }, { renderQuotePdfBlob }]) => {
+        const view = buildQuoteDocumentView(quote, {
+          org: context?.org,
+          customerName,
+        })
+        const template = resolveQuotePdfTemplate({
+          requested: context?.templateId,
+        })
+        return renderQuotePdfBlob(view, template)
+      })
+      .then((blob) => {
         if (cancelled) return
-        setUrl(
-          URL.createObjectURL(
-            new Blob([new Uint8Array(bytes)], { type: "application/pdf" })
-          )
-        )
+        setUrl(URL.createObjectURL(blob))
         setError(null)
       })
       .catch((cause: unknown) => {
@@ -61,7 +92,7 @@ export function PdfPreview({ quote }: SlotComponentProps<PreviewSlotProps>) {
     return () => {
       cancelled = true
     }
-  }, [quote, gap])
+  }, [quote, gap, context, customerName])
 
   if (gap) {
     return (

@@ -1,19 +1,23 @@
 import { NextResponse } from "next/server"
 
-import { buildQuotePdfModel, renderQuotePdf } from "@starboard/ext-quoting-pdf"
+import { renderQuotePdfBytes } from "@starboard/ext-quoting-pdf/server"
 import type { QuoteStatus } from "@starboard/lib-contracts"
 
 import { requireApiSession } from "@/lib/auth/session"
 import { getOrganizationPlan } from "@/lib/billing/plan"
 import { ServiceClientError } from "@/lib/clients/http"
 import { getQuotesManager } from "@/lib/domain/quotes/quotes.manager"
-import { isExtensionActive } from "@/lib/extensions"
+import {
+  isExtensionActive,
+  listActivePointContributions,
+} from "@/lib/extensions"
 
 const EXPORT_ALLOWED = new Set<QuoteStatus>(["review", "sent", "win", "loss"])
 
 /**
  * PDF bytes for a quote. Product UI lives in `quoting.pdf`; this BFF route
- * only serves download when that built-in is active (ticket 083).
+ * only authenticates, gates on the built-in, and delegates to its server
+ * helper (083 / 094: same view + org-selected template as the preview).
  */
 export async function GET(
   _request: Request,
@@ -53,9 +57,24 @@ export async function GET(
       )
     }
 
-    const model = buildQuotePdfModel(quote)
-    const bytes = await renderQuotePdf(model)
-    const filename = `quote-${model.quoteId || quoteId}.pdf`
+    const [context, templates] = await Promise.all([
+      getQuotesManager().getQuoteDocumentContextForOrg(
+        organizationId,
+        quote.customerId
+      ),
+      listActivePointContributions(
+        "quoting.pdf.templates",
+        plan,
+        organizationId
+      ),
+    ])
+    const { bytes, quoteNumber } = await renderQuotePdfBytes({
+      quote,
+      organization: context.organization,
+      customerName: context.customerName,
+      activeTemplateIds: templates.map((template) => template.id),
+    })
+    const filename = `quote-${quoteNumber || quoteId}.pdf`
 
     return new NextResponse(Buffer.from(bytes), {
       status: 200,
