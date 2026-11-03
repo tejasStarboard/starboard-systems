@@ -43,6 +43,10 @@ export const manifest = {
         description: "Stage, validity, and quote-number chrome.",
       },
       {
+        id: "quoting.slots.preview",
+        description: "Preview pane body (PDF | Email) beside the builder.",
+      },
+      {
         id: "quoting.commands",
         description: "Editor toolbar actions (PDF, send, …).",
       },

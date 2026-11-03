@@ -7,10 +7,8 @@ import { useFieldArray, useForm, useWatch } from "react-hook-form"
 import { useBreakpoint } from "@starboard/lib-ui/hooks/use-breakpoint"
 import { toast } from "@starboard/lib-ui/components/toast"
 
-import { QuoteFormDesktop } from "./quote-form-desktop"
+import { QuoteBuilderShell } from "./quote-builder-shell"
 import type { QuoteFormLayoutProps } from "./quote-form-layout-props"
-import { QuoteFormMobile } from "./quote-form-mobile"
-import { QuoteFormTablet } from "./quote-form-tablet"
 import { isCommercialEditable } from "../lib/quote-stage"
 import { useQuoteSlotEntries } from "../slots/slot-host"
 import { QUOTING_SLOTS } from "../slots/types"
@@ -390,13 +388,7 @@ export function QuoteForm({
         <input type="hidden" {...form.register("quoteId")} />
         <input type="hidden" {...form.register("source")} />
 
-        {breakpoint === "mobile" ? (
-          <QuoteFormMobile {...layoutProps} />
-        ) : breakpoint === "tablet" ? (
-          <QuoteFormTablet {...layoutProps} />
-        ) : (
-          <QuoteFormDesktop {...layoutProps} />
-        )}
+        <QuoteBuilderShell props={layoutProps} layout={breakpoint} />
       </form>
 
       <RatesSearchSheet

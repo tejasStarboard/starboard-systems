@@ -24,6 +24,7 @@ export const QUOTING_SLOTS = {
   totals: "quoting.slots.totals",
   rateSources: "quoting.slots.rateSources",
   lifecycle: "quoting.slots.lifecycle",
+  preview: "quoting.slots.preview",
   commands: "quoting.commands",
 } as const
 
@@ -67,6 +68,23 @@ export type LifecycleSlotProps = Pick<Form, "control" | "register"> & {
   errors: FieldErrors<QuoteFormValues>
   /** Layout hint so one contribution can adapt density. */
   layout: "desktop" | "tablet" | "mobile"
+}
+
+export type PreviewTab = "pdf" | "email"
+
+/**
+ * Preview pane body (092 fills PDF / Email). The pane chrome (tabs, document
+ * frame, mobile sheet) stays with `quoting.document`; when no contribution is
+ * active it renders a stub. `quoteId` is the persisted row UUID.
+ */
+export type PreviewSlotProps = Pick<Form, "control"> & {
+  quoteId: string
+  tab: PreviewTab
+  /** Active builder step id (`basics` … `build`). */
+  step: string
+  /** Index of the active lane (steps 2–5), for per-lane previews. */
+  selectedLaneIndex: number
+  currencyCode: string
 }
 
 /**

@@ -85,6 +85,7 @@ Kernel does **not** list `quote` as a built-in resource kind in code forever —
 | `quoting.slots.totals`             | Footer / markup                                       | `quoting.markup`, `quoting.math`     |
 | `quoting.slots.rateSources`        | Search/apply rates UI                                 | `rates.catalog`, `spot.*`            |
 | `quoting.slots.lifecycle`          | Stage / validity / numbering chrome (shipped **082**) | `quoting.document` (self)            |
+| `quoting.slots.preview`            | Preview pane body, PDF \| Email (chrome **089**)      | `quoting.pdf` / email (**092**)      |
 | `quoting.commands`                 | Editor/toolbar actions (host shipped **082**)         | `quoting.pdf` (**083**), later send  |
 | `quoting.totalsHooks`              | Headless hooks into ONE MATH pipeline                 | `quoting.incoterm`, `quoting.markup` |
 | `quoting.chargeProviders`          | Extra lines/sections into charge model                | globals, apply-rate                  |
@@ -174,6 +175,8 @@ Optional extensions should prefer contributing to **driving** points, not invent
 **082 (done):** `quoting.slots.lifecycle` + `quoting.commands` defined; document self-contributes lifecycle chrome.
 
 **083 (done):** `quoting.pdf` contributes `quoting.pdf.export` into `quoting.commands`; BFF `GET /api/quotes/:id/pdf`.
+
+**089 (in progress):** `quoting.document` owns the 5-step builder shell (Basics → Route → Cargo → Rates → Build) and defines `quoting.slots.preview`; empty = stub. Existing slots remount by step: `headerFields` → Basics, `rateSources` → Rates, `chargeTable` / `totals` → Build.
 
 **084 (done):** `quoting.incoterm` → `headerFields`; `quoting.markup` → `totals`.
 
