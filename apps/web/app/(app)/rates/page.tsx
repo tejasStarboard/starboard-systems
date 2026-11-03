@@ -1,8 +1,7 @@
 /**
- * Deep-link anchor (086). `/rates` is claimed by the `rates.catalog`
- * `rate.list` editor; when that built-in is active the editor group mounts
- * the real editor and ignores these children. Only when it is inactive
- * (unplugged / rolled out off) does this fallback render.
+ * Deep-link anchor. Catalog list CRUD moved under `/rates/sheets` (096).
+ * This path is no longer claimed by an editor; keep a fallback so direct
+ * hits still explain when the rates catalog extension is inactive.
  */
 export default function RatesDeepLinkPage() {
   return (

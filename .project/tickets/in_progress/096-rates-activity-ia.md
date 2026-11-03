@@ -2,7 +2,7 @@
 id: 096
 wave: 09-rates-catalog-ux
 title: Rates activity IA — Search / Sheets / Sell / Spot sidebar shells
-status: todo
+status: in_progress
 depends_on: [086, 095]
 epic: SYS-RATES-UX
 docs:
@@ -55,12 +55,12 @@ starboard-2 Rate Management uses three **top tabs** (Search Rates, Rate Sheets, 
 
 ## Acceptance
 
-- [ ] Rates activity sidebar shows four entries matching the design doc labels
-- [ ] Each entry opens its editor via contribution deep link; no collision with upload/detail routes
-- [ ] Existing catalog list CRUD remains reachable (under Rate Sheets)
-- [ ] Unplug `rates.catalog` → Rates activity gone; quote still opens
-- [ ] `quoting.slots.rateSources` catalog contribution unchanged
-- [ ] `pnpm run ci` green
+- [x] Rates activity sidebar shows four entries matching the design doc labels
+- [x] Each entry opens its editor via contribution deep link; no collision with upload/detail routes
+- [x] Existing catalog list CRUD remains reachable (under Rate Sheets)
+- [x] Unplug `rates.catalog` → Rates activity gone; quote still opens
+- [x] `quoting.slots.rateSources` catalog contribution unchanged
+- [x] `pnpm run ci` green
 
 ## Out of scope
 
