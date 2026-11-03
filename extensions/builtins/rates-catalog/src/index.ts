@@ -1,6 +1,7 @@
 import type { ComponentType } from "react"
 
 import { RateEditor } from "./editors/rate-editor"
+import { RateSearchEditor } from "./editors/rate-search-editor"
 import { RateSheetsEditor } from "./editors/rate-sheets-editor"
 import { RatesPlaceholderEditor } from "./editors/rates-placeholder-editor"
 import type { BuiltinEditorProps } from "./host"
@@ -23,7 +24,7 @@ export const editors: Readonly<
   >
 > = {
   rate: RateEditor,
-  "rate.search": RatesPlaceholderEditor,
+  "rate.search": RateSearchEditor,
   "rate.sheets": RateSheetsEditor,
   "rate.sell": RatesPlaceholderEditor,
   "rate.spotSearch": RatesPlaceholderEditor,
