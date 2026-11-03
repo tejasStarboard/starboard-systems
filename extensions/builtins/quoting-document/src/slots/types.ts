@@ -75,10 +75,12 @@ export type PreviewTab = "pdf" | "email"
 /**
  * Preview pane body (092 fills PDF / Email). The pane chrome (tabs, document
  * frame, mobile sheet) stays with `quoting.document`; when no contribution is
- * active it renders a stub. `quoteId` is the persisted row UUID.
+ * active it renders a stub. `quoteId` is the persisted row UUID used by
+ * `/api/quotes/:id`; `quoteNumber` is the human-facing number (display only).
  */
 export type PreviewSlotProps = Pick<Form, "control"> & {
   quoteId: string
+  quoteNumber: string
   tab: PreviewTab
   /** Active builder step id (`basics` … `build`). */
   step: string

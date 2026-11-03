@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { ArrowLeftIcon, ArrowRightIcon, EyeIcon } from "@phosphor-icons/react"
 
 import { Button } from "@starboard/lib-ui/components/button"
@@ -91,6 +91,18 @@ export function QuoteBuilderShell({
     ? "route"
     : storedLaneStep
   const step: QuoteStepId = view === "basics" ? "basics" : laneStep
+
+  // Persist the clamp: otherwise fixing the ports again would snap this lane
+  // back to its old (e.g. Build) step.
+  const selectedLaneId = props.selectedLaneId
+  useEffect(() => {
+    if (!selectedLaneId) return
+    setLaneSteps((prev) =>
+      prev[selectedLaneId] && prev[selectedLaneId] !== laneStep
+        ? { ...prev, [selectedLaneId]: laneStep }
+        : prev
+    )
+  }, [selectedLaneId, laneStep])
 
   function goTo(target: QuoteStepId) {
     if (blockedReason(target)) return
@@ -225,7 +237,7 @@ export function QuoteBuilderShell({
               </SheetDescription>
             </SheetHeader>
             <div className="min-h-0 flex-1 overflow-y-auto p-4 pt-0">
-              <QuotePreviewPane layoutProps={props} step={step} />
+              <QuotePreviewPane layoutProps={props} step={step} hideHeading />
             </div>
           </SheetContent>
         </Sheet>

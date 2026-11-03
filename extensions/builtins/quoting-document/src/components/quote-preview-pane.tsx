@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { useWatch } from "react-hook-form"
 
 import { Skeleton } from "@starboard/lib-ui/components/skeleton"
 import {
@@ -134,11 +135,18 @@ export function QuotePreviewPane({
   layoutProps,
   step,
   className,
+  hideHeading,
 }: {
   layoutProps: QuoteFormLayoutProps
   step: QuoteStepId
   className?: string
+  /** Sheet already titles the pane. */
+  hideHeading?: boolean
 }) {
+  // API paths need the persisted row UUID (`id`), like the commands slot; the
+  // human `quoteId` is for display only.
+  const resourceId = (useWatch({ control: layoutProps.control, name: "id" }) ??
+    "") as string
   const [tab, setTab] = useState<PreviewTab>("pdf")
   const hasContributor = useQuoteSlotEntries(QUOTING_SLOTS.preview).length > 0
   const snapshot = useDebouncedValue<StubSnapshot>(
@@ -155,7 +163,8 @@ export function QuotePreviewPane({
     if (hasContributor) {
       const slotProps: PreviewSlotProps = {
         control: layoutProps.control,
-        quoteId: layoutProps.quoteId,
+        quoteId: resourceId,
+        quoteNumber: layoutProps.quoteId,
         tab: forTab,
         step,
         selectedLaneIndex: layoutProps.selectedLaneIndex,
@@ -181,7 +190,11 @@ export function QuotePreviewPane({
         onValueChange={(value) => setTab(value === "email" ? "email" : "pdf")}
       >
         <div className="flex items-center justify-between gap-2">
-          <h2 className="text-sm font-medium">Preview</h2>
+          {hideHeading ? (
+            <span />
+          ) : (
+            <h2 className="text-sm font-medium">Preview</h2>
+          )}
           <TabsList>
             <TabsTrigger value="pdf">PDF</TabsTrigger>
             <TabsTrigger value="email">Email</TabsTrigger>

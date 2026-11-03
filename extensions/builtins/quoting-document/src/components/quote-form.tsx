@@ -72,6 +72,9 @@ export function QuoteForm({
   const hasChargeTable =
     useQuoteSlotEntries(QUOTING_SLOTS.chargeTable).length > 0
   const [selectedLaneIndex, setSelectedLaneIndex] = useState(0)
+  // Bumped on Cancel so the builder shell remounts with fresh navigation state
+  // (step, per-lane steps, preview sheet) instead of showing a stale step.
+  const [shellKey, setShellKey] = useState(0)
   const [manualRatesVisibleByLane, setManualRatesVisibleByLane] = useState<
     Record<string, boolean>
   >(() =>
@@ -324,6 +327,7 @@ export function QuoteForm({
   function handleCancel() {
     form.reset(defaultValues)
     setSelectedLaneIndex(0)
+    setShellKey((key) => key + 1)
     setManualRatesVisibleByLane(
       Object.fromEntries(
         defaultValues.lanes.map((lane) => [
@@ -388,7 +392,11 @@ export function QuoteForm({
         <input type="hidden" {...form.register("quoteId")} />
         <input type="hidden" {...form.register("source")} />
 
-        <QuoteBuilderShell props={layoutProps} layout={breakpoint} />
+        <QuoteBuilderShell
+          key={shellKey}
+          props={layoutProps}
+          layout={breakpoint}
+        />
       </form>
 
       <RatesSearchSheet
