@@ -47,6 +47,11 @@ export const manifest = {
         description: "Preview pane body (PDF | Email) beside the builder.",
       },
       {
+        id: "quoting.slots.laneRoute",
+        description:
+          "FCL Route step port picker (e.g. world map). Empty → PortCombobox.",
+      },
+      {
         id: "quoting.commands",
         description: "Editor toolbar actions (PDF, send, …).",
       },

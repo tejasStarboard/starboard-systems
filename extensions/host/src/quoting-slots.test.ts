@@ -13,6 +13,7 @@ const SLOTS = [
   "quoting.slots.rateSources",
   "quoting.slots.lifecycle",
   "quoting.slots.preview",
+  "quoting.slots.laneRoute",
   "quoting.commands",
 ]
 
@@ -63,6 +64,26 @@ describe("quoting.document defines slots (073)", () => {
         (c) => [c.id, c.extensionId]
       )
     ).toEqual([["quoting.incoterm.fields", "quoting.incoterm"]])
+  })
+
+  test("geo.gazetteer contributes the FCL route map (090)", () => {
+    expect(
+      getContributionsToPoint("quoting.slots.laneRoute", "credit").map((c) => [
+        c.id,
+        c.extensionId,
+      ])
+    ).toEqual([["geo.gazetteer.routeMap", "geo.gazetteer"]])
+  })
+
+  test("unplug geo.gazetteer → empty laneRoute (Route falls back to PortCombobox)", () => {
+    const result = getContributionsForOwner(
+      "quoting.document",
+      "credit",
+      manifests,
+      off("geo.gazetteer")
+    )
+    expect(result["quoting.slots.laneRoute"]).toEqual([])
+    expect(result["quoting.slots.headerFields"]).toHaveLength(1)
   })
 
   test("quoting.markup contributes totals footer (084)", () => {

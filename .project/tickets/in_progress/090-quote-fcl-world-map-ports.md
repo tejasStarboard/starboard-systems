@@ -59,10 +59,10 @@ docs:
 
 ## Acceptance
 
-- [ ] Port search returns lat/lng when stored; `country` filter returns seaports for that country
-- [ ] FCL: map country → port selection sets lane origin/destination; curve + zoom behavior per design doc
-- [ ] Vias appear after both ports; curve updates when vias + coords exist
-- [ ] LCL/Air unchanged (combobox); Find port fallback works on FCL
+- [x] Port search returns lat/lng when stored; `country` filter returns seaports for that country
+- [x] FCL: map country → port selection sets lane origin/destination; curve + zoom behavior per design doc
+- [x] Vias appear after both ports; curve updates when vias + coords exist
+- [x] LCL/Air unchanged (combobox); Find port fallback works on FCL
 - [ ] Branch from `quote-flow`; PR targets `quote-flow`; `pnpm run ci` green
 
 ## Out of scope

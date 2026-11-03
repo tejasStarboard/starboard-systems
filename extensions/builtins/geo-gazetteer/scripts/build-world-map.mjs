@@ -75,9 +75,24 @@ for (const f of feature(topology, topology.objects.countries).features) {
     Math.abs(ringArea(a)) >= Math.abs(ringArea(b)) ? a : b
   )
   const [lng, lat] = ringCentroid(largest)
+  const xs = largest.map(([x]) => px(x))
+  const ys = largest.map(([, y]) => py(y))
+  const box = [
+    round(Math.min(...xs)),
+    round(Math.min(...ys)),
+    round(Math.max(...xs)),
+    round(Math.max(...ys)),
+  ]
   const d = rings.map(ringPath).join("")
   if (!d) continue
-  out.push({ id: iso2, name: f.properties.name, d, lng: round(lng), lat: round(lat) })
+  out.push({
+    id: iso2,
+    name: f.properties.name,
+    d,
+    lng: round(lng),
+    lat: round(lat),
+    box,
+  })
 }
 out.sort((a, b) => a.id.localeCompare(b.id))
 
@@ -93,6 +108,8 @@ export type WorldCountryShape = {
   /** Label / curve anchor (largest landmass centroid). */
   lng: number
   lat: number
+  /** Largest-landmass bounds in viewBox units: [x0, y0, x1, y1]. */
+  box: readonly [number, number, number, number]
 }
 
 export const WORLD_WIDTH = ${WIDTH}
@@ -101,5 +118,10 @@ export const WORLD_LAT_TOP = ${LAT_TOP}
 
 export const WORLD_COUNTRIES: readonly WorldCountryShape[] = ${JSON.stringify(out)}
 `
-writeFileSync(new URL("../src/lib/world-countries.generated.ts", import.meta.url), body)
-console.log(`wrote ${out.length} countries, ${(body.length / 1024).toFixed(0)} KB`)
+writeFileSync(
+  new URL("../src/lib/world-countries.generated.ts", import.meta.url),
+  body
+)
+console.log(
+  `wrote ${out.length} countries, ${(body.length / 1024).toFixed(0)} KB`
+)

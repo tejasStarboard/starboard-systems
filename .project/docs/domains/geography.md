@@ -14,7 +14,7 @@ Countries / states / cities (reference), **facilities** (UN/LOCODE and/or IATA g
 ## APIs
 
 - `GET/POST /currencies` — list / ensure currency codes (service token)
-- `GET /ports?q=` — search facilities by UN/LOCODE or IATA prefix, name, or alias (service token); empty `q` returns capped list. Response: `{ ports: FacilityOption[] }` (`value`, `label`, optional `types`, `country`)
+- `GET /ports?q=&country=XX&type=seaport` — search facilities by UN/LOCODE or IATA prefix, name, or alias (service token); empty `q` returns capped list. `country` (ISO-2) and `type` (`seaport` \| `airport`) scope hits (FCL world map, **090**). Response: `{ ports: FacilityOption[] }` (`value`, `label`, optional `types`, `country`, `latitude`, `longitude` when stored)
 - `GET /locations?q=` — search **places** (city/locality gazetteer) for quote pickup/delivery; min 2 chars. `?ids=` resolves soft ids to labels. Response: `{ locations: FormOption[] }` (`value` = place id, `label` e.g. `Mississauga, ON, CA`)
 - `GET /health` — open
 

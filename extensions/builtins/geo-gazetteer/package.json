@@ -25,7 +25,8 @@
   ],
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "build:map": "node scripts/build-world-map.mjs"
+    "build:map": "node scripts/build-world-map.mjs",
+    "test": "bun test"
   },
   "devDependencies": {
     "@starboard/tool-typescript-config": "workspace:*",
@@ -35,7 +36,8 @@
     "react": "19.3.1",
     "topojson-client": "^3.1.0",
     "typescript": "^5.9.3",
-    "world-atlas": "^2.0.2"
+    "world-atlas": "^2.0.2",
+    "@types/bun": "^1.3.5"
   },
   "peerDependencies": {
     "react": "19.3.1"
