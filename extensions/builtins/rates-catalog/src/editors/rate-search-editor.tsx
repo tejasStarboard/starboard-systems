@@ -13,6 +13,7 @@ import {
   applyClientSearchFilters,
   buildSearchRatesParams,
   emptySearchRatesFilters,
+  paginateSearchRates,
   sortSearchRates,
   type SearchRatesFilters,
   type SearchRatesSort,
@@ -30,8 +31,13 @@ export function RateSearchEditor({ host }: BuiltinEditorProps) {
   const [hasSearched, setHasSearched] = useState(false)
   const [loading, setLoading] = useState(false)
   const [sort, setSort] = useState<SearchRatesSort>("lane")
+  const [page, setPage] = useState(1)
 
   const sorted = useMemo(() => sortSearchRates(rates, sort), [rates, sort])
+  const pageRows = useMemo(
+    () => paginateSearchRates(sorted, page),
+    [sorted, page]
+  )
 
   async function runSearch(filters: SearchRatesFilters) {
     setLoading(true)
@@ -53,6 +59,7 @@ export function RateSearchEditor({ host }: BuiltinEditorProps) {
       }
       setRates(applyClientSearchFilters(body.rates, filters))
       setHasSearched(true)
+      setPage(1)
     } catch {
       toast.add({
         type: "error",
@@ -68,6 +75,12 @@ export function RateSearchEditor({ host }: BuiltinEditorProps) {
     setDraft(emptySearchRatesFilters())
     setRates([])
     setHasSearched(false)
+    setPage(1)
+  }
+
+  function onSortChange(next: SearchRatesSort) {
+    setSort(next)
+    setPage(1)
   }
 
   return (
@@ -88,11 +101,14 @@ export function RateSearchEditor({ host }: BuiltinEditorProps) {
         searching={loading}
       />
       <SearchRatesResults
-        rates={sorted}
+        rates={pageRows}
+        total={sorted.length}
+        page={page}
+        onPageChange={setPage}
         loading={loading}
         hasSearched={hasSearched}
         sort={sort}
-        onSortChange={setSort}
+        onSortChange={onSortChange}
         host={host}
       />
     </div>

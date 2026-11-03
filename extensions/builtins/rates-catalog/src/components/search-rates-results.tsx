@@ -1,5 +1,7 @@
 "use client"
 
+import { CaretLeftIcon, CaretRightIcon } from "@phosphor-icons/react"
+
 import type { Rate } from "@starboard/lib-contracts"
 import { Button } from "@starboard/lib-ui/components/button"
 import {
@@ -20,7 +22,10 @@ import {
 import { toast } from "@starboard/lib-ui/components/toast"
 
 import type { BuiltinHost } from "../host"
-import type { SearchRatesSort } from "../lib/search-rates-query"
+import {
+  searchRatesTotalPages,
+  type SearchRatesSort,
+} from "../lib/search-rates-query"
 
 function formatLane(rate: Rate): string {
   const origin = rate.origin ?? "—"
@@ -41,25 +46,34 @@ function formatAmount(rate: Rate): string {
 
 export function SearchRatesResults({
   rates,
+  total,
+  page,
+  onPageChange,
   loading,
   hasSearched,
   sort,
   onSortChange,
   host,
 }: {
+  /** Current page slice only. */
   rates: Rate[]
+  total: number
+  page: number
+  onPageChange: (page: number) => void
   loading: boolean
   hasSearched: boolean
   sort: SearchRatesSort
   onSortChange: (sort: SearchRatesSort) => void
   host: BuiltinHost
 }) {
+  const pages = searchRatesTotalPages(total)
+
   return (
     <div className="flex flex-col gap-3">
       <div className="flex flex-wrap items-center gap-2">
         <p className="text-xs text-muted-foreground">
           {hasSearched
-            ? `${rates.length} rate${rates.length === 1 ? "" : "s"}`
+            ? `${total} rate${total === 1 ? "" : "s"}`
             : "Run a search to see catalog rates"}
         </p>
         <div className="ml-auto flex items-center gap-2">
@@ -103,66 +117,95 @@ export function SearchRatesResults({
 
       {loading ? (
         <p className="text-xs text-muted-foreground">Searching rates…</p>
-      ) : !hasSearched ? null : rates.length === 0 ? (
+      ) : !hasSearched ? null : total === 0 ? (
         <p className="text-sm text-muted-foreground">No rates found.</p>
       ) : (
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Lane</TableHead>
-              <TableHead>Agent</TableHead>
-              <TableHead>Carrier</TableHead>
-              <TableHead>Validity</TableHead>
-              <TableHead>Transit</TableHead>
-              <TableHead className="text-right">Rate</TableHead>
-              <TableHead className="w-16" />
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {rates.map((rate) => {
-              const active =
-                host.activeEditor?.viewType === "rate" &&
-                host.activeEditor.resourceId === rate.id
-              return (
-                <TableRow
-                  key={rate.id}
-                  data-state={active ? "selected" : undefined}
-                >
-                  <TableCell className="font-medium">
-                    {formatLane(rate)}
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {rate.customerId ?? "—"}
-                  </TableCell>
-                  <TableCell>{rate.carrier ?? "—"}</TableCell>
-                  <TableCell className="text-xs whitespace-nowrap">
-                    {formatValidity(rate)}
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">—</TableCell>
-                  <TableCell className="text-right tabular-nums">
-                    {formatAmount(rate)}
-                  </TableCell>
-                  <TableCell>
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="ghost"
-                      onClick={() =>
-                        host.openEditor({
-                          viewType: "rate",
-                          resourceId: rate.id,
-                          title: rate.label,
-                        })
-                      }
-                    >
-                      View
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              )
-            })}
-          </TableBody>
-        </Table>
+        <>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Lane</TableHead>
+                <TableHead>Agent</TableHead>
+                <TableHead>Carrier</TableHead>
+                <TableHead>Validity</TableHead>
+                <TableHead>Transit</TableHead>
+                <TableHead className="text-right">Rate</TableHead>
+                <TableHead className="w-16" />
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {rates.map((rate) => {
+                const active =
+                  host.activeEditor?.viewType === "rate" &&
+                  host.activeEditor.resourceId === rate.id
+                return (
+                  <TableRow
+                    key={rate.id}
+                    data-state={active ? "selected" : undefined}
+                  >
+                    <TableCell className="font-medium">
+                      {formatLane(rate)}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {rate.customerId ?? "—"}
+                    </TableCell>
+                    <TableCell>{rate.carrier ?? "—"}</TableCell>
+                    <TableCell className="text-xs whitespace-nowrap">
+                      {formatValidity(rate)}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">—</TableCell>
+                    <TableCell className="text-right tabular-nums">
+                      {formatAmount(rate)}
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        onClick={() =>
+                          host.openEditor({
+                            viewType: "rate",
+                            resourceId: rate.id,
+                            title: rate.label,
+                          })
+                        }
+                      >
+                        View
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                )
+              })}
+            </TableBody>
+          </Table>
+          <div className="flex items-center justify-between gap-2 border-t pt-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={loading || page <= 1}
+              onClick={() => onPageChange(Math.max(1, page - 1))}
+              aria-label="Previous page"
+            >
+              <CaretLeftIcon className="size-4" />
+              <span className="sr-only sm:not-sr-only">Prev</span>
+            </Button>
+            <span className="text-xs text-muted-foreground">
+              {page} / {pages}
+            </span>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={loading || page >= pages}
+              onClick={() => onPageChange(page + 1)}
+              aria-label="Next page"
+            >
+              <span className="sr-only sm:not-sr-only">Next</span>
+              <CaretRightIcon className="size-4" />
+            </Button>
+          </div>
+        </>
       )}
     </div>
   )

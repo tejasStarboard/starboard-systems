@@ -36,6 +36,7 @@ Prod **Search Rates** (Ocean FCL): mode icon bar; Origin/Destination port + swap
 3. **View** opens the existing rate detail editor (`/rates/catalog/:id`).
 4. Mode tabs for LCL / Drayage / Cartage / Air: visible, **disabled** (coming soon).
 5. Sort can be client-side first; Export lean or stubbed.
+6. **Paginate** Search Rates results (page size 25, prev/next) over the filtered/sorted client result set. Server list pagination can follow when `GET /rates` grows a page API.
 
 ## Non-goals
 
@@ -43,6 +44,7 @@ Prod **Search Rates** (Ocean FCL): mode icon bar; Origin/Destination port + swap
 - Pixel-perfect prod CSS; full Export productization
 - Agent/marketplace filters beyond what rates/CRM APIs already expose
 - Spot inside Search Rates (Spot is **098**)
+- Server-side `page`/`pageSize` on `GET /rates` (client page of filtered results is enough for this slice)
 
 ## Files to touch (approx)
 
@@ -57,9 +59,10 @@ Prod **Search Rates** (Ocean FCL): mode icon bar; Origin/Destination port + swap
 - [x] Mode tabs for non-FCL are present and disabled
 - [x] View navigates to existing rate detail contribution
 - [x] Clear resets filters; Search triggers list refresh
+- [x] Results paginate (25 per page, prev/next; page resets on Search / Clear / sort change)
 - [x] No kernel product imports of catalog UI
 - [x] `pnpm run ci` green
 
 ## Out of scope
 
-Non-FCL modes; marketplace; Spot search; Rate Sheets manage UX
+Non-FCL modes; marketplace; Spot search; Rate Sheets manage UX; rates service list pagination API

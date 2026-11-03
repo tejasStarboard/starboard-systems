@@ -5,6 +5,9 @@ import {
   applyClientSearchFilters,
   buildSearchRatesParams,
   emptySearchRatesFilters,
+  paginateSearchRates,
+  SEARCH_RATES_PAGE_SIZE,
+  searchRatesTotalPages,
   sortSearchRates,
   type SearchRatesFilters,
 } from "./search-rates-query"
@@ -131,5 +134,33 @@ describe("sortSearchRates", () => {
       "lane"
     )
     expect(sorted.map((r) => r.id)).toEqual(["a", "b"])
+  })
+})
+
+describe("paginateSearchRates", () => {
+  const rows = Array.from({ length: 30 }, (_, i) => rate({ id: `r-${i}` }))
+
+  test("returns first page of SEARCH_RATES_PAGE_SIZE", () => {
+    const page = paginateSearchRates(rows, 1)
+    expect(page).toHaveLength(SEARCH_RATES_PAGE_SIZE)
+    expect(page[0]?.id).toBe("r-0")
+    expect(page.at(-1)?.id).toBe("r-24")
+  })
+
+  test("returns remainder on last page", () => {
+    const page = paginateSearchRates(rows, 2)
+    expect(page.map((r) => r.id)).toEqual([
+      "r-25",
+      "r-26",
+      "r-27",
+      "r-28",
+      "r-29",
+    ])
+  })
+
+  test("total pages is at least 1", () => {
+    expect(searchRatesTotalPages(0)).toBe(1)
+    expect(searchRatesTotalPages(25)).toBe(1)
+    expect(searchRatesTotalPages(26)).toBe(2)
   })
 })

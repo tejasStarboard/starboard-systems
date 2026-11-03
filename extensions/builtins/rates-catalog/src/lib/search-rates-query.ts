@@ -16,6 +16,27 @@ export type SearchRatesSort = "lane" | "carrier" | "validity" | "amount"
 
 export const EQUIPMENT_OPTIONS = ["20GP", "40GP", "40HC"] as const
 
+/** Page size for Search Rates results (matches quotes list chrome). */
+export const SEARCH_RATES_PAGE_SIZE = 25
+
+export function searchRatesTotalPages(
+  total: number,
+  pageSize: number = SEARCH_RATES_PAGE_SIZE
+): number {
+  return Math.max(1, Math.ceil(total / pageSize))
+}
+
+/** Slice a sorted/filtered list to one page (1-indexed). */
+export function paginateSearchRates<T>(
+  rows: T[],
+  page: number,
+  pageSize: number = SEARCH_RATES_PAGE_SIZE
+): T[] {
+  const safePage = Math.max(1, page)
+  const start = (safePage - 1) * pageSize
+  return rows.slice(start, start + pageSize)
+}
+
 export function emptySearchRatesFilters(): SearchRatesFilters {
   return {
     origin: "",
