@@ -1,4 +1,4 @@
-# Build priority — 2026-11-01 (updated 2026-11-02)
+# Build priority — 2026-11-01 (updated 2026-11-03)
 
 **Source of truth for execution order.**
 
@@ -48,18 +48,18 @@ Also: [079](../../tickets/done/079-apps-web-reusable-hooks.md) hooks · [080](..
 
 ---
 
-## Phase D — Quote close-the-loop (modular built-ins / extras) — **NOW**
+## Phase D — Quote close-the-loop (modular built-ins / extras) — **DONE**
 
 All product work lands in **packages** that contribute to the workbench or to `quoting.document`-owned points. Kernel stays thin.
 
 |   # | Ticket                                                                                             | Package / layer                             | Why                          |
 | --: | -------------------------------------------------------------------------------------------------- | ------------------------------------------- | ---------------------------- |
-|  11 | **[082](../../tickets/todo/082-quote-stages-validity-numbering.md)** Stages + validity + numbering | `quoting.document` **built-in**             | Lifecycle; unlocks PDF/send  |
-|  12 | **[083](../../tickets/todo/083-quote-pdf-export-builtin.md)** Quote PDF                            | **`quoting.pdf`** **built-in**              | Export via document commands |
-|  13 | **[084](../../tickets/todo/084-quoting-incoterm-markup-slot-packages.md)** Peel Incoterm + markup  | `quoting.incoterm` / `markup` **built-ins** | Fill empty 073 slots         |
-|  14 | **[085](../../tickets/todo/085-qv2-money-follow-ons-charges.md)** Per-CT / row FX / equipment      | `quoting.charges` **built-in**              | 072 deferrals                |
-|  15 | **[086](../../tickets/todo/086-rates-catalog-workbench-crud.md)** Catalog CRUD workbench           | `rates.catalog` **built-in**                | Beyond apply sheet           |
-|  16 | **[087](../../tickets/todo/087-ingestion-fcl-v6-excel-pdf.md)** FCL v6 Excel/PDF ingest            | `ingestion.fcl_v6` **optional**             | Extra; CSV already shipped   |
+|  11 | [082](../../tickets/done/082-quote-stages-validity-numbering.md) Stages + validity + numbering     | `quoting.document` **built-in**             | Lifecycle; unlocks PDF/send  |
+|  12 | [083](../../tickets/done/083-quote-pdf-export-builtin.md) Quote PDF                                | **`quoting.pdf`** **built-in**              | Export via document commands |
+|  13 | [084](../../tickets/done/084-quoting-incoterm-markup-slot-packages.md) Peel Incoterm + markup      | `quoting.incoterm` / `markup` **built-ins** | Fill empty 073 slots         |
+|  14 | [085](../../tickets/done/085-qv2-money-follow-ons-charges.md) Per-CT / row FX / equipment          | `quoting.charges` **built-in**              | 072 deferrals                |
+|  15 | [086](../../tickets/done/086-rates-catalog-workbench-crud.md) Catalog CRUD workbench               | `rates.catalog` **built-in**                | Beyond apply sheet           |
+|  16 | [087](../../tickets/done/087-ingestion-fcl-v6-excel-pdf.md) FCL v6 Excel/PDF ingest                | `ingestion.fcl_v6` **optional**             | Extra; CSV already shipped   |
 
 ```text
 082 quoting.document lifecycle ──► 083 quoting.pdf (contributes commands)
@@ -71,7 +71,30 @@ All product work lands in **packages** that contribute to the workbench or to `q
 087 ingestion.fcl_v6 Excel/PDF ── optional parallel
 ```
 
-`082` before `083`. `084` before `085`. `086` before or parallel with `087` (prefer **086** first if ingest actions use catalog-defined points).
+---
+
+## Phase E — Quote builder UX — **NOW**
+
+Multistep builder + FCL map + rate cards + live PDF/email preview. Design: [quote-builder-ux-2026-11-03.md](quote-builder-ux-2026-11-03.md).
+
+**Integration branch:** `quote-flow` (off `dev`). Slice branches: `git checkout --no-track -b {id} origin/quote-flow`. PRs target **`quote-flow` only**; **no direct commits** on `quote-flow`. Promote via `quote-flow` → `dev` when the epic is ready.
+
+|   # | Ticket                                                                                          | Package / layer                    | Why                          |
+| --: | ----------------------------------------------------------------------------------------------- | ---------------------------------- | ---------------------------- |
+|  17 | [088](../../tickets/done/088-quote-builder-ux-epic.md) Epic (docs / orchestration)             | —                                  | Sequence + git rules         |
+|  18 | **[089](../../tickets/todo/089-quote-builder-multistep-shell.md)** Multistep shell + preview chrome | `quoting.document`             | Stepper + Sejda-like pane    |
+|  19 | **[090](../../tickets/todo/090-quote-fcl-world-map-ports.md)** FCL world-map ports              | `geo.gazetteer` + document Route   | Country → seaport + curves   |
+|  20 | **[091](../../tickets/todo/091-quote-rate-cards.md)** Uber-style rate cards                     | `rates.catalog` / spot → rateSources | Card rail + schedule chips |
+|  21 | **[092](../../tickets/todo/092-quote-live-pdf-email-preview.md)** Live PDF + email preview      | `quoting.pdf` + `packages/email`   | Fill preview pane            |
+
+```text
+088 epic
+089 shell ──► 090 map
+         └──► 091 rate cards
+089 + 083 ──► 092 live preview
+```
+
+`089` before `090` / `091` / `092`. `090` and `091` may run in parallel after `089`. `092` needs `089` + existing PDF built-in (**083**).
 
 ---
 
@@ -81,6 +104,6 @@ All product work lands in **packages** that contribute to the workbench or to `q
 
 ---
 
-## Later (Phase E+)
+## Later (Phase F+)
 
-RFQ email → draft quote · more spot carriers · settings/billing productization · admin extension node-graph · Outlook/Gmail hosts · Public API · Companion · FFW OS · Air/LCL ingest extras · …
+RFQ email → draft quote · more spot carriers · settings/billing productization · admin extension node-graph · Outlook/Gmail hosts · Public API · Companion · FFW OS · Air/LCL ingest extras · catalog schedule schema (if rate cards need ETD/ETA on catalog rows) · …
