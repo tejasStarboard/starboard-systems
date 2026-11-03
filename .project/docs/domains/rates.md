@@ -56,7 +56,7 @@ remains `/rates/upload` until fully folded into Sheets via `ingestActions`.
 Sell Rates is a **gated shell** only (marketplace Won’t/deferred). Spot search
 does **not** require a quote; quote apply path stays on `rateSources`.
 
-**Next implement:** [097](../../tickets/todo/097-search-rates-ocean-fcl.md).
+**In progress:** [097](../../tickets/in_progress/097-search-rates-ocean-fcl.md) Search Rates FCL. Next: [098](../../tickets/todo/098-spot-search-standalone.md) / [099](../../tickets/todo/099-rate-sheets-and-sell-shell.md).
 
 ## Ingestion writes
 

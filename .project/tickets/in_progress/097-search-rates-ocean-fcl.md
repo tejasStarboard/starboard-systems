@@ -2,7 +2,7 @@
 id: 097
 wave: 09-rates-catalog-ux
 title: Search Rates — Ocean FCL filters + results table
-status: todo
+status: in_progress
 depends_on: [096]
 epic: SYS-RATES-UX
 docs:
@@ -53,12 +53,12 @@ Prod **Search Rates** (Ocean FCL): mode icon bar; Origin/Destination port + swap
 
 ## Acceptance
 
-- [ ] Search Rates editor shows FCL filters + results against live catalog API for the org
-- [ ] Mode tabs for non-FCL are present and disabled
-- [ ] View navigates to existing rate detail contribution
-- [ ] Clear resets filters; Search triggers list refresh
-- [ ] No kernel product imports of catalog UI
-- [ ] `pnpm run ci` green
+- [x] Search Rates editor shows FCL filters + results against live catalog API for the org
+- [x] Mode tabs for non-FCL are present and disabled
+- [x] View navigates to existing rate detail contribution
+- [x] Clear resets filters; Search triggers list refresh
+- [x] No kernel product imports of catalog UI
+- [x] `pnpm run ci` green
 
 ## Out of scope
 
