@@ -17,22 +17,22 @@ docs:
 
 ## Git
 
-| Rule | Detail |
-|------|--------|
-| Base | `origin/quote-flow` — `git checkout --no-track -b 094 origin/quote-flow` |
-| PR | Into **`quote-flow` only** |
-| Landing | No direct commits on `quote-flow` |
+| Rule    | Detail                                                                   |
+| ------- | ------------------------------------------------------------------------ |
+| Base    | `origin/quote-flow` — `git checkout --no-track -b 094 origin/quote-flow` |
+| PR      | Into **`quote-flow` only**                                               |
+| Landing | No direct commits on `quote-flow`                                        |
 
 ## Extension model
 
-|                  |                                                                 |
-| ---------------- | --------------------------------------------------------------- |
-| **Packages**     | **`quoting.pdf`** (PDF preview + export via **`@react-pdf/renderer`**); **`quoting.email`** (email preview via **`@react-email/components`**). Document owns `quoting.slots.preview`. |
-| **Layer**        | Driving built-ins (default-on). Product UI **not** in kernel `apps/web` beyond thin BFF auth/gate routes. |
-| **Defines**      | Each package **defines** a template registry point, e.g. `quoting.pdf.templates` / `quoting.email.templates`, so tenants/extensions can register custom designs. |
-| **Contributes**  | Default template(s) into those points; preview tab into `quoting.slots.preview`; Export PDF into `quoting.commands`. |
-| **Unplug test**  | `quoting.pdf` off → no PDF tab/export; `quoting.email` off → Email tab stub; document intact. |
-| **Math**         | View-model totals **only** via `@starboard/lib-pricing` — no twin pricing. Templates are display-only. |
+|                 |                                                                                                                                                                                       |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Packages**    | **`quoting.pdf`** (PDF preview + export via **`@react-pdf/renderer`**); **`quoting.email`** (email preview via **`@react-email/components`**). Document owns `quoting.slots.preview`. |
+| **Layer**       | Driving built-ins (default-on). Product UI **not** in kernel `apps/web` beyond thin BFF auth/gate routes.                                                                             |
+| **Defines**     | Each package **defines** a template registry point, e.g. `quoting.pdf.templates` / `quoting.email.templates`, so tenants/extensions can register custom designs.                      |
+| **Contributes** | Default template(s) into those points; preview tab into `quoting.slots.preview`; Export PDF into `quoting.commands`.                                                                  |
+| **Unplug test** | `quoting.pdf` off → no PDF tab/export; `quoting.email` off → Email tab stub; document intact.                                                                                         |
+| **Math**        | View-model totals **only** via `@starboard/lib-pricing` — no twin pricing. Templates are display-only.                                                                                |
 
 ## Problem
 
@@ -72,12 +72,12 @@ docs:
 
 ## Acceptance
 
-- [ ] PDF preview + export built with `@react-pdf/renderer` against `QuoteDocumentView` (no pdf-lib on quote path)
-- [ ] Email preview built with react-email against the **same** schema
-- [ ] `quoting.pdf` / `quoting.email` define template contribution points; default templates registered; org can select template (settings or metadata) with fallback to default
-- [ ] At least one alternate/branded template contribution demonstrates letterhead/custom layout binding to schema fields
-- [ ] Preview UI remains extension-owned; apps/web has no product preview components
-- [ ] Totals still ONE MATH; unplug tests pass
+- [x] PDF preview + export built with `@react-pdf/renderer` against `QuoteDocumentView` (no pdf-lib on quote path)
+- [x] Email preview built with react-email against the **same** schema
+- [x] `quoting.pdf` / `quoting.email` define template contribution points; default templates registered; org can select template (settings or metadata) with fallback to default
+- [x] At least one alternate/branded template contribution demonstrates letterhead/custom layout binding to schema fields
+- [x] Preview UI remains extension-owned; apps/web has no product preview components
+- [x] Totals still ONE MATH; unplug tests pass
 - [ ] Branch from `quote-flow`; PR targets `quote-flow`; `pnpm run ci` green
 
 ## Out of scope
