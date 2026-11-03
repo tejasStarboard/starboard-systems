@@ -15,22 +15,23 @@ Single implementation + fixture conformance suite. No TS/Python/add-in twins.
 
 ## Exported API
 
-| Export                                | Role                                                           |
-| ------------------------------------- | -------------------------------------------------------------- |
-| `roundMoney`                          | Half-up money rounding (default 2 dp)                          |
-| `computeManualLaneTotals`             | Canonical `{ buy, markup, sell }` for manual rate lines        |
-| `calculateManualRateTotals`           | UI alias `{ subtotal, markup, total }`                         |
-| `isIncludedInTotal`                   | Surcharge inclusion predicate (sell / buy / rollup_buy)        |
-| `deriveExcludedBuckets`               | Legacy door presence helper (068). Quote UI no longer calls it |
-| `excludedBucketsForIncoterm`          | Incoterm × shipper/consignee → excluded buckets (070)          |
-| `getEffectiveUsageAmount`             | free → min → max usage → billable qty                          |
-| `calculateSurchargeAmount`            | Unit / flat / % of base freight → `{ buy, sell }`              |
-| `isBaseFreightRow`                    | Stamp or name-allowlist base-freight predicate                 |
-| `findBaseFreightRow`                  | Elect base freight from a surcharge list                       |
-| `tryGetFxRate` / `tryConvertCurrency` | Quote FX lookup + convert (085; starboard-2 port)              |
-| `surchargeAppliesToEquipment`         | Default vs CT filter for surcharge lines                       |
+| Export                                | Role                                                             |
+| ------------------------------------- | ---------------------------------------------------------------- |
+| `roundMoney`                          | Half-up money rounding (default 2 dp)                            |
+| `computeManualLaneTotals`             | Canonical `{ buy, markup, sell }` for manual rate lines          |
+| `calculateManualRateTotals`           | UI alias `{ subtotal, markup, total }`                           |
+| `isIncludedInTotal`                   | Surcharge inclusion predicate (sell / buy / rollup_buy)          |
+| `deriveExcludedBuckets`               | Legacy door presence helper (068). Quote UI no longer calls it   |
+| `excludedBucketsForIncoterm`          | Incoterm × shipper/consignee → excluded buckets (070)            |
+| `getEffectiveUsageAmount`             | free → min → max usage → billable qty                            |
+| `calculateSurchargeAmount`            | Unit / flat / % of base freight → `{ buy, sell }`                |
+| `isBaseFreightRow`                    | Stamp or name-allowlist base-freight predicate                   |
+| `findBaseFreightRow`                  | Elect base freight from a surcharge list                         |
+| `tryGetFxRate` / `tryConvertCurrency` | Quote FX lookup + convert (085; starboard-2 port)                |
+| `mergeBaseFxRates`                    | Merge live Frankfurter rates into `exchangeRates` base row (093) |
+| `surchargeAppliesToEquipment`         | Default vs CT filter for surcharge lines                         |
 
-`computeManualLaneTotals` accepts optional `scope.excluded_buckets`, quote-level `globalCharges`, `quoteCurrency`, and `fxRates`. The quote UI passes **one** selected rate line. `baseMode: "per_eq"` with `equipmentAmounts` prices each CT like starboard-2 (`unit buy + dial` × count); surcharge `equipmentType` filters per CT. Flat / no-equipment keeps one lane dial on the rolled buy. A finite `sellAmount` replaces that row’s calculated sell; the gap vs buy is included in `markup` so `sell = buy + markup`. `isVisible` does not change the total. Schemas: `@starboard/lib-contracts` (`surchargeLineSchema`). Persistence: **065** / **068** / **071** / **085** (`equipment_type`, `exchange_rates`, per-CT dial fields on `equipment_amounts`).
+`computeManualLaneTotals` accepts optional `scope.excluded_buckets`, quote-level `globalCharges`, `quoteCurrency`, and `fxRates`. The quote UI passes **one** selected rate line. `baseMode: "per_eq"` with `equipmentAmounts` prices each CT like starboard-2 (`unit buy + dial` × count); surcharge `equipmentType` filters per CT. Flat / no-equipment keeps one lane dial on the rolled buy. A finite `sellAmount` replaces that row’s calculated sell; the gap vs buy is included in `markup` so `sell = buy + markup`. `isVisible` does not change the total. Schemas: `@starboard/lib-contracts` (`surchargeLineSchema`). Live FX (**093**): Frankfurter rates (`1 base = rate × code`, fetched server-side by geography) land in `exchangeRates[base]`; `tryGetFxRate` uses the inverse for `line → base`, so no second totals engine and no invented rates (missing → existing missing-FX behavior). Persistence: **065** / **068** / **071** / **085** (`equipment_type`, `exchange_rates`, per-CT dial fields on `equipment_amounts`).
 
 ## Fixtures
 

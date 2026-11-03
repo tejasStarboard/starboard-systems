@@ -142,7 +142,8 @@ export function buildQuotePdfModel(quote: QuoteFormValues): QuotePdfModel {
   return {
     quoteId: quote.quoteId || quote.id,
     status: quote.status,
-    currencyCode: quote.currencyCode || "USD",
+    // Blank stays blank: totals skip FX without a base, so never claim USD.
+    currencyCode: quote.currencyCode.trim().toUpperCase(),
     effectiveFrom: quote.effectiveFrom,
     expiryAt: quote.expiryAt,
     incoterm: quote.incoterm || "-",

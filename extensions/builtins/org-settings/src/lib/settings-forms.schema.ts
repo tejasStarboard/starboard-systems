@@ -14,7 +14,7 @@ export const profileFormSchema = z.object({
 
 export type ProfileFormValues = z.infer<typeof profileFormSchema>
 
-export const quoteRulesFormSchema = z.object({
+export const quotePreferencesFormSchema = z.object({
   defaultValidityDays: z
     .string()
     .trim()
@@ -25,9 +25,18 @@ export const quoteRulesFormSchema = z.object({
     .refine((value) => Number.parseInt(value, 10) >= 1, {
       message: "Enter a validity of at least 1 day",
     }),
+  /** Blank clears the org default. */
+  defaultBaseCurrency: z
+    .string()
+    .trim()
+    .refine((value) => value === "" || /^[A-Za-z]{3}$/.test(value), {
+      message: "Pick a 3-letter currency",
+    }),
 })
 
-export type QuoteRulesFormValues = z.infer<typeof quoteRulesFormSchema>
+export type QuotePreferencesFormValues = z.infer<
+  typeof quotePreferencesFormSchema
+>
 
 export const teamInviteFormSchema = z.object({
   email: z.string().trim().email("Enter a valid email"),

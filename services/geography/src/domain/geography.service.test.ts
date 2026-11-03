@@ -4,9 +4,11 @@ import type {
   DoorAddress,
   FacilityOption,
   FormOption,
+  FxLatestResponse,
 } from "@starboard/lib-contracts"
 
 import type { GeographyDao } from "../dao/geography.dao"
+import { FxProviderError } from "../integrations/frankfurter"
 import type { GooglePlacesClient } from "../integrations/google-places"
 import { DefaultGeographyService } from "./geography.service"
 
@@ -51,6 +53,10 @@ class InMemoryGeographyDao implements GeographyDao {
     const normalized = code.trim().toUpperCase()
     this.currencies.add(normalized)
     return normalized
+  }
+
+  async ensureCurrencies(codes: string[]): Promise<void> {
+    for (const code of codes) this.currencies.add(code.trim().toUpperCase())
   }
 
   async listCurrencies(): Promise<FormOption[]> {
@@ -134,12 +140,61 @@ function roughSimilarity(a: string, b: string): number {
   return matches / longer.length
 }
 
-function service() {
+class FakeFx {
+  latestCalls: string[] = []
+  async currencies(): Promise<Record<string, string>> {
+    return { XAU: "Gold (provider only)" }
+  }
+  async latest(base: string): Promise<FxLatestResponse> {
+    this.latestCalls.push(base)
+    if (base === "ZZZ") throw new FxProviderError("unsupported", 404)
+    return {
+      base,
+      date: "2026-11-03",
+      rates: { EUR: 0.9 },
+      provider: "frankfurter",
+    }
+  }
+}
+
+function service(fx: FakeFx = new FakeFx()) {
   return new DefaultGeographyService(
     new InMemoryGeographyDao(),
-    new FakePlacesClient() as unknown as GooglePlacesClient
+    new FakePlacesClient() as unknown as GooglePlacesClient,
+    fx
   )
 }
+
+describe("DefaultGeographyService currencies + FX", () => {
+  test("fresh DB lists seeded ISO + provider currencies with names", async () => {
+    const options = await service().listCurrencies()
+    expect(options.find((o) => o.value === "USD")?.label).toBe(
+      "USD — US Dollar"
+    )
+    expect(options.find((o) => o.value === "XAU")?.label).toContain("Gold")
+    expect(options.length).toBeGreaterThan(40)
+  })
+
+  test("ensureCurrency still persists a custom code", async () => {
+    const svc = service()
+    await svc.ensureCurrency("xyz")
+    expect((await svc.listCurrencies()).some((o) => o.value === "XYZ")).toBe(
+      true
+    )
+  })
+
+  test("getFxRates returns provider payload for a valid base", async () => {
+    const result = await service().getFxRates("usd")
+    expect(result).toMatchObject({ base: "USD", rates: { EUR: 0.9 } })
+  })
+
+  test("getFxRates rejects an invalid base and maps provider errors", async () => {
+    await expect(service().getFxRates("US")).rejects.toThrow()
+    await expect(service().getFxRates("ZZZ")).rejects.toMatchObject({
+      status: 404,
+    })
+  })
+})
 
 describe("DefaultGeographyService.searchPorts", () => {
   test("returns seeded facilities when q is empty", async () => {

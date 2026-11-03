@@ -26,6 +26,8 @@ import { toast } from "@starboard/lib-ui/components/toast"
 import { cn } from "@starboard/lib-ui/lib/utils"
 
 import { CustomerCombobox } from "@starboard/ext-crm-parties"
+import { CurrencyCombobox } from "@starboard/ext-geo-gazetteer"
+import type { LiveFxState } from "../lib/use-live-fx"
 import {
   quoteStatusSchema,
   type QuoteFormOption,
@@ -159,11 +161,13 @@ export function QuoteCustomerField({
 export function QuoteCurrencyField({
   control,
   currencyOptions,
+  fx,
   className,
   disabled,
 }: {
   control: Control<QuoteFormValues>
   currencyOptions: QuoteFormOption[]
+  fx?: LiveFxState
   className?: string
   disabled?: boolean
 }) {
@@ -176,29 +180,44 @@ export function QuoteCurrencyField({
           className={cn(className)}
           data-invalid={fieldState.invalid || undefined}
         >
-          <FieldLabel>Currency</FieldLabel>
-          <Select
-            value={field.value || null}
+          <FieldLabel htmlFor="quote-base-currency">Base currency</FieldLabel>
+          <CurrencyCombobox
+            id="quote-base-currency"
+            options={currencyOptions}
+            value={field.value}
+            onChange={field.onChange}
+            invalid={fieldState.invalid}
             disabled={disabled}
-            onValueChange={(value) => {
-              field.onChange(value ?? "")
-            }}
-          >
-            <SelectTrigger className="w-full" aria-invalid={fieldState.invalid}>
-              <SelectValue placeholder="—" />
-            </SelectTrigger>
-            <SelectContent>
-              {currencyOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          />
+          {fx && !disabled && field.value ? <FxStatusNote fx={fx} /> : null}
           <FieldError errors={[fieldState.error]} />
         </Field>
       )}
     />
+  )
+}
+
+function FxStatusNote({ fx }: { fx: LiveFxState }) {
+  return (
+    <p className="flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
+      <span>
+        {fx.status === "loading"
+          ? "Loading live FX…"
+          : fx.status === "error"
+            ? "Live FX unavailable — existing rates kept."
+            : fx.asOf
+              ? `FX rates as of ${fx.asOf} (Frankfurter / ECB).`
+              : "Totals convert charge lines into this currency."}
+      </span>
+      <button
+        type="button"
+        className="underline underline-offset-2 hover:text-foreground disabled:no-underline disabled:opacity-50"
+        disabled={fx.status === "loading"}
+        onClick={fx.refresh}
+      >
+        Refresh
+      </button>
+    </p>
   )
 }
 

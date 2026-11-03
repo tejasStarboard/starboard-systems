@@ -11,6 +11,8 @@ export type GeographyConfig = {
   serviceToken: string
   serviceName: string
   googleGeocodeApiKey: string | undefined
+  /** Frankfurter base URL (default https://api.frankfurter.app). */
+  frankfurterBaseUrl: string | undefined
 }
 
 export function loadConfig(
@@ -35,5 +37,6 @@ export function loadConfig(
       env.GOOGLE_GEOCODE_API_KEY?.trim() ||
       env.GOOGLE_MAPS_API_KEY?.trim() ||
       undefined,
+    frankfurterBaseUrl: env.FRANKFURTER_API_URL?.trim() || undefined,
   }
 }

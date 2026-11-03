@@ -11,13 +11,34 @@ import {
 } from "@starboard/lib-ui/components/field"
 import { toast } from "@starboard/lib-ui/components/toast"
 
-export function PreferencesSettingsForm() {
+import { QuotePreferencesSection } from "./quote-preferences-section"
+
+/**
+ * Preferences page: **App** (theme, per-browser) + **Quote** (org defaults).
+ * `section="quote"` (old `/settings/quote-rules` links, `#quote`) scrolls to
+ * the Quote section.
+ */
+export function PreferencesSettingsForm({
+  section,
+}: {
+  section?: "app" | "quote"
+}) {
   const { theme, setTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
     setMounted(true)
   }, [])
+
+  useEffect(() => {
+    const target =
+      section ?? (window.location.hash === "#quote" ? "quote" : "app")
+    if (target === "quote") {
+      document
+        .getElementById("quote")
+        ?.scrollIntoView({ block: "start", behavior: "smooth" })
+    }
+  }, [section])
 
   function choose(next: string) {
     setTheme(next)
@@ -33,11 +54,21 @@ export function PreferencesSettingsForm() {
       <div className="space-y-1">
         <h1 className="text-2xl font-semibold tracking-tight">Preferences</h1>
         <p className="text-sm text-muted-foreground">
-          Personal appearance settings for this browser.
+          App appearance for this browser and quote defaults for this workspace.
         </p>
       </div>
 
-      <section className="space-y-4">
+      <section
+        id="app"
+        aria-labelledby="preferences-app-heading"
+        className="space-y-4"
+      >
+        <h2
+          id="preferences-app-heading"
+          className="text-lg font-semibold tracking-tight"
+        >
+          App
+        </h2>
         <FieldGroup>
           <Field>
             <FieldLabel>Theme</FieldLabel>
@@ -61,6 +92,8 @@ export function PreferencesSettingsForm() {
           </Field>
         </FieldGroup>
       </section>
+
+      <QuotePreferencesSection />
     </div>
   )
 }

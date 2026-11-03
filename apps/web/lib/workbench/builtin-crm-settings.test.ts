@@ -114,6 +114,7 @@ describe("078 geo.gazetteer + crm widgets consumed by quote", () => {
   test("packages export the comboboxes quote renders", () => {
     expect(typeof geoWidgets.PortCombobox).toBe("function")
     expect(typeof geoWidgets.AddressCombobox).toBe("function")
+    expect(typeof geoWidgets.CurrencyCombobox).toBe("function")
     expect(typeof crmWidgets.CustomerCombobox).toBe("function")
   })
 })

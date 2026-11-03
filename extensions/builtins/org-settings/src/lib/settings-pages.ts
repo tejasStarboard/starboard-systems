@@ -29,13 +29,6 @@ export const SETTINGS_PAGES = [
     section: "",
   },
   {
-    slug: "quote-rules",
-    title: "Quote rules",
-    description: "Defaults and policies applied when building quotes.",
-    icon: "scales",
-    section: "Quotes",
-  },
-  {
     slug: "profile",
     title: "Profile",
     description: "Your name, email, and account preferences.",
@@ -45,13 +38,23 @@ export const SETTINGS_PAGES = [
   {
     slug: "preferences",
     title: "Preferences",
-    description: "Theme, notifications, and personal workspace defaults.",
+    description: "App theme plus quote defaults (validity, base currency).",
     icon: "lock",
     section: "Account",
   },
 ] as const
 
 export type SettingsSlug = (typeof SETTINGS_PAGES)[number]["slug"]
+
+/**
+ * Retired slugs that still resolve (old links / restored tabs): slug →
+ * the page + section they now live in.
+ */
+export const SETTINGS_SLUG_ALIASES: Readonly<
+  Record<string, { slug: SettingsSlug; section: "app" | "quote" }>
+> = {
+  "quote-rules": { slug: "preferences", section: "quote" },
+}
 
 export function findSettingsPage(slug: string) {
   return SETTINGS_PAGES.find((page) => page.slug === slug)

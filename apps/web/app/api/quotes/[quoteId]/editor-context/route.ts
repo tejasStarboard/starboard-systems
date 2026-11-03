@@ -28,9 +28,12 @@ export async function GET(
     if (!quote) {
       return NextResponse.json({ error: "Quote not found" }, { status: 404 })
     }
-    const options = await quotesManager.loadQuoteFormOptions(organizationId, {
-      customerId: quote.customerId,
-    })
+    const [options, defaultBaseCurrency] = await Promise.all([
+      quotesManager.loadQuoteFormOptions(organizationId, {
+        customerId: quote.customerId,
+      }),
+      quotesManager.getDefaultBaseCurrencyForOrg(organizationId),
+    ])
     // Contributions into the slots `quoting.document` defines (host-resolved,
     // rollout-aware, empty when the owner is inactive).
     const slots = await listActiveOwnerPointContributions(
@@ -39,7 +42,12 @@ export async function GET(
       organizationId
     )
 
-    return NextResponse.json({ quote, options, slots })
+    return NextResponse.json({
+      quote,
+      options,
+      slots,
+      defaults: { baseCurrency: defaultBaseCurrency },
+    })
   } catch (error) {
     if (error instanceof ServiceClientError) {
       return NextResponse.json(

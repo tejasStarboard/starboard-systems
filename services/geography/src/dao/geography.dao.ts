@@ -22,6 +22,8 @@ const applyTrgmThresholds = sql`(
 
 export interface GeographyDao {
   ensureCurrency(code: string): Promise<string>
+  /** Idempotent bulk insert (seed). */
+  ensureCurrencies(codes: string[]): Promise<void>
   listCurrencies(): Promise<FormOption[]>
   searchPorts(
     q: string,
@@ -72,6 +74,17 @@ export class DrizzleGeographyDao implements GeographyDao {
       .values({ code: normalized })
       .onConflictDoNothing({ target: currency.code })
     return normalized
+  }
+
+  async ensureCurrencies(codes: string[]): Promise<void> {
+    const values = [...new Set(codes.map((c) => c.trim().toUpperCase()))]
+      .filter(Boolean)
+      .map((code) => ({ code }))
+    if (values.length === 0) return
+    await this.db
+      .insert(currency)
+      .values(values)
+      .onConflictDoNothing({ target: currency.code })
   }
 
   async listCurrencies(): Promise<FormOption[]> {

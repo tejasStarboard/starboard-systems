@@ -282,6 +282,7 @@ export function QuoteStepContent({
           <QuoteCurrencyField
             control={props.control}
             currencyOptions={props.currencyOptions}
+            fx={props.fx}
             className="w-full"
             disabled={locked}
           />

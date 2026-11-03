@@ -1,11 +1,12 @@
 import type { ComponentType } from "react"
 
 import { AddressCombobox } from "./components/address-combobox"
+import { CurrencyCombobox } from "./components/currency-combobox"
 import { PortCombobox } from "./components/port-combobox"
 import { RouteMapFields } from "./components/route-map-fields"
 
 export { manifest, type BuiltinManifest } from "./manifest"
-export { AddressCombobox, PortCombobox, RouteMapFields }
+export { AddressCombobox, CurrencyCombobox, PortCombobox, RouteMapFields }
 export type { ComboboxOption, PortOption } from "./lib/options"
 export type {
   RouteMapField,
@@ -16,6 +17,7 @@ export type {
 export const widgets = {
   PortCombobox,
   AddressCombobox,
+  CurrencyCombobox,
 } as const
 
 /**

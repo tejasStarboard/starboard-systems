@@ -62,7 +62,7 @@ FCL unit labels: `container` Per Eq, `kg` Per KG, `per_time` Per Day. Enum value
 
 ## Charge line economics (072)
 
-Each surcharge and global charge row edits a buy rate (`rate`, or `%` when the unit is percentage), an optional line sell (`sellAmount`; blank mirrors the calculated buy), Include (`isIncludedInTotal`), and Split (`isVisible`). Split off marks the line Absorbed: it still counts in the total and is not drawn as its own customer line. Free / min / max usage feed `getEffectiveUsageAmount`. When the quote Incoterm excludes a bucket, the row shows Auto / Include / Exclude (`scopeOverride`). Multi-CT FCL: one `$` / `%` dial **per container type** on `equipmentAmounts` (starboard-2 SB-5766; UI in `quoting.markup`). Flat / single-CT keeps the lane dial. Surcharge **Equipment** column (`equipmentType`, Default = all CTs). Row FX when line currency ≠ quote currency uses `exchangeRates` (convert in ONE MATH). Totals are `sell = buy + markup`, and a sell override’s gap vs buy is part of markup.
+Each surcharge and global charge row edits a buy rate (`rate`, or `%` when the unit is percentage), an optional line sell (`sellAmount`; blank mirrors the calculated buy), Include (`isIncludedInTotal`), and Split (`isVisible`). Split off marks the line Absorbed: it still counts in the total and is not drawn as its own customer line. Free / min / max usage feed `getEffectiveUsageAmount`. When the quote Incoterm excludes a bucket, the row shows Auto / Include / Exclude (`scopeOverride`). Multi-CT FCL: one `$` / `%` dial **per container type** on `equipmentAmounts` (starboard-2 SB-5766; UI in `quoting.markup`). Flat / single-CT keeps the lane dial. Surcharge **Equipment** column (`equipmentType`, Default = all CTs). Row FX when line currency ≠ quote currency uses `exchangeRates` (convert in ONE MATH). **093:** Step 1 **Base currency** and charge-line CCY are searchable comboboxes (`CurrencyCombobox`, geography ISO list); when the base is set / changed / refreshed the form fetches Frankfurter rates via the BFF and merges the `base → code` row into `exchangeRates` (`mergeBaseFxRates`; manual `line → base` overrides win; terminal quotes skip the fetch). Lines keep and display their own currency; totals convert to base. Fetch failure → non-blocking warning, prior rates kept; missing rate keeps the row "FX missing — set rate" hint (no invented numbers). The org default base currency (Preferences → Quote, `organization.metadata.quoteRules.defaultBaseCurrency`) is applied on quote create and to blank-currency commercial drafts in editor-context. Totals are `sell = buy + markup`, and a sell override’s gap vs buy is part of markup.
 
 ## Stages, validity, numbering (082)
 
@@ -102,11 +102,11 @@ Built-in **`quoting.pdf`** (`extensions/builtins/quoting-pdf`) contributes Expor
 Redesign chrome only (money + stages unchanged): multistep flow, FCL world-map ports, rate cards, live PDF/email preview.
 
 - Design: [quote-builder-ux-2026-11-03.md](../reference/quote-builder-ux-2026-11-03.md)
-- Epic **088**; implement **089 → 090∥091 → 092**
+- Epic **088**; ~~089 → 090∥091 → 092~~ done · next **[093](../../tickets/in_progress/093-quote-currency-fx-preferences.md)** (currency / live FX / Preferences)
 - Git: integration branch **`quote-flow`**; slice PRs into `quote-flow` only (no direct commits); promote `quote-flow` → `dev` when ready
 
 ## Next tickets
 
-**Phase E (NOW):** [088](../../tickets/done/088-quote-builder-ux-epic.md) epic · **[089](../../tickets/done/089-quote-builder-multistep-shell.md)** shell · [090](../../tickets/done/090-quote-fcl-world-map-ports.md) map · [091](../../tickets/done/091-quote-rate-cards.md) rate cards · [092](../../tickets/done/092-quote-live-pdf-email-preview.md) live preview.
+**Phase E (NOW):** ~~088–092~~ builder UX on `quote-flow`. **[093](../../tickets/in_progress/093-quote-currency-fx-preferences.md)** — searchable base/line currency comboboxes, Frankfurter live FX into `exchangeRates` (totals in Step 1 base), Preferences **App** / **Quote** sections + default base currency. The standalone Quote rules nav is gone; `/settings/quote-rules` redirects to `/settings/preferences#quote`.
 
 **Phase D:** ~~082–087~~ done (lifecycle, PDF, Incoterm/markup peel, money follow-ons, catalog CRUD, FCL ingest).

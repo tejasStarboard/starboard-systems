@@ -6,10 +6,12 @@ import { useFieldArray, useForm, useWatch } from "react-hook-form"
 
 import { useBreakpoint } from "@starboard/lib-ui/hooks/use-breakpoint"
 import { toast } from "@starboard/lib-ui/components/toast"
+import { mergeBaseFxRates } from "@starboard/lib-pricing"
 
 import { QuoteBuilderShell } from "./quote-builder-shell"
 import type { QuoteFormLayoutProps } from "./quote-form-layout-props"
 import { isCommercialEditable } from "../lib/quote-stage"
+import { useLiveFx } from "../lib/use-live-fx"
 import { useQuoteSlotEntries } from "../slots/slot-host"
 import { QUOTING_SLOTS, type ApplyRatePayload } from "../slots/types"
 import {
@@ -123,6 +125,21 @@ export function QuoteForm({
   const exchangeRates = useWatch({
     control: form.control,
     name: "exchangeRates",
+  })
+  const fx = useLiveFx({
+    currencyCode: currencyCode ?? "",
+    enabled: isCommercialEditable(status ?? "draft"),
+    onRates: (base, rates, { previousBase, manual }) => {
+      const current = form.getValues("exchangeRates") ?? {}
+      const next = mergeBaseFxRates(current, base, rates, {
+        dropBase: previousBase ?? undefined,
+      })
+      if (next !== current) {
+        // Automatic provider refresh must not dirty the form on open; only a
+        // user-initiated Refresh does.
+        form.setValue("exchangeRates", next, { shouldDirty: manual })
+      }
+    },
   })
   const incoterm = useWatch({
     control: form.control,
@@ -359,6 +376,7 @@ export function QuoteForm({
     totals,
     excludedBuckets,
     currencyCode: currencyCode ?? "",
+    fx,
     pending,
     isDirty: form.formState.isDirty,
     commercialEditable: isCommercialEditable(status ?? "draft"),
