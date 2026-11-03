@@ -5,8 +5,10 @@
  * `@starboard/ext-host` Zod schema validates it at load. Default-on for
  * credit + enterprise; missing rollout row = on.
  *
- * Contributes Export PDF into `quoting.document`'s `quoting.commands` point.
- * Does not define points. Unplug → no export control; quote editor intact.
+ * Contributes Export PDF into `quoting.document`'s `quoting.commands` point
+ * and the PDF tab body into `quoting.slots.preview` (092; `props.tab` routes
+ * it). Does not define points. Unplug → no export control and a PDF-tab stub;
+ * quote editor intact.
  */
 export const manifest = {
   id: "quoting.pdf",
@@ -16,6 +18,13 @@ export const manifest = {
   contributes: {
     points: {
       "quoting.commands": [{ id: "quoting.pdf.export", label: "Export PDF" }],
+      "quoting.slots.preview": [
+        {
+          id: "quoting.pdf.preview",
+          label: "PDF preview",
+          props: { tab: "pdf" },
+        },
+      ],
     },
   },
   enabled: true,

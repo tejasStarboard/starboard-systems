@@ -78,19 +78,19 @@ Kernel does **not** list `quote` as a built-in resource kind in code forever —
 
 `quoting.document` contributes a `workbench.editors` entry (`viewType: "quote"`) and a Quotes `workbench.views` entry. It also **`defines`**:
 
-| Point id                           | Purpose                                               | Typical contributors                 |
-| ---------------------------------- | ----------------------------------------------------- | ------------------------------------ |
-| `quoting.slots.headerFields`       | Header region inside quote editor                     | `quoting.incoterm`, `crm.parties`    |
-| `quoting.slots.chargeTable`        | Charge grid region                                    | `quoting.charges`, `quoting.globals` |
-| `quoting.slots.totals`             | Footer / markup                                       | `quoting.markup`, `quoting.math`     |
-| `quoting.slots.rateSources`        | Search/apply rates UI                                 | `rates.catalog`, `spot.*`            |
-| `quoting.slots.lifecycle`          | Stage / validity / numbering chrome (shipped **082**) | `quoting.document` (self)            |
-| `quoting.slots.preview`            | Preview pane body, PDF \| Email (chrome **089**)      | `quoting.pdf` / email (**092**)      |
-| `quoting.slots.laneRoute`          | FCL Route step port picker; empty → `PortCombobox`    | `geo.gazetteer` world map (**090**)  |
-| `quoting.commands`                 | Editor/toolbar actions (host shipped **082**)         | `quoting.pdf` (**083**), later send  |
-| `quoting.totalsHooks`              | Headless hooks into ONE MATH pipeline                 | `quoting.incoterm`, `quoting.markup` |
-| `quoting.chargeProviders`          | Extra lines/sections into charge model                | globals, apply-rate                  |
-| `quoting.documentModel` (optional) | Extend aggregate fields                               | carefully versioned                  |
+| Point id                           | Purpose                                               | Typical contributors                      |
+| ---------------------------------- | ----------------------------------------------------- | ----------------------------------------- |
+| `quoting.slots.headerFields`       | Header region inside quote editor                     | `quoting.incoterm`, `crm.parties`         |
+| `quoting.slots.chargeTable`        | Charge grid region                                    | `quoting.charges`, `quoting.globals`      |
+| `quoting.slots.totals`             | Footer / markup                                       | `quoting.markup`, `quoting.math`          |
+| `quoting.slots.rateSources`        | Search/apply rates UI                                 | `rates.catalog`, `spot.*`                 |
+| `quoting.slots.lifecycle`          | Stage / validity / numbering chrome (shipped **082**) | `quoting.document` (self)                 |
+| `quoting.slots.preview`            | Preview pane body, PDF \| Email (chrome **089**)      | `quoting.pdf` + `quoting.email` (**092**) |
+| `quoting.slots.laneRoute`          | FCL Route step port picker; empty → `PortCombobox`    | `geo.gazetteer` world map (**090**)       |
+| `quoting.commands`                 | Editor/toolbar actions (host shipped **082**)         | `quoting.pdf` (**083**), later send       |
+| `quoting.totalsHooks`              | Headless hooks into ONE MATH pipeline                 | `quoting.incoterm`, `quoting.markup`      |
+| `quoting.chargeProviders`          | Extra lines/sections into charge model                | globals, apply-rate                       |
+| `quoting.documentModel` (optional) | Extend aggregate fields                               | carefully versioned                       |
 
 The **quote editor React tree** (inside the built-in) hosts these slots. Kernel never imports `ChargeTable`.
 

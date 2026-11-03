@@ -12,6 +12,9 @@ import {
 } from "@starboard/lib-ui/components/tabs"
 import { cn } from "@starboard/lib-ui/lib/utils"
 
+import type { QuoteFormValues } from "@starboard/lib-contracts"
+
+import { contributesToPreviewTab } from "../lib/preview-tabs"
 import type { QuoteStepId } from "../lib/quote-builder-steps"
 import { QuoteSlot, useQuoteSlotEntries } from "../slots/slot-host"
 import {
@@ -32,21 +35,10 @@ function useDebouncedValue<T>(value: T, delayMs: number): T {
   return debounced
 }
 
-type StubSnapshot = {
-  quoteId: string
-  currencyCode: string
-  origin: string
-  destination: string
-}
-
-function emptyMessage(step: QuoteStepId, snapshot: StubSnapshot) {
-  if (step === "basics") {
-    return "Pick a customer and currency to start the quote."
-  }
-  if (!snapshot.origin || !snapshot.destination) {
-    return "Select ports to see route on the quote."
-  }
-  return "Live preview arrives with the PDF and email templates."
+function stubMessage(forTab: PreviewTab) {
+  return forTab === "pdf"
+    ? "PDF preview is turned off for this workspace."
+    : "Email preview is turned off for this workspace."
 }
 
 function StubLines({ rows }: { rows: number }) {
@@ -62,74 +54,24 @@ function StubLines({ rows }: { rows: number }) {
   )
 }
 
-function PdfStub({
-  snapshot,
-  step,
-}: {
-  snapshot: StubSnapshot
-  step: QuoteStepId
-}) {
-  const route =
-    snapshot.origin && snapshot.destination
-      ? `${snapshot.origin} → ${snapshot.destination}`
-      : null
+/** Shown when a tab has no active contributor (extension unplugged). */
+function TabStub({ tab }: { tab: PreviewTab }) {
   return (
     <div
-      data-testid="quote-preview-pdf-stub"
-      className="mx-auto flex aspect-[1/1.3] w-full max-w-md flex-col gap-4 border bg-background p-5 shadow-sm"
-    >
-      <div className="flex items-start justify-between gap-3">
-        <Skeleton className="h-6 w-24" aria-hidden />
-        <div className="text-right text-[11px] text-muted-foreground">
-          <p className="tabular-nums">Quote {snapshot.quoteId || "—"}</p>
-          <p className="tabular-nums">{snapshot.currencyCode || "—"}</p>
-        </div>
-      </div>
-      <StubLines rows={2} />
-      <p className="text-xs font-medium">{route ?? "Route not set"}</p>
-      <StubLines rows={5} />
-      <p className="mt-auto text-[11px] text-muted-foreground">
-        {emptyMessage(step, snapshot)}
-      </p>
-    </div>
-  )
-}
-
-function EmailStub({
-  snapshot,
-  step,
-}: {
-  snapshot: StubSnapshot
-  step: QuoteStepId
-}) {
-  return (
-    <div
-      data-testid="quote-preview-email-stub"
+      data-testid={`quote-preview-${tab}-stub`}
       className="mx-auto flex w-full max-w-md flex-col gap-4 border bg-background p-5 shadow-sm"
     >
-      <div className="space-y-2 border-b pb-3 text-[11px] text-muted-foreground">
-        <p>
-          To: <span className="inline-block h-2.5 w-32 bg-muted align-middle" />
-        </p>
-        <p>
-          Subject: Quote {snapshot.quoteId || "—"}
-          {snapshot.origin && snapshot.destination
-            ? ` · ${snapshot.origin} → ${snapshot.destination}`
-            : ""}
-        </p>
-      </div>
       <StubLines rows={6} />
-      <p className="text-[11px] text-muted-foreground">
-        {emptyMessage(step, snapshot)}
-      </p>
+      <p className="text-[11px] text-muted-foreground">{stubMessage(tab)}</p>
     </div>
   )
 }
 
 /**
- * Preview chrome (ticket 089): PDF | Email tabs + document frame. Body comes
- * from `quoting.slots.preview` contributions (092); otherwise a stub that
- * follows form state with a ~300ms debounce.
+ * Preview chrome (089) + host for `quoting.slots.preview` (092): PDF | Email
+ * tabs and document frame. The pane debounces the whole form (~300ms) and
+ * hands the snapshot to each tab's contributor; a tab with no active
+ * contributor shows a stub (unplug). Never blocks typing on regen.
  */
 export function QuotePreviewPane({
   layoutProps,
@@ -147,35 +89,41 @@ export function QuotePreviewPane({
   // human `quoteId` is for display only.
   const resourceId = (useWatch({ control: layoutProps.control, name: "id" }) ??
     "") as string
+  const liveQuote = useWatch({
+    control: layoutProps.control,
+  }) as QuoteFormValues
+  const customerId = liveQuote?.customerId ?? ""
   const [tab, setTab] = useState<PreviewTab>("pdf")
-  const hasContributor = useQuoteSlotEntries(QUOTING_SLOTS.preview).length > 0
-  const snapshot = useDebouncedValue<StubSnapshot>(
-    {
-      quoteId: layoutProps.quoteId,
-      currencyCode: layoutProps.currencyCode,
-      origin: layoutProps.selectedLane?.origin.trim() ?? "",
-      destination: layoutProps.selectedLane?.destination.trim() ?? "",
-    },
-    PREVIEW_DEBOUNCE_MS
-  )
+  const entries = useQuoteSlotEntries(QUOTING_SLOTS.preview)
+  const quote = useDebouncedValue(liveQuote, PREVIEW_DEBOUNCE_MS)
+  const customerName =
+    layoutProps.customerOptions.find((option) => option.value === customerId)
+      ?.label ?? ""
 
   function body(forTab: PreviewTab) {
-    if (hasContributor) {
-      const slotProps: PreviewSlotProps = {
-        control: layoutProps.control,
-        quoteId: resourceId,
-        quoteNumber: layoutProps.quoteId,
-        tab: forTab,
-        step,
-        selectedLaneIndex: layoutProps.selectedLaneIndex,
-        currencyCode: layoutProps.currencyCode,
-      }
-      return <QuoteSlot point={QUOTING_SLOTS.preview} props={slotProps} />
+    const hasContributor = entries.some((entry) =>
+      contributesToPreviewTab(entry.contribution, forTab)
+    )
+    if (!hasContributor) {
+      return <TabStub tab={forTab} />
     }
-    return forTab === "pdf" ? (
-      <PdfStub snapshot={snapshot} step={step} />
-    ) : (
-      <EmailStub snapshot={snapshot} step={step} />
+    const slotProps: PreviewSlotProps = {
+      control: layoutProps.control,
+      quoteId: resourceId,
+      quoteNumber: layoutProps.quoteId,
+      quote,
+      customerName,
+      tab: forTab,
+      step,
+      selectedLaneIndex: layoutProps.selectedLaneIndex,
+      currencyCode: layoutProps.currencyCode,
+    }
+    return (
+      <QuoteSlot
+        point={QUOTING_SLOTS.preview}
+        props={slotProps}
+        filter={(contribution) => contributesToPreviewTab(contribution, forTab)}
+      />
     )
   }
 

@@ -84,12 +84,18 @@ export function QuoteSlot<P extends object>({
   point,
   props,
   className,
+  filter,
 }: {
   point: string
   props: P
   className?: string
+  /** Mount only contributions this returns true for (default: all). */
+  filter?: (contribution: SlotContribution) => boolean
 }) {
-  const entries = useQuoteSlotEntries(point)
+  const all = useQuoteSlotEntries(point)
+  const entries = filter
+    ? all.filter((entry) => filter(entry.contribution))
+    : all
   if (entries.length === 0) {
     return null
   }

@@ -29,6 +29,7 @@
     "@starboard/ext-org-settings": "workspace:*",
     "@starboard/ext-quoting-charges": "workspace:*",
     "@starboard/ext-quoting-document": "workspace:*",
+    "@starboard/ext-quoting-email": "workspace:*",
     "@starboard/ext-quoting-incoterm": "workspace:*",
     "@starboard/ext-quoting-markup": "workspace:*",
     "@starboard/ext-quoting-pdf": "workspace:*",

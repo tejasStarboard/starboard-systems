@@ -75,13 +75,22 @@ export type PreviewTab = "pdf" | "email"
 
 /**
  * Preview pane body (092 fills PDF / Email). The pane chrome (tabs, document
- * frame, mobile sheet) stays with `quoting.document`; when no contribution is
- * active it renders a stub. `quoteId` is the persisted row UUID used by
+ * frame, mobile sheet) stays with `quoting.document`. A contribution declares
+ * its tab via manifest `props: { tab: "pdf" | "email" }`; the host mounts it
+ * only on that tab (no `tab` prop = both) and renders a stub when a tab has no
+ * active contributor (unplug). `quoteId` is the persisted row UUID used by
  * `/api/quotes/:id`; `quoteNumber` is the human-facing number (display only).
  */
 export type PreviewSlotProps = Pick<Form, "control"> & {
   quoteId: string
   quoteNumber: string
+  /**
+   * Form snapshot, debounced (~300ms) by the host so contributors regenerate
+   * without blocking typing. Preview-only — never persisted from here.
+   */
+  quote: QuoteFormValues
+  /** Resolved customer label (empty when unset). */
+  customerName: string
   tab: PreviewTab
   /** Active builder step id (`basics` … `build`). */
   step: string

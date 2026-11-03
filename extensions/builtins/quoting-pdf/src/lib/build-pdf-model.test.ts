@@ -11,6 +11,7 @@ import {
 } from "@starboard/lib-pricing"
 
 import { buildQuotePdfModel } from "./build-pdf-model"
+import { renderQuotePdfPreview } from "./preview-pdf"
 import { renderQuotePdf } from "./render-pdf"
 import { usageFromLane } from "./usage-from-lane"
 
@@ -123,5 +124,15 @@ describe("buildQuotePdfModel (083)", () => {
     expect(bytes.byteLength).toBeGreaterThan(100)
     const header = new TextDecoder().decode(bytes.slice(0, 5))
     expect(header).toBe("%PDF-")
+  })
+})
+
+describe("renderQuotePdfPreview (092)", () => {
+  test("renders unsaved draft form values with the same model (no export gate)", async () => {
+    const quote = goldenFobShipperQuote()
+    quote.status = "draft"
+    const bytes = await renderQuotePdfPreview(quote)
+    expect(new TextDecoder().decode(bytes.slice(0, 5))).toBe("%PDF-")
+    expect(buildQuotePdfModel(quote).grandTotal).toBe(1100)
   })
 })

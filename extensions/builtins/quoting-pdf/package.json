@@ -1,7 +1,7 @@
 {
   "name": "@starboard/ext-quoting-pdf",
   "version": "0.0.1",
-  "description": "Driving built-in extension `quoting.pdf` — Export PDF into quoting.document commands",
+  "description": "Driving built-in extension `quoting.pdf` \u2014 Export PDF into quoting.document commands",
   "private": true,
   "license": "UNLICENSED",
   "type": "module",
@@ -18,6 +18,10 @@
     "./manifest": {
       "types": "./src/manifest.ts",
       "default": "./src/manifest.ts"
+    },
+    "./model": {
+      "types": "./src/lib/build-pdf-model.ts",
+      "default": "./src/lib/build-pdf-model.ts"
     }
   },
   "files": [

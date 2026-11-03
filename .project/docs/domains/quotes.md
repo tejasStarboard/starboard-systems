@@ -95,6 +95,8 @@ Also: no delete yet; no catalog/spot provenance FK. Full prod stage-transition e
 
 Built-in **`quoting.pdf`** (`extensions/builtins/quoting-pdf`) contributes Export PDF into `quoting.commands`. Totals use `@starboard/lib-pricing` only. Download via BFF `GET /api/quotes/:id/pdf` (row UUID, not human `quoteId`; gated on extension active + status ∈ review|sent|win|loss). Unplug → no export control; editor intact.
 
+**Live preview (092):** `quoting.document` debounces (~300ms) the form and mounts `quoting.slots.preview` contributions per tab (manifest `props.tab`). `quoting.pdf` renders the same 083 model client-side into a blob-URL iframe (not stage-gated; Export keeps the gates). `quoting.email` (`extensions/builtins/quoting-email`) POSTs the form to `POST /api/quotes/preview/email`, which renders the `@starboard/lib-email` `QuoteDraftEmail` template from `buildQuotePdfModel` (display-only; Copy HTML / Open draft, no send). Unplug pdf → PDF tab stub + no export; unplug email → Email tab stub.
+
 ## Quote builder UX (Phase E)
 
 Redesign chrome only (money + stages unchanged): multistep flow, FCL world-map ports, rate cards, live PDF/email preview.
