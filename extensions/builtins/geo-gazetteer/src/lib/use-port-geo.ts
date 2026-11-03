@@ -25,15 +25,25 @@ function notify() {
 /** Remember a full search hit (picked on the map / combobox). */
 export function rememberPort(option: PortOption) {
   const code = option.value.toUpperCase()
+  const existing = cache.get(code)
+  const hasCoords = option.latitude != null && option.longitude != null
+  const coords = hasCoords
+    ? { latitude: option.latitude!, longitude: option.longitude! }
+    : existing?.latitude != null && existing.longitude != null
+      ? { latitude: existing.latitude, longitude: existing.longitude }
+      : {}
   cache.set(code, {
     code,
-    country: option.country || countryFromCode(code),
+    country: option.country || existing?.country || countryFromCode(code),
     label: option.label,
-    ...(option.latitude != null && option.longitude != null
-      ? { latitude: option.latitude, longitude: option.longitude }
-      : {}),
+    ...coords,
   })
   notify()
+}
+
+/** Test-only read access to the module cache. */
+export function peekPortGeoCache(): ReadonlyMap<string, PortGeo> {
+  return cache
 }
 
 async function resolve(code: string) {

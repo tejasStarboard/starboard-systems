@@ -12,6 +12,7 @@ import {
 } from "@starboard/lib-ui/components/combobox"
 
 import type { ComboboxOption, PortOption } from "../lib/options"
+import { mergePortInto } from "../lib/port-merge"
 
 const DEBOUNCE_MS = 150
 
@@ -65,7 +66,7 @@ export function PortCombobox({
     setOptions((prev) => {
       const byValue = new Map(prev.map((o) => [o.value, o]))
       for (const option of initialOptions) {
-        byValue.set(option.value, option)
+        mergePortInto(byValue, option)
       }
       return [...byValue.values()]
     })
@@ -97,11 +98,11 @@ export function PortCombobox({
         setOptions(() => {
           const byValue = new Map(next.map((o) => [o.value, o]))
           if (selectedOption) {
-            byValue.set(selectedOption.value, selectedOption)
+            mergePortInto(byValue, selectedOption)
           }
           for (const option of seeds) {
             if (option.value === currentValue || !trimmed) {
-              byValue.set(option.value, option)
+              mergePortInto(byValue, option)
             }
           }
           return [...byValue.values()]
