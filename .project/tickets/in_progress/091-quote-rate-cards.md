@@ -60,7 +60,7 @@ docs:
 - [x] Rate offers render as cards with amount + carrier; Select applies to lane
 - [x] Chips omit when fields absent; spot richer fields show when available
 - [x] Manual add rate still available; unplug catalog/spot behaves as today
-- [x] Branch from `quote-flow`; PR targets `quote-flow`; `pnpm run ci` green
+- [ ] Branch from `quote-flow`; PR targets `quote-flow`; `pnpm run ci` green
 
 ## Out of scope
 
