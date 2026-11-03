@@ -25,14 +25,17 @@ Service-token + `X-Organization-Id`:
 - `PATCH /rates/:id` — update fields and/or soft-delete (`isActive: false`) / reactivate
 - `DELETE /rates/:id` — permanent delete
 
-Default list excludes inactive rates. Apply-to-lane (quote sheet) uses the
+Default list excludes inactive rates. Apply-to-lane (Rates step cards) uses the
 default list, so deactivated rates do not appear.
 
 BFF: `apps/web/lib/domain/rates/*`, `/api/rates`, `/api/rates/:rateId`.
 
 Workbench: driving built-in **`rates.catalog`** contributes Rates activity +
 list/detail editors (`/rates`, `/rates/catalog/:id`) and still contributes
-`quoting.slots.rateSources` for apply-to-lane. It **defines**
+`quoting.slots.rateSources` for apply-to-lane as **rate cards** (carrier logo /
+monogram, amount, currency; schedule/route chips only when the payload carries
+`cargoDropOff`, `cutoff`, `etd`, `eta`, `transitDays`, `route`, `altRoute` —
+catalog rows have none today; spot offers may). Sorted by price, then ETD. It **defines**
 `rates.slots.ingestActions` (stub host; **087** / `ingestion.fcl_v6` will
 inject upload UI). Kernel anchors only — no catalog product imports.
 

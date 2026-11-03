@@ -6,6 +6,7 @@ import type {
   UseFormSetValue,
 } from "react-hook-form"
 
+import type { ApplyRatePayload } from "../slots/types"
 import type {
   LaneFormValues,
   QuoteFormOption,
@@ -46,7 +47,7 @@ export type QuoteFormLayoutProps = {
   onSelectLane: (index: number) => void
   onAddLane: () => void
   onRemoveLane: (index: number) => void
-  onSearchRates: () => void
+  onApplyRate: (payload: ApplyRatePayload) => void
   onAddManualRate: () => void
   onAppendRate: () => void
   onRemoveRate: (index: number) => void

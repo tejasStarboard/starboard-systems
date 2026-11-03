@@ -2,7 +2,7 @@
 id: 091
 wave: 08-quote-builder-ux
 title: Uber-style quote rate cards
-status: todo
+status: in_progress
 depends_on: [089, 060]
 epic: SYS-QUOTE-UX
 docs:
@@ -57,9 +57,9 @@ docs:
 
 ## Acceptance
 
-- [ ] Rate offers render as cards with amount + carrier; Select applies to lane
-- [ ] Chips omit when fields absent; spot richer fields show when available
-- [ ] Manual add rate still available; unplug catalog/spot behaves as today
+- [x] Rate offers render as cards with amount + carrier; Select applies to lane
+- [x] Chips omit when fields absent; spot richer fields show when available
+- [x] Manual add rate still available; unplug catalog/spot behaves as today
 - [ ] Branch from `quote-flow`; PR targets `quote-flow`; `pnpm run ci` green
 
 ## Out of scope

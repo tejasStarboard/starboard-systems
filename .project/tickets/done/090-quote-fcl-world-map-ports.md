@@ -2,7 +2,7 @@
 id: 090
 wave: 08-quote-builder-ux
 title: FCL world-map seaport picker + geo lat/lng country filter
-status: in_progress
+status: done
 depends_on: [089, 007, 003]
 epic: SYS-QUOTE-UX
 docs:
@@ -63,7 +63,7 @@ docs:
 - [x] FCL: map country → port selection sets lane origin/destination; curve + zoom behavior per design doc
 - [x] Vias appear after both ports; curve updates when vias + coords exist
 - [x] LCL/Air unchanged (combobox); Find port fallback works on FCL
-- [ ] Branch from `quote-flow`; PR targets `quote-flow`; `pnpm run ci` green
+- [x] Branch from `quote-flow`; PR targets `quote-flow`; `pnpm run ci` green
 
 ## Out of scope
 

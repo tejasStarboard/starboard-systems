@@ -1,6 +1,7 @@
 "use client"
 
-import { MagnifyingGlassIcon, PlusIcon } from "@phosphor-icons/react"
+import { useState } from "react"
+import { PlusIcon } from "@phosphor-icons/react"
 
 import { Button } from "@starboard/lib-ui/components/button"
 import { cn } from "@starboard/lib-ui/lib/utils"
@@ -15,6 +16,7 @@ import { QuoteSlot, useQuoteSlotEntries } from "../slots/slot-host"
 import {
   QUOTING_SLOTS,
   type ChargeTableSlotProps,
+  type RateSourcesSlotProps,
   type TotalsSlotProps,
 } from "../slots/types"
 
@@ -65,6 +67,27 @@ function RatesStep({
     useQuoteSlotEntries(QUOTING_SLOTS.chargeTable).length > 0
   const locked = !props.commercialEditable
   const rateCount = props.rateFields.length
+  const canSearchRates =
+    hasRateSources && hasChargeTable && props.laneReady && !locked
+  // Strict: only an explicit `selectedRateId` that resolves to an existing line
+  // counts. (`resolveSelectedManualRate` falls back to the first rate for
+  // pricing; a card must not claim "Selected" off that fallback.)
+  const selectedRateId = props.selectedLane?.selectedRateId
+  const selectedManualRate = selectedRateId
+    ? props.selectedLane?.manualRates.find((rate) => rate.id === selectedRateId)
+    : undefined
+  const rateSourcesProps: RateSourcesSlotProps = {
+    origin: props.selectedLane?.origin.trim() || undefined,
+    destination: props.selectedLane?.destination.trim() || undefined,
+    selectedRate: selectedManualRate
+      ? {
+          id: selectedManualRate.id,
+          label: selectedManualRate.label,
+          amount: selectedManualRate.amount,
+        }
+      : null,
+    onApplyRate: props.onApplyRate,
+  }
 
   return (
     <div className="space-y-4">
@@ -74,18 +97,6 @@ function RatesStep({
           fullWidthActions ? "flex-col" : "flex-wrap"
         )}
       >
-        {hasRateSources && hasChargeTable ? (
-          <Button
-            type="button"
-            variant="outline"
-            className={cn(fullWidthActions && "w-full")}
-            disabled={!props.laneReady || locked}
-            onClick={props.onSearchRates}
-          >
-            <MagnifyingGlassIcon data-icon="inline-start" />
-            Search rates
-          </Button>
-        ) : null}
         {hasChargeTable ? (
           <Button
             type="button"
@@ -113,13 +124,32 @@ function RatesStep({
         </p>
       ) : null}
 
+      {canSearchRates ? (
+        <QuoteSlot
+          point={QUOTING_SLOTS.rateSources}
+          props={rateSourcesProps}
+          className="flex min-w-0 flex-col gap-4"
+        />
+      ) : null}
+
+      {hasRateSources && hasChargeTable && !canSearchRates ? (
+        <p
+          data-testid="rates-unavailable"
+          className="text-xs text-muted-foreground"
+        >
+          {locked
+            ? "This quote is closed, so rates can no longer be changed."
+            : "Complete the route and cargo to see rates for this lane."}
+        </p>
+      ) : null}
+
       {hasChargeTable ? (
         <p
           data-testid="rates-summary"
           className="border border-dashed p-3 text-xs text-muted-foreground"
         >
           {rateCount === 0
-            ? "No rate on this lane yet. Search rates or add one manually."
+            ? "No rate on this lane yet. Select a rate card or add one manually."
             : `${rateCount} rate${rateCount === 1 ? "" : "s"} on this lane. Review charges and totals in Build.`}
         </p>
       ) : null}
@@ -229,6 +259,9 @@ export function QuoteStepContent({
   onStepChange: (step: QuoteStepId) => void
 }) {
   const locked = !props.commercialEditable
+  const [ratesVisited, setRatesVisited] = useState(step === "rates")
+  if (step === "rates" && !ratesVisited) setRatesVisited(true)
+  const ratesMounted = step === "rates" || ratesVisited
   return (
     <div className="flex min-w-0 flex-col gap-4">
       <StepHeading step={step} props={props} />
@@ -279,8 +312,13 @@ export function QuoteStepContent({
         />
       ) : null}
 
-      {step === "rates" ? (
-        <RatesStep props={props} fullWidthActions={layout === "mobile"} />
+      {/* Kept mounted (hidden) once visited so in-progress / completed spot
+          searches survive step navigation; rate sources reset themselves when
+          the lane's ports change. */}
+      {ratesMounted ? (
+        <div hidden={step !== "rates"}>
+          <RatesStep props={props} fullWidthActions={layout === "mobile"} />
+        </div>
       ) : null}
 
       {step === "build" ? (

@@ -11,8 +11,7 @@ import { QuoteBuilderShell } from "./quote-builder-shell"
 import type { QuoteFormLayoutProps } from "./quote-form-layout-props"
 import { isCommercialEditable } from "../lib/quote-stage"
 import { useQuoteSlotEntries } from "../slots/slot-host"
-import { QUOTING_SLOTS } from "../slots/types"
-import { RatesSearchSheet, type ApplyRatePayload } from "./rates-search-sheet"
+import { QUOTING_SLOTS, type ApplyRatePayload } from "../slots/types"
 import {
   buildLaneUsageQuantities,
   calculateManualRateTotals,
@@ -66,7 +65,6 @@ export function QuoteForm({
 }) {
   const breakpoint = useBreakpoint()
   const [pending, startTransition] = useTransition()
-  const [ratesOpen, setRatesOpen] = useState(false)
   // Rates may only be applied while the charge table is mounted; otherwise the
   // result would land in charge UI the user cannot see (quoting.charges off).
   const hasChargeTable =
@@ -367,9 +365,7 @@ export function QuoteForm({
     onSelectLane: setSelectedLaneIndex,
     onAddLane: handleAddLane,
     onRemoveLane: handleRemoveLane,
-    onSearchRates: () => {
-      if (hasChargeTable) setRatesOpen(true)
-    },
+    onApplyRate: handleApplyRate,
     onAddManualRate: handleAddManualRate,
     onAppendRate: () => {
       const line = createManualRateLine({ label: "Rate" })
@@ -398,14 +394,6 @@ export function QuoteForm({
           layout={breakpoint}
         />
       </form>
-
-      <RatesSearchSheet
-        open={ratesOpen && hasChargeTable}
-        onOpenChange={setRatesOpen}
-        origin={selectedLane?.origin || undefined}
-        destination={selectedLane?.destination || undefined}
-        onApplyRate={handleApplyRate}
-      />
     </div>
   )
 }
