@@ -173,8 +173,10 @@ jobs:
           node-version: 22
           cache: pnpm
 
+      # Always install Bun on the quality job: turbo --affected can pull
+      # @starboard/ext-host (and other bun test scripts) via workspace deps
+      # even when path filters only mark builtins / non-bun packages.
       - name: Setup Bun
-        if: needs.changes.outputs.bun == 'true' || needs.changes.outputs.tooling == 'true'
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
