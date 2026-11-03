@@ -2,7 +2,7 @@
 id: 093
 wave: 08-quote-builder-ux
 title: Quote currency comboboxes, live FX, Preferences (default base currency)
-status: in_progress
+status: done
 depends_on: [089, 085, 078]
 epic: SYS-QUOTE-UX
 docs:
@@ -78,7 +78,7 @@ docs:
 - [x] Missing FX rate does not invent a number; user sees existing/clear affordance
 - [x] Preferences has **App** + **Quote** sections; Quote rules content lives under Quote; default base currency saved on org and applied to new quotes
 - [x] Standalone Quote rules nav removed; old `/settings/quote-rules` deep link still reaches Quote prefs
-- [ ] Branch from `quote-flow`; PR targets `quote-flow`; `pnpm run ci` green
+- [x] Branch from `quote-flow`; PR targets `quote-flow`; `pnpm run ci` green
 
 ## Out of scope
 
