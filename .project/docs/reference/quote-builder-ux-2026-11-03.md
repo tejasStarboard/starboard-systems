@@ -2,7 +2,7 @@
 
 **Product redesign** of the quote editor chrome and flow. Money semantics, ONE MATH, and extension slots stay; the form becomes a multistep builder with live PDF/email preview.
 
-Tickets: [088](../../tickets/done/088-quote-builder-ux-epic.md) (epic) · [089](../../tickets/todo/089-quote-builder-multistep-shell.md) · [090](../../tickets/todo/090-quote-fcl-world-map-ports.md) · [091](../../tickets/todo/091-quote-rate-cards.md) · [092](../../tickets/todo/092-quote-live-pdf-email-preview.md).
+Tickets: [088](../../tickets/done/088-quote-builder-ux-epic.md) (epic) · [089](../../tickets/done/089-quote-builder-multistep-shell.md) · [090](../../tickets/done/090-quote-fcl-world-map-ports.md) · [091](../../tickets/done/091-quote-rate-cards.md) · [092](../../tickets/done/092-quote-live-pdf-email-preview.md).
 
 Domain: [quotes.md](../domains/quotes.md) · Geography: [geography.md](../domains/geography.md) · Priority: [build-priority](build-priority-2026-11-01.md) Phase E.
 
