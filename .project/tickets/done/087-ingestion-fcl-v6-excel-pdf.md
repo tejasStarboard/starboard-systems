@@ -2,7 +2,7 @@
 id: 087
 wave: 07-quote-loop
 title: FCL v6 Excel/PDF ingest (optional ingestion.fcl_v6)
-status: in_progress
+status: done
 depends_on: [021, 080, 086]
 epic: SYS-EXT-INGEST
 docs:
@@ -44,11 +44,11 @@ docs:
 
 ## Acceptance
 
-- [ ] Excel and/or PDF (ticket picks both or phased with checklist) enqueue → status → rates on success
-- [ ] Gate failure → no partial rate write; error on job status
-- [ ] Extension off → no upload activity/API; catalog/quoting OK
-- [ ] No v3–v5 code paths introduced
-- [ ] `pnpm run ci` / Python tests green as applicable
+- [x] Excel and/or PDF (ticket picks both or phased with checklist) enqueue → status → rates on success
+- [x] Gate failure → no partial rate write; error on job status
+- [x] Extension off → no upload activity/API; catalog/quoting OK
+- [x] No v3–v5 code paths introduced
+- [x] `pnpm run ci` / Python tests green as applicable
 
 ## Out of scope
 

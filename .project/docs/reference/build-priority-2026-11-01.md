@@ -1,4 +1,4 @@
-# Build priority — 2026-11-01 (updated 2026-11-02)
+# Build priority — 2026-11-01 (updated 2026-11-03 — Phase F rates UX)
 
 **Source of truth for execution order.**
 
@@ -48,18 +48,18 @@ Also: [079](../../tickets/done/079-apps-web-reusable-hooks.md) hooks · [080](..
 
 ---
 
-## Phase D — Quote close-the-loop (modular built-ins / extras) — **NOW**
+## Phase D — Quote close-the-loop (modular built-ins / extras) — **DONE**
 
 All product work lands in **packages** that contribute to the workbench or to `quoting.document`-owned points. Kernel stays thin.
 
-|   # | Ticket                                                                                             | Package / layer                             | Why                          |
-| --: | -------------------------------------------------------------------------------------------------- | ------------------------------------------- | ---------------------------- |
-|  11 | **[082](../../tickets/todo/082-quote-stages-validity-numbering.md)** Stages + validity + numbering | `quoting.document` **built-in**             | Lifecycle; unlocks PDF/send  |
-|  12 | **[083](../../tickets/todo/083-quote-pdf-export-builtin.md)** Quote PDF                            | **`quoting.pdf`** **built-in**              | Export via document commands |
-|  13 | **[084](../../tickets/todo/084-quoting-incoterm-markup-slot-packages.md)** Peel Incoterm + markup  | `quoting.incoterm` / `markup` **built-ins** | Fill empty 073 slots         |
-|  14 | **[085](../../tickets/todo/085-qv2-money-follow-ons-charges.md)** Per-CT / row FX / equipment      | `quoting.charges` **built-in**              | 072 deferrals                |
-|  15 | **[086](../../tickets/todo/086-rates-catalog-workbench-crud.md)** Catalog CRUD workbench           | `rates.catalog` **built-in**                | Beyond apply sheet           |
-|  16 | **[087](../../tickets/todo/087-ingestion-fcl-v6-excel-pdf.md)** FCL v6 Excel/PDF ingest            | `ingestion.fcl_v6` **optional**             | Extra; CSV already shipped   |
+|   # | Ticket                                                                                         | Package / layer                             | Why                          |
+| --: | ---------------------------------------------------------------------------------------------- | ------------------------------------------- | ---------------------------- |
+|  11 | [082](../../tickets/done/082-quote-stages-validity-numbering.md) Stages + validity + numbering | `quoting.document` **built-in**             | Lifecycle; unlocks PDF/send  |
+|  12 | [083](../../tickets/done/083-quote-pdf-export-builtin.md) Quote PDF                            | **`quoting.pdf`** **built-in**              | Export via document commands |
+|  13 | [084](../../tickets/done/084-quoting-incoterm-markup-slot-packages.md) Peel Incoterm + markup  | `quoting.incoterm` / `markup` **built-ins** | Fill empty 073 slots         |
+|  14 | [085](../../tickets/done/085-qv2-money-follow-ons-charges.md) Per-CT / row FX / equipment      | `quoting.charges` **built-in**              | 072 deferrals                |
+|  15 | [086](../../tickets/done/086-rates-catalog-workbench-crud.md) Catalog CRUD workbench           | `rates.catalog` **built-in**                | Beyond apply sheet           |
+|  16 | [087](../../tickets/done/087-ingestion-fcl-v6-excel-pdf.md) FCL v6 Excel/PDF ingest            | `ingestion.fcl_v6` **optional**             | Extra; CSV already shipped   |
 
 ```text
 082 quoting.document lifecycle ──► 083 quoting.pdf (contributes commands)
@@ -71,7 +71,31 @@ All product work lands in **packages** that contribute to the workbench or to `q
 087 ingestion.fcl_v6 Excel/PDF ── optional parallel
 ```
 
-`082` before `083`. `084` before `085`. `086` before or parallel with `087` (prefer **086** first if ingest actions use catalog-defined points).
+---
+
+## Phase F — Rates catalog UX — **NEXT**
+
+Map starboard-2 Rate Management top tabs into the Rates activity sidebar + standalone Spot search. Design: [rates-catalog-ux-2026-11-03.md](rates-catalog-ux-2026-11-03.md).
+
+**Git:** normal ticket flow — branch off `origin/dev`, PR to **`dev`** (no `quote-flow` exception).
+
+|   # | Ticket                                                                                                  | Package / layer                      | Why                               |
+| --: | ------------------------------------------------------------------------------------------------------- | ------------------------------------ | --------------------------------- |
+|  24 | [095](../../tickets/done/095-rates-catalog-ux-epic.md) Epic (docs / orchestration)                      | —                                    | Sequence + ref doc                |
+|  25 | **[096](../../tickets/todo/096-rates-activity-ia.md)** Rates activity IA + shells                       | `rates.catalog`                      | Four sidebar entries              |
+|  26 | [097](../../tickets/todo/097-search-rates-ocean-fcl.md) Search Rates (Ocean FCL)                        | `rates.catalog`                      | Prod-shaped FCL search            |
+|  27 | [098](../../tickets/todo/098-spot-search-standalone.md) Spot search standalone                          | `rates.catalog` + `spot.*`           | Offers without a quote            |
+|  28 | [099](../../tickets/todo/099-rate-sheets-and-sell-shell.md) Rate Sheets manage + Sell Rates gated shell | `rates.catalog` + `ingestion.fcl_v6` | Sheets UX; marketplace shell only |
+
+```text
+095 epic
+096 IA shells ──► 097 Search FCL
+               ├──► 098 Spot search
+               └──► 099 Sheets + Sell gated
+087 ingest (done) ── soft-dep for 099 status
+```
+
+**Next ticket to implement:** [096](../../tickets/todo/096-rates-activity-ia.md).
 
 ---
 
@@ -81,6 +105,6 @@ All product work lands in **packages** that contribute to the workbench or to `q
 
 ---
 
-## Later (Phase E+)
+## Later (Phase G+)
 
-RFQ email → draft quote · more spot carriers · settings/billing productization · admin extension node-graph · Outlook/Gmail hosts · Public API · Companion · FFW OS · Air/LCL ingest extras · …
+RFQ email → draft quote · more spot carriers · settings/billing productization · admin extension node-graph · Outlook/Gmail hosts · Public API · Companion · FFW OS · Air/LCL ingest extras · LCL/Drayage/Cartage/Air Search Rates backends · full rate marketplace (if ever) · catalog schedule schema · …

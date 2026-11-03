@@ -31,10 +31,31 @@ default list, so deactivated rates do not appear.
 BFF: `apps/web/lib/domain/rates/*`, `/api/rates`, `/api/rates/:rateId`.
 
 Workbench: driving built-in **`rates.catalog`** contributes Rates activity +
-list/detail editors (`/rates`, `/rates/catalog/:id`) and still contributes
-`quoting.slots.rateSources` for apply-to-lane. It **defines**
-`rates.slots.ingestActions` (stub host; **087** / `ingestion.fcl_v6` will
-inject upload UI). Kernel anchors only — no catalog product imports.
+list/detail editors and still contributes `quoting.slots.rateSources` for
+apply-to-lane. It **defines** `rates.slots.ingestActions` (**087** /
+`ingestion.fcl_v6` injects upload UI) and will define `rates.slots.spotSearch`
+(**098**) for standalone spot offers. Kernel anchors only — no catalog product
+imports.
+
+### Rates activity IA (Phase F — **095–099**)
+
+Design: [rates-catalog-ux-2026-11-03.md](../reference/rates-catalog-ux-2026-11-03.md).
+
+Prod Rate Management top tabs map to Rates **sidebar** entries (plus Spot):
+
+| Entry        | Deep link (target) | Ticket |
+| ------------ | ------------------ | -----: |
+| Search Rates | `/rates/search`    |    097 |
+| Rate Sheets  | `/rates/sheets`    |    099 |
+| Sell Rates   | `/rates/sell`      |    099 |
+| Spot search  | `/rates/spot`      |    098 |
+
+IA shells: **096**. Detail editor stays `/rates/catalog/:id`. Upload remains
+`/rates/upload` until fully folded into Sheets via `ingestActions`. Sell Rates
+is a **gated shell** only (marketplace Won’t/deferred). Spot search does **not**
+require a quote; quote apply path stays on `rateSources`.
+
+**Next implement:** [096](../../tickets/todo/096-rates-activity-ia.md).
 
 ## Ingestion writes
 
