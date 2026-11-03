@@ -74,116 +74,116 @@ export function ChargeTable({
         <p className="text-xs text-muted-foreground">No rates yet.</p>
       )}
 
-      {selectedIndex >= 0 ? (
-        <div className="space-y-3 rounded-none border p-3">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
-            <label className="flex flex-1 flex-col gap-1">
-              <span className="text-xs text-muted-foreground">
-                Base freight
-              </span>
-              <Input
-                placeholder="Rate label"
-                {...register(`${lanePath}.manualRates.${selectedIndex}.label`)}
-              />
-            </label>
-            <label className="flex flex-col gap-1">
-              <span className="text-xs text-muted-foreground">Basis</span>
-              <select
-                className="h-8 border bg-background px-2 text-xs"
-                value={rates[selectedIndex]?.baseMode ?? "flat"}
-                onChange={(event) => {
-                  setValue(
-                    `${lanePath}.manualRates.${selectedIndex}.baseMode`,
-                    event.target.value as RateBaseMode,
-                    { shouldDirty: true }
-                  )
-                }}
+      <div className="space-y-3 rounded-none border p-3">
+        {selectedIndex >= 0 ? (
+          <>
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
+              <label className="flex flex-1 flex-col gap-1">
+                <span className="text-xs text-muted-foreground">
+                  Base freight
+                </span>
+                <Input
+                  placeholder="Rate label"
+                  {...register(
+                    `${lanePath}.manualRates.${selectedIndex}.label`
+                  )}
+                />
+              </label>
+              <label className="flex flex-col gap-1">
+                <span className="text-xs text-muted-foreground">Basis</span>
+                <select
+                  className="h-8 border bg-background px-2 text-xs"
+                  value={rates[selectedIndex]?.baseMode ?? "flat"}
+                  onChange={(event) => {
+                    setValue(
+                      `${lanePath}.manualRates.${selectedIndex}.baseMode`,
+                      event.target.value as RateBaseMode,
+                      { shouldDirty: true }
+                    )
+                  }}
+                >
+                  <option value="flat">Flat</option>
+                  <option value="per_eq">Per Eq</option>
+                </select>
+              </label>
+              <label className="flex w-36 flex-col gap-1">
+                <span className="text-xs text-muted-foreground">Amount</span>
+                <Input
+                  type="number"
+                  step="0.01"
+                  className="text-right tabular-nums"
+                  {...register(
+                    `${lanePath}.manualRates.${selectedIndex}.amount`,
+                    { valueAsNumber: true }
+                  )}
+                />
+              </label>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-sm"
+                aria-label="Remove rate"
+                onClick={() => onRemoveRate(selectedIndex)}
               >
-                <option value="flat">Flat</option>
-                <option value="per_eq">Per Eq</option>
-              </select>
-            </label>
-            <label className="flex w-36 flex-col gap-1">
-              <span className="text-xs text-muted-foreground">Amount</span>
-              <Input
-                type="number"
-                step="0.01"
-                className="text-right tabular-nums"
-                {...register(
-                  `${lanePath}.manualRates.${selectedIndex}.amount`,
-                  { valueAsNumber: true }
-                )}
-              />
-            </label>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-sm"
-              aria-label="Remove rate"
-              onClick={() => onRemoveRate(selectedIndex)}
-            >
-              <TrashIcon />
-            </Button>
-          </div>
-
-          {rates[selectedIndex]?.baseMode === "per_eq" &&
-          containers.length > 0 ? (
-            <div className="space-y-2">
-              <p className="text-xs text-muted-foreground">
-                Equipment amounts. Empty rows use the amount above times
-                container count.
-              </p>
-              {containers.map((container, containerIndex) => {
-                const equipment = rates[selectedIndex]?.equipmentAmounts ?? []
-                const current = equipment.find(
-                  (row) => row.containerType === container.containerType
-                )
-                return (
-                  <label
-                    key={container.id || containerIndex}
-                    className="flex items-center gap-2 text-xs"
-                  >
-                    <span className="w-24 font-mono">
-                      {container.containerType || "Eq"} × {container.count}
-                    </span>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      className="w-32 text-right tabular-nums"
-                      value={current?.amount ?? ""}
-                      onChange={(event) => {
-                        const amount = Number(event.target.value)
-                        const next = equipment.filter(
-                          (row) => row.containerType !== container.containerType
-                        )
-                        if (
-                          event.target.value !== "" &&
-                          Number.isFinite(amount)
-                        ) {
-                          next.push({
-                            containerType: container.containerType,
-                            amount,
-                            markupType: current?.markupType ?? null,
-                            markupValue: current?.markupValue ?? null,
-                          })
-                        }
-                        setValue(
-                          `${lanePath}.manualRates.${selectedIndex}.equipmentAmounts`,
-                          next,
-                          { shouldDirty: true }
-                        )
-                      }}
-                    />
-                  </label>
-                )
-              })}
+                <TrashIcon />
+              </Button>
             </div>
-          ) : null}
 
-          <div className="space-y-2">
-            <p className="text-xs font-medium">
-              Origin / Freight / Destination
-            </p>
+            {rates[selectedIndex]?.baseMode === "per_eq" &&
+            containers.length > 0 ? (
+              <div className="space-y-2">
+                <p className="text-xs text-muted-foreground">
+                  Equipment amounts. Empty rows use the amount above times
+                  container count.
+                </p>
+                {containers.map((container, containerIndex) => {
+                  const equipment = rates[selectedIndex]?.equipmentAmounts ?? []
+                  const current = equipment.find(
+                    (row) => row.containerType === container.containerType
+                  )
+                  return (
+                    <label
+                      key={container.id || containerIndex}
+                      className="flex items-center gap-2 text-xs"
+                    >
+                      <span className="w-24 font-mono">
+                        {container.containerType || "Eq"} × {container.count}
+                      </span>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        className="w-32 text-right tabular-nums"
+                        value={current?.amount ?? ""}
+                        onChange={(event) => {
+                          const amount = Number(event.target.value)
+                          const next = equipment.filter(
+                            (row) =>
+                              row.containerType !== container.containerType
+                          )
+                          if (
+                            event.target.value !== "" &&
+                            Number.isFinite(amount)
+                          ) {
+                            next.push({
+                              containerType: container.containerType,
+                              amount,
+                              markupType: current?.markupType ?? null,
+                              markupValue: current?.markupValue ?? null,
+                            })
+                          }
+                          setValue(
+                            `${lanePath}.manualRates.${selectedIndex}.equipmentAmounts`,
+                            next,
+                            { shouldDirty: true }
+                          )
+                        }}
+                      />
+                    </label>
+                  )
+                })}
+              </div>
+            ) : null}
+
             <RateSurchargesEditor
               control={control}
               register={register}
@@ -193,12 +193,14 @@ export function ChargeTable({
               currencyCode={currencyCode}
               excludedBuckets={excludedBuckets}
             />
-          </div>
-        </div>
-      ) : null}
+          </>
+        ) : (
+          <p className="text-xs text-muted-foreground">
+            Select or add a rate to edit base freight and leg surcharges.
+          </p>
+        )}
 
-      <div className="space-y-2 border-t pt-3">
-        <p className="text-xs font-medium">Globals</p>
+        {/* Quote-level globals: same grid as O/F/D (071), not a sibling panel. */}
         <GlobalChargesEditor
           control={control}
           register={register}
