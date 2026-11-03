@@ -59,11 +59,11 @@ docs:
 
 ## Acceptance
 
-- [ ] PDF tab updates from current form/editor-context without full page reload (debounced)
-- [ ] Email tab shows react-email quote HTML; Copy HTML works
-- [ ] Totals in preview match ONE MATH for a golden fixture (Incoterm exclusions honored)
-- [ ] Unplug pdf → no PDF preview/export affordance; document still works
-- [ ] Branch from `quote-flow`; PR targets `quote-flow`; `pnpm run ci` green
+- [x] PDF tab updates from current form/editor-context without full page reload (debounced)
+- [x] Email tab shows react-email quote HTML; Copy HTML works
+- [x] Totals in preview match ONE MATH for a golden fixture (Incoterm exclusions honored)
+- [x] Unplug pdf → no PDF preview/export affordance; document still works
+- [x] Branch from `quote-flow`; PR targets `quote-flow`; `pnpm run ci` green
 
 ## Out of scope
 
