@@ -1,6 +1,11 @@
 import { describe, expect, test } from "bun:test"
 
-import { convertToQuoteCurrency, tryConvertCurrency, tryGetFxRate } from "./fx"
+import {
+  convertToQuoteCurrency,
+  mergeBaseFxRates,
+  tryConvertCurrency,
+  tryGetFxRate,
+} from "./fx"
 
 describe("tryGetFxRate", () => {
   test("same currency is 1", () => {
@@ -40,5 +45,30 @@ describe("convertToQuoteCurrency", () => {
 
   test("missing FX yields 0", () => {
     expect(convertToQuoteCurrency(50, "EUR", "USD", {})).toBe(0)
+  })
+})
+
+describe("mergeBaseFxRates", () => {
+  test("writes base row, keeps manual overrides, ignores invalid", () => {
+    const current = { EUR: { USD: 1.2 } }
+    const next = mergeBaseFxRates(current, "usd", {
+      EUR: 0.9,
+      GBP: 0.8,
+      USD: 1,
+      BAD: Number.NaN,
+      NEG: -1,
+    })
+    expect(next).toEqual({ EUR: { USD: 1.2 }, USD: { EUR: 0.9, GBP: 0.8 } })
+  })
+
+  test("returns same reference when unchanged", () => {
+    const current = { USD: { EUR: 0.9 } }
+    expect(mergeBaseFxRates(current, "USD", { EUR: 0.9 })).toBe(current)
+  })
+
+  test("live base row feeds ONE MATH conversion for line → base", () => {
+    const rates = mergeBaseFxRates({}, "USD", { EUR: 0.5 })
+    const result = tryConvertCurrency(10, "EUR", "USD", rates)
+    expect("converted" in result && result.converted).toBeCloseTo(20)
   })
 })

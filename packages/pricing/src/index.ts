@@ -1,6 +1,7 @@
 export { roundMoney } from "./money"
 export {
   convertToQuoteCurrency,
+  mergeBaseFxRates,
   tryConvertCurrency,
   tryGetFxRate,
   type FxRates,

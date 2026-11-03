@@ -79,3 +79,38 @@ export function convertToQuoteCurrency(
   }
   return result.converted
 }
+
+/**
+ * Merge live provider rates (`1 base = rate × code`) into a quote's
+ * `exchangeRates` as the `base → code` row. Only valid positive rates are
+ * written; other rows (manual `line → base` overrides) are untouched and keep
+ * winning in {@link tryGetFxRate}. Returns the same reference when nothing
+ * changed so callers can skip a dirty form write.
+ */
+export function mergeBaseFxRates(
+  current: FxRates | null | undefined,
+  baseCurrency: string,
+  liveRates: Record<string, number>
+): FxRates {
+  const prev = current ?? {}
+  const base = baseCurrency.trim().toUpperCase()
+  if (!base) {
+    return prev
+  }
+  const row: Record<string, number> = {}
+  for (const [code, rate] of Object.entries(liveRates)) {
+    const to = code.trim().toUpperCase()
+    if (to && to !== base && isValidRate(rate)) {
+      row[to] = rate
+    }
+  }
+  const existing = prev[base] ?? {}
+  const keys = Object.keys(row)
+  const unchanged =
+    keys.length === Object.keys(existing).length &&
+    keys.every((key) => existing[key] === row[key])
+  if (unchanged) {
+    return prev
+  }
+  return { ...prev, [base]: row }
+}
