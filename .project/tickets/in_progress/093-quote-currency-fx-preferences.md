@@ -18,22 +18,22 @@ docs:
 
 ## Git
 
-| Rule | Detail |
-|------|--------|
-| Base | `origin/quote-flow` — `git checkout --no-track -b 093 origin/quote-flow` |
-| PR | Into **`quote-flow` only** (not `dev` / `main`) |
-| Landing | No direct commits on `quote-flow` |
+| Rule    | Detail                                                                   |
+| ------- | ------------------------------------------------------------------------ |
+| Base    | `origin/quote-flow` — `git checkout --no-track -b 093 origin/quote-flow` |
+| PR      | Into **`quote-flow` only** (not `dev` / `main`)                          |
+| Landing | No direct commits on `quote-flow`                                        |
 
 ## Extension model
 
-|                  |                                                                 |
-| ---------------- | --------------------------------------------------------------- |
-| **Packages**     | `quoting.document` (Basics currency); `quoting.charges` (line CCY); `org-settings` (Preferences); geography BFF/service; optional thin FX fetch in BFF or geography |
-| **Layer**        | Built-ins + geography; ONE MATH stays in `@starboard/lib-pricing` |
-| **Defines**      | None required                                                   |
-| **Contributes**  | Settings pages under Preferences; currency options into quote form |
-| **Unplug test**  | Org-settings off → no Preferences editor; quote still opens. Geography off → currency lists empty with clear empty state |
-| **Math**         | Line amounts in foreign CCY convert to quote **base** via `exchangeRates` / `tryConvertCurrency` — **no twin pricing** |
+|                 |                                                                                                                                                                     |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Packages**    | `quoting.document` (Basics currency); `quoting.charges` (line CCY); `org-settings` (Preferences); geography BFF/service; optional thin FX fetch in BFF or geography |
+| **Layer**       | Built-ins + geography; ONE MATH stays in `@starboard/lib-pricing`                                                                                                   |
+| **Defines**     | None required                                                                                                                                                       |
+| **Contributes** | Settings pages under Preferences; currency options into quote form                                                                                                  |
+| **Unplug test** | Org-settings off → no Preferences editor; quote still opens. Geography off → currency lists empty with clear empty state                                            |
+| **Math**        | Line amounts in foreign CCY convert to quote **base** via `exchangeRates` / `tryConvertCurrency` — **no twin pricing**                                              |
 
 ## Problem (current)
 
@@ -72,12 +72,12 @@ docs:
 
 ## Acceptance
 
-- [ ] Basics base currency: searchable combobox with selectable options on a fresh DB (no manual seed ritual)
-- [ ] Build charge / global currency: searchable combobox (not free text)
-- [ ] Live FX from public API fills `exchangeRates` for quote base; mixed-currency lines convert into base in totals via ONE MATH while UI still shows line currency
-- [ ] Missing FX rate does not invent a number; user sees existing/clear affordance
-- [ ] Preferences has **App** + **Quote** sections; Quote rules content lives under Quote; default base currency saved on org and applied to new quotes
-- [ ] Standalone Quote rules nav removed; old `/settings/quote-rules` deep link still reaches Quote prefs
+- [x] Basics base currency: searchable combobox with selectable options on a fresh DB (no manual seed ritual)
+- [x] Build charge / global currency: searchable combobox (not free text)
+- [x] Live FX from public API fills `exchangeRates` for quote base; mixed-currency lines convert into base in totals via ONE MATH while UI still shows line currency
+- [x] Missing FX rate does not invent a number; user sees existing/clear affordance
+- [x] Preferences has **App** + **Quote** sections; Quote rules content lives under Quote; default base currency saved on org and applied to new quotes
+- [x] Standalone Quote rules nav removed; old `/settings/quote-rules` deep link still reaches Quote prefs
 - [ ] Branch from `quote-flow`; PR targets `quote-flow`; `pnpm run ci` green
 
 ## Out of scope
