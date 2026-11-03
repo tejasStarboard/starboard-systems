@@ -137,8 +137,7 @@ export function ChargeTable({
                   container count.
                 </p>
                 {containers.map((container, containerIndex) => {
-                  const equipment =
-                    rates[selectedIndex]?.equipmentAmounts ?? []
+                  const equipment = rates[selectedIndex]?.equipmentAmounts ?? []
                   const current = equipment.find(
                     (row) => row.containerType === container.containerType
                   )
