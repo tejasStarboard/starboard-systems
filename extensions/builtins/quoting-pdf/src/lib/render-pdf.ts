@@ -3,7 +3,7 @@ import { PDFDocument, StandardFonts, rgb } from "pdf-lib"
 import type { QuotePdfModel } from "./build-pdf-model"
 
 function money(currency: string, amount: number): string {
-  return `${currency} ${amount.toFixed(2)}`
+  return currency ? `${currency} ${amount.toFixed(2)}` : amount.toFixed(2)
 }
 
 /**
@@ -49,7 +49,7 @@ export async function renderQuotePdf(
   write("Quote", { size: 18, font: bold })
   write(`Number: ${model.quoteId}`, { font: bold })
   write(`Status: ${model.status}`)
-  write(`Currency: ${model.currencyCode}`)
+  write(`Currency: ${model.currencyCode || "not set"}`)
   write(`Valid: ${model.effectiveFrom || "-"} -> ${model.expiryAt || "-"}`)
   write(`Incoterm: ${model.incoterm} (${model.customerRole})`)
   if (model.excludedBuckets.length > 0) {

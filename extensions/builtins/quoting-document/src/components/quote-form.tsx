@@ -129,11 +129,15 @@ export function QuoteForm({
   const fx = useLiveFx({
     currencyCode: currencyCode ?? "",
     enabled: isCommercialEditable(status ?? "draft"),
-    onRates: (base, rates) => {
+    onRates: (base, rates, { previousBase, manual }) => {
       const current = form.getValues("exchangeRates") ?? {}
-      const next = mergeBaseFxRates(current, base, rates)
+      const next = mergeBaseFxRates(current, base, rates, {
+        dropBase: previousBase ?? undefined,
+      })
       if (next !== current) {
-        form.setValue("exchangeRates", next, { shouldDirty: true })
+        // Automatic provider refresh must not dirty the form on open; only a
+        // user-initiated Refresh does.
+        form.setValue("exchangeRates", next, { shouldDirty: manual })
       }
     },
   })

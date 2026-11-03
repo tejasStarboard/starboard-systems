@@ -14,10 +14,13 @@ import { cn } from "@starboard/lib-ui/lib/utils"
 
 import type { ComboboxOption } from "../lib/options"
 
-let currencyRequest: Promise<ComboboxOption[]> | null = null
+let currencyRequest: Promise<ComboboxOption[] | null> | null = null
 
-/** One `GET /api/geography/currencies` per page session (geography seeds ISO). */
-function loadCurrencyOptions(): Promise<ComboboxOption[]> {
+/**
+ * One `GET /api/geography/currencies` per page session (geography seeds ISO).
+ * Resolves `null` on failure and clears the cache so the next call retries.
+ */
+function loadCurrencyOptions(): Promise<ComboboxOption[] | null> {
   currencyRequest ??= fetch("/api/geography/currencies")
     .then(async (response) => {
       if (!response.ok) throw new Error("currencies unavailable")
@@ -26,7 +29,7 @@ function loadCurrencyOptions(): Promise<ComboboxOption[]> {
     })
     .catch(() => {
       currencyRequest = null
-      return []
+      return null
     })
   return currencyRequest
 }
@@ -57,16 +60,23 @@ export function CurrencyCombobox({
   className?: string
 }) {
   const [loaded, setLoaded] = useState<ComboboxOption[] | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [attempt, setAttempt] = useState(0)
 
+  // Failure keeps `loaded` empty and unlocks a retry (Retry button, or the
+  // next time the list opens) instead of freezing an empty list.
   useEffect(() => {
     let active = true
+    setLoading(true)
     void loadCurrencyOptions().then((next) => {
-      if (active) setLoaded(next)
+      if (!active) return
+      if (next) setLoaded(next)
+      setLoading(false)
     })
     return () => {
       active = false
     }
-  }, [])
+  }, [attempt])
 
   const options = useMemo(() => {
     const byValue = new Map<string, ComboboxOption>()
@@ -89,6 +99,9 @@ export function CurrencyCombobox({
       items={options}
       value={selected}
       disabled={disabled}
+      onOpenChange={(open) => {
+        if (open && !loading && loaded === null) setAttempt((n) => n + 1)
+      }}
       onValueChange={(option) => {
         onChange((option as ComboboxOption | null)?.value ?? "")
       }}
@@ -106,14 +119,14 @@ export function CurrencyCombobox({
         aria-invalid={invalid}
         disabled={disabled}
         showClear={!!selected && !disabled}
-        loading={loaded === null}
+        loading={loading}
       />
       <ComboboxContent className="w-(--anchor-width) min-w-56">
         <ComboboxEmpty>
-          {loaded === null
+          {loading
             ? "Loading currencies…"
             : options.length === 0
-              ? "No currencies available."
+              ? "No currencies available — reopen to retry."
               : "No currencies found."}
         </ComboboxEmpty>
         <ComboboxList>

@@ -25,7 +25,15 @@ export function useLiveFx({
 }: {
   currencyCode: string
   enabled: boolean
-  onRates: (base: string, rates: Record<string, number>) => void
+  /**
+   * `previousBase` = last base whose rates were applied (stale row to drop);
+   * `manual` = user pressed Refresh (the only case that may dirty the form).
+   */
+  onRates: (
+    base: string,
+    rates: Record<string, number>,
+    meta: { previousBase: string | null; manual: boolean }
+  ) => void
 }): LiveFxState {
   const [state, setState] = useState<Omit<LiveFxState, "refresh">>({
     status: "idle",
@@ -33,6 +41,7 @@ export function useLiveFx({
   })
   const [nonce, setNonce] = useState(0)
   const forceRef = useRef(false)
+  const appliedBaseRef = useRef<string | null>(null)
   const onRatesRef = useRef(onRates)
   onRatesRef.current = onRates
 
@@ -49,7 +58,11 @@ export function useLiveFx({
     fetchLiveFx(base, { force })
       .then((fx) => {
         if (!active) return
-        onRatesRef.current(base, fx.rates)
+        onRatesRef.current(base, fx.rates, {
+          previousBase: appliedBaseRef.current,
+          manual: force,
+        })
+        appliedBaseRef.current = base
         setState({ status: "ok", asOf: fx.date })
       })
       .catch((error: unknown) => {

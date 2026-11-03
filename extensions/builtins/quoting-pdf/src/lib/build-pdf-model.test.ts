@@ -118,6 +118,14 @@ describe("buildQuotePdfModel (083)", () => {
     )
   })
 
+  test("blank base currency stays blank (no invented USD)", async () => {
+    const quote = goldenFobShipperQuote()
+    quote.currencyCode = ""
+    const model = buildQuotePdfModel(quote)
+    expect(model.currencyCode).toBe("")
+    expect((await renderQuotePdf(model)).byteLength).toBeGreaterThan(100)
+  })
+
   test("renderQuotePdf emits a PDF with matching grand total path", async () => {
     const model = buildQuotePdfModel(goldenFobShipperQuote())
     const bytes = await renderQuotePdf(model)

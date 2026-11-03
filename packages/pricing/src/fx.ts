@@ -90,9 +90,18 @@ export function convertToQuoteCurrency(
 export function mergeBaseFxRates(
   current: FxRates | null | undefined,
   baseCurrency: string,
-  liveRates: Record<string, number>
+  liveRates: Record<string, number>,
+  options: { dropBase?: string } = {}
 ): FxRates {
-  const prev = current ?? {}
+  let prev = current ?? {}
+  // Base changed: the old base's row is live-derived; drop it so a stale
+  // direct pair cannot outrank the fresh inverse.
+  const drop = options.dropBase?.trim().toUpperCase()
+  if (drop && drop !== baseCurrency.trim().toUpperCase() && drop in prev) {
+    prev = Object.fromEntries(
+      Object.entries(prev).filter(([code]) => code !== drop)
+    )
+  }
   const base = baseCurrency.trim().toUpperCase()
   if (!base) {
     return prev

@@ -78,7 +78,9 @@ export function RateSurchargesEditor({
       name: `${lanePath}.containers`,
     }) ?? []
   const exchangeRates = useWatch({ control, name: "exchangeRates" }) ?? {}
-  const quoteCurrency = currencyCode || "USD"
+  // Blank base stays blank (same as totals' `currencyCode || null`): no
+  // invented USD for new lines or FX hints.
+  const quoteCurrency = currencyCode.trim().toUpperCase()
 
   const equipmentOptions = [
     { value: DEFAULT_EQ, label: "Default" },

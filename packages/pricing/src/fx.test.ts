@@ -71,4 +71,17 @@ describe("mergeBaseFxRates", () => {
     const result = tryConvertCurrency(10, "EUR", "USD", rates)
     expect("converted" in result && result.converted).toBeCloseTo(20)
   })
+
+  test("dropBase removes the previous base row so stale pairs cannot win", () => {
+    const current = { USD: { EUR: 0.5 }, GBP: { CHF: 1.1 } }
+    const next = mergeBaseFxRates(
+      current,
+      "EUR",
+      { USD: 2 },
+      { dropBase: "usd" }
+    )
+    expect(next).toEqual({ GBP: { CHF: 1.1 }, EUR: { USD: 2 } })
+    const result = tryConvertCurrency(10, "USD", "EUR", next)
+    expect("converted" in result && result.converted).toBeCloseTo(5)
+  })
 })

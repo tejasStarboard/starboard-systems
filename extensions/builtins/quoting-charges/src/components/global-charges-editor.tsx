@@ -55,7 +55,9 @@ export function GlobalChargesEditor({
       name: "globalCharges",
     }) ?? []
   const exchangeRates = useWatch({ control, name: "exchangeRates" }) ?? {}
-  const quoteCurrency = currencyCode || "USD"
+  // Blank base stays blank (same as totals' `currencyCode || null`): no
+  // invented USD for new lines or FX hints.
+  const quoteCurrency = currencyCode.trim().toUpperCase()
 
   function setFxRate(from: string, to: string, rate: number) {
     const next = {

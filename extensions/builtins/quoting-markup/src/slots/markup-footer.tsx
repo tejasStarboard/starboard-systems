@@ -18,10 +18,11 @@ import {
 } from "@starboard/lib-ui/components/toggle-group"
 
 function formatMoney(value: number, currencyCode: string) {
+  if (!currencyCode) return value.toFixed(2)
   try {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
-      currency: currencyCode || "USD",
+      currency: currencyCode,
       maximumFractionDigits: 2,
     }).format(value)
   } catch {
