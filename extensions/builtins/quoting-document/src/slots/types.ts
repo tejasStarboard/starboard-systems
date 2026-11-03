@@ -155,10 +155,11 @@ export type RateSourcesSlotProps = {
   origin?: string
   destination?: string
   /**
-   * The lane's currently selected manual rate (label + amount), so a source
-   * can mark the card it applied. Absent / null when none is selected.
+   * The lane's selected manual rate (only when `selectedRateId` resolves to an
+   * existing line — never a fallback), so a source can mark the card it
+   * applied. Absent / null when none is selected.
    */
-  selectedRate?: { label: string; amount: number } | null
+  selectedRate?: { id: string; label: string; amount: number } | null
   /** Appends the line to the selected lane and selects it. */
   onApplyRate: (payload: ApplyRatePayload) => void
 }

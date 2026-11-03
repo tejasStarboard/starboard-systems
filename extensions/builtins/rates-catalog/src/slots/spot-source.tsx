@@ -15,6 +15,7 @@ import {
 } from "../lib/apply-rate-to-lane"
 import {
   isRateCardSelected,
+  rememberAppliedCard,
   sortRateCards,
   spotOfferToCard,
 } from "../lib/rate-card-model"
@@ -51,9 +52,19 @@ export function SpotSource({
   const [spotStatus, setSpotStatus] = useState<PolledJobStatus | null>(null)
   const [spotPending, setSpotPending] = useState(false)
 
-  // Abort the in-flight enqueue/poll when the sheet closes (unmount).
+  // Abort the in-flight enqueue/poll on unmount.
   const abortRef = useRef<AbortController | null>(null)
   useEffect(() => () => abortRef.current?.abort(), [])
+
+  // Offers belong to the lane they were searched for: when the ports change,
+  // abort the poll and drop the job so stale cards can't be applied.
+  useEffect(() => {
+    abortRef.current?.abort()
+    abortRef.current = null
+    setSpotPending(false)
+    setSpotJob(null)
+    setSpotStatus(null)
+  }, [origin, destination])
 
   const spotCards = useMemo(() => {
     if (spotStatus?.status !== "completed") {
@@ -64,7 +75,7 @@ export function SpotSource({
     return sortRateCards(
       parsed.rates.map((offer, index) => ({
         offer,
-        ...spotOfferToCard(offer, index),
+        ...spotOfferToCard(offer, index, extensionId),
       }))
     )
   }, [spotStatus])
@@ -158,10 +169,13 @@ export function SpotSource({
       </div>
       {spotJob ? (
         <div className="space-y-2 text-xs text-muted-foreground">
-          <p>
-            Job {spotJob.workflowId}
-            {spotStatus ? ` — ${spotStatus.status}` : ""}
-          </p>
+          {spotStatus && spotStatus.status !== "completed" ? (
+            <p>
+              {spotStatus.status === "running"
+                ? "Searching…"
+                : `Search ${spotStatus.status}`}
+            </p>
+          ) : null}
           {spotCards.length > 0 ? (
             <RateCardRail>
               {spotCards.map(({ offer, ...card }) => (
@@ -169,12 +183,11 @@ export function SpotSource({
                   key={card.key}
                   card={card}
                   selected={isRateCardSelected(card, selectedRate)}
-                  onSelect={() =>
-                    onApplyRate({
-                      line: spotOfferToManualLine(offer),
-                      currencyCode: offer.currencyCode,
-                    })
-                  }
+                  onSelect={() => {
+                    const line = spotOfferToManualLine(offer)
+                    rememberAppliedCard(line.id, card.key)
+                    onApplyRate({ line, currencyCode: offer.currencyCode })
+                  }}
                 />
               ))}
             </RateCardRail>

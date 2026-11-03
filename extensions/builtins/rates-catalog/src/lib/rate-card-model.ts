@@ -159,11 +159,12 @@ export function catalogRateToCard(rate: Rate): RateCardModel {
 
 export function spotOfferToCard(
   offer: SpotOffer,
-  index: number
+  index: number,
+  sourceId = "spot"
 ): RateCardModel {
   const row = offer as unknown as Record<string, unknown>
   return {
-    key: `spot:${index}:${offer.label}:${offer.amount}`,
+    key: `${sourceId}:${index}:${offer.label}:${offer.amount}:${offer.currencyCode}`,
     carrier: nonEmptyString(offer.carrier) ?? null,
     title: offer.label,
     lineLabel: spotOfferLineLabel(offer),
@@ -213,14 +214,30 @@ export function carrierMonogram(carrier: string | null | undefined): string {
   return letters.toUpperCase()
 }
 
-/** A card is selected when the lane's selected manual rate is its applied line. */
+/**
+ * Applied manual-line id → card key, so Select can be matched to the exact
+ * card (not just label + amount) for the rest of the session. Lines restored
+ * from a saved draft aren't in the map and fall back to label + amount
+ * (`lineLabel` already embeds the carrier for spot offers).
+ */
+const appliedCardByLineId = new Map<string, string>()
+
+export function rememberAppliedCard(lineId: string, cardKey: string): void {
+  appliedCardByLineId.set(lineId, cardKey)
+}
+
+/**
+ * A card is selected when the lane's selected manual rate is its applied line:
+ * by id when known, else by label + amount.
+ */
 export function isRateCardSelected(
-  card: Pick<RateCardModel, "lineLabel" | "amount">,
-  selected: { label: string; amount: number } | null | undefined
+  card: Pick<RateCardModel, "key" | "lineLabel" | "amount">,
+  selected: { id?: string; label: string; amount: number } | null | undefined
 ): boolean {
-  return (
-    selected != null &&
-    selected.label === card.lineLabel &&
-    selected.amount === card.amount
-  )
+  if (selected == null) return false
+  const linkedKey = selected.id
+    ? appliedCardByLineId.get(selected.id)
+    : undefined
+  if (linkedKey !== undefined) return linkedKey === card.key
+  return selected.label === card.lineLabel && selected.amount === card.amount
 }

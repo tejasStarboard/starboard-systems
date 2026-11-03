@@ -8,6 +8,7 @@ import {
   extractRateChips,
   formatScheduleDate,
   isRateCardSelected,
+  rememberAppliedCard,
   sortRateCards,
   spotOfferToCard,
 } from "./rate-card-model"
@@ -139,14 +140,21 @@ describe("monogram + selection", () => {
     expect(carrierMonogram("  ")).toBe("?")
   })
 
-  test("selected when lane's selected line matches label + amount", () => {
+  test("falls back to label + amount when the line id is unknown", () => {
     const card = catalogRateToCard(rate)
-    expect(
-      isRateCardSelected(card, { label: "Ocean freight", amount: 1500 })
-    ).toBe(true)
-    expect(
-      isRateCardSelected(card, { label: "Ocean freight", amount: 1 })
-    ).toBe(false)
+    const sel = { id: "restored", label: "Ocean freight", amount: 1500 }
+    expect(isRateCardSelected(card, sel)).toBe(true)
+    expect(isRateCardSelected(card, { ...sel, amount: 1 })).toBe(false)
     expect(isRateCardSelected(card, null)).toBe(false)
+  })
+
+  test("known line id selects only the card it was applied from", () => {
+    const a = catalogRateToCard(rate)
+    const b = catalogRateToCard({ ...rate, id: "rate-2", carrier: "MSC" })
+    rememberAppliedCard("line-b", b.key)
+    const sel = { id: "line-b", label: "Ocean freight", amount: 1500 }
+    expect(isRateCardSelected(b, sel)).toBe(true)
+    // Same label + amount, different card: no collision.
+    expect(isRateCardSelected(a, sel)).toBe(false)
   })
 })

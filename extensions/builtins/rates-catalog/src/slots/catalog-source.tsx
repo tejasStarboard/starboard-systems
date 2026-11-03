@@ -14,6 +14,7 @@ import { catalogRateToManualLine } from "../lib/apply-rate-to-lane"
 import {
   catalogRateToCard,
   isRateCardSelected,
+  rememberAppliedCard,
   sortRateCards,
 } from "../lib/rate-card-model"
 
