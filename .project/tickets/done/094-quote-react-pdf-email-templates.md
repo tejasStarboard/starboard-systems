@@ -2,7 +2,7 @@
 id: 094
 wave: 08-quote-builder-ux
 title: react-pdf + react-email preview extensions with tenant template schema
-status: in_progress
+status: done
 depends_on: [092, 083]
 epic: SYS-QUOTE-UX
 docs:
@@ -78,7 +78,7 @@ docs:
 - [x] At least one alternate/branded template contribution demonstrates letterhead/custom layout binding to schema fields
 - [x] Preview UI remains extension-owned; apps/web has no product preview components
 - [x] Totals still ONE MATH; unplug tests pass
-- [ ] Branch from `quote-flow`; PR targets `quote-flow`; `pnpm run ci` green
+- [x] Branch from `quote-flow`; PR targets `quote-flow`; `pnpm run ci` green
 
 ## Out of scope
 
