@@ -17,13 +17,13 @@ docs:
 
 ## Extension model
 
-|                        |                                                                                                      |
-| ---------------------- | ---------------------------------------------------------------------------------------------------- |
-| **Package / id**       | **`rates.catalog`** — driving built-in                                                               |
-| **Layer**              | Built-in. Fills `rate.search` editor from **096**                                                    |
-| **Defines**            | None new (optional later: `rates.slots.searchModes` for LCL/Air packages — **not** this ticket)      |
-| **Contributes**        | Search Rates editor UI; still `quoting.slots.rateSources` for quote apply                            |
-| **Unplug test**        | Catalog off → Search Rates gone with Rates activity                                                  |
+|                  |                                                                                                 |
+| ---------------- | ----------------------------------------------------------------------------------------------- |
+| **Package / id** | **`rates.catalog`** — driving built-in                                                          |
+| **Layer**        | Built-in. Fills `rate.search` editor from **096**                                               |
+| **Defines**      | None new (optional later: `rates.slots.searchModes` for LCL/Air packages — **not** this ticket) |
+| **Contributes**  | Search Rates editor UI; still `quoting.slots.rateSources` for quote apply                       |
+| **Unplug test**  | Catalog off → Search Rates gone with Rates activity                                             |
 
 ## Prod context
 

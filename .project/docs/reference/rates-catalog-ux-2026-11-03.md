@@ -33,23 +33,23 @@ Rewrite `rates.catalog` today exposes one sidebar entry (“Rate catalog”) wit
 
 Normal program flow ([git-workflow.md](../git-workflow.md)):
 
-| Rule            | Detail                                                      |
-| --------------- | ----------------------------------------------------------- |
-| Base branch     | `origin/dev`                                                |
-| Ticket branches | `git checkout --no-track -b {id} origin/dev` (e.g. `096`)   |
-| PR base         | **`dev` only**                                              |
-| No exception    | Unlike quote-builder Phase E, **no** `quote-flow` branch    |
+| Rule            | Detail                                                    |
+| --------------- | --------------------------------------------------------- |
+| Base branch     | `origin/dev`                                              |
+| Ticket branches | `git checkout --no-track -b {id} origin/dev` (e.g. `096`) |
+| PR base         | **`dev` only**                                            |
+| No exception    | Unlike quote-builder Phase E, **no** `quote-flow` branch  |
 
 ---
 
 ## Sidebar IA (Rates activity)
 
-| Sidebar entry   | viewType (approx) | Deep link (approx)   | Slice |
-| --------------- | ----------------- | -------------------- | ----: |
-| Search Rates    | `rate.search`     | `/rates/search`      |   097 |
-| Rate Sheets     | `rate.sheets`     | `/rates/sheets`      |   099 |
-| Sell Rates      | `rate.sell`       | `/rates/sell`        |   099 |
-| Spot search     | `rate.spotSearch` | `/rates/spot`        |   098 |
+| Sidebar entry | viewType (approx) | Deep link (approx) | Slice |
+| ------------- | ----------------- | ------------------ | ----: |
+| Search Rates  | `rate.search`     | `/rates/search`    |   097 |
+| Rate Sheets   | `rate.sheets`     | `/rates/sheets`    |   099 |
+| Sell Rates    | `rate.sell`       | `/rates/sell`      |   099 |
+| Spot search   | `rate.spotSearch` | `/rates/spot`      |   098 |
 
 Avoid colliding with existing `/rates/upload` (ingest) and `/rates/catalog/:resourceId` (detail). IA shells land in **096**; fill Search / Spot / Sheets+Sell in later slices.
 
@@ -83,11 +83,11 @@ Rates activity
 
 Documented so ModeTabs can match prod labels; **disabled** until later tickets:
 
-| Mode    | Distinct filters (prod)                         | Distinct result columns (prod)        |
-| ------- | ----------------------------------------------- | ------------------------------------- |
-| LCL     | Origin/dest port, validity, agent, carrier, doc | Per CBM                               |
-| Drayage | Port, address, equipment, agent, doc            | Equipment, Base, Fuel surcharge       |
-| Cartage | Port, address, cargo size kg, service area      | Service, weight break, rate / kg      |
+| Mode    | Distinct filters (prod)                         | Distinct result columns (prod)           |
+| ------- | ----------------------------------------------- | ---------------------------------------- |
+| LCL     | Origin/dest port, validity, agent, carrier, doc | Per CBM                                  |
+| Drayage | Port, address, equipment, agent, doc            | Equipment, Base, Fuel surcharge          |
+| Cartage | Port, address, cargo size kg, service area      | Service, weight break, rate / kg         |
 | Air     | Origin/dest airport, commodity, agent, airline  | Currency tiers (Min, Normal, +kg breaks) |
 
 ### Rate Sheets
@@ -110,13 +110,13 @@ Documented so ModeTabs can match prod labels; **disabled** until later tickets:
 
 ## Package model (ADR 0006)
 
-|                        |                                                                                          |
-| ---------------------- | ---------------------------------------------------------------------------------------- |
-| **Package / id**       | **`rates.catalog`** (`@starboard/ext-rates-catalog`) — driving built-in                  |
-| **Defines**            | Existing `rates.slots.ingestActions`; add `rates.slots.spotSearch` (098)                 |
-| **Contributes**        | Rates activity + four view entries + editors; still `quoting.slots.rateSources`          |
-| **Extras**             | `ingestion.fcl_v6` → ingestActions / sheets; `spot.*` → spotSearch + quote rateSources |
-| **Unplug**             | Catalog off → no Rates activity/editors; quote loses catalog panel; spot quote path OK if spot still on |
+|                  |                                                                                                         |
+| ---------------- | ------------------------------------------------------------------------------------------------------- |
+| **Package / id** | **`rates.catalog`** (`@starboard/ext-rates-catalog`) — driving built-in                                 |
+| **Defines**      | Existing `rates.slots.ingestActions`; add `rates.slots.spotSearch` (098)                                |
+| **Contributes**  | Rates activity + four view entries + editors; still `quoting.slots.rateSources`                         |
+| **Extras**       | `ingestion.fcl_v6` → ingestActions / sheets; `spot.*` → spotSearch + quote rateSources                  |
+| **Unplug**       | Catalog off → no Rates activity/editors; quote loses catalog panel; spot quote path OK if spot still on |
 
 Kernel: thin deep-link anchors only.
 

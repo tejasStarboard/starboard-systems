@@ -17,13 +17,13 @@ docs:
 
 ## Extension model
 
-|                        |                                                                                                                                      |
-| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| **Package / id**       | **`rates.catalog`** hosts editor; **`spot.*`** extras contribute offer UI into the new point                                         |
-| **Layer**              | Built-in defines point; optional spot packages contribute (unplug spot → empty/disabled Spot search, Rates activity still present) |
-| **Defines**            | **`rates.slots.spotSearch`** — host for standalone spot offer search (no quote document context)                                     |
-| **Contributes**        | Spot search editor shell at `/rates/spot`; **unchanged** `quoting.slots.rateSources` spot contribution for apply-to-lane             |
-| **Unplug test**        | Spot extras off → Spot search shows empty/gated state; quote may lose spot rateSources panel; catalog Search/Sheets still work       |
+|                  |                                                                                                                                    |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| **Package / id** | **`rates.catalog`** hosts editor; **`spot.*`** extras contribute offer UI into the new point                                       |
+| **Layer**        | Built-in defines point; optional spot packages contribute (unplug spot → empty/disabled Spot search, Rates activity still present) |
+| **Defines**      | **`rates.slots.spotSearch`** — host for standalone spot offer search (no quote document context)                                   |
+| **Contributes**  | Spot search editor shell at `/rates/spot`; **unchanged** `quoting.slots.rateSources` spot contribution for apply-to-lane           |
+| **Unplug test**  | Spot extras off → Spot search shows empty/gated state; quote may lose spot rateSources panel; catalog Search/Sheets still work     |
 
 ## Prod context
 

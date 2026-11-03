@@ -17,13 +17,13 @@ docs:
 
 ## Extension model
 
-|                        |                                                                                                                                 |
-| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| **Package / id**       | **`rates.catalog`** (`@starboard/ext-rates-catalog`) — driving built-in                                                         |
-| **Layer**              | Built-in. Owns Rates activity IA; keeps contributing `quoting.slots.rateSources`                                                |
-| **Defines**            | Keep `rates.slots.ingestActions`; declare `rates.slots.spotSearch` stub host if needed for 098 (empty until Spot fills it)      |
-| **Contributes**        | Four `views` entries under activity `rates` + matching `editors` / deep links                                                   |
-| **Unplug test**        | Catalog off → no Rates activity or these editors; quote rateSources loses catalog panel                                         |
+|                  |                                                                                                                            |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| **Package / id** | **`rates.catalog`** (`@starboard/ext-rates-catalog`) — driving built-in                                                    |
+| **Layer**        | Built-in. Owns Rates activity IA; keeps contributing `quoting.slots.rateSources`                                           |
+| **Defines**      | Keep `rates.slots.ingestActions`; declare `rates.slots.spotSearch` stub host if needed for 098 (empty until Spot fills it) |
+| **Contributes**  | Four `views` entries under activity `rates` + matching `editors` / deep links                                              |
+| **Unplug test**  | Catalog off → no Rates activity or these editors; quote rateSources loses catalog panel                                    |
 
 Thin `app/(app)/rates/...` anchors only (null children when editor provided). **Not** a long-lived kernel page tree.
 

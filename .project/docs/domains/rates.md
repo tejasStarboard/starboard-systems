@@ -43,12 +43,12 @@ Design: [rates-catalog-ux-2026-11-03.md](../reference/rates-catalog-ux-2026-11-0
 
 Prod Rate Management top tabs map to Rates **sidebar** entries (plus Spot):
 
-| Entry         | Deep link (target)   | Ticket |
-| ------------- | -------------------- | -----: |
-| Search Rates  | `/rates/search`      |    097 |
-| Rate Sheets   | `/rates/sheets`      |    099 |
-| Sell Rates    | `/rates/sell`        |    099 |
-| Spot search   | `/rates/spot`        |    098 |
+| Entry        | Deep link (target) | Ticket |
+| ------------ | ------------------ | -----: |
+| Search Rates | `/rates/search`    |    097 |
+| Rate Sheets  | `/rates/sheets`    |    099 |
+| Sell Rates   | `/rates/sell`      |    099 |
+| Spot search  | `/rates/spot`      |    098 |
 
 IA shells: **096**. Detail editor stays `/rates/catalog/:id`. Upload remains
 `/rates/upload` until fully folded into Sheets via `ingestActions`. Sell Rates

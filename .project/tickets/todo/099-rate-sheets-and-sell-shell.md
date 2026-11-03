@@ -20,13 +20,13 @@ Soft dependency: [087](../done/087-ingestion-fcl-v6-excel-pdf.md) (or done) for 
 
 ## Extension model
 
-|                        |                                                                                                                           |
-| ---------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| **Package / id**       | **`rates.catalog`** hosts Sheets + Sell editors; **`ingestion.fcl_v6`** contributes upload via `rates.slots.ingestActions` |
-| **Layer**              | Built-in shells + optional ingest extra                                                                                    |
-| **Defines**            | Existing `rates.slots.ingestActions` (toolbar / upload on Sheets)                                                          |
-| **Contributes**        | Rate Sheets + Sell Rates editors; catalog list CRUD remains under Sheets                                                   |
-| **Unplug test**        | Ingest off → Sheets loses upload contribution but manage shell remains; Sell shell remains (gated banner)                  |
+|                  |                                                                                                                            |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| **Package / id** | **`rates.catalog`** hosts Sheets + Sell editors; **`ingestion.fcl_v6`** contributes upload via `rates.slots.ingestActions` |
+| **Layer**        | Built-in shells + optional ingest extra                                                                                    |
+| **Defines**      | Existing `rates.slots.ingestActions` (toolbar / upload on Sheets)                                                          |
+| **Contributes**  | Rate Sheets + Sell Rates editors; catalog list CRUD remains under Sheets                                                   |
+| **Unplug test**  | Ingest off → Sheets loses upload contribution but manage shell remains; Sell shell remains (gated banner)                  |
 
 ## Prod context
 
