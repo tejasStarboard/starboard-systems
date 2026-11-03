@@ -34,8 +34,8 @@ Workbench: driving built-in **`rates.catalog`** contributes Rates activity +
 Search / Sheets / Sell / Spot editors and still contributes
 `quoting.slots.rateSources` for apply-to-lane. It **defines**
 `rates.slots.ingestActions` (**087** / `ingestion.fcl_v6` injects upload UI)
-and `rates.slots.spotSearch` (stub in **096**; **098** fills offer UI).
-Kernel anchors only — no catalog product imports.
+and `rates.slots.spotSearch` (**098** standalone offer UI; `spot.*` contribute
+`rates.spotSource`). Kernel anchors only — no catalog product imports.
 
 ### Rates activity IA (Phase F — **095–099**)
 
@@ -56,7 +56,9 @@ remains `/rates/upload` until fully folded into Sheets via `ingestActions`.
 Sell Rates is a **gated shell** only (marketplace Won’t/deferred). Spot search
 does **not** require a quote; quote apply path stays on `rateSources`.
 
-**In progress:** [097](../../tickets/in_progress/097-search-rates-ocean-fcl.md) Search Rates FCL. Next: [098](../../tickets/todo/098-spot-search-standalone.md) / [099](../../tickets/todo/099-rate-sheets-and-sell-shell.md).
+**Done:** [097](../../tickets/done/097-search-rates-ocean-fcl.md) Search Rates FCL.
+**In progress:** [098](../../tickets/in_progress/098-spot-search-standalone.md) Spot search.
+Next: [099](../../tickets/todo/099-rate-sheets-and-sell-shell.md).
 
 ## Ingestion writes
 

@@ -96,7 +96,7 @@ Other driving built-ins follow the same pattern when they grow nested UI:
 
 - `crm.parties` might define `crm.slots.contactPanel`
 - `rates.catalog` defines `rates.slots.ingestActions` (086 stub; 087 fills upload)
-- `rates.catalog` defines `rates.slots.spotSearch` (**096** stub; **098** fills UI) — standalone Spot search editor (no quote document); `spot.*` contribute offer UI. Quote apply-to-lane remains `quoting.slots.rateSources`.
+- `rates.catalog` defines `rates.slots.spotSearch` (**098**) — standalone Spot search editor (no quote document); `spot.*` contribute `rates.spotSource` offer UI. Quote apply-to-lane remains `quoting.slots.rateSources`. Unplug spot → empty/gated Spot search; catalog Search/Sheets still work.
 
 Rates activity IA (Search / Sheets / Sell / Spot sidebar): [rates-catalog-ux-2026-11-03.md](reference/rates-catalog-ux-2026-11-03.md) · tickets **095–099**.
 

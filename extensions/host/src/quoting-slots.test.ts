@@ -82,7 +82,7 @@ describe("quoting.document defines slots (073)", () => {
     }
   })
 
-  test("rates.catalog defines ingestActions + spotSearch stub", () => {
+  test("rates.catalog defines ingestActions + spotSearch", () => {
     const catalog = manifests.find((m) => m.id === "rates.catalog")!
     expect(catalog.defines?.extensionPoints?.map((p) => p.id)).toEqual([
       "rates.slots.ingestActions",
@@ -98,7 +98,7 @@ describe("quoting.document defines slots (073)", () => {
     ).toEqual([["quoting.charges.table", "quoting.charges"]])
   })
 
-  test("catalog + spot contribute only to rateSources; spot first, catalog last", () => {
+  test("catalog + spot contribute to rateSources; spot also to spotSearch", () => {
     const sources = getContributionsToPoint(
       "quoting.slots.rateSources",
       "credit"
@@ -109,20 +109,35 @@ describe("quoting.document defines slots (073)", () => {
       "spot.cma.source",
       "rates.catalog.source",
     ])
-    for (const id of [
-      "rates.catalog",
-      "spot.fake",
-      "spot.maersk",
-      "spot.cma",
-    ]) {
+    expect(
+      Object.keys(
+        manifests.find((m) => m.id === "rates.catalog")!.contributes.points ??
+          {}
+      )
+    ).toEqual(["quoting.slots.rateSources"])
+    for (const id of ["spot.fake", "spot.maersk", "spot.cma"]) {
       const manifest = manifests.find((m) => m.id === id)!
-      expect(Object.keys(manifest.contributes.points ?? {})).toEqual([
+      expect(Object.keys(manifest.contributes.points ?? {}).sort()).toEqual([
         "quoting.slots.rateSources",
+        "rates.slots.spotSearch",
       ])
     }
     const spot = sources.find((c) => c.id === "spot.maersk.source")!
     expect(spot.component).toBe("rates.spotSource")
     expect(spot.props).toEqual({ carrier: "maersk" })
+
+    const spotSearch = getContributionsToPoint(
+      "rates.slots.spotSearch",
+      "credit"
+    )
+    expect(spotSearch.map((c) => c.id)).toEqual([
+      "spot.fake.spotSearch",
+      "spot.maersk.spotSearch",
+      "spot.cma.spotSearch",
+    ])
+    expect(spotSearch.every((c) => c.component === "rates.spotSource")).toBe(
+      true
+    )
   })
 
   test("getContributionsForOwner keys every defined point, no slot names needed", () => {
@@ -204,6 +219,28 @@ describe("quoting.document defines slots (073)", () => {
     )
     expect(noSpot["quoting.slots.rateSources"]?.map((c) => c.id)).toEqual([
       "rates.catalog.source",
+    ])
+
+    const ratesNoSpot = getContributionsForOwner(
+      "rates.catalog",
+      "credit",
+      manifests,
+      off("spot.maersk", "spot.cma", "spot.fake")
+    )
+    expect(ratesNoSpot["rates.slots.spotSearch"]).toEqual([])
+    expect(ratesNoSpot["rates.slots.ingestActions"]).toHaveLength(1)
+  })
+
+  test("rates.catalog owner exposes spotSearch contributions when spot on", () => {
+    const result = getContributionsForOwner("rates.catalog", "credit")
+    expect(Object.keys(result)).toEqual([
+      "rates.slots.ingestActions",
+      "rates.slots.spotSearch",
+    ])
+    expect(result["rates.slots.spotSearch"]?.map((c) => c.id)).toEqual([
+      "spot.fake.spotSearch",
+      "spot.maersk.spotSearch",
+      "spot.cma.spotSearch",
     ])
   })
 })

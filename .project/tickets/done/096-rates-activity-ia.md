@@ -2,7 +2,7 @@
 id: 096
 wave: 09-rates-catalog-ux
 title: Rates activity IA — Search / Sheets / Sell / Spot sidebar shells
-status: in_progress
+status: done
 depends_on: [086, 095]
 epic: SYS-RATES-UX
 docs:

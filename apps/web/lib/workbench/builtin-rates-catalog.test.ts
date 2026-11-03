@@ -111,7 +111,7 @@ describe("096 rates.catalog activity IA", () => {
     )
   })
 
-  test("rateSources + ingestActions points resolve when catalog on", () => {
+  test("rateSources + ingestActions + spotSearch points resolve when catalog on", () => {
     const points = getActiveWorkbenchContributions("credit").points
     expect(
       points["quoting.slots.rateSources"]?.some(
@@ -131,5 +131,16 @@ describe("096 rates.catalog activity IA", () => {
       )
     ).toBe(true)
     expect(typeof builtinPointComponents["rates.ingestUpload"]).toBe("function")
+    expect(points["rates.slots.spotSearch"]?.map((c) => c.id)).toEqual([
+      "spot.fake.spotSearch",
+      "spot.maersk.spotSearch",
+      "spot.cma.spotSearch",
+    ])
+    expect(
+      points["rates.slots.spotSearch"]?.every(
+        (c) => c.component === "rates.spotSource"
+      )
+    ).toBe(true)
+    expect(typeof builtinPointComponents["rates.spotSource"]).toBe("function")
   })
 })
