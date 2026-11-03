@@ -2,7 +2,7 @@
 id: 092
 wave: 08-quote-builder-ux
 title: Live quote PDF + react-email preview
-status: todo
+status: in_progress
 depends_on: [089, 083]
 epic: SYS-QUOTE-UX
 docs:
