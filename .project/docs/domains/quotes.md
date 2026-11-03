@@ -95,6 +95,16 @@ Also: no delete yet; no catalog/spot provenance FK. Full prod stage-transition e
 
 Built-in **`quoting.pdf`** (`extensions/builtins/quoting-pdf`) contributes Export PDF into `quoting.commands`. Totals use `@starboard/lib-pricing` only. Download via BFF `GET /api/quotes/:id/pdf` (row UUID, not human `quoteId`; gated on extension active + status ∈ review|sent|win|loss). Unplug → no export control; editor intact.
 
+## Quote builder UX (Phase E)
+
+Redesign chrome only (money + stages unchanged): multistep flow, FCL world-map ports, rate cards, live PDF/email preview.
+
+- Design: [quote-builder-ux-2026-11-03.md](../reference/quote-builder-ux-2026-11-03.md)
+- Epic **088**; implement **089 → 090∥091 → 092**
+- Git: integration branch **`quote-flow`**; slice PRs into `quote-flow` only (no direct commits); promote `quote-flow` → `dev` when ready
+
 ## Next tickets
 
-**Phase D (cont.):** ~~peel Incoterm/markup (**084**)~~ — done. ~~Money follow-ons (**085**)~~ — per-CT dials / row FX / equipment in charges + markup + pricing.
+**Phase E (NOW):** [088](../../tickets/done/088-quote-builder-ux-epic.md) epic · **[089](../../tickets/todo/089-quote-builder-multistep-shell.md)** shell · [090](../../tickets/todo/090-quote-fcl-world-map-ports.md) map · [091](../../tickets/todo/091-quote-rate-cards.md) rate cards · [092](../../tickets/todo/092-quote-live-pdf-email-preview.md) live preview.
+
+**Phase D:** ~~082–087~~ done (lifecycle, PDF, Incoterm/markup peel, money follow-ons, catalog CRUD, FCL ingest).
