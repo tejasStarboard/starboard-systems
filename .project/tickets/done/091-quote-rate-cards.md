@@ -2,7 +2,7 @@
 id: 091
 wave: 08-quote-builder-ux
 title: Uber-style quote rate cards
-status: in_progress
+status: done
 depends_on: [089, 060]
 epic: SYS-QUOTE-UX
 docs:
