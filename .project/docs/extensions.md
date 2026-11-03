@@ -143,7 +143,7 @@ Register in [`extensions/host/src/registry.ts`](../../extensions/host/src/regist
 - `requiredPlan`, `enabled: true`
 - `contributes.jobs`: `{ type: "spot.search", carrier: "<plugin>" }`
 - `contributes.api`: `{ pathPrefix: "/api/extensions/spot.<plugin>" }`
-- `contributes.points`: `{ "quoting.slots.rateSources": [{ id: "spot.<plugin>.source", label: "<Display name>", component: "rates.spotSource", props: { carrier: "<plugin>" } }] }` — spot source in the quote rates sheet (**073**; `quoting.document` defines the point, `rates.catalog` ships the generic `rates.spotSource` panel, so no JS package is needed)
+- `contributes.points`: quote apply path + standalone Spot search — `{ "quoting.slots.rateSources": [{ id: "spot.<plugin>.source", label: "<Display name>", component: "rates.spotSource", props: { carrier: "<plugin>" } }], "rates.slots.spotSearch": [{ id: "spot.<plugin>.spotSearch", label: "<Display name>", component: "rates.spotSource", props: { carrier: "<plugin>" } }] }` (**073** / **098**; `rates.catalog` ships the generic `rates.spotSource` panel, so no JS package is needed)
 - `worker`: `{ kind: "python-temporal", service: "spot", plugin: "<plugin>" }`
 - `healthPath`: `"/health"`
 

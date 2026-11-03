@@ -2,10 +2,6 @@
 
 import { useEffect, useMemo, useRef, useState } from "react"
 
-import type {
-  RateSourcesSlotProps,
-  SlotComponentProps,
-} from "@starboard/ext-quoting-document/slots"
 import { toast } from "@starboard/lib-ui/components/toast"
 
 import {
@@ -18,21 +14,40 @@ import {
   pollExtensionJob,
   type PolledJobStatus,
 } from "../lib/extension-api"
+import type { SlotContribution } from "../host"
+
+/** Apply payload for quote `rateSources` (optional on standalone Spot search). */
+export type SpotApplyRatePayload = {
+  line: ReturnType<typeof spotOfferToManualLine>
+  currencyCode: string
+}
+
+/**
+ * Props for the generic `rates.spotSource` panel. Used from both
+ * `quoting.slots.rateSources` (with `onApplyRate`) and
+ * `rates.slots.spotSearch` (browse-only, no apply).
+ */
+export type SpotSourceProps = {
+  contribution: SlotContribution & { extensionId?: string }
+  origin?: string
+  destination?: string
+  onApplyRate?: (payload: SpotApplyRatePayload) => void
+}
 
 /**
  * Generic spot-rate source (`component: "rates.spotSource"`). Optional
- * `spot.*` workers contribute into `quoting.slots.rateSources` with this
- * component; the contributing `extensionId` is the API/job owner and
- * `props.carrier` is display-only.
+ * `spot.*` workers contribute into quote `rateSources` and/or standalone
+ * `rates.slots.spotSearch` with this component; the contributing
+ * `extensionId` is the API/job owner and `props.carrier` is display-only.
  */
 export function SpotSource({
   origin,
   destination,
   onApplyRate,
   contribution,
-}: SlotComponentProps<RateSourcesSlotProps>) {
+}: SpotSourceProps) {
   const extensionId = contribution.extensionId
-  const displayName = contribution.label ?? extensionId
+  const displayName = contribution.label ?? extensionId ?? contribution.id
   const carrier =
     typeof contribution.props?.carrier === "string"
       ? contribution.props.carrier
@@ -45,7 +60,7 @@ export function SpotSource({
   const [spotStatus, setSpotStatus] = useState<PolledJobStatus | null>(null)
   const [spotPending, setSpotPending] = useState(false)
 
-  // Abort the in-flight enqueue/poll when the sheet closes (unmount).
+  // Abort the in-flight enqueue/poll when the panel unmounts.
   const abortRef = useRef<AbortController | null>(null)
   useEffect(() => () => abortRef.current?.abort(), [])
 
@@ -58,6 +73,14 @@ export function SpotSource({
   }, [spotStatus])
 
   async function enqueueSpotSearch() {
+    if (!extensionId) {
+      toast.add({
+        type: "error",
+        title: "Unable to start spot search",
+        description: "Missing extension id for this spot source.",
+      })
+      return
+    }
     abortRef.current?.abort()
     const controller = new AbortController()
     abortRef.current = controller
@@ -80,7 +103,7 @@ export function SpotSource({
       if (!response.ok) {
         throw new Error(payload?.error ?? "Failed to enqueue spot search")
       }
-      if (!payload?.workflowId || !payload.runId) {
+      if (!payload?.workflowId || !payload?.runId) {
         throw new Error("Invalid spot search response")
       }
       setSpotJob({ workflowId: payload.workflowId, runId: payload.runId })
@@ -173,18 +196,20 @@ export function SpotSource({
                       .filter(Boolean)
                       .join(" · ")}
                   </p>
-                  <button
-                    type="button"
-                    className="mt-1 text-xs font-medium underline-offset-2 hover:underline"
-                    onClick={() =>
-                      onApplyRate({
-                        line: spotOfferToManualLine(offer),
-                        currencyCode: offer.currencyCode,
-                      })
-                    }
-                  >
-                    Apply to lane
-                  </button>
+                  {onApplyRate ? (
+                    <button
+                      type="button"
+                      className="mt-1 text-xs font-medium underline-offset-2 hover:underline"
+                      onClick={() =>
+                        onApplyRate({
+                          line: spotOfferToManualLine(offer),
+                          currencyCode: offer.currencyCode,
+                        })
+                      }
+                    >
+                      Apply to lane
+                    </button>
+                  ) : null}
                 </li>
               ))}
             </ul>

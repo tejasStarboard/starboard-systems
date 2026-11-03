@@ -9,7 +9,7 @@
  *   editors (`/rates/search|sheets|sell|spot`). Detail stays
  *   `/rates/catalog/:resourceId` (avoids `/rates/upload`).
  * - Catalog list CRUD lives under Rate Sheets until 099 polish.
- * - `defines.rates.slots.ingestActions` + stub `rates.slots.spotSearch` (098).
+ * - `defines.rates.slots.ingestActions` + `rates.slots.spotSearch` (098).
  * - Still contributes catalog search into `quoting.slots.rateSources`.
  */
 export const manifest = {

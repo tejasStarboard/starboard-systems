@@ -3,7 +3,7 @@
 import type { BuiltinEditorProps } from "../host"
 
 /**
- * Titled shell for Search / Sell / Spot until 097–099 fill product UI.
+ * Titled shell for Sell Rates until 099 fills product UI.
  */
 export function RatesPlaceholderEditor({ title }: BuiltinEditorProps) {
   return (

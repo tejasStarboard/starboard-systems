@@ -325,8 +325,7 @@ describe("getActiveWorkbenchContributions", () => {
       "ingestion.fcl_v6",
       "messaging.msgraph",
     ])
-    // Defined but empty `rates.slots.spotSearch` (096 stub) is omitted until
-    // contributors mount in 098.
+    // `rates.slots.spotSearch` has spot.* contributors (098).
     expect(Object.keys(result.points)).toEqual([
       "quoting.slots.headerFields",
       "quoting.slots.chargeTable",
@@ -335,6 +334,12 @@ describe("getActiveWorkbenchContributions", () => {
       "quoting.slots.lifecycle",
       "quoting.commands",
       "rates.slots.ingestActions",
+      "rates.slots.spotSearch",
+    ])
+    expect(result.points["rates.slots.spotSearch"]?.map((c) => c.id)).toEqual([
+      "spot.fake.spotSearch",
+      "spot.maersk.spotSearch",
+      "spot.cma.spotSearch",
     ])
   })
 })

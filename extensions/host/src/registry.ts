@@ -120,6 +120,14 @@ const stubManifests = [
             props: { carrier: "fake" },
           },
         ],
+        "rates.slots.spotSearch": [
+          {
+            id: "spot.fake.spotSearch",
+            label: "Fake spot rates",
+            component: "rates.spotSource",
+            props: { carrier: "fake" },
+          },
+        ],
       },
     },
     worker: {
@@ -142,6 +150,14 @@ const stubManifests = [
         "quoting.slots.rateSources": [
           {
             id: "spot.maersk.source",
+            label: "Maersk spot rates",
+            component: "rates.spotSource",
+            props: { carrier: "maersk" },
+          },
+        ],
+        "rates.slots.spotSearch": [
+          {
+            id: "spot.maersk.spotSearch",
             label: "Maersk spot rates",
             component: "rates.spotSource",
             props: { carrier: "maersk" },
@@ -202,6 +218,14 @@ const stubManifests = [
         "quoting.slots.rateSources": [
           {
             id: "spot.cma.source",
+            label: "CMA CGM spot rates",
+            component: "rates.spotSource",
+            props: { carrier: "cma" },
+          },
+        ],
+        "rates.slots.spotSearch": [
+          {
+            id: "spot.cma.spotSearch",
             label: "CMA CGM spot rates",
             component: "rates.spotSource",
             props: { carrier: "cma" },
