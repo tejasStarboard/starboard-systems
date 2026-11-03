@@ -2,7 +2,7 @@
 id: 097
 wave: 09-rates-catalog-ux
 title: Search Rates — Ocean FCL filters + results table
-status: in_progress
+status: done
 depends_on: [096]
 epic: SYS-RATES-UX
 docs:
