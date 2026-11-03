@@ -16,14 +16,19 @@ import { renderQuotePdfPreview } from "../lib/preview-pdf"
  * The previous PDF stays visible while the next one renders. Preview is not
  * stage-gated; the Export command keeps its 083 status gates.
  */
-export function PdfPreview({
-  quote,
-  quoteNumber,
-}: SlotComponentProps<PreviewSlotProps>) {
+export function PdfPreview({ quote }: SlotComponentProps<PreviewSlotProps>) {
   const gap = quotePreviewGap(quote)
   const [url, setUrl] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [pending, setPending] = useState(false)
+
+  // Revoke a blob URL only once it is no longer the displayed one: this
+  // cleanup runs after the render that swapped `url` (and on unmount), so the
+  // previous PDF stays alive until its replacement is committed.
+  useEffect(() => {
+    if (!url) return
+    return () => URL.revokeObjectURL(url)
+  }, [url])
 
   useEffect(() => {
     if (gap) {
@@ -33,15 +38,15 @@ export function PdfPreview({
       return
     }
     let cancelled = false
-    let created: string | null = null
     setPending(true)
     renderQuotePdfPreview(quote)
       .then((bytes) => {
         if (cancelled) return
-        created = URL.createObjectURL(
-          new Blob([new Uint8Array(bytes)], { type: "application/pdf" })
+        setUrl(
+          URL.createObjectURL(
+            new Blob([new Uint8Array(bytes)], { type: "application/pdf" })
+          )
         )
-        setUrl(created)
         setError(null)
       })
       .catch((cause: unknown) => {
@@ -55,11 +60,6 @@ export function PdfPreview({
       })
     return () => {
       cancelled = true
-      // Revoke on next tick so the iframe can swap sources without a flash.
-      if (created) {
-        const stale = created
-        setTimeout(() => URL.revokeObjectURL(stale), 1000)
-      }
     }
   }, [quote, gap])
 
@@ -87,7 +87,7 @@ export function PdfPreview({
       ) : null}
       {url ? (
         <iframe
-          title={`Quote ${quoteNumber || "draft"} PDF preview`}
+          title={`Quote ${quote.quoteId || "draft"} PDF preview`}
           src={`${url}#toolbar=0&navpanes=0`}
           className="aspect-[1/1.3] w-full border bg-background shadow-sm"
         />

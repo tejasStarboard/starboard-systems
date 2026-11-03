@@ -51,6 +51,7 @@ export function EmailPreview({
       .then(async (response) => {
         const payload = (await response.json().catch(() => null)) as
           (Partial<EmailPreviewResult> & { error?: string }) | null
+        if (controller.signal.aborted) return
         if (!response.ok || !payload?.html) {
           throw new Error(
             payload?.error ?? `Preview failed (${response.status})`
@@ -84,11 +85,13 @@ export function EmailPreview({
 
   function onOpenDraft() {
     if (!result) return
-    const url = URL.createObjectURL(
-      new Blob([result.html], { type: "text/html" })
-    )
-    window.open(url, "_blank", "noopener")
-    setTimeout(() => URL.revokeObjectURL(url), 60_000)
+    // Write into a blank tab (no blob URL to revoke, so open tabs never break).
+    const tab = window.open("", "_blank")
+    if (!tab) return
+    tab.opener = null
+    tab.document.open()
+    tab.document.write(result.html)
+    tab.document.close()
   }
 
   if (gap) {
