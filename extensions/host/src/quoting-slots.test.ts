@@ -12,6 +12,7 @@ const SLOTS = [
   "quoting.slots.totals",
   "quoting.slots.rateSources",
   "quoting.slots.lifecycle",
+  "quoting.slots.preview",
   "quoting.commands",
 ]
 
@@ -31,7 +32,7 @@ describe("quoting.document defines slots (073)", () => {
   const manifests = listManifests()
   const document = manifests.find((m) => m.id === "quoting.document")!
 
-  test("defines header / chargeTable / totals / rateSources / lifecycle / commands + totalsHooks", () => {
+  test("defines header / chargeTable / totals / rateSources / lifecycle / preview / commands + totalsHooks", () => {
     expect(document.defines?.extensionPoints?.map((p) => p.id)).toEqual([
       ...SLOTS,
       "quoting.totalsHooks",

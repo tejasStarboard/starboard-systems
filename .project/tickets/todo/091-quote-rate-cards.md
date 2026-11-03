@@ -17,22 +17,22 @@ docs:
 
 ## Git
 
-| Rule | Detail |
-|------|--------|
-| Base | `origin/quote-flow` — `git checkout --no-track -b 091 origin/quote-flow` |
-| PR | Into **`quote-flow` only** |
-| Landing | No direct commits on `quote-flow` |
+| Rule    | Detail                                                                   |
+| ------- | ------------------------------------------------------------------------ |
+| Base    | `origin/quote-flow` — `git checkout --no-track -b 091 origin/quote-flow` |
+| PR      | Into **`quote-flow` only**                                               |
+| Landing | No direct commits on `quote-flow`                                        |
 
 ## Extension model
 
-|                  |                                                                                         |
-| ---------------- | --------------------------------------------------------------------------------------- |
-| **Packages**     | **`rates.catalog`** (+ spot sources when active) into `quoting.slots.rateSources`       |
-| **Layer**        | Built-in / optional spot contributors; document Rates step hosts the slot               |
-| **Defines**      | None required                                                                           |
-| **Contributes**  | Card UI replacing dense list in rate search / Rates step                                |
-| **Unplug test**  | Catalog off → no catalog cards; spot off → no spot cards; manual add rate still works   |
-| **Math**         | Apply-to-lane unchanged (ManualRateLine + surcharges); ONE MATH on totals               |
+|                 |                                                                                       |
+| --------------- | ------------------------------------------------------------------------------------- |
+| **Packages**    | **`rates.catalog`** (+ spot sources when active) into `quoting.slots.rateSources`     |
+| **Layer**       | Built-in / optional spot contributors; document Rates step hosts the slot             |
+| **Defines**     | None required                                                                         |
+| **Contributes** | Card UI replacing dense list in rate search / Rates step                              |
+| **Unplug test** | Catalog off → no catalog cards; spot off → no spot cards; manual add rate still works |
+| **Math**        | Apply-to-lane unchanged (ManualRateLine + surcharges); ONE MATH on totals             |
 
 ## Goal
 

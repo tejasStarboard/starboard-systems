@@ -17,22 +17,22 @@ docs:
 
 ## Git
 
-| Rule | Detail |
-|------|--------|
-| Base | `origin/quote-flow` — `git checkout --no-track -b 092 origin/quote-flow` |
-| PR | Into **`quote-flow` only** |
-| Landing | No direct commits on `quote-flow` |
+| Rule    | Detail                                                                   |
+| ------- | ------------------------------------------------------------------------ |
+| Base    | `origin/quote-flow` — `git checkout --no-track -b 092 origin/quote-flow` |
+| PR      | Into **`quote-flow` only**                                               |
+| Landing | No direct commits on `quote-flow`                                        |
 
 ## Extension model
 
-|                  |                                                                                                      |
-| ---------------- | ---------------------------------------------------------------------------------------------------- |
-| **Packages**     | **`quoting.pdf`** (live PDF blob into preview); email template via `packages/email` and/or `quoting.pdf` / thin `quoting.email` contribution |
-| **Layer**        | Built-in contributions into document-owned **preview** slot (089)                                    |
-| **Defines**      | None required (unless email defines template hooks later)                                            |
-| **Contributes**  | PDF preview pane + Email preview pane; Export PDF command remains                                    |
-| **Unplug test**  | `quoting.pdf` off → PDF tab empty / no export; email contribution off → Email tab stub; editor intact |
-| **Math**         | Preview totals **only** via `@starboard/lib-pricing` / same model as 083 — no twin pricing           |
+|                 |                                                                                                                                              |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Packages**    | **`quoting.pdf`** (live PDF blob into preview); email template via `packages/email` and/or `quoting.pdf` / thin `quoting.email` contribution |
+| **Layer**       | Built-in contributions into document-owned **preview** slot (089)                                                                            |
+| **Defines**     | None required (unless email defines template hooks later)                                                                                    |
+| **Contributes** | PDF preview pane + Email preview pane; Export PDF command remains                                                                            |
+| **Unplug test** | `quoting.pdf` off → PDF tab empty / no export; email contribution off → Email tab stub; editor intact                                        |
+| **Math**        | Preview totals **only** via `@starboard/lib-pricing` / same model as 083 — no twin pricing                                                   |
 
 ## Goal
 
