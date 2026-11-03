@@ -8,7 +8,8 @@
  * - `settings` activity + `org.settings.pages` view (static entries that open
  *   editor tabs).
  * - `settings` editor owns `/settings/:resourceId` (resource id = page slug:
- *   company, team, integrations, billing, quote-rules, profile, preferences).
+ *   company, team, integrations, billing, profile, preferences; the retired
+ *   `quote-rules` slug resolves to Preferences → Quote).
  * - `settings.index` owns `/settings` (overview).
  */
 export const manifest = {
@@ -67,15 +68,6 @@ export const manifest = {
               viewType: "settings",
               resourceId: "billing",
               title: "Billing",
-            },
-          },
-          {
-            id: "org.settings.quote-rules",
-            label: "Quote rules",
-            opens: {
-              viewType: "settings",
-              resourceId: "quote-rules",
-              title: "Quote rules",
             },
           },
           {

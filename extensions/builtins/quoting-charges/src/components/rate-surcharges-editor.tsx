@@ -16,6 +16,7 @@ import {
   type SurchargeLeg,
   type UsageUnit,
 } from "@starboard/lib-contracts"
+import { CurrencyCombobox } from "@starboard/ext-geo-gazetteer"
 import { Button } from "@starboard/lib-ui/components/button"
 import { Checkbox } from "@starboard/lib-ui/components/checkbox"
 import { Input } from "@starboard/lib-ui/components/input"
@@ -164,7 +165,7 @@ export function RateSurchargesEditor({
                       )}
                       title={scopedOut ? "Excluded by Incoterm" : undefined}
                     >
-                      <div className="grid grid-cols-[minmax(0,1.2fr)_6rem_6rem_5rem_4.5rem_5rem_auto_auto] items-center gap-2">
+                      <div className="grid grid-cols-[minmax(0,1.2fr)_6rem_6rem_8rem_4.5rem_5rem_auto_auto] items-center gap-2">
                         <Input
                           placeholder="Name"
                           className="h-8"
@@ -286,12 +287,17 @@ export function RateSurchargesEditor({
                             })}
                           />
                         )}
-                        <Input
-                          placeholder="CCY"
-                          maxLength={3}
-                          className="h-8 uppercase"
-                          title="Line currency"
-                          {...register(`${prefix}.currencyCode`)}
+                        <Controller
+                          control={control}
+                          name={`${prefix}.currencyCode`}
+                          render={({ field: ccyField }) => (
+                            <CurrencyCombobox
+                              value={ccyField.value ?? ""}
+                              onChange={ccyField.onChange}
+                              placeholder="CCY"
+                              className="h-8"
+                            />
+                          )}
                         />
                         <Controller
                           control={control}

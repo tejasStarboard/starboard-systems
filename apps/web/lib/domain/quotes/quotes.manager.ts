@@ -16,6 +16,7 @@ import {
   getQuotesClient,
   type QuotesClient,
 } from "@/lib/domain/quotes/quotes.client"
+import { orgDefaultBaseCurrency } from "@starboard/ext-org-settings/org-metadata"
 import { type CrmManager, getCrmManager } from "@/lib/domain/crm/crm.manager"
 import {
   getOrganizationsDao,
@@ -59,6 +60,15 @@ export class QuotesManager {
     }
   }
 
+  /** Org Preferences → Quote default base currency (`null` when unset). */
+  async getDefaultBaseCurrencyForOrg(
+    organizationId: string
+  ): Promise<string | null> {
+    return orgDefaultBaseCurrency(
+      await this.organizationsDao.getOrganizationMetadata(organizationId)
+    )
+  }
+
   async getQuoteFormValuesForOrg(quoteId: string, organizationId: string) {
     return this.quotesClient.getQuoteFormValues(quoteId, organizationId)
   }
@@ -71,7 +81,10 @@ export class QuotesManager {
     currencyCode?: string | null
   }) {
     const requestId = crypto.randomUUID()
-    const currencyCode = input.currencyCode?.trim().toUpperCase() || null
+    // Blank draft → org default base currency (Preferences → Quote).
+    const currencyCode =
+      input.currencyCode?.trim().toUpperCase() ||
+      (await this.getDefaultBaseCurrencyForOrg(input.organizationId))
 
     if (currencyCode) {
       await this.geographyClient.ensureCurrency(currencyCode, requestId)

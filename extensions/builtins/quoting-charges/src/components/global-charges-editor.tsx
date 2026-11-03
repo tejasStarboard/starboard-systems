@@ -15,6 +15,7 @@ import {
   type QuoteFormValues,
   type UsageUnit,
 } from "@starboard/lib-contracts"
+import { CurrencyCombobox } from "@starboard/ext-geo-gazetteer"
 import { Button } from "@starboard/lib-ui/components/button"
 import { Checkbox } from "@starboard/lib-ui/components/checkbox"
 import { Input } from "@starboard/lib-ui/components/input"
@@ -109,7 +110,7 @@ export function GlobalChargesEditor({
             const lineCurrency = watched[index]?.currencyCode ?? quoteCurrency
             return (
               <div key={field.id} className="space-y-1.5 border px-2 py-2">
-                <div className="grid grid-cols-[minmax(0,1.4fr)_7rem_7rem_5rem_auto_auto] items-center gap-2">
+                <div className="grid grid-cols-[minmax(0,1.4fr)_7rem_7rem_8rem_auto_auto] items-center gap-2">
                   <Input
                     placeholder="Name"
                     className="h-8"
@@ -164,12 +165,17 @@ export function GlobalChargesEditor({
                       })}
                     />
                   )}
-                  <Input
-                    placeholder="CCY"
-                    maxLength={3}
-                    className="h-8 uppercase"
-                    title="Line currency"
-                    {...register(`${prefix}.currencyCode`)}
+                  <Controller
+                    control={control}
+                    name={`${prefix}.currencyCode`}
+                    render={({ field: ccyField }) => (
+                      <CurrencyCombobox
+                        value={ccyField.value ?? ""}
+                        onChange={ccyField.onChange}
+                        placeholder="CCY"
+                        className="h-8"
+                      />
+                    )}
                   />
                   <Controller
                     control={control}

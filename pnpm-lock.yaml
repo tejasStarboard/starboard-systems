@@ -227,6 +227,9 @@ importers:
       '@phosphor-icons/react':
         specifier: ^2.1.10
         version: 2.1.10(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+      '@starboard/ext-geo-gazetteer':
+        specifier: workspace:*
+        version: link:../geo-gazetteer
       '@starboard/lib-ui':
         specifier: workspace:*
         version: link:../../../packages/ui
@@ -264,6 +267,9 @@ importers:
       '@phosphor-icons/react':
         specifier: ^2.1.10
         version: 2.1.10(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+      '@starboard/ext-geo-gazetteer':
+        specifier: workspace:*
+        version: link:../geo-gazetteer
       '@starboard/ext-quoting-document':
         specifier: workspace:*
         version: link:../quoting-document
