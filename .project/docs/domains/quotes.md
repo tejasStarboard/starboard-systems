@@ -102,11 +102,11 @@ Built-in **`quoting.pdf`** (`extensions/builtins/quoting-pdf`) contributes Expor
 Redesign chrome only (money + stages unchanged): multistep flow, FCL world-map ports, rate cards, live PDF/email preview.
 
 - Design: [quote-builder-ux-2026-11-03.md](../reference/quote-builder-ux-2026-11-03.md)
-- Epic **088**; ~~089 → 090∥091 → 092~~ done · next **[093](../../tickets/in_progress/093-quote-currency-fx-preferences.md)** (currency / live FX / Preferences)
+- Epic **088**; ~~089 → 090∥091 → 092~~ done · next **[093](../../tickets/done/093-quote-currency-fx-preferences.md)** (currency / live FX / Preferences)
 - Git: integration branch **`quote-flow`**; slice PRs into `quote-flow` only (no direct commits); promote `quote-flow` → `dev` when ready
 
 ## Next tickets
 
-**Phase E (NOW):** ~~088–092~~ builder UX on `quote-flow`. **[093](../../tickets/in_progress/093-quote-currency-fx-preferences.md)** — searchable base/line currency comboboxes, Frankfurter live FX into `exchangeRates` (totals in Step 1 base), Preferences **App** / **Quote** sections + default base currency. The standalone Quote rules nav is gone; `/settings/quote-rules` redirects to `/settings/preferences#quote`.
+**Phase E (NOW):** ~~088–092~~ builder UX on `quote-flow`. **[093](../../tickets/done/093-quote-currency-fx-preferences.md)** — searchable base/line currency comboboxes, Frankfurter live FX into `exchangeRates` (totals in Step 1 base), Preferences **App** / **Quote** sections + default base currency. The standalone Quote rules nav is gone; `/settings/quote-rules` redirects to `/settings/preferences#quote`.
 
 **Phase D:** ~~082–087~~ done (lifecycle, PDF, Incoterm/markup peel, money follow-ons, catalog CRUD, FCL ingest).
