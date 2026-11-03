@@ -32,6 +32,20 @@ export class OrganizationsDao {
     return row?.metadata ?? null
   }
 
+  /** Org name / logo / metadata for quote documents (094). */
+  async getOrganizationDocumentRecord(organizationId: string) {
+    const [row] = await db
+      .select({
+        name: organization.name,
+        logo: organization.logo,
+        metadata: organization.metadata,
+      })
+      .from(organization)
+      .where(eq(organization.id, organizationId))
+      .limit(1)
+    return row ?? { name: null, logo: null, metadata: null }
+  }
+
   /** Optional helper: orgs the user belongs to (for future scoping). */
   async listMembershipOrganizationIds(userId: string) {
     const rows = await db

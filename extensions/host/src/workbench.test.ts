@@ -330,6 +330,8 @@ describe("getActiveWorkbenchContributions", () => {
       "quoting.slots.preview",
       "quoting.slots.laneRoute",
       "quoting.commands",
+      "quoting.pdf.templates",
+      "quoting.email.templates",
       "rates.slots.ingestActions",
     ])
   })

@@ -397,6 +397,160 @@ function usesPerCtPath(lines: ManualLaneTotalsInput["lines"]): boolean {
   )
 }
 
+export type ManualChargeAmount = {
+  buy: number
+  sell: number
+  /** False when scope / removed / visibility / inclusion drops the row (0, 0). */
+  included: boolean
+}
+
+export type ManualBaseFreightPart = {
+  /** Null for flat / single-amount bases. */
+  containerType: string | null
+  count: number
+  unitAmount: number
+  /** unitAmount × count (what `baseFreightBuy` rolls into the lane buy). */
+  extended: number
+}
+
+export type ManualLineBreakdown = {
+  base: ManualBaseFreightPart[]
+  /** Parallel to `line.surcharges`; per-CT rows are summed (× count). */
+  surcharges: ManualChargeAmount[]
+}
+
+export type ManualLaneBreakdown = {
+  lines: ManualLineBreakdown[]
+  /** Parallel to `globalCharges`. */
+  globals: ManualChargeAmount[]
+}
+
+function chargeIncluded(
+  surcharge: ManualSurchargeLineInput,
+  scope: ScopeContext | null | undefined
+): boolean {
+  return isIncludedInTotal(
+    {
+      is_removed: surcharge.isRemoved,
+      is_visible: surcharge.isVisible,
+      is_included_in_total: surcharge.isIncludedInTotal,
+      leg: surcharge.leg,
+      scope_override: surcharge.scopeOverride,
+      source: surcharge.source,
+    },
+    {},
+    "sell",
+    scope
+  )
+}
+
+/**
+ * Per-row display amounts using the exact primitives behind
+ * {@link computeManualLaneTotals} (usage, %, free/min/max, FX, per-CT unit
+ * pricing × count, scope inclusion) so documents never re-derive row math.
+ * Row `sell` values + base parts + the lane dial reconstruct the lane total.
+ */
+export function computeManualLaneBreakdown(
+  input: ManualLaneTotalsInput
+): ManualLaneBreakdown {
+  const scope = input.scope ?? null
+  const quoteCurrency = input.quoteCurrency ?? null
+  const fxRates = input.fxRates ?? null
+
+  const lines = input.lines.map((line): ManualLineBreakdown => {
+    const surcharges = line.surcharges ?? []
+    const equipment = line.equipmentAmounts ?? []
+    const perCt = line.baseMode === "per_eq" && equipment.length > 0
+
+    if (perCt) {
+      const perUnitUsage = unitUsage(input.usage)
+      const base: ManualBaseFreightPart[] = []
+      const totals = surcharges.map(() => ({ buy: 0, sell: 0 }))
+      for (const row of equipment) {
+        const count = Number.isFinite(row.count) ? row.count : 0
+        if (count <= 0) continue
+        const unitAmount = Number.isFinite(row.amount) ? row.amount : 0
+        base.push({
+          containerType: row.containerType,
+          count,
+          unitAmount,
+          extended: unitAmount * count,
+        })
+        surcharges.forEach((surcharge, index) => {
+          if (
+            !surchargeAppliesToEquipment(
+              surcharge.equipmentType,
+              row.containerType
+            )
+          ) {
+            return
+          }
+          const amounts = surchargeAmounts(
+            surcharge,
+            unitAmount,
+            perUnitUsage,
+            scope,
+            quoteCurrency,
+            fxRates
+          )
+          totals[index]!.buy += amounts.buy * count
+          totals[index]!.sell += amounts.sell * count
+        })
+      }
+      return {
+        base,
+        surcharges: surcharges.map((surcharge, index) => ({
+          ...totals[index]!,
+          included: chargeIncluded(surcharge, scope),
+        })),
+      }
+    }
+
+    const extended = baseFreightBuy(line, input.usage)
+    const containers = input.usage?.container ?? 0
+    const perEq = line.baseMode === "per_eq"
+    return {
+      base: [
+        {
+          containerType: null,
+          count: perEq ? containers : 1,
+          unitAmount: Number.isFinite(line.amount) ? line.amount : 0,
+          extended,
+        },
+      ],
+      surcharges: surcharges.map((surcharge) => ({
+        ...surchargeAmounts(
+          surcharge,
+          extended,
+          input.usage,
+          scope,
+          quoteCurrency,
+          fxRates
+        ),
+        included: chargeIncluded(surcharge, scope),
+      })),
+    }
+  })
+
+  const baseFreight = linesBaseFreight(input.lines, input.usage)
+  const globals = (input.globalCharges ?? []).map((row) => {
+    const withSource = { ...row, source: row.source ?? "global" }
+    return {
+      ...surchargeAmounts(
+        withSource,
+        baseFreight,
+        input.usage,
+        scope,
+        quoteCurrency,
+        fxRates
+      ),
+      included: chargeIncluded(withSource, scope),
+    }
+  })
+
+  return { lines, globals }
+}
+
 /**
  * Sum manual rate lines as buy seed, apply amount/percent markup, derive sell.
  *

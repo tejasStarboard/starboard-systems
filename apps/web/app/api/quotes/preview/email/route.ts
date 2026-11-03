@@ -5,13 +5,18 @@ import { quoteFormSchema } from "@starboard/lib-contracts"
 
 import { requireApiSession } from "@/lib/auth/session"
 import { getOrganizationPlan } from "@/lib/billing/plan"
-import { isExtensionActive } from "@/lib/extensions"
+import { getQuotesManager } from "@/lib/domain/quotes/quotes.manager"
+import {
+  isExtensionActive,
+  listActivePointContributions,
+} from "@/lib/extensions"
 
 /**
- * react-email quote draft HTML for the live Email preview tab (ticket 092).
- * Stateless: renders the posted (possibly unsaved) form values with the same
- * model as the 083 PDF; nothing is persisted or sent. Served only while the
- * `quoting.email` built-in is active.
+ * react-email quote draft HTML for the live Email preview tab (092 / 094).
+ * Stateless: renders the posted (possibly unsaved) form values through the
+ * extension's server helper (same `QuoteDocumentView` as the PDF, org-selected
+ * template); nothing is persisted or sent. Served only while `quoting.email`
+ * is active.
  */
 export async function POST(request: Request) {
   const authResult = await requireApiSession()
@@ -47,8 +52,18 @@ export async function POST(request: Request) {
     )
   }
 
+  const [context, templates] = await Promise.all([
+    getQuotesManager().getQuoteDocumentContextForOrg(organizationId),
+    listActivePointContributions(
+      "quoting.email.templates",
+      plan,
+      organizationId
+    ),
+  ])
   const result = await renderQuoteEmailPreview({
     quote: parsed.data,
+    organization: context.organization,
+    activeTemplateIds: templates.map((template) => template.id),
     customerName:
       typeof input.customerName === "string" && input.customerName.trim()
         ? input.customerName.trim()
