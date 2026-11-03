@@ -82,10 +82,10 @@ Multistep builder + FCL map + rate cards + live PDF/email preview. Design: [quot
 |   # | Ticket                                                                                              | Package / layer                      | Why                        |
 | --: | --------------------------------------------------------------------------------------------------- | ------------------------------------ | -------------------------- |
 |  17 | [088](../../tickets/done/088-quote-builder-ux-epic.md) Epic (docs / orchestration)                  | —                                    | Sequence + git rules       |
-|  18 | **[089](../../tickets/todo/089-quote-builder-multistep-shell.md)** Multistep shell + preview chrome | `quoting.document`                   | Stepper + Sejda-like pane  |
-|  19 | **[090](../../tickets/todo/090-quote-fcl-world-map-ports.md)** FCL world-map ports                  | `geo.gazetteer` + document Route     | Country → seaport + curves |
-|  20 | **[091](../../tickets/todo/091-quote-rate-cards.md)** Uber-style rate cards                         | `rates.catalog` / spot → rateSources | Card rail + schedule chips |
-|  21 | **[092](../../tickets/todo/092-quote-live-pdf-email-preview.md)** Live PDF + email preview          | `quoting.pdf` + `packages/email`     | Fill preview pane          |
+|  18 | **[089](../../tickets/done/089-quote-builder-multistep-shell.md)** Multistep shell + preview chrome | `quoting.document`                   | Stepper + Sejda-like pane  |
+|  19 | **[090](../../tickets/done/090-quote-fcl-world-map-ports.md)** FCL world-map ports                  | `geo.gazetteer` + document Route     | Country → seaport + curves |
+|  20 | **[091](../../tickets/done/091-quote-rate-cards.md)** Uber-style rate cards                         | `rates.catalog` / spot → rateSources | Card rail + schedule chips |
+|  21 | **[092](../../tickets/done/092-quote-live-pdf-email-preview.md)** Live PDF + email preview          | `quoting.pdf` + `packages/email`     | Fill preview pane          |
 
 ```text
 088 epic

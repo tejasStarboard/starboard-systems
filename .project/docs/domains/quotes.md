@@ -107,6 +107,6 @@ Redesign chrome only (money + stages unchanged): multistep flow, FCL world-map p
 
 ## Next tickets
 
-**Phase E (NOW):** [088](../../tickets/done/088-quote-builder-ux-epic.md) epic · **[089](../../tickets/todo/089-quote-builder-multistep-shell.md)** shell · [090](../../tickets/todo/090-quote-fcl-world-map-ports.md) map · [091](../../tickets/todo/091-quote-rate-cards.md) rate cards · [092](../../tickets/todo/092-quote-live-pdf-email-preview.md) live preview.
+**Phase E (NOW):** [088](../../tickets/done/088-quote-builder-ux-epic.md) epic · **[089](../../tickets/done/089-quote-builder-multistep-shell.md)** shell · [090](../../tickets/done/090-quote-fcl-world-map-ports.md) map · [091](../../tickets/done/091-quote-rate-cards.md) rate cards · [092](../../tickets/done/092-quote-live-pdf-email-preview.md) live preview.
 
 **Phase D:** ~~082–087~~ done (lifecycle, PDF, Incoterm/markup peel, money follow-ons, catalog CRUD, FCL ingest).
