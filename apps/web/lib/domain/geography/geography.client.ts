@@ -6,6 +6,7 @@ import {
   listPortsResponseSchema,
   type AddressPrediction,
   type DoorAddress,
+  type FacilityOption,
   type FormOption,
 } from "@starboard/lib-contracts"
 
@@ -16,10 +17,16 @@ import {
   serviceFetch,
 } from "@/lib/clients/http"
 
+export type PortSearchFilters = { country?: string; type?: string }
+
 export interface GeographyClient {
   listCurrencyOptions(requestId?: string): Promise<FormOption[]>
   ensureCurrency(code: string, requestId?: string): Promise<void>
-  searchPorts(q?: string, requestId?: string): Promise<FormOption[]>
+  searchPorts(
+    q?: string,
+    filters?: PortSearchFilters,
+    requestId?: string
+  ): Promise<FacilityOption[]>
   searchAddresses(q?: string, requestId?: string): Promise<AddressPrediction[]>
   getAddressDetails(placeId: string, requestId?: string): Promise<DoorAddress>
 }
@@ -67,7 +74,11 @@ class HttpGeographyClient implements GeographyClient {
     await parseJsonResponse(response, "Failed to ensure currency")
   }
 
-  async searchPorts(q = "", requestId?: string): Promise<FormOption[]> {
+  async searchPorts(
+    q = "",
+    filters: PortSearchFilters = {},
+    requestId?: string
+  ): Promise<FacilityOption[]> {
     const options = createServiceOptions({
       baseUrl: this.options.baseUrl,
       requestId,
@@ -76,6 +87,8 @@ class HttpGeographyClient implements GeographyClient {
     if (q.trim()) {
       params.set("q", q.trim())
     }
+    if (filters.country?.trim()) params.set("country", filters.country.trim())
+    if (filters.type?.trim()) params.set("type", filters.type.trim())
     const path = params.size > 0 ? `/ports?${params}` : "/ports"
     const response = await serviceFetch(path, { method: "GET" }, options)
     const body = await parseJsonResponse(response, "Failed to search ports")
@@ -83,7 +96,7 @@ class HttpGeographyClient implements GeographyClient {
     if (!parsed.success) {
       throw new Error("Failed to search ports: invalid response")
     }
-    return parsed.data.ports.map(({ value, label }) => ({ value, label }))
+    return parsed.data.ports
   }
 
   async searchAddresses(

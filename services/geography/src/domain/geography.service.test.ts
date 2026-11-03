@@ -16,6 +16,20 @@ const SEEDED_FACILITIES: FacilityOption[] = [
     label: "CNSHA — Shanghai",
     types: ["seaport"],
     country: "CN",
+    latitude: 31.23,
+    longitude: 121.47,
+  },
+  {
+    value: "CNNGB",
+    label: "CNNGB — Ningbo",
+    types: ["seaport"],
+    country: "CN",
+  },
+  {
+    value: "CNPEK",
+    label: "CNPEK — Beijing Capital",
+    types: ["airport"],
+    country: "CN",
   },
   {
     value: "LAX",
@@ -45,13 +59,21 @@ class InMemoryGeographyDao implements GeographyDao {
       .map((code) => ({ value: code, label: code }))
   }
 
-  async searchPorts(q: string): Promise<FacilityOption[]> {
+  async searchPorts(
+    q: string,
+    filters: { country?: string; type?: string } = {}
+  ): Promise<FacilityOption[]> {
     const prefix = q.trim().toUpperCase()
     const needle = q.trim().toLowerCase()
+    const scoped = this.facilities.filter(
+      (facility) =>
+        (!filters.country || facility.country === filters.country) &&
+        (!filters.type || facility.types?.includes(filters.type))
+    )
     if (!prefix) {
-      return this.facilities.slice(0, 50)
+      return scoped.slice(0, 50)
     }
-    return this.facilities.filter((facility) => {
+    return scoped.filter((facility) => {
       if (facility.value.toUpperCase().startsWith(prefix)) return true
       const name = facility.label.split(" — ")[1]?.toLowerCase() ?? ""
       if (name.includes(needle)) return true
@@ -126,8 +148,33 @@ describe("DefaultGeographyService.searchPorts", () => {
   })
 
   test("filters by unlocode prefix", async () => {
-    const ports = await service().searchPorts("cn")
+    const ports = await service().searchPorts("cnsh")
     expect(ports).toEqual([SEEDED_FACILITIES[0]!])
+  })
+
+  test("returns latitude / longitude when stored", async () => {
+    const [sha] = await service().searchPorts("CNSHA")
+    expect(sha?.latitude).toBe(31.23)
+    expect(sha?.longitude).toBe(121.47)
+  })
+
+  test("country filter returns only that country's seaports", async () => {
+    const ports = await service().searchPorts("", {
+      country: "cn",
+      type: "seaport",
+    })
+    expect(ports.map((p) => p.value)).toEqual(["CNSHA", "CNNGB"])
+  })
+
+  test("country + q narrows within the country", async () => {
+    const ports = await service().searchPorts("cnn", { country: "CN" })
+    expect(ports.map((p) => p.value)).toEqual(["CNNGB"])
+  })
+
+  test("rejects an invalid country code", async () => {
+    await expect(
+      service().searchPorts("", { country: "CHN" })
+    ).rejects.toThrow()
   })
 
   test("matches common port name typos via fuzzy stand-in", async () => {

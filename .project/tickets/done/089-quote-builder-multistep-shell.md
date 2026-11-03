@@ -2,7 +2,7 @@
 id: 089
 wave: 08-quote-builder-ux
 title: Quote builder multistep shell + preview chrome
-status: in_progress
+status: done
 depends_on: [077, 073, 082, 088]
 epic: SYS-QUOTE-UX
 docs:
@@ -57,10 +57,10 @@ docs:
 
 ## Acceptance
 
-- [ ] Stepper navigates five steps; validation gates Next where design doc requires (e.g. ports before rates)
-- [ ] Preview pane chrome present on desktop; stubs acceptable
-- [ ] Existing slots still mount in the correct step; optionals unplug cleanly
-- [ ] Branch from `quote-flow`; PR targets `quote-flow`; `pnpm run ci` green
+- [x] Stepper navigates five steps; validation gates Next where design doc requires (e.g. ports before rates)
+- [x] Preview pane chrome present on desktop; stubs acceptable
+- [x] Existing slots still mount in the correct step; optionals unplug cleanly
+- [x] Branch from `quote-flow`; PR targets `quote-flow`; `pnpm run ci` green
 
 ## Out of scope
 

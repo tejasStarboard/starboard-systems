@@ -327,6 +327,7 @@ describe("getActiveWorkbenchContributions", () => {
       "quoting.slots.totals",
       "quoting.slots.rateSources",
       "quoting.slots.lifecycle",
+      "quoting.slots.laneRoute",
       "quoting.commands",
       "rates.slots.ingestActions",
     ])

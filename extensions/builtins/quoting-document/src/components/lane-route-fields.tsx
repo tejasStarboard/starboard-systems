@@ -17,13 +17,13 @@ import {
   ToggleGroupItem,
 } from "@starboard/lib-ui/components/toggle-group"
 
-import { AddressCombobox, PortCombobox } from "@starboard/ext-geo-gazetteer"
 import {
   createContainerLine,
   type LaneMode,
   type QuoteFormOption,
   type QuoteFormValues,
 } from "../lib/quotes.schema"
+import { LaneRoutePorts } from "./lane-route-ports"
 
 /** Step 2 (Route): mode, ports, vias and door addresses for one lane. */
 export function LaneRouteFields({
@@ -77,12 +77,6 @@ export function LaneRouteFields({
     }
   }
 
-  const originLabel = mode === "air" ? "Origin airport" : "Origin port"
-  const destinationLabel =
-    mode === "air" ? "Destination airport" : "Destination port"
-  const codePlaceholder = mode === "air" ? "IATA / UNLOCODE" : "UNLOCODE"
-  const fieldId = (name: string) => `lane-${laneIndex}-${name}`
-
   return (
     <FieldGroup className="gap-4">
       <Controller
@@ -111,112 +105,13 @@ export function LaneRouteFields({
         )}
       />
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Controller
-          control={control}
-          name={`${prefix}.pickup`}
-          render={({ field }) => (
-            <Field>
-              <FieldLabel htmlFor={fieldId("pickup")}>Pickup</FieldLabel>
-              <AddressCombobox
-                id={fieldId("pickup")}
-                value={field.value}
-                onChange={field.onChange}
-                placeholder="Search pickup address…"
-              />
-            </Field>
-          )}
-        />
-        <Controller
-          control={control}
-          name={`${prefix}.origin`}
-          render={({ field }) => (
-            <Field>
-              <FieldLabel htmlFor={fieldId("origin")}>{originLabel}</FieldLabel>
-              <PortCombobox
-                id={fieldId("origin")}
-                options={portOptions}
-                value={field.value}
-                onChange={field.onChange}
-                placeholder={codePlaceholder}
-              />
-            </Field>
-          )}
-        />
-        {mode === "fcl" ? (
-          <>
-            <Controller
-              control={control}
-              name={`${prefix}.originVia`}
-              render={({ field }) => (
-                <Field>
-                  <FieldLabel htmlFor={fieldId("originVia")}>
-                    Origin via
-                  </FieldLabel>
-                  <PortCombobox
-                    id={fieldId("originVia")}
-                    options={portOptions}
-                    value={field.value}
-                    onChange={field.onChange}
-                    placeholder="Optional via port"
-                  />
-                </Field>
-              )}
-            />
-            <Controller
-              control={control}
-              name={`${prefix}.destinationVia`}
-              render={({ field }) => (
-                <Field>
-                  <FieldLabel htmlFor={fieldId("destinationVia")}>
-                    Destination via
-                  </FieldLabel>
-                  <PortCombobox
-                    id={fieldId("destinationVia")}
-                    options={portOptions}
-                    value={field.value}
-                    onChange={field.onChange}
-                    placeholder="Optional via port"
-                  />
-                </Field>
-              )}
-            />
-          </>
-        ) : null}
-        <Controller
-          control={control}
-          name={`${prefix}.destination`}
-          render={({ field }) => (
-            <Field>
-              <FieldLabel htmlFor={fieldId("destination")}>
-                {destinationLabel}
-              </FieldLabel>
-              <PortCombobox
-                id={fieldId("destination")}
-                options={portOptions}
-                value={field.value}
-                onChange={field.onChange}
-                placeholder={codePlaceholder}
-              />
-            </Field>
-          )}
-        />
-        <Controller
-          control={control}
-          name={`${prefix}.delivery`}
-          render={({ field }) => (
-            <Field>
-              <FieldLabel htmlFor={fieldId("delivery")}>Delivery</FieldLabel>
-              <AddressCombobox
-                id={fieldId("delivery")}
-                value={field.value}
-                onChange={field.onChange}
-                placeholder="Search delivery address…"
-              />
-            </Field>
-          )}
-        />
-      </div>
+      <LaneRoutePorts
+        control={control}
+        setValue={setValue}
+        laneIndex={laneIndex}
+        portOptions={portOptions}
+        mode={mode}
+      />
     </FieldGroup>
   )
 }

@@ -4,6 +4,7 @@ import {
   editors as crmPartiesEditors,
   views as crmPartiesViews,
 } from "@starboard/ext-crm-parties"
+import { pointComponents as geoGazetteerPoints } from "@starboard/ext-geo-gazetteer"
 import { pointComponents as quotingChargesPoints } from "@starboard/ext-quoting-charges"
 import { pointComponents as quotingIncotermPoints } from "@starboard/ext-quoting-incoterm"
 import { pointComponents as quotingMarkupPoints } from "@starboard/ext-quoting-markup"
@@ -63,6 +64,7 @@ export const builtinPointComponents: Readonly<
   Record<string, ComponentType<never>>
 > = {
   ...quotingDocumentPoints,
+  ...geoGazetteerPoints,
   ...quotingChargesPoints,
   ...quotingIncotermPoints,
   ...quotingMarkupPoints,

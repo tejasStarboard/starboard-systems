@@ -25,6 +25,7 @@ export const QUOTING_SLOTS = {
   rateSources: "quoting.slots.rateSources",
   lifecycle: "quoting.slots.lifecycle",
   preview: "quoting.slots.preview",
+  laneRoute: "quoting.slots.laneRoute",
   commands: "quoting.commands",
 } as const
 
@@ -87,6 +88,25 @@ export type PreviewSlotProps = Pick<Form, "control"> & {
   /** Index of the active lane (steps 2–5), for per-lane previews. */
   selectedLaneIndex: number
   currencyCode: string
+}
+
+export type LaneRouteField =
+  "origin" | "destination" | "originVia" | "destinationVia"
+
+/**
+ * FCL Route step port picker (090). Mounted only for FCL lanes; when no
+ * contribution is active (or it throws) the host renders `PortCombobox`
+ * fields. Values are soft UNLOCODE strings; Door moves stay host-owned.
+ * `geo.gazetteer` mirrors this shape structurally (no import → no cycle).
+ */
+export type LaneRouteSlotProps = {
+  origin: string
+  destination: string
+  originVia: string
+  destinationVia: string
+  portOptions: { value: string; label: string }[]
+  idPrefix?: string
+  onChange: (field: LaneRouteField, value: string) => void
 }
 
 /**

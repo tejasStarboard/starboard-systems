@@ -11,7 +11,8 @@ import {
   ComboboxList,
 } from "@starboard/lib-ui/components/combobox"
 
-import type { ComboboxOption } from "../lib/options"
+import type { ComboboxOption, PortOption } from "../lib/options"
+import { mergePortInto } from "../lib/port-merge"
 
 const DEBOUNCE_MS = 150
 
@@ -22,6 +23,10 @@ export function PortCombobox({
   placeholder = "Search port …",
   invalid,
   id,
+  country,
+  type,
+  onSelect,
+  defaultOpen,
 }: {
   /** Seed list + selected labels (e.g. form options / resolved codes). */
   options?: ComboboxOption[]
@@ -30,8 +35,16 @@ export function PortCombobox({
   placeholder?: string
   invalid?: boolean
   id?: string
+  /** ISO-3166 alpha-2: search only this country (map → seaport flow). */
+  country?: string
+  /** Facility type filter, e.g. `seaport`. */
+  type?: string
+  /** Full hit (incl. lat/lng) when the user picks — or clears (`null`). */
+  onSelect?: (option: PortOption | null) => void
+  /** Open the list on mount (map popover). */
+  defaultOpen?: boolean
 }) {
-  const [options, setOptions] = useState<ComboboxOption[]>(initialOptions)
+  const [options, setOptions] = useState<PortOption[]>(initialOptions)
   const [query, setQuery] = useState("")
   const [loading, setLoading] = useState(false)
 
@@ -53,7 +66,7 @@ export function PortCombobox({
     setOptions((prev) => {
       const byValue = new Map(prev.map((o) => [o.value, o]))
       for (const option of initialOptions) {
-        byValue.set(option.value, option)
+        mergePortInto(byValue, option)
       }
       return [...byValue.values()]
     })
@@ -68,13 +81,15 @@ export function PortCombobox({
       try {
         const params = new URLSearchParams()
         if (trimmed) params.set("q", trimmed)
+        if (country) params.set("country", country)
+        if (type) params.set("type", type)
         const qs = params.size > 0 ? `?${params}` : ""
         const response = await fetch(`/api/geography/ports${qs}`, {
           signal: controller.signal,
         })
         if (!response.ok) return
         const body = (await response.json()) as {
-          ports?: ComboboxOption[]
+          ports?: PortOption[]
         }
         const next = body.ports ?? []
         const selectedOption = selectedRef.current
@@ -83,11 +98,11 @@ export function PortCombobox({
         setOptions(() => {
           const byValue = new Map(next.map((o) => [o.value, o]))
           if (selectedOption) {
-            byValue.set(selectedOption.value, selectedOption)
+            mergePortInto(byValue, selectedOption)
           }
           for (const option of seeds) {
             if (option.value === currentValue || !trimmed) {
-              byValue.set(option.value, option)
+              mergePortInto(byValue, option)
             }
           }
           return [...byValue.values()]
@@ -105,16 +120,18 @@ export function PortCombobox({
       controller.abort()
       window.clearTimeout(handle)
     }
-  }, [query])
+  }, [query, country, type])
 
   return (
     <Combobox
       items={options}
+      defaultOpen={defaultOpen}
       // Server already ranks with pg_trgm; disable client substring filter
       // so typos still surface ranked port matches.
       filter={null}
       value={selected}
       onValueChange={(option) => {
+        onSelect?.((option as PortOption | null) ?? null)
         onChange(option?.value ?? "")
       }}
       onInputValueChange={(next) => {
