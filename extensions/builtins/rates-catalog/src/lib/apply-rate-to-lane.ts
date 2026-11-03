@@ -20,6 +20,21 @@ export type SpotOffer = {
   mode?: string
   /** Charge lines when the spot strategy returns them. */
   surcharges?: SurchargeLine[]
+  /**
+   * Optional schedule/route fields (rate cards render a chip only when set).
+   * Dates are ISO `YYYY-MM-DD[...]`; `transitDays` is a day count. Aliases
+   * (`cutOff`, `dropOff`, `transitTime`, `alternateRoute`) are read too — see
+   * `extractRateChips`.
+   */
+  cargoDropOff?: string
+  cutoff?: string
+  etd?: string
+  eta?: string
+  transitDays?: number
+  route?: string | string[]
+  altRoute?: string | string[]
+  /** Optional carrier logo (https or root-relative); monogram when absent. */
+  carrierLogoUrl?: string
 }
 
 export type SpotSearchWorkflowResult = {
@@ -54,12 +69,14 @@ export function catalogRateToManualLine(rate: Rate): ManualRateLine {
   })
 }
 
+/** Label of the manual line a spot offer becomes when applied to a lane. */
+export function spotOfferLineLabel(offer: SpotOffer): string {
+  return offer.carrier ? `${offer.label} (${offer.carrier})` : offer.label
+}
+
 export function spotOfferToManualLine(offer: SpotOffer): ManualRateLine {
-  const label = offer.carrier
-    ? `${offer.label} (${offer.carrier})`
-    : offer.label
   return createManualRateLine({
-    label,
+    label: spotOfferLineLabel(offer),
     amount: offer.amount,
     surcharges: mapSurchargesToManual(offer.surcharges),
   })

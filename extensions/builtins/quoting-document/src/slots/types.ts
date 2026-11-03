@@ -154,6 +154,11 @@ export type ApplyRatePayload = {
 export type RateSourcesSlotProps = {
   origin?: string
   destination?: string
-  /** Appends the line to the selected lane and closes the sheet. */
+  /**
+   * The lane's currently selected manual rate (label + amount), so a source
+   * can mark the card it applied. Absent / null when none is selected.
+   */
+  selectedRate?: { label: string; amount: number } | null
+  /** Appends the line to the selected lane and selects it. */
   onApplyRate: (payload: ApplyRatePayload) => void
 }

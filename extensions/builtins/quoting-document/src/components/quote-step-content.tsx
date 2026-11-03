@@ -1,6 +1,6 @@
 "use client"
 
-import { MagnifyingGlassIcon, PlusIcon } from "@phosphor-icons/react"
+import { PlusIcon } from "@phosphor-icons/react"
 
 import { Button } from "@starboard/lib-ui/components/button"
 import { cn } from "@starboard/lib-ui/lib/utils"
@@ -10,11 +10,13 @@ import { LaneRouteFields } from "./lane-route-fields"
 import { QuoteCurrencyField, QuoteCustomerField } from "./quote-form-fields"
 import { QuoteHeaderSlot } from "./quote-header-slot"
 import type { QuoteFormLayoutProps } from "./quote-form-layout-props"
+import { resolveSelectedManualRate } from "../lib/quotes.schema"
 import { QUOTE_STEPS, type QuoteStepId } from "../lib/quote-builder-steps"
 import { QuoteSlot, useQuoteSlotEntries } from "../slots/slot-host"
 import {
   QUOTING_SLOTS,
   type ChargeTableSlotProps,
+  type RateSourcesSlotProps,
   type TotalsSlotProps,
 } from "../slots/types"
 
@@ -65,6 +67,20 @@ function RatesStep({
     useQuoteSlotEntries(QUOTING_SLOTS.chargeTable).length > 0
   const locked = !props.commercialEditable
   const rateCount = props.rateFields.length
+  const canSearchRates =
+    hasRateSources && hasChargeTable && props.laneReady && !locked
+  const selectedManualRate = resolveSelectedManualRate(
+    props.selectedLane?.manualRates ?? [],
+    props.selectedLane?.selectedRateId
+  )
+  const rateSourcesProps: RateSourcesSlotProps = {
+    origin: props.selectedLane?.origin.trim() || undefined,
+    destination: props.selectedLane?.destination.trim() || undefined,
+    selectedRate: selectedManualRate
+      ? { label: selectedManualRate.label, amount: selectedManualRate.amount }
+      : null,
+    onApplyRate: props.onApplyRate,
+  }
 
   return (
     <div className="space-y-4">
@@ -74,18 +90,6 @@ function RatesStep({
           fullWidthActions ? "flex-col" : "flex-wrap"
         )}
       >
-        {hasRateSources && hasChargeTable ? (
-          <Button
-            type="button"
-            variant="outline"
-            className={cn(fullWidthActions && "w-full")}
-            disabled={!props.laneReady || locked}
-            onClick={props.onSearchRates}
-          >
-            <MagnifyingGlassIcon data-icon="inline-start" />
-            Search rates
-          </Button>
-        ) : null}
         {hasChargeTable ? (
           <Button
             type="button"
@@ -113,13 +117,32 @@ function RatesStep({
         </p>
       ) : null}
 
+      {canSearchRates ? (
+        <QuoteSlot
+          point={QUOTING_SLOTS.rateSources}
+          props={rateSourcesProps}
+          className="flex min-w-0 flex-col gap-4"
+        />
+      ) : null}
+
+      {hasRateSources && hasChargeTable && !canSearchRates ? (
+        <p
+          data-testid="rates-unavailable"
+          className="text-xs text-muted-foreground"
+        >
+          {locked
+            ? "This quote is closed, so rates can no longer be changed."
+            : "Complete the route and cargo to see rates for this lane."}
+        </p>
+      ) : null}
+
       {hasChargeTable ? (
         <p
           data-testid="rates-summary"
           className="border border-dashed p-3 text-xs text-muted-foreground"
         >
           {rateCount === 0
-            ? "No rate on this lane yet. Search rates or add one manually."
+            ? "No rate on this lane yet. Select a rate card or add one manually."
             : `${rateCount} rate${rateCount === 1 ? "" : "s"} on this lane. Review charges and totals in Build.`}
         </p>
       ) : null}

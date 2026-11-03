@@ -8,11 +8,16 @@ import type {
 } from "@starboard/ext-quoting-document/slots"
 import { toast } from "@starboard/lib-ui/components/toast"
 
+import { RateCard, RateCardRail } from "../components/rate-card"
 import {
   parseSpotSearchResult,
   spotOfferToManualLine,
-  type SpotOffer,
 } from "../lib/apply-rate-to-lane"
+import {
+  isRateCardSelected,
+  sortRateCards,
+  spotOfferToCard,
+} from "../lib/rate-card-model"
 import {
   extensionApiPath,
   pollExtensionJob,
@@ -28,6 +33,7 @@ import {
 export function SpotSource({
   origin,
   destination,
+  selectedRate,
   onApplyRate,
   contribution,
 }: SlotComponentProps<RateSourcesSlotProps>) {
@@ -49,12 +55,18 @@ export function SpotSource({
   const abortRef = useRef<AbortController | null>(null)
   useEffect(() => () => abortRef.current?.abort(), [])
 
-  const spotOffers = useMemo((): SpotOffer[] => {
+  const spotCards = useMemo(() => {
     if (spotStatus?.status !== "completed") {
       return []
     }
     const parsed = parseSpotSearchResult(spotStatus.result)
-    return parsed.ok ? parsed.rates : []
+    if (!parsed.ok) return []
+    return sortRateCards(
+      parsed.rates.map((offer, index) => ({
+        offer,
+        ...spotOfferToCard(offer, index),
+      }))
+    )
   }, [spotStatus])
 
   async function enqueueSpotSearch() {
@@ -150,44 +162,22 @@ export function SpotSource({
             Job {spotJob.workflowId}
             {spotStatus ? ` — ${spotStatus.status}` : ""}
           </p>
-          {spotOffers.length > 0 ? (
-            <ul className="space-y-2">
-              {spotOffers.map((offer, index) => (
-                <li
-                  key={`${offer.label}-${offer.amount}-${index}`}
-                  className="border-b border-border py-2 last:border-b-0"
-                >
-                  <div className="flex items-baseline justify-between gap-2">
-                    <p className="text-sm font-medium text-foreground">
-                      {offer.label}
-                    </p>
-                    <p className="text-sm text-foreground tabular-nums">
-                      {offer.amount.toLocaleString("en-US", {
-                        style: "currency",
-                        currency: offer.currencyCode,
-                      })}
-                    </p>
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    {[offer.carrier, offer.origin, offer.destination]
-                      .filter(Boolean)
-                      .join(" · ")}
-                  </p>
-                  <button
-                    type="button"
-                    className="mt-1 text-xs font-medium underline-offset-2 hover:underline"
-                    onClick={() =>
-                      onApplyRate({
-                        line: spotOfferToManualLine(offer),
-                        currencyCode: offer.currencyCode,
-                      })
-                    }
-                  >
-                    Apply to lane
-                  </button>
-                </li>
+          {spotCards.length > 0 ? (
+            <RateCardRail>
+              {spotCards.map(({ offer, ...card }) => (
+                <RateCard
+                  key={card.key}
+                  card={card}
+                  selected={isRateCardSelected(card, selectedRate)}
+                  onSelect={() =>
+                    onApplyRate({
+                      line: spotOfferToManualLine(offer),
+                      currencyCode: offer.currencyCode,
+                    })
+                  }
+                />
               ))}
-            </ul>
+            </RateCardRail>
           ) : null}
         </div>
       ) : null}
