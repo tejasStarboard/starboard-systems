@@ -1,6 +1,8 @@
 import { describe, expect, test } from "bun:test"
 
 import {
+  createManualRateLine,
+  createSurchargeLine,
   quoteDocumentViewSchema,
   resolveQuoteDocumentOrgContext,
 } from "@starboard/lib-contracts"
@@ -60,7 +62,7 @@ describe("buildQuoteDocumentView (094)", () => {
     expect(freight.charges.map((c) => c.name)).toEqual(["Ocean FCL", "BAF"])
     expect(freight.charges[1]).toMatchObject({
       currencyCode: "USD",
-      amount: 50,
+      amount: null, // dropped from totals by Incoterm (ONE MATH)
       note: "Excluded by Incoterm",
     })
   })
@@ -81,5 +83,86 @@ describe("buildQuoteDocumentView (094)", () => {
     const view = buildQuoteDocumentView(quote)
     expect(view.quote.currencyCode).toBe("")
     expect(view.totals.currencyCode).toBe("")
+  })
+
+  test("row amounts follow ONE MATH: per_eq base, %, unit, FX, globals", () => {
+    const quote = goldenFobShipperQuote()
+    quote.incoterm = ""
+    quote.exchangeRates = { EUR: { USD: 1.1 } }
+    const line = (
+      id: string,
+      overrides: Partial<ReturnType<typeof createSurchargeLine>>
+    ) =>
+      createSurchargeLine({
+        id,
+        name: id,
+        leg: "origin",
+        usageUnit: "flat",
+        currencyCode: "USD",
+        source: "carrier",
+        ...overrides,
+      })
+    const rate = createManualRateLine({
+      id: "r",
+      label: "Ocean",
+      amount: 0,
+      baseMode: "per_eq",
+      equipmentAmounts: [
+        { containerType: "20GP", amount: 500 },
+        { containerType: "40HC", amount: 800 },
+      ],
+      surcharges: [
+        line("thc", { usageUnit: "container", rate: 10 }),
+        line("eur", { rate: 100, currencyCode: "EUR" }),
+        line("baf", {
+          leg: "freight",
+          usageUnit: "percentage",
+          ratePercentage: 10,
+        }),
+      ],
+    })
+    quote.lanes[0] = {
+      ...quote.lanes[0]!,
+      mode: "fcl",
+      selectedRateId: "r",
+      manualRates: [rate],
+      containers: [
+        { id: "a", containerType: "20GP", weight: 1, count: 2 },
+        { id: "b", containerType: "40HC", weight: 1, count: 1 },
+      ],
+    }
+    quote.globalCharges = [
+      createSurchargeLine({
+        id: "g",
+        name: "Doc fee",
+        usageUnit: "flat",
+        rate: 25,
+        currencyCode: "USD",
+        source: "global",
+      }),
+    ]
+    const view = buildQuoteDocumentView(quote)
+    const lane = view.lanes[0]!
+    const base = lane.sections
+      .flatMap((s) => s.charges)
+      .filter((c) => c.name.startsWith("Ocean"))
+    expect(base.map((c) => [c.name, c.amount])).toEqual([
+      ["Ocean - 2 × 20GP", 1000],
+      ["Ocean - 1 × 40HC", 800],
+    ])
+    const rows = lane.sections.flatMap((s) => s.charges)
+    const byName = (name: string) => rows.find((c) => c.name === name)!
+    expect(byName("thc").amount).toBe(30) // 10 × 3 containers
+    expect(byName("eur").amount).toBeCloseTo(330, 2) // (100 × 1.1) × 3 CTs
+    expect(byName("eur")).toMatchObject({
+      currencyCode: "USD",
+      sourceCurrencyCode: "EUR",
+    })
+    expect(view.globals[0]!.amount).toBe(25)
+    // Every displayed amount (+ globals) reconstructs the lane total.
+    const sum =
+      rows.reduce((acc, c) => acc + (c.amount ?? 0), 0) +
+      view.globals.reduce((acc, c) => acc + (c.amount ?? 0), 0)
+    expect(sum).toBeCloseTo(lane.total - lane.markup, 1)
   })
 })

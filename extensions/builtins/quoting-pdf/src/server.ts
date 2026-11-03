@@ -28,13 +28,21 @@ export type QuoteOrgRecord = {
 export function resolveQuotePdfContext(input: {
   organization: QuoteOrgRecord
   activeTemplateIds: readonly string[]
-}): { org: QuoteDocumentOrg; templateId: string } {
+}): {
+  org: QuoteDocumentOrg
+  templateId: string
+  activeTemplateIds: string[]
+} {
   const { org, templates } = resolveQuoteDocumentOrgContext(input.organization)
   const template = resolveQuotePdfTemplate({
     requested: templates.pdf,
     activeIds: input.activeTemplateIds,
   })
-  return { org, templateId: template.id }
+  return {
+    org,
+    templateId: template.id,
+    activeTemplateIds: [...input.activeTemplateIds],
+  }
 }
 
 /** Export bytes: same view builder + template as the preview. */

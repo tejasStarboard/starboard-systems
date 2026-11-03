@@ -32,8 +32,14 @@ export type QuoteDocumentOrg = z.infer<typeof quoteDocumentOrgSchema>
 export const quoteDocumentChargeSchema = z.object({
   name: z.string(),
   leg: z.enum(["origin", "freight", "destination", "global"]),
-  /** Line currency (may differ from the quote currency; FX is in totals). */
+  /** Currency of `amount`: the quote currency when set (FX applied), else the line's. */
   currencyCode: z.string(),
+  /** The line's own currency before FX (display hint, e.g. "EUR 100 at 1.1"). */
+  sourceCurrencyCode: z.string().optional(),
+  /**
+   * Contribution to the lane/quote total (ONE MATH, post usage / % / FX / per-CT
+   * × count). Null when the row is dropped (Incoterm scope, removed, not included).
+   */
   amount: z.number().nullable(),
   included: z.boolean(),
   absorbed: z.boolean(),

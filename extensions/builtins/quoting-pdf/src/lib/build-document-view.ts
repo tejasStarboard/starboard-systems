@@ -13,7 +13,11 @@ import {
 } from "@starboard/lib-contracts"
 import {
   calculateManualRateTotals,
+  computeManualLaneBreakdown,
   excludedBucketsForIncoterm,
+  roundMoney,
+  type ManualChargeAmount,
+  type ManualLaneTotalsInput,
 } from "@starboard/lib-pricing"
 
 import { usageFromLane } from "./usage-from-lane"
@@ -31,16 +35,23 @@ const LEG_LABEL = {
   destination: "Destination charges",
 } as const
 
+/**
+ * Display row for a surcharge. `amount` is the ONE MATH sell contribution from
+ * `computeManualLaneBreakdown` (null when the row is dropped from totals).
+ */
 function surchargeRow(
   line: SurchargeLine,
   leg: QuoteDocumentCharge["leg"],
+  amounts: ManualChargeAmount | undefined,
+  quoteCurrency: string,
   note?: string
 ): QuoteDocumentCharge {
   return {
     name: line.name.trim() || "Charge",
     leg,
-    currencyCode: line.currencyCode,
-    amount: line.sellAmount ?? line.buyAmount ?? line.rate,
+    currencyCode: quoteCurrency || line.currencyCode,
+    sourceCurrencyCode: line.currencyCode,
+    amount: amounts?.included ? roundMoney(amounts.sell) : null,
     included: line.isIncludedInTotal,
     absorbed: !line.isVisible,
     ...(note ? { note } : {}),
@@ -92,6 +103,7 @@ export function buildQuoteDocumentView(
     role: quote.customerRole,
   })
 
+  let globalAmounts: ManualChargeAmount[] = []
   const lanes: QuoteDocumentLane[] = quote.lanes.map((lane, index) => {
     const selected = resolveSelectedManualRate(
       lane.manualRates,
@@ -104,7 +116,7 @@ export function buildQuoteDocumentView(
           (container) => container.containerType === row.containerType
         )?.count ?? 0,
     }))
-    const totals = calculateManualRateTotals({
+    const totalsInput: ManualLaneTotalsInput = {
       lines: selected
         ? [
             {
@@ -122,7 +134,13 @@ export function buildQuoteDocumentView(
       globalCharges: index === 0 ? (quote.globalCharges ?? []) : [],
       quoteCurrency: quote.currencyCode || null,
       fxRates: quote.exchangeRates ?? {},
-    })
+    }
+    const totals = calculateManualRateTotals(totalsInput)
+    const breakdown = computeManualLaneBreakdown(totalsInput)
+    if (index === 0) {
+      globalAmounts = breakdown.globals
+    }
+    const lineBreakdown = breakdown.lines[0]
 
     const byLeg: Record<keyof typeof LEG_LABEL, QuoteDocumentCharge[]> = {
       origin: [],
@@ -130,16 +148,21 @@ export function buildQuoteDocumentView(
       destination: [],
     }
     if (selected) {
-      byLeg.freight.push({
-        name: selected.label.trim() || "Base freight",
-        leg: "freight",
-        currencyCode,
-        amount: selected.amount,
-        included: true,
-        absorbed: false,
-      })
-      for (const surcharge of selected.surcharges) {
-        if (surcharge.isRemoved) continue
+      const label = selected.label.trim() || "Base freight"
+      for (const part of lineBreakdown?.base ?? []) {
+        byLeg.freight.push({
+          name: part.containerType
+            ? `${label} - ${part.count} × ${part.containerType}`
+            : label,
+          leg: "freight",
+          currencyCode,
+          amount: roundMoney(part.extended),
+          included: true,
+          absorbed: false,
+        })
+      }
+      selected.surcharges.forEach((surcharge, row) => {
+        if (surcharge.isRemoved) return
         const excluded =
           excludedBuckets.includes(surcharge.leg) &&
           surcharge.scopeOverride !== "include"
@@ -147,10 +170,12 @@ export function buildQuoteDocumentView(
           surchargeRow(
             surcharge,
             surcharge.leg,
+            lineBreakdown?.surcharges[row],
+            currencyCode,
             excluded ? "Excluded by Incoterm" : undefined
           )
         )
-      }
+      })
     }
     const sections: QuoteDocumentSection[] = (
       Object.keys(LEG_LABEL) as Array<keyof typeof LEG_LABEL>
@@ -210,9 +235,11 @@ export function buildQuoteDocumentView(
     },
     customer: { name: options.customerName?.trim() ?? "" },
     lanes,
-    globals: (quote.globalCharges ?? [])
-      .filter((line) => !line.isRemoved)
-      .map((line) => surchargeRow(line, "global")),
+    globals: (quote.globalCharges ?? []).flatMap((line, row) =>
+      line.isRemoved
+        ? []
+        : [surchargeRow(line, "global", globalAmounts[row], currencyCode)]
+    ),
     excludedBuckets,
     totals: {
       currencyCode,

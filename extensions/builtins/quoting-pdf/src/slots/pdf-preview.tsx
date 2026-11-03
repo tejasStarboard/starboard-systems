@@ -13,13 +13,24 @@ import type {
 
 import { buildQuoteDocumentView } from "../lib/build-document-view"
 
-type PdfContext = { org: QuoteDocumentOrg; templateId: string }
+type PdfContext = {
+  org: QuoteDocumentOrg
+  templateId: string
+  activeTemplateIds: string[]
+}
+
+/** Preview must match export: never render until org context has loaded. */
+type ContextState =
+  | { status: "loading" }
+  | { status: "ready"; context: PdfContext }
+  | { status: "error"; message: string }
 
 /**
  * `quoting.pdf.preview` → `quoting.slots.preview` (PDF tab). Builds the
  * `QuoteDocumentView` from the host's debounced form snapshot + org context
- * (`/api/quotes/preview/pdf-context`: branding + selected template id), then
- * renders the selected `quoting.pdf.templates` template with
+ * (`/api/quotes/preview/pdf-context`: branding + selected template id; the
+ * preview waits for it and surfaces failures instead of rendering the wrong
+ * default), then renders the selected `quoting.pdf.templates` template with
  * `@react-pdf/renderer` into a blob URL. The previous PDF stays visible while
  * the next renders. Preview is not stage-gated; Export keeps its status gates.
  */
@@ -28,7 +39,9 @@ export function PdfPreview({
   customerName,
 }: SlotComponentProps<PreviewSlotProps>) {
   const gap = quotePreviewGap(quote)
-  const [context, setContext] = useState<PdfContext | null>(null)
+  const [contextState, setContextState] = useState<ContextState>({
+    status: "loading",
+  })
   const [url, setUrl] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [pending, setPending] = useState(false)
@@ -36,15 +49,37 @@ export function PdfPreview({
   useEffect(() => {
     const controller = new AbortController()
     fetch("/api/quotes/preview/pdf-context", { signal: controller.signal })
-      .then(async (response) =>
-        response.ok ? ((await response.json()) as PdfContext) : null
-      )
-      .then((payload) => {
-        if (!controller.signal.aborted) setContext(payload)
+      .then(async (response) => {
+        const payload = (await response.json().catch(() => null)) as
+          (Partial<PdfContext> & { error?: string }) | null
+        if (controller.signal.aborted) return
+        if (!response.ok || !payload?.org || !payload.templateId) {
+          throw new Error(
+            payload?.error ?? `Preview context failed (${response.status})`
+          )
+        }
+        setContextState({
+          status: "ready",
+          context: {
+            org: payload.org,
+            templateId: payload.templateId,
+            activeTemplateIds: payload.activeTemplateIds ?? [],
+          },
+        })
       })
-      .catch(() => undefined)
+      .catch((cause: unknown) => {
+        if (controller.signal.aborted) return
+        setContextState({
+          status: "error",
+          message:
+            cause instanceof Error
+              ? cause.message
+              : "Unable to load preview context",
+        })
+      })
     return () => controller.abort()
   }, [])
+  const context = contextState.status === "ready" ? contextState.context : null
 
   // Revoke a blob URL only once it is no longer the displayed one: this
   // cleanup runs after the render that swapped `url` (and on unmount), so the
@@ -55,7 +90,7 @@ export function PdfPreview({
   }, [url])
 
   useEffect(() => {
-    if (gap) {
+    if (gap || !context) {
       setUrl(null)
       setError(null)
       setPending(false)
@@ -67,11 +102,12 @@ export function PdfPreview({
     Promise.all([import("../templates"), import("../templates/render")])
       .then(([{ resolveQuotePdfTemplate }, { renderQuotePdfBlob }]) => {
         const view = buildQuoteDocumentView(quote, {
-          org: context?.org,
+          org: context.org,
           customerName,
         })
         const template = resolveQuotePdfTemplate({
-          requested: context?.templateId,
+          requested: context.templateId,
+          activeIds: context.activeTemplateIds,
         })
         return renderQuotePdfBlob(view, template)
       })
@@ -111,9 +147,9 @@ export function PdfPreview({
       data-pending={pending ? "true" : "false"}
       className="mx-auto w-full max-w-md space-y-2"
     >
-      {error ? (
+      {contextState.status === "error" || error ? (
         <p role="alert" className="text-xs text-destructive">
-          {error}
+          {contextState.status === "error" ? contextState.message : error}
         </p>
       ) : null}
       {url ? (
@@ -124,7 +160,9 @@ export function PdfPreview({
         />
       ) : (
         <div className="flex aspect-[1/1.3] w-full items-center justify-center border bg-background text-sm text-muted-foreground shadow-sm">
-          Rendering preview…
+          {contextState.status === "error"
+            ? "Preview unavailable"
+            : "Rendering preview…"}
         </div>
       )}
     </div>
