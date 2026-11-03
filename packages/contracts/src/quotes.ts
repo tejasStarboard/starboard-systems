@@ -327,6 +327,23 @@ export function isLaneReady(lane: LaneFormValues) {
   return lane.origin.trim().length > 0 && lane.destination.trim().length > 0
 }
 
+/**
+ * Why the live PDF / email preview (092) has nothing to show yet, or `null`
+ * when the form has enough data (a currency and at least one lane with both
+ * ports). Presentation hint only — never gates export (083 stage gates).
+ */
+export function quotePreviewGap(
+  quote: Pick<QuoteFormValues, "currencyCode" | "lanes">
+): string | null {
+  if (!quote.currencyCode.trim()) {
+    return "Pick a currency to start the quote."
+  }
+  if (!quote.lanes.some(isLaneReady)) {
+    return "Select ports to see route on the quote."
+  }
+  return null
+}
+
 export function createManualRateLine(
   overrides?: Partial<ManualRateLine>
 ): ManualRateLine {

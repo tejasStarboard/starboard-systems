@@ -18,6 +18,7 @@ import {
   emptyQuoteFormValues,
   quoteFormSchema,
   quoteListItemSchema,
+  quotePreviewGap,
 } from "./quotes"
 import {
   createSurchargeLine,
@@ -200,5 +201,22 @@ describe("crm contracts", () => {
     expect(createContactRequestSchema.safeParse({ name: "" }).success).toBe(
       false
     )
+  })
+})
+
+describe("quotePreviewGap (092)", () => {
+  test("asks for currency, then ports, then is ready", () => {
+    const quote = emptyQuoteFormValues({ id: "q-1", quoteId: "AB12CD" })
+    expect(quotePreviewGap(quote)).toBe("Pick a currency to start the quote.")
+    quote.currencyCode = "USD"
+    expect(quotePreviewGap(quote)).toBe(
+      "Select ports to see route on the quote."
+    )
+    quote.lanes[0] = {
+      ...quote.lanes[0]!,
+      origin: "CNSHA",
+      destination: "USLAX",
+    }
+    expect(quotePreviewGap(quote)).toBeNull()
   })
 })

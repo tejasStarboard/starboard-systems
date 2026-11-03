@@ -58,6 +58,19 @@ describe("quoting.document defines slots (073)", () => {
     ).toEqual([["quoting.pdf.export", "quoting.pdf"]])
   })
 
+  test("quoting.pdf + quoting.email contribute preview tabs (092)", () => {
+    expect(
+      getContributionsToPoint("quoting.slots.preview", "credit").map((c) => [
+        c.id,
+        c.extensionId,
+        c.props?.tab,
+      ])
+    ).toEqual([
+      ["quoting.pdf.preview", "quoting.pdf", "pdf"],
+      ["quoting.email.preview", "quoting.email", "email"],
+    ])
+  })
+
   test("quoting.incoterm contributes header fields (084)", () => {
     expect(
       getContributionsToPoint("quoting.slots.headerFields", "credit").map(
@@ -166,8 +179,26 @@ describe("quoting.document defines slots (073)", () => {
       context
     )
     expect(result["quoting.commands"]).toEqual([])
+    // PDF tab contributor gone; Email tab contributor stays (092).
+    expect(result["quoting.slots.preview"]?.map((c) => c.id)).toEqual([
+      "quoting.email.preview",
+    ])
     expect(result["quoting.slots.lifecycle"]).toHaveLength(1)
     expect(result["quoting.slots.chargeTable"]).toHaveLength(1)
+  })
+
+  test("unplug quoting.email → no email preview; PDF + export intact (092)", () => {
+    const result = getContributionsForOwner(
+      "quoting.document",
+      "credit",
+      manifests,
+      off("quoting.email")
+    )
+    expect(result["quoting.slots.preview"]?.map((c) => c.id)).toEqual([
+      "quoting.pdf.preview",
+    ])
+    expect(result["quoting.commands"]).toHaveLength(1)
+    expect(result["quoting.slots.lifecycle"]).toHaveLength(1)
   })
 
   test("unplug quoting.incoterm → empty headerFields; other slots intact", () => {

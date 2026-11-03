@@ -56,6 +56,9 @@ importers:
       '@starboard/ext-quoting-document':
         specifier: workspace:*
         version: link:../../extensions/builtins/quoting-document
+      '@starboard/ext-quoting-email':
+        specifier: workspace:*
+        version: link:../../extensions/builtins/quoting-email
       '@starboard/ext-quoting-incoterm':
         specifier: workspace:*
         version: link:../../extensions/builtins/quoting-incoterm
@@ -336,6 +339,43 @@ importers:
         specifier: ^5.9.3
         version: 5.9.3
 
+  extensions/builtins/quoting-email:
+    dependencies:
+      '@phosphor-icons/react':
+        specifier: ^2.1.10
+        version: 2.1.10(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+      '@starboard/ext-quoting-document':
+        specifier: workspace:*
+        version: link:../quoting-document
+      '@starboard/ext-quoting-pdf':
+        specifier: workspace:*
+        version: link:../quoting-pdf
+      '@starboard/lib-contracts':
+        specifier: workspace:*
+        version: link:../../../packages/contracts
+      '@starboard/lib-email':
+        specifier: workspace:*
+        version: link:../../../packages/email
+      '@starboard/lib-ui':
+        specifier: workspace:*
+        version: link:../../../packages/ui
+    devDependencies:
+      '@starboard/tool-typescript-config':
+        specifier: workspace:*
+        version: link:../../../tooling/typescript-config
+      '@types/bun':
+        specifier: ^1.3.5
+        version: 1.4.4
+      '@types/react':
+        specifier: ^19
+        version: 19.3.0
+      react:
+        specifier: 19.3.1
+        version: 19.3.1
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+
   extensions/builtins/quoting-incoterm:
     dependencies:
       '@starboard/ext-quoting-document':
@@ -490,6 +530,9 @@ importers:
       '@starboard/ext-quoting-document':
         specifier: workspace:*
         version: link:../builtins/quoting-document
+      '@starboard/ext-quoting-email':
+        specifier: workspace:*
+        version: link:../builtins/quoting-email
       '@starboard/ext-quoting-incoterm':
         specifier: workspace:*
         version: link:../builtins/quoting-incoterm
