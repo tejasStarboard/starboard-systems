@@ -1,7 +1,8 @@
 import type { ComponentType } from "react"
 
 import { RateEditor } from "./editors/rate-editor"
-import { RateListEditor } from "./editors/rate-list-editor"
+import { RateSheetsEditor } from "./editors/rate-sheets-editor"
+import { RatesPlaceholderEditor } from "./editors/rates-placeholder-editor"
 import type { BuiltinEditorProps } from "./host"
 import { CatalogSource } from "./slots/catalog-source"
 import { SpotSource } from "./slots/spot-source"
@@ -16,10 +17,16 @@ export {
 
 /** Editor factories keyed by contributed `workbench.editors` viewType. */
 export const editors: Readonly<
-  Record<"rate" | "rate.list", ComponentType<BuiltinEditorProps>>
+  Record<
+    "rate" | "rate.search" | "rate.sheets" | "rate.sell" | "rate.spotSearch",
+    ComponentType<BuiltinEditorProps>
+  >
 > = {
   rate: RateEditor,
-  "rate.list": RateListEditor,
+  "rate.search": RatesPlaceholderEditor,
+  "rate.sheets": RateSheetsEditor,
+  "rate.sell": RatesPlaceholderEditor,
+  "rate.spotSearch": RatesPlaceholderEditor,
 }
 
 /** No sidebar view factories: the contributed view is a static entry list. */

@@ -144,9 +144,9 @@ export function RateDetail({
       toast.add({ type: "success", title: "Rate deleted" })
       onChanged(null)
       host.openEditor({
-        viewType: "rate.list",
-        resourceId: "/rates",
-        title: "Rates",
+        viewType: "rate.sheets",
+        resourceId: "/rates/sheets",
+        title: "Rate Sheets",
       })
     } catch {
       toast.add({

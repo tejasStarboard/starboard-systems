@@ -82,10 +82,11 @@ describe("quoting.document defines slots (073)", () => {
     }
   })
 
-  test("rates.catalog defines ingestActions for 086/087", () => {
+  test("rates.catalog defines ingestActions + spotSearch stub", () => {
     const catalog = manifests.find((m) => m.id === "rates.catalog")!
     expect(catalog.defines?.extensionPoints?.map((p) => p.id)).toEqual([
       "rates.slots.ingestActions",
+      "rates.slots.spotSearch",
     ])
   })
 

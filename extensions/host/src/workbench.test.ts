@@ -300,7 +300,7 @@ describe("getActiveWorkbenchContributions", () => {
     expect(result.editors[0]?.extensionId).toBe("quoting.document")
   })
 
-  test("registry contributes quoting.document (077), crm.parties + org.settings (078), rates.catalog (086), rates/messaging (080); slot points resolve (073)", () => {
+  test("registry contributes quoting.document (077), crm.parties + org.settings (078), rates.catalog (086/096), rates/messaging (080); slot points resolve (073)", () => {
     const result = getActiveWorkbenchContributions("enterprise")
     expect(result.activity.map((a) => a.extensionId)).toEqual([
       "quoting.document",
@@ -309,6 +309,7 @@ describe("getActiveWorkbenchContributions", () => {
       "org.settings",
       "messaging.msgraph",
     ])
+    // rates.catalog: detail + search + sheets + sell + spotSearch (096)
     expect(result.editors.map((e) => e.extensionId)).toEqual([
       "quoting.document",
       "quoting.document",
@@ -316,11 +317,16 @@ describe("getActiveWorkbenchContributions", () => {
       "crm.parties",
       "rates.catalog",
       "rates.catalog",
+      "rates.catalog",
+      "rates.catalog",
+      "rates.catalog",
       "org.settings",
       "org.settings",
       "ingestion.fcl_v6",
       "messaging.msgraph",
     ])
+    // Defined but empty `rates.slots.spotSearch` (096 stub) is omitted until
+    // contributors mount in 098.
     expect(Object.keys(result.points)).toEqual([
       "quoting.slots.headerFields",
       "quoting.slots.chargeTable",

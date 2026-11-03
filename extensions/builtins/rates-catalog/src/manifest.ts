@@ -1,15 +1,15 @@
 /**
- * Manifest for driving built-in `rates.catalog` (tickets 073 / 086).
+ * Manifest for driving built-in `rates.catalog` (tickets 073 / 086 / 096).
  *
  * Plain data (no imports) so the host registry can bundle it and the
  * `@starboard/ext-host` Zod schema validates it at load. Default-on for
  * credit + enterprise; missing rollout row = on.
  *
- * - Workbench: `rates` activity + list/detail editors (`/rates`,
- *   `/rates/catalog/:resourceId` — 3-segment detail avoids colliding with
- *   ingestion's `/rates/upload`).
- * - `defines.rates.slots.ingestActions` so optional ingest can inject upload
- *   actions (`rates.ingestUpload` shared panel) without coupling.
+ * - Workbench: `rates` activity + Search / Sheets / Sell / Spot sidebar
+ *   editors (`/rates/search|sheets|sell|spot`). Detail stays
+ *   `/rates/catalog/:resourceId` (avoids `/rates/upload`).
+ * - Catalog list CRUD lives under Rate Sheets until 099 polish.
+ * - `defines.rates.slots.ingestActions` + stub `rates.slots.spotSearch` (098).
  * - Still contributes catalog search into `quoting.slots.rateSources`.
  */
 export const manifest = {
@@ -24,6 +24,11 @@ export const manifest = {
         description:
           "Toolbar / actions on the rates catalog list (rate-sheet upload, …).",
       },
+      {
+        id: "rates.slots.spotSearch",
+        description:
+          "Standalone Spot search UI in the Rates activity (no quote document).",
+      },
     ],
   },
   contributes: {
@@ -35,12 +40,39 @@ export const manifest = {
         activityId: "rates",
         entries: [
           {
-            id: "rates.catalog.all",
-            label: "Rate catalog",
+            id: "rates.catalog.search",
+            label: "Search Rates",
             opens: {
-              viewType: "rate.list",
-              resourceId: "/rates",
-              title: "Rates",
+              viewType: "rate.search",
+              resourceId: "/rates/search",
+              title: "Search Rates",
+            },
+          },
+          {
+            id: "rates.catalog.sheets",
+            label: "Rate Sheets",
+            opens: {
+              viewType: "rate.sheets",
+              resourceId: "/rates/sheets",
+              title: "Rate Sheets",
+            },
+          },
+          {
+            id: "rates.catalog.sell",
+            label: "Sell Rates",
+            opens: {
+              viewType: "rate.sell",
+              resourceId: "/rates/sell",
+              title: "Sell Rates",
+            },
+          },
+          {
+            id: "rates.catalog.spot",
+            label: "Spot search",
+            opens: {
+              viewType: "rate.spotSearch",
+              resourceId: "/rates/spot",
+              title: "Spot search",
             },
           },
         ],
@@ -53,9 +85,24 @@ export const manifest = {
         deepLink: "/rates/catalog/:resourceId",
       },
       {
-        viewType: "rate.list",
-        displayName: "Rates",
-        deepLink: "/rates",
+        viewType: "rate.search",
+        displayName: "Search Rates",
+        deepLink: "/rates/search",
+      },
+      {
+        viewType: "rate.sheets",
+        displayName: "Rate Sheets",
+        deepLink: "/rates/sheets",
+      },
+      {
+        viewType: "rate.sell",
+        displayName: "Sell Rates",
+        deepLink: "/rates/sell",
+      },
+      {
+        viewType: "rate.spotSearch",
+        displayName: "Spot search",
+        deepLink: "/rates/spot",
       },
     ],
     points: {

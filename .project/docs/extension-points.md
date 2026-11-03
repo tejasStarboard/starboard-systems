@@ -96,7 +96,7 @@ Other driving built-ins follow the same pattern when they grow nested UI:
 
 - `crm.parties` might define `crm.slots.contactPanel`
 - `rates.catalog` defines `rates.slots.ingestActions` (086 stub; 087 fills upload)
-- `rates.catalog` defines `rates.slots.spotSearch` (**098**) — standalone Spot search editor (no quote document); `spot.*` contribute offer UI. Quote apply-to-lane remains `quoting.slots.rateSources`.
+- `rates.catalog` defines `rates.slots.spotSearch` (**096** stub; **098** fills UI) — standalone Spot search editor (no quote document); `spot.*` contribute offer UI. Quote apply-to-lane remains `quoting.slots.rateSources`.
 
 Rates activity IA (Search / Sheets / Sell / Spot sidebar): [rates-catalog-ux-2026-11-03.md](reference/rates-catalog-ux-2026-11-03.md) · tickets **095–099**.
 
@@ -104,11 +104,11 @@ Rates activity IA (Search / Sheets / Sell / Spot sidebar): [rates-catalog-ux-202
 
 ## 3. Specialty elsewhere (also extension-owned)
 
-| Owner                                  | Defines                                                              | Contributors                 |
-| -------------------------------------- | -------------------------------------------------------------------- | ---------------------------- |
-| `rates.catalog`                        | `rates.slots.ingestActions`, `rates.slots.spotSearch` (**098**)      | `spot.*`, `ingestion.fcl_v6` |
-| `rates.catalog` or rates host built-in | `rates.offerProviders`, `rates.ingestPipelines` (future / specialty) | `spot.*`, `ingestion.fcl_v6` |
-| Messaging host / `messaging.msgraph`   | mail account / send hooks                                            | future gmail, …              |
+| Owner                                  | Defines                                                                 | Contributors                 |
+| -------------------------------------- | ----------------------------------------------------------------------- | ---------------------------- |
+| `rates.catalog`                        | `rates.slots.ingestActions`, `rates.slots.spotSearch` (**096**/**098**) | `spot.*`, `ingestion.fcl_v6` |
+| `rates.catalog` or rates host built-in | `rates.offerProviders`, `rates.ingestPipelines` (future / specialty)    | `spot.*`, `ingestion.fcl_v6` |
+| Messaging host / `messaging.msgraph`   | mail account / send hooks                                               | future gmail, …              |
 
 Optional extensions should prefer contributing to **driving** points, not inventing kernel specialty APIs.
 
