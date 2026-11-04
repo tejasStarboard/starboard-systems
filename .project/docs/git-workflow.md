@@ -20,7 +20,10 @@ On public repos, GitHub Free supports branch protection / rulesets:
 1. **`dev` and `main`**: pull request required; no direct push; no force-push/delete.
 2. **`dev`**: required status check **`Lint · typecheck · test · build`** (CI job name).
 3. Repo **auto-merge** enabled; PRs into `dev` are queued to merge when CI passes (see also [`.github/workflows/automerge-dev.yml`](../../.github/workflows/automerge-dev.yml) as a fallback).
-4. **Merge method for ticket PRs into `dev`: squash and merge only** (`gh pr merge --auto --squash`). Squash keeps **one commit per ticket** on `dev` (title = PR title) so a bad ticket is one SHA to revert / cherry-pick to `main`. Repo settings allow **squash only** (merge commits and rebase-and-merge disabled). Automerge fallback uses `merge_method: "squash"`.
+4. **GitHub keeps all merge methods available** on the PR page (merge commit, squash, rebase). Do **not** disable any at the repo level.
+5. **Which method to use into `dev`:**
+   - **Single-ticket PR** (branch = ticket id, e.g. `096`): prefer **squash** (`gh pr merge --auto --squash`) so that ticket is **one commit** on `dev` (easy revert / cherry-pick to `main`).
+   - **Multi-ticket feature / integration PR** (e.g. `quote-flow` carrying several ticket commits): use **rebase** or **merge commit** — **do not squash** the whole PR, or ticket history collapses into one SHA. Each ticket should remain a separate commit on `dev`.
 
 Local guard (optional, still useful):
 
@@ -40,20 +43,21 @@ Agent default: skill **starboard-dev-workflow**.
    Naming: **ticket id only** (e.g. `001`), matching `.project/tickets/…/{id}-*.md`. Do **not** set `dev` as the branch upstream.
 3. Implement the ticket; keep the branch scoped to that ticket. Commit subjects:
    `{feat|fix|chore}({id}) - {commit title}` (e.g. `feat(001) - extension host skeleton`).
-4. Push and open a PR **into `dev`** (enable auto-merge with **squash**):
+4. Push and open a PR **into `dev`**. For a **single-ticket** branch, prefer squash auto-merge:
    ```bash
    git push -u origin HEAD
    gh pr create --base dev --title "feat(001) - …" --body "…"   # title: {fix|feat|chore}({id}) - brief title
    # body sections: Summary · What it covers · Out of Scope · QA Instructions
    gh pr merge --auto --squash
    ```
+   Multi-ticket feature PRs: choose **rebase** or **merge** on the PR page (or `gh pr merge --auto --rebase` / `--merge`) so each ticket stays a separate commit.
 5. After merge to `dev`: move ticket `in_progress/` → `done/`.
 
 ## Promote to `main` (cherry-pick)
 
 Do **not** open feature PRs against `main`.
 
-1. Identify the **squash commit** on `dev` for the ticket (one SHA per ticket PR).
+1. Identify the ticket commit(s) on `dev` to release (squash SHA for a single-ticket PR, or each ticket’s commit if a feature branch was rebased/merged).
 2. Branch from `main`:
    ```bash
    git fetch origin
@@ -79,6 +83,6 @@ Locally mirror with `pnpm run ci` (not bare `pnpm ci`, which is a clean install)
 
 - Never commit straight to `dev` or `main`.
 - Never open ticket PRs with `--base main`.
-- Default base for `gh pr create` in this repo: **`dev`**; enable `gh pr merge --auto --squash` (never `--merge` / `--rebase` for ticket PRs into `dev`).
+- Default base for `gh pr create` in this repo: **`dev`**. Single-ticket PRs: prefer `gh pr merge --auto --squash`. Multi-ticket feature PRs: rebase or merge (not squash).
 - Ticket branches: `git checkout --no-track -b {id} origin/dev` (e.g. `001`; upstream is the ticket branch after push, never `dev`).
 - Run **`pnpm run ci`** locally (same steps as GitHub CI) before push/PR; keep remote CI green before merge.

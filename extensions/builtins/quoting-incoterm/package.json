@@ -24,13 +24,16 @@
     "src"
   ],
   "scripts": {
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test:e2e": "playwright test"
   },
   "devDependencies": {
     "@starboard/tool-typescript-config": "workspace:*",
     "@types/react": "^19",
     "react": "19.3.1",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "@playwright/test": "^1.64.1",
+    "@starboard/tool-e2e": "workspace:*"
   },
   "peerDependencies": {
     "react": "19.3.1"

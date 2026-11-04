@@ -58,13 +58,19 @@ jobs:
             }
 
             for (const pr of targets) {
-              core.info(`Merging PR #${pr.number}: ${pr.title}`)
+              // Single-ticket branches are numeric ids (e.g. "096") → squash.
+              // Multi-ticket feature/integration branches → merge commit so
+              // each ticket commit stays separate on dev (do not squash).
+              const merge_method = /^\d+$/.test(pr.head.ref) ? "squash" : "merge"
+              core.info(
+                `Merging PR #${pr.number}: ${pr.title} (method=${merge_method}, head=${pr.head.ref})`
+              )
               try {
                 await github.rest.pulls.merge({
                   owner,
                   repo,
                   pull_number: pr.number,
-                  merge_method: "squash",
+                  merge_method,
                 })
                 core.info(`Merged PR #${pr.number}`)
                 try {

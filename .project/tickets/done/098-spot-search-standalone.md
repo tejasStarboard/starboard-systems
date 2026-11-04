@@ -2,7 +2,7 @@
 id: 098
 wave: 09-rates-catalog-ux
 title: Spot search — standalone Rates workbench editor
-status: in_progress
+status: done
 depends_on: [096]
 epic: SYS-RATES-UX
 docs:

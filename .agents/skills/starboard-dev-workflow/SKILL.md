@@ -126,7 +126,7 @@ gh pr merge --auto --squash
 
 - Base **`dev` only** (never `main`).
 - `-u origin HEAD` tracks the **ticket branch**, not `dev`.
-- Always enable auto-merge with **`--squash`** when available (one commit per ticket on `dev` — easy revert / promote). Do **not** use `--merge` or `--rebase` for ticket PRs into `dev`.
+- This skill is **one ticket per PR** → prefer auto-merge with **`--squash`** (one commit per ticket on `dev`). Do **not** squash multi-ticket feature/integration PRs into `dev` — those use rebase or merge so each ticket stays a separate commit. GitHub keeps squash / merge / rebase all available on the PR page.
 - Remote CI job name: `Lint · typecheck · test · build`.
 
 ## 8. After merge (when asked or on next workflow run)
