@@ -31,7 +31,7 @@ git fetch origin
 git log --oneline origin/dev -30
 ```
 
-From recent `origin/dev` history (merge commits, `ticket NNN`, branch names `{id}` / `001`):
+From recent `origin/dev` history (squash commits titled `{feat|fix|chore}({id}) - …`, `ticket NNN`, branch names `{id}` / `001`):
 
 - For each ticket id clearly merged to `dev`, if the file still lives in `todo/` or `in_progress/`:
   - move → `.project/tickets/done/`
@@ -117,7 +117,7 @@ gh pr create --base dev --title "{type}({id}) - {brief title}" --body "$(cat <<'
 
 EOF
 )"
-gh pr merge --auto --merge
+gh pr merge --auto --squash
 ```
 
 **Title:** `{fix|feat|chore}({id}) - {brief title}` — e.g. `feat(001) - extension host skeleton`. Pick `feat` / `fix` / `chore` from the change; `{id}` is the ticket id.
@@ -126,7 +126,8 @@ gh pr merge --auto --merge
 
 - Base **`dev` only** (never `main`).
 - `-u origin HEAD` tracks the **ticket branch**, not `dev`.
-- Always enable auto-merge when available; remote CI job name: `Lint · typecheck · test · build`.
+- Always enable auto-merge with **`--squash`** when available (one commit per ticket on `dev` — easy revert / promote). Do **not** use `--merge` or `--rebase` for ticket PRs into `dev`.
+- Remote CI job name: `Lint · typecheck · test · build`.
 
 ## 8. After merge (when asked or on next workflow run)
 
