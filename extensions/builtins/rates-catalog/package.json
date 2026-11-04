@@ -25,7 +25,7 @@
   ],
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "test": "bun test",
+    "test": "bun test src",
     "test:e2e": "playwright test"
   },
   "devDependencies": {
