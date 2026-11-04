@@ -81,7 +81,12 @@ describe("077 quoting.document in the workbench", () => {
   test("073: every active quoting slot contribution resolves to a UI factory", () => {
     const { points } = getActiveWorkbenchContributions("credit")
     const quoting = Object.entries(points)
-      .filter(([pointId]) => pointId.startsWith("quoting."))
+      // 094 `*.templates` points are headless registries (renderers live in
+      // the owning extension's server/template modules), not slot UI.
+      .filter(
+        ([pointId]) =>
+          pointId.startsWith("quoting.") && !pointId.endsWith(".templates")
+      )
       .flatMap(([, contributions]) => contributions)
     expect(quoting.length).toBeGreaterThan(0)
     for (const contribution of quoting) {

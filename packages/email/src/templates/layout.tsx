@@ -14,15 +14,22 @@ type EmailLayoutProps = {
   preview: string
   heading: string
   children: ReactNode
+  /** Container max width in px (default 480; quote drafts use a wider table). */
+  width?: number
 }
 
-export function EmailLayout({ preview, heading, children }: EmailLayoutProps) {
+export function EmailLayout({
+  preview,
+  heading,
+  children,
+  width = 480,
+}: EmailLayoutProps) {
   return (
     <Html>
       <Head />
       <Preview>{preview}</Preview>
       <Body style={body}>
-        <Container style={container}>
+        <Container style={{ ...container, maxWidth: `${width}px` }}>
           <Text style={brand}>Starboard</Text>
           <Heading style={title}>{heading}</Heading>
           <Section>{children}</Section>

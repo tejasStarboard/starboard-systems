@@ -1,7 +1,7 @@
 import "server-only"
 
 import { and, eq, inArray } from "drizzle-orm"
-import { member, user } from "@starboard/lib-db/schema"
+import { member, organization, user } from "@starboard/lib-db/schema"
 
 import { db } from "@/lib/db"
 
@@ -18,6 +18,32 @@ export class OrganizationsDao {
       .where(inArray(user.id, unique))
 
     return new Map(rows.map((row) => [row.id, row.name]))
+  }
+
+  /** Raw Better Auth `organization.metadata` (JSON text) or null. */
+  async getOrganizationMetadata(
+    organizationId: string
+  ): Promise<string | null> {
+    const [row] = await db
+      .select({ metadata: organization.metadata })
+      .from(organization)
+      .where(eq(organization.id, organizationId))
+      .limit(1)
+    return row?.metadata ?? null
+  }
+
+  /** Org name / logo / metadata for quote documents (094). */
+  async getOrganizationDocumentRecord(organizationId: string) {
+    const [row] = await db
+      .select({
+        name: organization.name,
+        logo: organization.logo,
+        metadata: organization.metadata,
+      })
+      .from(organization)
+      .where(eq(organization.id, organizationId))
+      .limit(1)
+    return row ?? { name: null, logo: null, metadata: null }
   }
 
   /** Optional helper: orgs the user belongs to (for future scoping). */

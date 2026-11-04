@@ -5,17 +5,24 @@
  * `@starboard/ext-host` Zod schema validates it at load. Default-on for
  * credit + enterprise; missing rollout row = on.
  *
- * Contributes no workbench UI: it exports port / address combobox widgets
- * (`widgets`) consumed by quote lane fields (and available for slot
- * contributions later). Data comes from `/api/geography/*` (BFF →
- * `services/geography`).
+ * Exports port / address combobox widgets (`widgets`) consumed by quote lane
+ * fields. Contributes the FCL world-map route picker (ticket 090) into
+ * `quoting.document`'s `quoting.slots.laneRoute`. Unplug (or map off) →
+ * Route step falls back to `PortCombobox`. Data comes from `/api/geography/*`
+ * (BFF → `services/geography`).
  */
 export const manifest = {
   id: "geo.gazetteer",
   version: "0.1.0",
   displayName: "Geography gazetteer",
   requiredPlan: ["credit", "enterprise"],
-  contributes: {},
+  contributes: {
+    points: {
+      "quoting.slots.laneRoute": [
+        { id: "geo.gazetteer.routeMap", label: "FCL route map" },
+      ],
+    },
+  },
   enabled: true,
 } as const
 

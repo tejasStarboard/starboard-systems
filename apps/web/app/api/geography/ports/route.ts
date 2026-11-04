@@ -12,10 +12,12 @@ export async function GET(request: Request) {
 
   const url = new URL(request.url)
   const q = url.searchParams.get("q") ?? ""
+  const country = url.searchParams.get("country") ?? undefined
+  const type = url.searchParams.get("type") ?? undefined
 
   try {
     const client = getGeographyClient()
-    const ports = await client.searchPorts(q)
+    const ports = await client.searchPorts(q, { country, type })
     return NextResponse.json({ ports })
   } catch (error) {
     if (error instanceof ServiceClientError) {

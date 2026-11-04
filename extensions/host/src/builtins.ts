@@ -3,6 +3,7 @@ import { manifest as geoGazetteer } from "@starboard/ext-geo-gazetteer/manifest"
 import { manifest as orgSettings } from "@starboard/ext-org-settings/manifest"
 import { manifest as quotingCharges } from "@starboard/ext-quoting-charges/manifest"
 import { manifest as quotingDocument } from "@starboard/ext-quoting-document/manifest"
+import { manifest as quotingEmail } from "@starboard/ext-quoting-email/manifest"
 import { manifest as quotingIncoterm } from "@starboard/ext-quoting-incoterm/manifest"
 import { manifest as quotingMarkup } from "@starboard/ext-quoting-markup/manifest"
 import { manifest as quotingPdf } from "@starboard/ext-quoting-pdf/manifest"
@@ -20,6 +21,7 @@ export const builtinManifests: readonly unknown[] = [
   quotingIncoterm,
   quotingMarkup,
   quotingPdf,
+  quotingEmail,
   crmParties,
   geoGazetteer,
   ratesCatalog,

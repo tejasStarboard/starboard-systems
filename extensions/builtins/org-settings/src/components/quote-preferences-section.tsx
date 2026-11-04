@@ -4,9 +4,11 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useCallback, useEffect, useState } from "react"
 import { Controller, useForm } from "react-hook-form"
 
+import { CurrencyCombobox } from "@starboard/ext-geo-gazetteer"
 import { Button } from "@starboard/lib-ui/components/button"
 import {
   Field,
+  FieldDescription,
   FieldError,
   FieldGroup,
   FieldLabel,
@@ -15,22 +17,27 @@ import { Input } from "@starboard/lib-ui/components/input"
 import { toast } from "@starboard/lib-ui/components/toast"
 
 import { authClient } from "../lib/auth-client"
+import { toastFormErrors } from "../lib/form-toast"
 import {
   parseOrgMetadata,
   type OrgWorkspaceMetadata,
 } from "../lib/org-metadata"
 import {
-  quoteRulesFormSchema,
-  type QuoteRulesFormValues,
+  quotePreferencesFormSchema,
+  type QuotePreferencesFormValues,
 } from "../lib/settings-forms.schema"
-import { toastFormErrors } from "../lib/form-toast"
 
-export function QuoteRulesSettingsForm() {
+/**
+ * Preferences → Quote (former Quote rules): org-level defaults stored in
+ * `organization.metadata.quoteRules` — validity days + default base currency
+ * applied to new / blank-currency quote drafts.
+ */
+export function QuotePreferencesSection() {
   const [metadata, setMetadata] = useState<OrgWorkspaceMetadata>({})
   const [loading, setLoading] = useState(true)
-  const form = useForm<QuoteRulesFormValues>({
-    resolver: zodResolver(quoteRulesFormSchema),
-    defaultValues: { defaultValidityDays: "30" },
+  const form = useForm<QuotePreferencesFormValues>({
+    resolver: zodResolver(quotePreferencesFormSchema),
+    defaultValues: { defaultValidityDays: "30", defaultBaseCurrency: "" },
   })
 
   const load = useCallback(async () => {
@@ -40,7 +47,7 @@ export function QuoteRulesSettingsForm() {
     if (orgError || !data) {
       toast.add({
         type: "error",
-        title: "Unable to load quote rules",
+        title: "Unable to load quote preferences",
         description: orgError?.message ?? "Something went wrong. Try again.",
       })
       setLoading(false)
@@ -50,6 +57,7 @@ export function QuoteRulesSettingsForm() {
     setMetadata(parsed)
     form.reset({
       defaultValidityDays: String(parsed.quoteRules?.defaultValidityDays ?? 30),
+      defaultBaseCurrency: parsed.quoteRules?.defaultBaseCurrency ?? "",
     })
     setLoading(false)
   }, [form])
@@ -58,36 +66,47 @@ export function QuoteRulesSettingsForm() {
     void load()
   }, [load])
 
-  async function onSave(values: QuoteRulesFormValues) {
-    const days = Number.parseInt(values.defaultValidityDays, 10)
+  async function onSave(values: QuotePreferencesFormValues) {
     const next: OrgWorkspaceMetadata = {
       ...metadata,
-      quoteRules: { defaultValidityDays: days },
+      quoteRules: {
+        defaultValidityDays: Number.parseInt(values.defaultValidityDays, 10),
+        defaultBaseCurrency: values.defaultBaseCurrency
+          ? values.defaultBaseCurrency.toUpperCase()
+          : undefined,
+      },
     }
     const { error: updateError } = await authClient.organization.update({
-      data: {
-        metadata: next,
-      },
+      data: { metadata: next },
     })
     if (updateError) {
       toast.add({
         type: "error",
-        title: "Unable to save quote rules",
+        title: "Unable to save quote preferences",
         description: updateError.message ?? "Something went wrong. Try again.",
       })
       return
     }
     setMetadata(next)
     form.reset(values)
-    toast.add({ type: "success", title: "Quote rules saved" })
+    toast.add({ type: "success", title: "Quote preferences saved" })
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-6 py-8">
+    <section
+      id="quote"
+      aria-labelledby="preferences-quote-heading"
+      className="scroll-mt-6 space-y-4"
+    >
       <div className="space-y-1">
-        <h1 className="text-2xl font-semibold tracking-tight">Quote rules</h1>
+        <h2
+          id="preferences-quote-heading"
+          className="text-lg font-semibold tracking-tight"
+        >
+          Quote
+        </h2>
         <p className="text-sm text-muted-foreground">
-          Defaults applied when building quotes for this workspace.
+          Workspace defaults applied when building quotes.
         </p>
       </div>
 
@@ -118,6 +137,28 @@ export function QuoteRulesSettingsForm() {
                 </Field>
               )}
             />
+            <Controller
+              control={form.control}
+              name="defaultBaseCurrency"
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid || undefined}>
+                  <FieldLabel htmlFor="default-base-currency">
+                    Default base currency
+                  </FieldLabel>
+                  <CurrencyCombobox
+                    id="default-base-currency"
+                    value={field.value}
+                    onChange={field.onChange}
+                    invalid={fieldState.invalid}
+                  />
+                  <FieldDescription>
+                    Quotes are totalled in this currency. New quotes start with
+                    it; each quote can still change it in Basics.
+                  </FieldDescription>
+                  <FieldError errors={[fieldState.error]} />
+                </Field>
+              )}
+            />
           </FieldGroup>
           <Button
             type="submit"
@@ -127,6 +168,6 @@ export function QuoteRulesSettingsForm() {
           </Button>
         </form>
       )}
-    </div>
+    </section>
   )
 }

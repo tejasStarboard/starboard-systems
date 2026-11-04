@@ -1,7 +1,7 @@
 {
   "name": "@starboard/ext-org-settings",
   "version": "0.0.1",
-  "description": "Driving built-in extension `org.settings` (company / team / profile / quote-rules / billing / integrations editors)",
+  "description": "Driving built-in extension `org.settings` (company / team / profile / preferences (App + Quote) / billing / integrations editors)",
   "private": true,
   "license": "UNLICENSED",
   "type": "module",
@@ -18,6 +18,10 @@
     "./permissions": {
       "types": "./src/lib/permissions.ts",
       "default": "./src/lib/permissions.ts"
+    },
+    "./org-metadata": {
+      "types": "./src/lib/org-metadata.ts",
+      "default": "./src/lib/org-metadata.ts"
     },
     "./manifest": {
       "types": "./src/manifest.ts",
@@ -47,6 +51,7 @@
   "dependencies": {
     "@hookform/resolvers": "^6.0.2",
     "@phosphor-icons/react": "^2.1.10",
+    "@starboard/ext-geo-gazetteer": "workspace:*",
     "@starboard/lib-ui": "workspace:*",
     "better-auth": "^1.7.14",
     "next-themes": "^0.4.6",

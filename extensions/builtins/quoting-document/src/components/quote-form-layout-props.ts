@@ -6,6 +6,8 @@ import type {
   UseFormSetValue,
 } from "react-hook-form"
 
+import type { LiveFxState } from "../lib/use-live-fx"
+import type { ApplyRatePayload } from "../slots/types"
 import type {
   LaneFormValues,
   QuoteFormOption,
@@ -39,6 +41,8 @@ export type QuoteFormLayoutProps = {
   totals: { subtotal: number; markup: number; total: number }
   excludedBuckets: Array<"origin" | "freight" | "destination">
   currencyCode: string
+  /** Live FX (Frankfurter) status for the Step 1 base currency. */
+  fx: LiveFxState
   pending: boolean
   isDirty: boolean
   /** False for terminal stages (win / loss / expired). */
@@ -46,7 +50,7 @@ export type QuoteFormLayoutProps = {
   onSelectLane: (index: number) => void
   onAddLane: () => void
   onRemoveLane: (index: number) => void
-  onSearchRates: () => void
+  onApplyRate: (payload: ApplyRatePayload) => void
   onAddManualRate: () => void
   onAppendRate: () => void
   onRemoveRate: (index: number) => void

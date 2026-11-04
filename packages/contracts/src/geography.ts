@@ -26,8 +26,20 @@ export type ListCurrenciesResponse = z.infer<
   typeof listCurrenciesResponseSchema
 >
 
+export const facilityTypeSchema = z.enum(["seaport", "airport"])
+
 export const listPortsQuerySchema = z.object({
   q: z.string().optional().default(""),
+  /** ISO-3166 alpha-2; restricts hits to that country (`GET /ports?country=XX`). */
+  country: z
+    .string()
+    .trim()
+    .length(2)
+    .regex(/^[A-Za-z]{2}$/, "Country must be a 2-letter code")
+    .transform((value) => value.toUpperCase())
+    .optional(),
+  /** Restrict to facilities carrying this type (e.g. `seaport` for the FCL map). */
+  type: facilityTypeSchema.optional(),
 })
 
 export type ListPortsQuery = z.infer<typeof listPortsQuerySchema>
@@ -36,6 +48,9 @@ export type ListPortsQuery = z.infer<typeof listPortsQuerySchema>
 export const facilityOptionSchema = formOptionSchema.extend({
   types: z.array(z.string()).optional(),
   country: z.string().optional(),
+  /** WGS84, when stored on `geo.facility`. */
+  latitude: z.number().nullable().optional(),
+  longitude: z.number().nullable().optional(),
 })
 
 export type FacilityOption = z.infer<typeof facilityOptionSchema>

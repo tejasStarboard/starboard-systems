@@ -54,4 +54,30 @@ describe("prepareQuoteEditorInput", () => {
     const input = prepareQuoteEditorInput(base)
     expect(input.customerOptions).toEqual([{ value: "cust-1", label: "Acme" }])
   })
+
+  test("blank-currency draft takes the org default base currency", () => {
+    const input = prepareQuoteEditorInput(
+      context({ defaults: { baseCurrency: "eur" } })
+    )
+    expect(input.defaultValues.currencyCode).toBe("EUR")
+    expect(input.currencyOptions.map((o) => o.value)).toContain("EUR")
+  })
+
+  test("org default never overrides a saved currency or a terminal quote", () => {
+    const saved = emptyQuoteFormValues({ id: "q-5" })
+    saved.currencyCode = "USD"
+    expect(
+      prepareQuoteEditorInput(
+        context({ quote: saved, defaults: { baseCurrency: "EUR" } })
+      ).defaultValues.currencyCode
+    ).toBe("USD")
+
+    const won = emptyQuoteFormValues({ id: "q-6" })
+    won.status = "win"
+    expect(
+      prepareQuoteEditorInput(
+        context({ quote: won, defaults: { baseCurrency: "EUR" } })
+      ).defaultValues.currencyCode
+    ).toBe("")
+  })
 })

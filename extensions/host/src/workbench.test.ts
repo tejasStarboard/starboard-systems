@@ -332,7 +332,11 @@ describe("getActiveWorkbenchContributions", () => {
       "quoting.slots.totals",
       "quoting.slots.rateSources",
       "quoting.slots.lifecycle",
+      "quoting.slots.preview",
+      "quoting.slots.laneRoute",
       "quoting.commands",
+      "quoting.pdf.templates",
+      "quoting.email.templates",
       "rates.slots.ingestActions",
       "rates.slots.spotSearch",
     ])

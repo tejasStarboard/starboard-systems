@@ -6,15 +6,14 @@ import { useFieldArray, useForm, useWatch } from "react-hook-form"
 
 import { useBreakpoint } from "@starboard/lib-ui/hooks/use-breakpoint"
 import { toast } from "@starboard/lib-ui/components/toast"
+import { mergeBaseFxRates } from "@starboard/lib-pricing"
 
-import { QuoteFormDesktop } from "./quote-form-desktop"
+import { QuoteBuilderShell } from "./quote-builder-shell"
 import type { QuoteFormLayoutProps } from "./quote-form-layout-props"
-import { QuoteFormMobile } from "./quote-form-mobile"
-import { QuoteFormTablet } from "./quote-form-tablet"
 import { isCommercialEditable } from "../lib/quote-stage"
+import { useLiveFx } from "../lib/use-live-fx"
 import { useQuoteSlotEntries } from "../slots/slot-host"
-import { QUOTING_SLOTS } from "../slots/types"
-import { RatesSearchSheet, type ApplyRatePayload } from "./rates-search-sheet"
+import { QUOTING_SLOTS, type ApplyRatePayload } from "../slots/types"
 import {
   buildLaneUsageQuantities,
   calculateManualRateTotals,
@@ -68,12 +67,14 @@ export function QuoteForm({
 }) {
   const breakpoint = useBreakpoint()
   const [pending, startTransition] = useTransition()
-  const [ratesOpen, setRatesOpen] = useState(false)
   // Rates may only be applied while the charge table is mounted; otherwise the
   // result would land in charge UI the user cannot see (quoting.charges off).
   const hasChargeTable =
     useQuoteSlotEntries(QUOTING_SLOTS.chargeTable).length > 0
   const [selectedLaneIndex, setSelectedLaneIndex] = useState(0)
+  // Bumped on Cancel so the builder shell remounts with fresh navigation state
+  // (step, per-lane steps, preview sheet) instead of showing a stale step.
+  const [shellKey, setShellKey] = useState(0)
   const [manualRatesVisibleByLane, setManualRatesVisibleByLane] = useState<
     Record<string, boolean>
   >(() =>
@@ -124,6 +125,21 @@ export function QuoteForm({
   const exchangeRates = useWatch({
     control: form.control,
     name: "exchangeRates",
+  })
+  const fx = useLiveFx({
+    currencyCode: currencyCode ?? "",
+    enabled: isCommercialEditable(status ?? "draft"),
+    onRates: (base, rates, { previousBase, manual }) => {
+      const current = form.getValues("exchangeRates") ?? {}
+      const next = mergeBaseFxRates(current, base, rates, {
+        dropBase: previousBase ?? undefined,
+      })
+      if (next !== current) {
+        // Automatic provider refresh must not dirty the form on open; only a
+        // user-initiated Refresh does.
+        form.setValue("exchangeRates", next, { shouldDirty: manual })
+      }
+    },
   })
   const incoterm = useWatch({
     control: form.control,
@@ -326,6 +342,7 @@ export function QuoteForm({
   function handleCancel() {
     form.reset(defaultValues)
     setSelectedLaneIndex(0)
+    setShellKey((key) => key + 1)
     setManualRatesVisibleByLane(
       Object.fromEntries(
         defaultValues.lanes.map((lane) => [
@@ -359,15 +376,14 @@ export function QuoteForm({
     totals,
     excludedBuckets,
     currencyCode: currencyCode ?? "",
+    fx,
     pending,
     isDirty: form.formState.isDirty,
     commercialEditable: isCommercialEditable(status ?? "draft"),
     onSelectLane: setSelectedLaneIndex,
     onAddLane: handleAddLane,
     onRemoveLane: handleRemoveLane,
-    onSearchRates: () => {
-      if (hasChargeTable) setRatesOpen(true)
-    },
+    onApplyRate: handleApplyRate,
     onAddManualRate: handleAddManualRate,
     onAppendRate: () => {
       const line = createManualRateLine({ label: "Rate" })
@@ -390,22 +406,12 @@ export function QuoteForm({
         <input type="hidden" {...form.register("quoteId")} />
         <input type="hidden" {...form.register("source")} />
 
-        {breakpoint === "mobile" ? (
-          <QuoteFormMobile {...layoutProps} />
-        ) : breakpoint === "tablet" ? (
-          <QuoteFormTablet {...layoutProps} />
-        ) : (
-          <QuoteFormDesktop {...layoutProps} />
-        )}
+        <QuoteBuilderShell
+          key={shellKey}
+          props={layoutProps}
+          layout={breakpoint}
+        />
       </form>
-
-      <RatesSearchSheet
-        open={ratesOpen && hasChargeTable}
-        onOpenChange={setRatesOpen}
-        origin={selectedLane?.origin || undefined}
-        destination={selectedLane?.destination || undefined}
-        onApplyRate={handleApplyRate}
-      />
     </div>
   )
 }

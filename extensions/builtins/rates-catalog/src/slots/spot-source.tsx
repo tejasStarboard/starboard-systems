@@ -4,11 +4,17 @@ import { useEffect, useMemo, useRef, useState } from "react"
 
 import { toast } from "@starboard/lib-ui/components/toast"
 
+import { RateCard, RateCardRail } from "../components/rate-card"
 import {
   parseSpotSearchResult,
   spotOfferToManualLine,
-  type SpotOffer,
 } from "../lib/apply-rate-to-lane"
+import {
+  isRateCardSelected,
+  rememberAppliedCard,
+  sortRateCards,
+  spotOfferToCard,
+} from "../lib/rate-card-model"
 import {
   extensionApiPath,
   pollExtensionJob,
@@ -24,13 +30,14 @@ export type SpotApplyRatePayload = {
 
 /**
  * Props for the generic `rates.spotSource` panel. Used from both
- * `quoting.slots.rateSources` (with `onApplyRate`) and
+ * `quoting.slots.rateSources` (with `onApplyRate` + `selectedRate`) and
  * `rates.slots.spotSearch` (browse-only, no apply).
  */
 export type SpotSourceProps = {
   contribution: SlotContribution & { extensionId?: string }
   origin?: string
   destination?: string
+  selectedRate?: { id: string; label: string; amount: number } | null
   onApplyRate?: (payload: SpotApplyRatePayload) => void
 }
 
@@ -43,6 +50,7 @@ export type SpotSourceProps = {
 export function SpotSource({
   origin,
   destination,
+  selectedRate,
   onApplyRate,
   contribution,
 }: SpotSourceProps) {
@@ -64,13 +72,29 @@ export function SpotSource({
   const abortRef = useRef<AbortController | null>(null)
   useEffect(() => () => abortRef.current?.abort(), [])
 
-  const spotOffers = useMemo((): SpotOffer[] => {
+  // Offers belong to the lane they were searched for: when the ports change,
+  // abort the poll and drop the job so stale cards can't be applied.
+  useEffect(() => {
+    abortRef.current?.abort()
+    abortRef.current = null
+    setSpotPending(false)
+    setSpotJob(null)
+    setSpotStatus(null)
+  }, [origin, destination])
+
+  const spotCards = useMemo(() => {
     if (spotStatus?.status !== "completed") {
       return []
     }
     const parsed = parseSpotSearchResult(spotStatus.result)
-    return parsed.ok ? parsed.rates : []
-  }, [spotStatus])
+    if (!parsed.ok) return []
+    return sortRateCards(
+      parsed.rates.map((offer, index) => ({
+        offer,
+        ...spotOfferToCard(offer, index, extensionId),
+      }))
+    )
+  }, [spotStatus, extensionId])
 
   async function enqueueSpotSearch() {
     if (!extensionId) {
@@ -169,50 +193,37 @@ export function SpotSource({
       </div>
       {spotJob ? (
         <div className="space-y-2 text-xs text-muted-foreground">
-          <p>
-            Job {spotJob.workflowId}
-            {spotStatus ? ` — ${spotStatus.status}` : ""}
-          </p>
-          {spotOffers.length > 0 ? (
-            <ul className="space-y-2">
-              {spotOffers.map((offer, index) => (
-                <li
-                  key={`${offer.label}-${offer.amount}-${index}`}
-                  className="border-b border-border py-2 last:border-b-0"
-                >
-                  <div className="flex items-baseline justify-between gap-2">
-                    <p className="text-sm font-medium text-foreground">
-                      {offer.label}
-                    </p>
-                    <p className="text-sm text-foreground tabular-nums">
-                      {offer.amount.toLocaleString("en-US", {
-                        style: "currency",
-                        currency: offer.currencyCode,
-                      })}
-                    </p>
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    {[offer.carrier, offer.origin, offer.destination]
-                      .filter(Boolean)
-                      .join(" · ")}
-                  </p>
-                  {onApplyRate ? (
-                    <button
-                      type="button"
-                      className="mt-1 text-xs font-medium underline-offset-2 hover:underline"
-                      onClick={() =>
-                        onApplyRate({
-                          line: spotOfferToManualLine(offer),
-                          currencyCode: offer.currencyCode,
-                        })
-                      }
-                    >
-                      Apply to lane
-                    </button>
-                  ) : null}
-                </li>
+          {spotStatus && spotStatus.status !== "completed" ? (
+            <p>
+              {spotStatus.status === "running"
+                ? "Searching…"
+                : `Search ${spotStatus.status}`}
+            </p>
+          ) : null}
+          {spotCards.length > 0 ? (
+            <RateCardRail>
+              {spotCards.map(({ offer, ...card }) => (
+                <RateCard
+                  key={card.key}
+                  card={card}
+                  selected={
+                    onApplyRate ? isRateCardSelected(card, selectedRate) : false
+                  }
+                  onSelect={
+                    onApplyRate
+                      ? () => {
+                          const line = spotOfferToManualLine(offer)
+                          rememberAppliedCard(line.id, card.key)
+                          onApplyRate({
+                            line,
+                            currencyCode: offer.currencyCode,
+                          })
+                        }
+                      : undefined
+                  }
+                />
               ))}
-            </ul>
+            </RateCardRail>
           ) : null}
         </div>
       ) : null}

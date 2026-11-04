@@ -4,9 +4,11 @@ import type {
   DoorAddress,
   FacilityOption,
   FormOption,
+  FxLatestResponse,
 } from "@starboard/lib-contracts"
 
 import type { GeographyDao } from "../dao/geography.dao"
+import { FxProviderError } from "../integrations/frankfurter"
 import type { GooglePlacesClient } from "../integrations/google-places"
 import { DefaultGeographyService } from "./geography.service"
 
@@ -15,6 +17,20 @@ const SEEDED_FACILITIES: FacilityOption[] = [
     value: "CNSHA",
     label: "CNSHA — Shanghai",
     types: ["seaport"],
+    country: "CN",
+    latitude: 31.23,
+    longitude: 121.47,
+  },
+  {
+    value: "CNNGB",
+    label: "CNNGB — Ningbo",
+    types: ["seaport"],
+    country: "CN",
+  },
+  {
+    value: "CNPEK",
+    label: "CNPEK — Beijing Capital",
+    types: ["airport"],
     country: "CN",
   },
   {
@@ -39,19 +55,31 @@ class InMemoryGeographyDao implements GeographyDao {
     return normalized
   }
 
+  async ensureCurrencies(codes: string[]): Promise<void> {
+    for (const code of codes) this.currencies.add(code.trim().toUpperCase())
+  }
+
   async listCurrencies(): Promise<FormOption[]> {
     return [...this.currencies]
       .sort()
       .map((code) => ({ value: code, label: code }))
   }
 
-  async searchPorts(q: string): Promise<FacilityOption[]> {
+  async searchPorts(
+    q: string,
+    filters: { country?: string; type?: string } = {}
+  ): Promise<FacilityOption[]> {
     const prefix = q.trim().toUpperCase()
     const needle = q.trim().toLowerCase()
+    const scoped = this.facilities.filter(
+      (facility) =>
+        (!filters.country || facility.country === filters.country) &&
+        (!filters.type || facility.types?.includes(filters.type))
+    )
     if (!prefix) {
-      return this.facilities.slice(0, 50)
+      return scoped.slice(0, 50)
     }
-    return this.facilities.filter((facility) => {
+    return scoped.filter((facility) => {
       if (facility.value.toUpperCase().startsWith(prefix)) return true
       const name = facility.label.split(" — ")[1]?.toLowerCase() ?? ""
       if (name.includes(needle)) return true
@@ -112,12 +140,61 @@ function roughSimilarity(a: string, b: string): number {
   return matches / longer.length
 }
 
-function service() {
+class FakeFx {
+  latestCalls: string[] = []
+  async currencies(): Promise<Record<string, string>> {
+    return { XAU: "Gold (provider only)" }
+  }
+  async latest(base: string): Promise<FxLatestResponse> {
+    this.latestCalls.push(base)
+    if (base === "ZZZ") throw new FxProviderError("unsupported", 404)
+    return {
+      base,
+      date: "2026-11-03",
+      rates: { EUR: 0.9 },
+      provider: "frankfurter",
+    }
+  }
+}
+
+function service(fx: FakeFx = new FakeFx()) {
   return new DefaultGeographyService(
     new InMemoryGeographyDao(),
-    new FakePlacesClient() as unknown as GooglePlacesClient
+    new FakePlacesClient() as unknown as GooglePlacesClient,
+    fx
   )
 }
+
+describe("DefaultGeographyService currencies + FX", () => {
+  test("fresh DB lists seeded ISO + provider currencies with names", async () => {
+    const options = await service().listCurrencies()
+    expect(options.find((o) => o.value === "USD")?.label).toBe(
+      "USD — US Dollar"
+    )
+    expect(options.find((o) => o.value === "XAU")?.label).toContain("Gold")
+    expect(options.length).toBeGreaterThan(40)
+  })
+
+  test("ensureCurrency still persists a custom code", async () => {
+    const svc = service()
+    await svc.ensureCurrency("xyz")
+    expect((await svc.listCurrencies()).some((o) => o.value === "XYZ")).toBe(
+      true
+    )
+  })
+
+  test("getFxRates returns provider payload for a valid base", async () => {
+    const result = await service().getFxRates("usd")
+    expect(result).toMatchObject({ base: "USD", rates: { EUR: 0.9 } })
+  })
+
+  test("getFxRates rejects an invalid base and maps provider errors", async () => {
+    await expect(service().getFxRates("US")).rejects.toThrow()
+    await expect(service().getFxRates("ZZZ")).rejects.toMatchObject({
+      status: 404,
+    })
+  })
+})
 
 describe("DefaultGeographyService.searchPorts", () => {
   test("returns seeded facilities when q is empty", async () => {
@@ -126,8 +203,33 @@ describe("DefaultGeographyService.searchPorts", () => {
   })
 
   test("filters by unlocode prefix", async () => {
-    const ports = await service().searchPorts("cn")
+    const ports = await service().searchPorts("cnsh")
     expect(ports).toEqual([SEEDED_FACILITIES[0]!])
+  })
+
+  test("returns latitude / longitude when stored", async () => {
+    const [sha] = await service().searchPorts("CNSHA")
+    expect(sha?.latitude).toBe(31.23)
+    expect(sha?.longitude).toBe(121.47)
+  })
+
+  test("country filter returns only that country's seaports", async () => {
+    const ports = await service().searchPorts("", {
+      country: "cn",
+      type: "seaport",
+    })
+    expect(ports.map((p) => p.value)).toEqual(["CNSHA", "CNNGB"])
+  })
+
+  test("country + q narrows within the country", async () => {
+    const ports = await service().searchPorts("cnn", { country: "CN" })
+    expect(ports.map((p) => p.value)).toEqual(["CNNGB"])
+  })
+
+  test("rejects an invalid country code", async () => {
+    await expect(
+      service().searchPorts("", { country: "CHN" })
+    ).rejects.toThrow()
   })
 
   test("matches common port name typos via fuzzy stand-in", async () => {

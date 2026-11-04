@@ -3,6 +3,7 @@ import { createGeographyDb } from "./dao/db"
 import { DrizzleGeographyDao } from "./dao/geography.dao"
 import { DefaultGeographyService } from "./domain/geography.service"
 import { createGeographyController } from "./http/geography.controller"
+import { FrankfurterClient } from "./integrations/frankfurter"
 import { GooglePlacesClient } from "./integrations/google-places"
 
 export type GeographyContainer = {
@@ -14,7 +15,11 @@ export function createContainer(config: GeographyConfig): GeographyContainer {
   const db = createGeographyDb(config.postgresUrl)
   const dao = new DrizzleGeographyDao(db)
   const places = new GooglePlacesClient(config.googleGeocodeApiKey)
-  const service = new DefaultGeographyService(dao, places)
+  const service = new DefaultGeographyService(
+    dao,
+    places,
+    new FrankfurterClient({ baseUrl: config.frankfurterBaseUrl })
+  )
   const controller = createGeographyController(service)
 
   return { service, controller }

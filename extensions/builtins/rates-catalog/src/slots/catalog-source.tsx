@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 
 import type {
   RateSourcesSlotProps,
@@ -9,16 +9,25 @@ import type {
 import type { Rate } from "@starboard/lib-contracts"
 import { toast } from "@starboard/lib-ui/components/toast"
 
+import { RateCard, RateCardRail } from "../components/rate-card"
 import { catalogRateToManualLine } from "../lib/apply-rate-to-lane"
+import {
+  catalogRateToCard,
+  isRateCardSelected,
+  rememberAppliedCard,
+  sortRateCards,
+} from "../lib/rate-card-model"
 
 /**
  * `rates.catalog.source` → `quoting.slots.rateSources`: catalog rates matching
- * the lane (`GET /api/rates`), applied to the lane as a manual rate line.
- * Mounted when the rates sheet opens, so it refetches on every open.
+ * the lane (`GET /api/rates`) as rate cards; Select applies the rate to the
+ * lane as a manual rate line. Mounted by the Rates step, so it refetches per
+ * visit and whenever the lane's ports change.
  */
 export function CatalogSource({
   origin,
   destination,
+  selectedRate,
   onApplyRate,
 }: SlotComponentProps<RateSourcesSlotProps>) {
   const [rates, setRates] = useState<Rate[]>([])
@@ -71,6 +80,14 @@ export function CatalogSource({
     return () => controller.abort()
   }, [origin, destination])
 
+  const cards = useMemo(
+    () =>
+      sortRateCards(
+        rates.map((rate) => ({ rate, ...catalogRateToCard(rate) }))
+      ),
+    [rates]
+  )
+
   if (loading) {
     return (
       <p className="text-center text-xs text-muted-foreground">
@@ -94,43 +111,23 @@ export function CatalogSource({
   }
 
   return (
-    <ul className="space-y-2">
-      {rates.map((rate) => (
-        <li
-          key={rate.id}
-          className="border-b border-border py-2 last:border-b-0"
-        >
-          <div className="flex items-baseline justify-between gap-2">
-            <p className="text-sm font-medium">{rate.label}</p>
-            <p className="text-sm tabular-nums">
-              {rate.amount.toLocaleString("en-US", {
-                style: "currency",
-                currency: rate.currencyCode,
-              })}
-            </p>
-          </div>
-          <p className="text-xs text-muted-foreground">
-            {[rate.carrier, rate.origin, rate.destination]
-              .filter(Boolean)
-              .join(" · ")}
-          </p>
-          <p className="text-xs text-muted-foreground">
-            Valid {rate.validFrom.slice(0, 10)} → {rate.validTo.slice(0, 10)}
-          </p>
-          <button
-            type="button"
-            className="mt-1 text-xs font-medium underline-offset-2 hover:underline"
-            onClick={() =>
+    <div className="space-y-1">
+      <p className="text-xs font-medium text-muted-foreground">Catalog rates</p>
+      <RateCardRail>
+        {cards.map(({ rate, ...card }) => (
+          <RateCard
+            key={card.key}
+            card={card}
+            selected={isRateCardSelected(card, selectedRate)}
+            onSelect={() =>
               onApplyRate({
                 line: catalogRateToManualLine(rate),
                 currencyCode: rate.currencyCode,
               })
             }
-          >
-            Apply to lane
-          </button>
-        </li>
-      ))}
-    </ul>
+          />
+        ))}
+      </RateCardRail>
+    </div>
   )
 }

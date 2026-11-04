@@ -12,6 +12,7 @@ const BUILTIN_IDS = [
   "quoting.incoterm",
   "quoting.markup",
   "quoting.pdf",
+  "quoting.email",
   "crm.parties",
   "geo.gazetteer",
   "rates.catalog",

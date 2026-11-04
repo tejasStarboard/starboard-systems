@@ -12,6 +12,8 @@ const SLOTS = [
   "quoting.slots.totals",
   "quoting.slots.rateSources",
   "quoting.slots.lifecycle",
+  "quoting.slots.preview",
+  "quoting.slots.laneRoute",
   "quoting.commands",
 ]
 
@@ -31,7 +33,7 @@ describe("quoting.document defines slots (073)", () => {
   const manifests = listManifests()
   const document = manifests.find((m) => m.id === "quoting.document")!
 
-  test("defines header / chargeTable / totals / rateSources / lifecycle / commands + totalsHooks", () => {
+  test("defines header / chargeTable / totals / rateSources / lifecycle / preview / commands + totalsHooks", () => {
     expect(document.defines?.extensionPoints?.map((p) => p.id)).toEqual([
       ...SLOTS,
       "quoting.totalsHooks",
@@ -56,12 +58,45 @@ describe("quoting.document defines slots (073)", () => {
     ).toEqual([["quoting.pdf.export", "quoting.pdf"]])
   })
 
+  test("quoting.pdf + quoting.email contribute preview tabs (092)", () => {
+    expect(
+      getContributionsToPoint("quoting.slots.preview", "credit").map((c) => [
+        c.id,
+        c.extensionId,
+        c.props?.tab,
+      ])
+    ).toEqual([
+      ["quoting.pdf.preview", "quoting.pdf", "pdf"],
+      ["quoting.email.preview", "quoting.email", "email"],
+    ])
+  })
+
   test("quoting.incoterm contributes header fields (084)", () => {
     expect(
       getContributionsToPoint("quoting.slots.headerFields", "credit").map(
         (c) => [c.id, c.extensionId]
       )
     ).toEqual([["quoting.incoterm.fields", "quoting.incoterm"]])
+  })
+
+  test("geo.gazetteer contributes the FCL route map (090)", () => {
+    expect(
+      getContributionsToPoint("quoting.slots.laneRoute", "credit").map((c) => [
+        c.id,
+        c.extensionId,
+      ])
+    ).toEqual([["geo.gazetteer.routeMap", "geo.gazetteer"]])
+  })
+
+  test("unplug geo.gazetteer → empty laneRoute (Route falls back to PortCombobox)", () => {
+    const result = getContributionsForOwner(
+      "quoting.document",
+      "credit",
+      manifests,
+      off("geo.gazetteer")
+    )
+    expect(result["quoting.slots.laneRoute"]).toEqual([])
+    expect(result["quoting.slots.headerFields"]).toHaveLength(1)
   })
 
   test("quoting.markup contributes totals footer (084)", () => {
@@ -73,13 +108,64 @@ describe("quoting.document defines slots (073)", () => {
     ).toEqual([["quoting.markup.footer", "quoting.markup"]])
   })
 
-  test("only quoting.document defines quoting.* points", () => {
-    for (const manifest of manifests.filter((m) => m.id !== document.id)) {
-      const quotingDefines = (manifest.defines?.extensionPoints ?? []).filter(
-        (point) => point.id.startsWith("quoting.")
-      )
-      expect(quotingDefines).toEqual([])
+  test("quoting.document owns the slots; pdf/email own only their template points (094)", () => {
+    const owned: Record<string, string[]> = {
+      "quoting.pdf": ["quoting.pdf.templates"],
+      "quoting.email": ["quoting.email.templates"],
     }
+    for (const manifest of manifests.filter((m) => m.id !== document.id)) {
+      const quotingDefines = (manifest.defines?.extensionPoints ?? [])
+        .map((point) => point.id)
+        .filter((id) => id.startsWith("quoting."))
+      expect(quotingDefines).toEqual(owned[manifest.id] ?? [])
+    }
+  })
+
+  test("template points self-contribute default + letterhead, org-pickable (094)", () => {
+    expect(
+      getContributionsToPoint("quoting.pdf.templates", "credit").map((c) => [
+        c.id,
+        c.extensionId,
+      ])
+    ).toEqual([
+      ["quoting.pdf.template.standard", "quoting.pdf"],
+      ["quoting.pdf.template.letterhead", "quoting.pdf"],
+    ])
+    expect(
+      getContributionsToPoint("quoting.email.templates", "credit").map(
+        (c) => c.id
+      )
+    ).toEqual([
+      "quoting.email.template.standard",
+      "quoting.email.template.letterhead",
+    ])
+  })
+
+  test("unplug quoting.pdf / quoting.email → their template points go empty (094)", () => {
+    expect(
+      getContributionsToPoint(
+        "quoting.pdf.templates",
+        "credit",
+        manifests,
+        off("quoting.pdf")
+      )
+    ).toEqual([])
+    expect(
+      getContributionsToPoint(
+        "quoting.email.templates",
+        "credit",
+        manifests,
+        off("quoting.email")
+      )
+    ).toEqual([])
+    expect(
+      getContributionsToPoint(
+        "quoting.pdf.templates",
+        "credit",
+        manifests,
+        off("quoting.email")
+      )
+    ).toHaveLength(2)
   })
 
   test("rates.catalog defines ingestActions + spotSearch", () => {
@@ -160,8 +246,26 @@ describe("quoting.document defines slots (073)", () => {
       context
     )
     expect(result["quoting.commands"]).toEqual([])
+    // PDF tab contributor gone; Email tab contributor stays (092).
+    expect(result["quoting.slots.preview"]?.map((c) => c.id)).toEqual([
+      "quoting.email.preview",
+    ])
     expect(result["quoting.slots.lifecycle"]).toHaveLength(1)
     expect(result["quoting.slots.chargeTable"]).toHaveLength(1)
+  })
+
+  test("unplug quoting.email → no email preview; PDF + export intact (092)", () => {
+    const result = getContributionsForOwner(
+      "quoting.document",
+      "credit",
+      manifests,
+      off("quoting.email")
+    )
+    expect(result["quoting.slots.preview"]?.map((c) => c.id)).toEqual([
+      "quoting.pdf.preview",
+    ])
+    expect(result["quoting.commands"]).toHaveLength(1)
+    expect(result["quoting.slots.lifecycle"]).toHaveLength(1)
   })
 
   test("unplug quoting.incoterm → empty headerFields; other slots intact", () => {

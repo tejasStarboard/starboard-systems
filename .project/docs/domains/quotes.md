@@ -62,7 +62,7 @@ FCL unit labels: `container` Per Eq, `kg` Per KG, `per_time` Per Day. Enum value
 
 ## Charge line economics (072)
 
-Each surcharge and global charge row edits a buy rate (`rate`, or `%` when the unit is percentage), an optional line sell (`sellAmount`; blank mirrors the calculated buy), Include (`isIncludedInTotal`), and Split (`isVisible`). Split off marks the line Absorbed: it still counts in the total and is not drawn as its own customer line. Free / min / max usage feed `getEffectiveUsageAmount`. When the quote Incoterm excludes a bucket, the row shows Auto / Include / Exclude (`scopeOverride`). Multi-CT FCL: one `$` / `%` dial **per container type** on `equipmentAmounts` (starboard-2 SB-5766; UI in `quoting.markup`). Flat / single-CT keeps the lane dial. Surcharge **Equipment** column (`equipmentType`, Default = all CTs). Row FX when line currency ≠ quote currency uses `exchangeRates` (convert in ONE MATH). Totals are `sell = buy + markup`, and a sell override’s gap vs buy is part of markup.
+Each surcharge and global charge row edits a buy rate (`rate`, or `%` when the unit is percentage), an optional line sell (`sellAmount`; blank mirrors the calculated buy), Include (`isIncludedInTotal`), and Split (`isVisible`). Split off marks the line Absorbed: it still counts in the total and is not drawn as its own customer line. Free / min / max usage feed `getEffectiveUsageAmount`. When the quote Incoterm excludes a bucket, the row shows Auto / Include / Exclude (`scopeOverride`). Multi-CT FCL: one `$` / `%` dial **per container type** on `equipmentAmounts` (starboard-2 SB-5766; UI in `quoting.markup`). Flat / single-CT keeps the lane dial. Surcharge **Equipment** column (`equipmentType`, Default = all CTs). Row FX when line currency ≠ quote currency uses `exchangeRates` (convert in ONE MATH). **093:** Step 1 **Base currency** and charge-line CCY are searchable comboboxes (`CurrencyCombobox`, geography ISO list); when the base is set / changed / refreshed the form fetches Frankfurter rates via the BFF and merges the `base → code` row into `exchangeRates` (`mergeBaseFxRates`; manual `line → base` overrides win; terminal quotes skip the fetch). Lines keep and display their own currency; totals convert to base. Fetch failure → non-blocking warning, prior rates kept; missing rate keeps the row "FX missing — set rate" hint (no invented numbers). The org default base currency (Preferences → Quote, `organization.metadata.quoteRules.defaultBaseCurrency`) is applied on quote create and to blank-currency commercial drafts in editor-context. Totals are `sell = buy + markup`, and a sell override’s gap vs buy is part of markup.
 
 ## Stages, validity, numbering (082)
 
@@ -89,12 +89,33 @@ See [build-priority](../reference/build-priority-2026-11-01.md) · [migration in
 **Phase A:** workbench (**074**) → host (**075**) → scaffold (**076**) → migrate quote (**077**) → slots (**073**).  
 **Phase B:** charge grid (**071**) and Incoterm (**070**) shipped. Economics (**072**) + money follow-ons (**085**): per-CT dials, row FX convert, equipment column. Still deferred: surcharge_matrix tiers; live finStore FX.
 
-Also: no delete yet; no catalog/spot provenance FK. Full prod stage-transition edge cases deferred. PDF is lean (not pixel-perfect prod template).
+Also: no delete yet; no catalog/spot provenance FK. Full prod stage-transition edge cases deferred. PDF is lean (not pixel-perfect prod template); layouts are tenant-selectable templates (094).
 
 ## Quote PDF (083)
 
 Built-in **`quoting.pdf`** (`extensions/builtins/quoting-pdf`) contributes Export PDF into `quoting.commands`. Totals use `@starboard/lib-pricing` only. Download via BFF `GET /api/quotes/:id/pdf` (row UUID, not human `quoteId`; gated on extension active + status ∈ review|sent|win|loss). Unplug → no export control; editor intact.
 
+**Live preview (092):** `quoting.document` debounces (~300ms) the form and mounts `quoting.slots.preview` contributions per tab (manifest `props.tab`). Unplug pdf → PDF tab stub + no export; unplug email → Email tab stub. Copy HTML / Open draft only; no send.
+
+### Document view + templates (094)
+
+- **Schema:** `QuoteDocumentView` (`packages/contracts/src/quote-document-view.ts`, Zod, `schemaVersion: 1`) is the only thing templates read: `org` (name, `logoUrl`, letterhead: address lines / email / phone / website / footer note), `quote` (number, status, currency, Incoterm, role, validity), `customer`, `lanes` (ports + vias, door pickup/delivery, cargo summary, O/F/D `sections` with per-line currency, lane subtotal/markup/total), `globals`, `excludedBuckets`, `totals`, `notes`. Built once by `buildQuoteDocumentView(quoteForm, { org, customerName })` (`@starboard/ext-quoting-pdf/view`); every amount is from `@starboard/lib-pricing` (ONE MATH: lane totals via `calculateManualRateTotals`, globals roll into lane 1, grand total = sum of lanes). Templates are display-only.
+- **PDF:** `@react-pdf/renderer` (pdf-lib removed). A template is `{ id, label, renderPdf(view) → <Document> }`. Preview: the PDF slot fetches `GET /api/quotes/preview/pdf-context` (org branding + resolved template id), builds the view from the debounced form and renders with `pdf().toBlob()` into the iframe blob URL. Export: `GET /api/quotes/:id/pdf` → `renderQuotePdfBytes` (`@starboard/ext-quoting-pdf/server`) with the same builder + template (`renderToBuffer`). A logo that fails to load retries once without the logo.
+- **Email:** `quoting.email` owns the react-email templates (migrated from `@starboard/lib-email` `QuoteDraftEmail`; `lib-email` keeps only auth/invite templates). `POST /api/quotes/preview/email` → `renderQuoteEmailPreview` (`@starboard/ext-quoting-email/server`) over the same view.
+- **Template points:** `quoting.pdf` **defines** `quoting.pdf.templates`, `quoting.email` **defines** `quoting.email.templates`; each self-contributes `…template.standard` (default) and `…template.letterhead` (org logo / name / address / contact footer from the view). A manifest contribution makes an id _active_; the package registers the renderer (`registerQuotePdfTemplate` / `registerQuoteEmailTemplate`), so a tenant extension adds a layout by doing both.
+- **Selection:** `organization.metadata` JSON `{ "quoteTemplates": { "pdf": "<id>", "email": "<id>" }, "letterhead": { "addressLines": [], "email": "", "phone": "", "website": "", "footerNote": "" } }`; branding name/logo come from `organization.name` / `organization.logo`. Missing, unregistered, or inactive (contributor unplugged / plan / rollout) id → standard. No settings UI yet (set via metadata).
+- **Kernel:** `apps/web` has no preview components — only BFF routes (auth → extension active → delegate).
+
+## Quote builder UX (Phase E)
+
+Redesign chrome only (money + stages unchanged): multistep flow, FCL world-map ports, rate cards, live PDF/email preview.
+
+- Design: [quote-builder-ux-2026-11-03.md](../reference/quote-builder-ux-2026-11-03.md)
+- Epic **088**; ~~089–093~~ done · next **[094](../../tickets/done/094-quote-react-pdf-email-templates.md)** (react-pdf / react-email template schema)
+- Git: integration branch **`quote-flow`**; slice PRs into `quote-flow` only (no direct commits); promote `quote-flow` → `dev` when ready
+
 ## Next tickets
 
-**Phase D (cont.):** ~~peel Incoterm/markup (**084**)~~ — done. ~~Money follow-ons (**085**)~~ — per-CT dials / row FX / equipment in charges + markup + pricing.
+**Phase E (NOW):** ~~088–093~~ on `quote-flow`. **[094](../../tickets/done/094-quote-react-pdf-email-templates.md)** — `@react-pdf/renderer` + react-email against shared `QuoteDocumentView`; `quoting.pdf` / `quoting.email` define template contribution points for tenant letterhead/layouts.
+
+**Phase D:** ~~082–087~~ done (lifecycle, PDF, Incoterm/markup peel, money follow-ons, catalog CRUD, FCL ingest).

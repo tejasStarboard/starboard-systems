@@ -1,6 +1,7 @@
 export { roundMoney } from "./money"
 export {
   convertToQuoteCurrency,
+  mergeBaseFxRates,
   tryConvertCurrency,
   tryGetFxRate,
   type FxRates,
@@ -8,9 +9,14 @@ export {
 export {
   buildLaneUsageQuantities,
   calculateManualRateTotals,
+  computeManualLaneBreakdown,
   computeManualLaneTotals,
   surchargeAppliesToEquipment,
   type LaneUsageQuantities,
+  type ManualBaseFreightPart,
+  type ManualChargeAmount,
+  type ManualLaneBreakdown,
+  type ManualLineBreakdown,
   type ManualLaneTotals,
   type ManualLaneTotalsInput,
   type ManualRateTotals,

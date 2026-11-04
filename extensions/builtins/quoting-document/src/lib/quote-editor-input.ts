@@ -1,5 +1,6 @@
 import type { QuoteFormOption, QuoteFormValues } from "./quotes.schema"
 import type { QuoteSlotContributions } from "../slots/types"
+import { isCommercialEditable } from "./quote-stage"
 
 /** `GET /api/quotes/:id/editor-context` payload (BFF composes service data). */
 export type QuoteEditorContext = {
@@ -14,6 +15,8 @@ export type QuoteEditorContext = {
   }
   /** Active contributions to this extension's defined slots (host-resolved). */
   slots: QuoteSlotContributions
+  /** Org Preferences → Quote defaults (absent / null = none). */
+  defaults?: { baseCurrency?: string | null }
 }
 
 export type QuoteEditorInput = {
@@ -36,6 +39,16 @@ export function prepareQuoteEditorInput(
 ): QuoteEditorInput {
   const { options } = context
   const defaultValues: QuoteFormValues = structuredClone(context.quote)
+
+  // Blank-currency commercial drafts take the org default base currency.
+  const orgDefault = context.defaults?.baseCurrency?.trim().toUpperCase()
+  if (
+    orgDefault &&
+    !defaultValues.currencyCode.trim() &&
+    isCommercialEditable(defaultValues.status)
+  ) {
+    defaultValues.currencyCode = orgDefault
+  }
 
   const currencies = [...options.currencyOptions]
   const ports = [...options.portOptions]

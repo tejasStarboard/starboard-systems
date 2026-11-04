@@ -24,6 +24,8 @@ export const QUOTING_SLOTS = {
   totals: "quoting.slots.totals",
   rateSources: "quoting.slots.rateSources",
   lifecycle: "quoting.slots.lifecycle",
+  preview: "quoting.slots.preview",
+  laneRoute: "quoting.slots.laneRoute",
   commands: "quoting.commands",
 } as const
 
@@ -67,6 +69,53 @@ export type LifecycleSlotProps = Pick<Form, "control" | "register"> & {
   errors: FieldErrors<QuoteFormValues>
   /** Layout hint so one contribution can adapt density. */
   layout: "desktop" | "tablet" | "mobile"
+}
+
+export type PreviewTab = "pdf" | "email"
+
+/**
+ * Preview pane body (092 fills PDF / Email). The pane chrome (tabs, document
+ * frame, mobile sheet) stays with `quoting.document`. A contribution declares
+ * its tab via manifest `props: { tab: "pdf" | "email" }`; the host mounts it
+ * only on that tab (no `tab` prop = both) and renders a stub when a tab has no
+ * active contributor (unplug). `quoteId` is the persisted row UUID used by
+ * `/api/quotes/:id`; `quoteNumber` is the human-facing number (display only).
+ */
+export type PreviewSlotProps = Pick<Form, "control"> & {
+  quoteId: string
+  quoteNumber: string
+  /**
+   * Form snapshot, debounced (~300ms) by the host so contributors regenerate
+   * without blocking typing. Preview-only — never persisted from here.
+   */
+  quote: QuoteFormValues
+  /** Resolved customer label (empty when unset). */
+  customerName: string
+  tab: PreviewTab
+  /** Active builder step id (`basics` … `build`). */
+  step: string
+  /** Index of the active lane (steps 2–5), for per-lane previews. */
+  selectedLaneIndex: number
+  currencyCode: string
+}
+
+export type LaneRouteField =
+  "origin" | "destination" | "originVia" | "destinationVia"
+
+/**
+ * FCL Route step port picker (090). Mounted only for FCL lanes; when no
+ * contribution is active (or it throws) the host renders `PortCombobox`
+ * fields. Values are soft UNLOCODE strings; Door moves stay host-owned.
+ * `geo.gazetteer` mirrors this shape structurally (no import → no cycle).
+ */
+export type LaneRouteSlotProps = {
+  origin: string
+  destination: string
+  originVia: string
+  destinationVia: string
+  portOptions: { value: string; label: string }[]
+  idPrefix?: string
+  onChange: (field: LaneRouteField, value: string) => void
 }
 
 /**
@@ -114,6 +163,12 @@ export type ApplyRatePayload = {
 export type RateSourcesSlotProps = {
   origin?: string
   destination?: string
-  /** Appends the line to the selected lane and closes the sheet. */
+  /**
+   * The lane's selected manual rate (only when `selectedRateId` resolves to an
+   * existing line — never a fallback), so a source can mark the card it
+   * applied. Absent / null when none is selected.
+   */
+  selectedRate?: { id: string; label: string; amount: number } | null
+  /** Appends the line to the selected lane and selects it. */
   onApplyRate: (payload: ApplyRatePayload) => void
 }

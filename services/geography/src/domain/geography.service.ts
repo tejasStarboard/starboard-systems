@@ -1,5 +1,8 @@
 import {
+  ISO_CURRENCIES,
   addressDetailsQuerySchema,
+  currencyLabel,
+  currencyCodeSchema,
   ensureCurrencyRequestSchema,
   listAddressesQuerySchema,
   listPortsQuerySchema,
@@ -7,15 +10,21 @@ import {
   type DoorAddress,
   type FacilityOption,
   type FormOption,
+  type FxLatestResponse,
 } from "@starboard/lib-contracts"
 
 import type { GeographyDao } from "../dao/geography.dao"
+import { FrankfurterClient, FxProviderError } from "../integrations/frankfurter"
 import type { GooglePlacesClient } from "../integrations/google-places"
 
 export interface GeographyService {
   ensureCurrency(code: string): Promise<{ code: string }>
   listCurrencies(): Promise<FormOption[]>
-  searchPorts(q?: string): Promise<FacilityOption[]>
+  getFxRates(base: string): Promise<FxLatestResponse>
+  searchPorts(
+    q?: string,
+    filters?: { country?: string; type?: string }
+  ): Promise<FacilityOption[]>
   searchAddresses(q?: string, limit?: number): Promise<AddressPrediction[]>
   getAddressDetails(placeId: string): Promise<DoorAddress>
 }
@@ -23,8 +32,29 @@ export interface GeographyService {
 export class DefaultGeographyService implements GeographyService {
   constructor(
     private readonly dao: GeographyDao,
-    private readonly places: GooglePlacesClient
+    private readonly places: GooglePlacesClient,
+    private readonly fx: Pick<
+      FrankfurterClient,
+      "latest" | "currencies"
+    > = new FrankfurterClient()
   ) {}
+
+  private seeding: Promise<void> | null = null
+
+  /** Seed `geo.currency` once per process: static ISO subset + provider set. */
+  private seedCurrencies(): Promise<void> {
+    this.seeding ??= (async () => {
+      const provider = await this.fx.currencies()
+      await this.dao.ensureCurrencies([
+        ...ISO_CURRENCIES.map((entry) => entry.code),
+        ...Object.keys(provider),
+      ])
+    })().catch((error) => {
+      this.seeding = null
+      throw error
+    })
+    return this.seeding
+  }
 
   async ensureCurrency(code: string): Promise<{ code: string }> {
     const parsed = ensureCurrencyRequestSchema.safeParse({ code })
@@ -39,18 +69,54 @@ export class DefaultGeographyService implements GeographyService {
   }
 
   async listCurrencies(): Promise<FormOption[]> {
-    return this.dao.listCurrencies()
+    await this.seedCurrencies()
+    const [rows, names] = await Promise.all([
+      this.dao.listCurrencies(),
+      this.fx.currencies(),
+    ])
+    return rows.map((row) => ({
+      value: row.value,
+      label: currencyLabel(row.value, names),
+    }))
   }
 
-  async searchPorts(q?: string): Promise<FacilityOption[]> {
-    const parsed = listPortsQuerySchema.safeParse({ q: q ?? "" })
+  /** Latest Frankfurter rates for a quote base (1 base = rate × code). */
+  async getFxRates(base: string): Promise<FxLatestResponse> {
+    const parsed = currencyCodeSchema.safeParse(base)
+    if (!parsed.success) {
+      throw new GeographyValidationError(
+        parsed.error.issues[0]?.message ?? "Invalid currency code"
+      )
+    }
+    try {
+      return await this.fx.latest(parsed.data.toUpperCase())
+    } catch (error) {
+      if (error instanceof FxProviderError) {
+        throw new GeographyValidationError(error.message, error.status)
+      }
+      throw error
+    }
+  }
+
+  async searchPorts(
+    q?: string,
+    filters: { country?: string; type?: string } = {}
+  ): Promise<FacilityOption[]> {
+    const parsed = listPortsQuerySchema.safeParse({
+      q: q ?? "",
+      country: filters.country || undefined,
+      type: filters.type || undefined,
+    })
     if (!parsed.success) {
       throw new GeographyValidationError(
         parsed.error.issues[0]?.message ?? "Invalid ports query"
       )
     }
 
-    return this.dao.searchPorts(parsed.data.q)
+    return this.dao.searchPorts(parsed.data.q, {
+      country: parsed.data.country,
+      type: parsed.data.type,
+    })
   }
 
   async searchAddresses(
