@@ -1,0 +1,48 @@
+{
+  "name": "@starboard/tool-e2e",
+  "version": "0.0.1",
+  "description": "Shared Playwright e2e harness — credentials, seed, auth storage, workbench locators, shell/extension config helpers, orchestrator",
+  "private": true,
+  "license": "UNLICENSED",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tejasStarboard/starboard-systems.git",
+    "directory": "tooling/e2e"
+  },
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./playwright": {
+      "types": "./src/playwright-config.ts",
+      "default": "./src/playwright-config.ts"
+    },
+    "./global-setup": {
+      "types": "./src/global-setup.ts",
+      "default": "./src/global-setup.ts"
+    }
+  },
+  "bin": {
+    "starboard-e2e": "./src/run.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "starboard-e2e": "bun src/run.ts"
+  },
+  "dependencies": {
+    "@starboard/lib-db": "workspace:*",
+    "better-auth": "^1.7.14",
+    "drizzle-orm": "^0.45.4"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.64.1",
+    "@starboard/tool-typescript-config": "workspace:*",
+    "@types/node": "^20",
+    "typescript": "^5.9.3"
+  },
+  "peerDependencies": {
+    "@playwright/test": "^1.64.1"
+  }
+}

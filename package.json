@@ -1,7 +1,7 @@
 {
   "name": "starboard-systems",
   "version": "0.0.1",
-  "description": "Starboard Systems monorepo \u2014 shell BFF, domain services, and extensions",
+  "description": "Starboard Systems monorepo — shell BFF, domain services, and extensions",
   "private": true,
   "license": "UNLICENSED",
   "repository": {
@@ -10,12 +10,14 @@
   },
   "scripts": {
     "build": "turbo build",
+    "start": "turbo start",
     "dev": "turbo dev --concurrency=25",
     "lint": "turbo lint",
     "format": "turbo format",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,mjs,cjs,json,md,css}\"",
     "typecheck": "turbo typecheck",
     "test": "turbo test",
+    "test:e2e": "bun tooling/e2e/src/run.ts",
     "ci": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build",
     "ci:affected": "turbo run lint typecheck test build --filter=...[origin/dev]"
   },
