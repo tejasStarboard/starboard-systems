@@ -41,7 +41,7 @@ Ship a hybrid e2e setup for the rewrite:
 - [x] Shell coverage: login/register/forgot, protected routes, BFF 401s, workbench activities, non-staff admin 404
 - [x] Builtin smoke: crm, org-settings, quoting.document / charges / incoterm / markup / pdf, rates.catalog, geo.gazetteer
 - [x] Specs live in extension packages (hybrid ownership); web keeps kernel/shell only
-- [ ] `pnpm run ci` green on the ticket branch
+- [x] `pnpm run ci` green on the ticket branch
 - [ ] PR into `dev` (squash)
 
 ## Fixtures
