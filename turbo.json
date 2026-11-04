@@ -56,9 +56,18 @@
       "dependsOn": ["^build"],
       "cache": false
     },
+    "test:e2e": {
+      "cache": false,
+      "passThroughEnv": ["PLAYWRIGHT_BASE_URL", "CI"]
+    },
     "dev": {
       "dependsOn": ["^build"],
       "cache": false,
+      "persistent": true
+    },
+    "start": {
+      "dependsOn": ["^build"],
+      "cache": true,
       "persistent": true
     }
   }
