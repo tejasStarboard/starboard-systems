@@ -1,9 +1,5 @@
 import { expect, test } from "@playwright/test"
-import {
-  activityBar,
-  editorHeading,
-  primarySidebar,
-} from "@starboard/tool-e2e"
+import { activityBar, editorHeading, primarySidebar } from "@starboard/tool-e2e"
 
 const settingsPages: { path: string; heading: string }[] = [
   { path: "/settings", heading: "Settings" },

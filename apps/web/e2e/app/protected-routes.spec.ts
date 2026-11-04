@@ -19,9 +19,7 @@ test.describe("protected routes (unauthenticated)", () => {
     test(`redirects ${path} to login`, async ({ page }) => {
       await page.goto(path)
       await expect(page).toHaveURL(/\/login/)
-      await expect(
-        page.getByRole("heading", { name: "Sign in" })
-      ).toBeVisible()
+      await expect(page.getByRole("heading", { name: "Sign in" })).toBeVisible()
     })
   }
 })

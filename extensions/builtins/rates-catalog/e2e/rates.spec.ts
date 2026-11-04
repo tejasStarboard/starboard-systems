@@ -1,9 +1,5 @@
 import { expect, test } from "@playwright/test"
-import {
-  activityBar,
-  editorHeading,
-  primarySidebar,
-} from "@starboard/tool-e2e"
+import { activityBar, editorHeading, primarySidebar } from "@starboard/tool-e2e"
 
 test.describe("rates.catalog", () => {
   test("activity bar opens rates", async ({ page }) => {

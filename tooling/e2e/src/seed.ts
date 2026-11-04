@@ -7,12 +7,7 @@ import { hashPassword } from "better-auth/crypto"
 import { eq } from "drizzle-orm"
 
 import { createDb } from "@starboard/lib-db"
-import {
-  account,
-  member,
-  organization,
-  user,
-} from "@starboard/lib-db/schema"
+import { account, member, organization, user } from "@starboard/lib-db/schema"
 
 import { e2eCredentials, type E2eFixtures } from "./credentials"
 import { loadWebEnv } from "./load-env"

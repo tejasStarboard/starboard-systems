@@ -5,15 +5,11 @@ test.describe("login", () => {
     await page.goto("/login")
 
     await expect(page.getByRole("link", { name: "Starboard" })).toBeVisible()
-    await expect(
-      page.getByRole("heading", { name: "Sign in" })
-    ).toBeVisible()
+    await expect(page.getByRole("heading", { name: "Sign in" })).toBeVisible()
     await expect(page.getByLabel("Email")).toBeVisible()
     await expect(page.getByLabel("Password")).toBeVisible()
     await expect(page.getByRole("button", { name: "Sign in" })).toBeVisible()
-    await expect(
-      page.getByRole("link", { name: "Create one" })
-    ).toBeVisible()
+    await expect(page.getByRole("link", { name: "Create one" })).toBeVisible()
   })
 
   test("shows validation errors for empty submit", async ({ page }) => {

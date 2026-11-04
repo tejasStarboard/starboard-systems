@@ -10,7 +10,9 @@ test.describe("quoting.incoterm", () => {
     await expect(page.getByTestId("quote-editor-loading")).toHaveCount(0, {
       timeout: 30_000,
     })
-    await expect(page.getByText("Incoterm", { exact: true }).first()).toBeVisible({
+    await expect(
+      page.getByText("Incoterm", { exact: true }).first()
+    ).toBeVisible({
       timeout: 30_000,
     })
   })

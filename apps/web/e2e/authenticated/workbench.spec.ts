@@ -1,9 +1,5 @@
 import { expect, test } from "@playwright/test"
-import {
-  activityBar,
-  editorGroup,
-  editorHeading,
-} from "@starboard/tool-e2e"
+import { activityBar, editorGroup, editorHeading } from "@starboard/tool-e2e"
 
 test.describe("workbench shell", () => {
   test("shows activity bar with built-in activities", async ({ page }) => {

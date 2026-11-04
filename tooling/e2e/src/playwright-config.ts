@@ -1,4 +1,8 @@
-import { defineConfig, devices, type PlaywrightTestConfig } from "@playwright/test"
+import {
+  defineConfig,
+  devices,
+  type PlaywrightTestConfig,
+} from "@playwright/test"
 
 import { authPaths, defaultBaseURL, webAppRoot } from "./paths"
 
@@ -8,8 +12,7 @@ const shared = {
   retries: process.env.CI ? 2 : 1,
   workers: process.env.CI ? 1 : 2,
   reporter: (process.env.CI ? [["github"], ["list"]] : "list") as
-    | "list"
-    | [["github"], ["list"]],
+    "list" | [["github"], ["list"]],
   timeout: 60_000,
   expect: { timeout: 20_000 },
   use: {
@@ -34,7 +37,11 @@ export function defineShellE2eConfig(
     projects: [
       {
         name: "auth",
-        testMatch: ["auth/**/*.spec.ts", "api/**/*.spec.ts", "app/**/*.spec.ts"],
+        testMatch: [
+          "auth/**/*.spec.ts",
+          "api/**/*.spec.ts",
+          "app/**/*.spec.ts",
+        ],
         use: { ...devices["Desktop Chrome"] },
       },
       {
