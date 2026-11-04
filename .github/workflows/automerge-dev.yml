@@ -64,7 +64,7 @@ jobs:
                   owner,
                   repo,
                   pull_number: pr.number,
-                  merge_method: "merge",
+                  merge_method: "squash",
                 })
                 core.info(`Merged PR #${pr.number}`)
                 try {
