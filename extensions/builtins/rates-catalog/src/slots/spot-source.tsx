@@ -207,9 +207,7 @@ export function SpotSource({
                   key={card.key}
                   card={card}
                   selected={
-                    onApplyRate
-                      ? isRateCardSelected(card, selectedRate)
-                      : false
+                    onApplyRate ? isRateCardSelected(card, selectedRate) : false
                   }
                   onSelect={
                     onApplyRate

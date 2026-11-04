@@ -79,15 +79,15 @@ Multistep builder + FCL map + rate cards + live PDF/email preview + currency/FX.
 
 **Integration branch:** `quote-flow` (off `dev`). Slice PRs targeted **`quote-flow` only**. Promote via `quote-flow` → `dev` when ready (this merge).
 
-|   # | Ticket                                                                                                        | Package / layer                                                     | Why                                                           |
-| --: | ------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------- |
-|  17 | [088](../../tickets/done/088-quote-builder-ux-epic.md) Epic (docs / orchestration)                            | —                                                                   | Sequence + git rules                                          |
-|  18 | [089](../../tickets/done/089-quote-builder-multistep-shell.md) Multistep shell + preview chrome               | `quoting.document`                                                  | Stepper + Sejda-like pane                                     |
-|  19 | [090](../../tickets/done/090-quote-fcl-world-map-ports.md) FCL world-map ports                                | `geo.gazetteer` + document Route                                    | Country → seaport + curves                                    |
-|  20 | [091](../../tickets/done/091-quote-rate-cards.md) Uber-style rate cards                                       | `rates.catalog` / spot → rateSources                                | Card rail + schedule chips                                    |
-|  21 | [092](../../tickets/done/092-quote-live-pdf-email-preview.md) Live PDF + email preview                        | `quoting.pdf` + `packages/email`                                    | Fill preview pane                                             |
-|  22 | [093](../../tickets/done/093-quote-currency-fx-preferences.md) Currency comboboxes + live FX + Preferences    | `quoting.document` / `quoting.charges` / `org-settings` / geography | Base + line CCY search; Frankfurter FX; default base currency |
-|  23 | [094](../../tickets/done/094-quote-react-pdf-email-templates.md) react-pdf + react-email templates            | `quoting.pdf` / `quoting.email`                                     | Schema-bound templates; tenant letterhead hooks               |
+|   # | Ticket                                                                                                     | Package / layer                                                     | Why                                                           |
+| --: | ---------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------- |
+|  17 | [088](../../tickets/done/088-quote-builder-ux-epic.md) Epic (docs / orchestration)                         | —                                                                   | Sequence + git rules                                          |
+|  18 | [089](../../tickets/done/089-quote-builder-multistep-shell.md) Multistep shell + preview chrome            | `quoting.document`                                                  | Stepper + Sejda-like pane                                     |
+|  19 | [090](../../tickets/done/090-quote-fcl-world-map-ports.md) FCL world-map ports                             | `geo.gazetteer` + document Route                                    | Country → seaport + curves                                    |
+|  20 | [091](../../tickets/done/091-quote-rate-cards.md) Uber-style rate cards                                    | `rates.catalog` / spot → rateSources                                | Card rail + schedule chips                                    |
+|  21 | [092](../../tickets/done/092-quote-live-pdf-email-preview.md) Live PDF + email preview                     | `quoting.pdf` + `packages/email`                                    | Fill preview pane                                             |
+|  22 | [093](../../tickets/done/093-quote-currency-fx-preferences.md) Currency comboboxes + live FX + Preferences | `quoting.document` / `quoting.charges` / `org-settings` / geography | Base + line CCY search; Frankfurter FX; default base currency |
+|  23 | [094](../../tickets/done/094-quote-react-pdf-email-templates.md) react-pdf + react-email templates         | `quoting.pdf` / `quoting.email`                                     | Schema-bound templates; tenant letterhead hooks               |
 
 ```text
 088 epic
