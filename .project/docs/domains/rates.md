@@ -31,13 +31,38 @@ default list, so deactivated rates do not appear.
 BFF: `apps/web/lib/domain/rates/*`, `/api/rates`, `/api/rates/:rateId`.
 
 Workbench: driving built-in **`rates.catalog`** contributes Rates activity +
-list/detail editors (`/rates`, `/rates/catalog/:id`) and still contributes
+Search / Sheets / Sell / Spot editors and still contributes
 `quoting.slots.rateSources` for apply-to-lane as **rate cards** (carrier logo /
 monogram, amount, currency; schedule/route chips only when the payload carries
 `cargoDropOff`, `cutoff`, `etd`, `eta`, `transitDays`, `route`, `altRoute` —
 catalog rows have none today; spot offers may). Sorted by price, then ETD. It **defines**
-`rates.slots.ingestActions` (stub host; **087** / `ingestion.fcl_v6` will
-inject upload UI). Kernel anchors only — no catalog product imports.
+`rates.slots.ingestActions` (**087** / `ingestion.fcl_v6` injects upload UI)
+and `rates.slots.spotSearch` (**098** standalone offer UI; `spot.*` contribute
+`rates.spotSource`). Kernel anchors only — no catalog product imports.
+
+### Rates activity IA (Phase F — **095–099**)
+
+Design: [rates-catalog-ux-2026-11-03.md](../reference/rates-catalog-ux-2026-11-03.md).
+
+Prod Rate Management top tabs map to Rates **sidebar** entries (plus Spot):
+
+| Entry        | Deep link (target) | Ticket |
+| ------------ | ------------------ | -----: |
+| Search Rates | `/rates/search`    |    097 |
+| Rate Sheets  | `/rates/sheets`    |    099 |
+| Sell Rates   | `/rates/sell`      |    099 |
+| Spot search  | `/rates/spot`      |    098 |
+
+IA shells landed in **096** (placeholders for Search / Sell / Spot; catalog
+list CRUD under Rate Sheets). Detail editor stays `/rates/catalog/:id`. Upload
+remains `/rates/upload` until fully folded into Sheets via `ingestActions`.
+Sell Rates is a **gated shell** only (marketplace Won’t/deferred). Spot search
+does **not** require a quote; quote apply path stays on `rateSources` (Uber-style
+cards from Phase E **091**).
+
+**Done:** [096](../../tickets/done/096-rates-activity-ia.md) · [097](../../tickets/done/097-search-rates-ocean-fcl.md) Search Rates FCL.
+**In progress:** [098](../../tickets/in_progress/098-spot-search-standalone.md) Spot search.
+Next: [099](../../tickets/todo/099-rate-sheets-and-sell-shell.md).
 
 ## Ingestion writes
 

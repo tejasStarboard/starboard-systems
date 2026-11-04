@@ -61,7 +61,8 @@ export function RateCard({
 }: {
   card: RateCardModel
   selected: boolean
-  onSelect: () => void
+  /** Omit on browse-only surfaces (standalone Spot search). */
+  onSelect?: () => void
 }) {
   return (
     <article
@@ -116,15 +117,17 @@ export function RateCard({
         {card.validity ? <span>{card.validity}</span> : null}
       </div>
 
-      <Button
-        type="button"
-        size="sm"
-        variant={selected ? "default" : "outline"}
-        aria-pressed={selected}
-        onClick={selected ? undefined : onSelect}
-      >
-        {selected ? "Selected" : "Select"}
-      </Button>
+      {onSelect ? (
+        <Button
+          type="button"
+          size="sm"
+          variant={selected ? "default" : "outline"}
+          aria-pressed={selected}
+          onClick={selected ? undefined : onSelect}
+        >
+          {selected ? "Selected" : "Select"}
+        </Button>
+      ) : null}
     </article>
   )
 }

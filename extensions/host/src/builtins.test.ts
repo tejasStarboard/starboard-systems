@@ -148,6 +148,14 @@ describe("driving built-in manifests (076)", () => {
           props: { carrier: "fake" },
         },
       ],
+      "rates.slots.spotSearch": [
+        {
+          id: "spot.fake.spotSearch",
+          label: "Fake spot rates",
+          component: "rates.spotSource",
+          props: { carrier: "fake" },
+        },
+      ],
     })
     for (const id of OPTIONAL_IDS) {
       expect(byId(id).worker?.kind).toBe("python-temporal")

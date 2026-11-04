@@ -71,14 +71,14 @@ export function GlobalChargesEditor({
   }
 
   return (
-    <div className="space-y-3 rounded-none border border-dashed bg-muted/10 px-3 py-3">
+    <div className="space-y-2 border-t border-dashed pt-3">
       <div className="flex items-center justify-between gap-2">
         <div>
-          <p className="text-xs font-medium text-muted-foreground">
-            Global charges
+          <p className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
+            Global
           </p>
           <p className="text-[11px] text-muted-foreground">
-            Quote-level; not dropped by door / bucket scope.
+            Quote-level; not dropped by Incoterm / door scope.
           </p>
         </div>
         <Button
@@ -96,12 +96,12 @@ export function GlobalChargesEditor({
           }
         >
           <PlusIcon data-icon="inline-start" />
-          Add global
+          Add charge
         </Button>
       </div>
 
       {fields.length === 0 ? (
-        <p className="text-xs text-muted-foreground">No global charges.</p>
+        <p className="text-xs text-muted-foreground">No global lines.</p>
       ) : (
         <div className="space-y-2">
           {fields.map((field, index) => {

@@ -1,4 +1,4 @@
-# Build priority — 2026-11-01 (updated 2026-11-03)
+# Build priority — 2026-11-01 (updated 2026-11-04 — Phase E quote-flow + Phase F rates UX)
 
 **Source of truth for execution order.**
 
@@ -73,21 +73,21 @@ All product work lands in **packages** that contribute to the workbench or to `q
 
 ---
 
-## Phase E — Quote builder UX — **NOW**
+## Phase E — Quote builder UX — **DONE on `quote-flow`**
 
-Multistep builder + FCL map + rate cards + live PDF/email preview. Design: [quote-builder-ux-2026-11-03.md](quote-builder-ux-2026-11-03.md).
+Multistep builder + FCL map + rate cards + live PDF/email preview + currency/FX. Design: [quote-builder-ux-2026-11-03.md](quote-builder-ux-2026-11-03.md).
 
-**Integration branch:** `quote-flow` (off `dev`). Slice branches: `git checkout --no-track -b {id} origin/quote-flow`. PRs target **`quote-flow` only**; **no direct commits** on `quote-flow`. Promote via `quote-flow` → `dev` when the epic is ready.
+**Integration branch:** `quote-flow` (off `dev`). Slice PRs targeted **`quote-flow` only**. Promote via `quote-flow` → `dev` when ready (this merge).
 
 |   # | Ticket                                                                                                        | Package / layer                                                     | Why                                                           |
 | --: | ------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------- |
 |  17 | [088](../../tickets/done/088-quote-builder-ux-epic.md) Epic (docs / orchestration)                            | —                                                                   | Sequence + git rules                                          |
-|  18 | **[089](../../tickets/done/089-quote-builder-multistep-shell.md)** Multistep shell + preview chrome           | `quoting.document`                                                  | Stepper + Sejda-like pane                                     |
-|  19 | **[090](../../tickets/done/090-quote-fcl-world-map-ports.md)** FCL world-map ports                            | `geo.gazetteer` + document Route                                    | Country → seaport + curves                                    |
-|  20 | **[091](../../tickets/done/091-quote-rate-cards.md)** Uber-style rate cards                                   | `rates.catalog` / spot → rateSources                                | Card rail + schedule chips                                    |
+|  18 | [089](../../tickets/done/089-quote-builder-multistep-shell.md) Multistep shell + preview chrome               | `quoting.document`                                                  | Stepper + Sejda-like pane                                     |
+|  19 | [090](../../tickets/done/090-quote-fcl-world-map-ports.md) FCL world-map ports                                | `geo.gazetteer` + document Route                                    | Country → seaport + curves                                    |
+|  20 | [091](../../tickets/done/091-quote-rate-cards.md) Uber-style rate cards                                       | `rates.catalog` / spot → rateSources                                | Card rail + schedule chips                                    |
 |  21 | [092](../../tickets/done/092-quote-live-pdf-email-preview.md) Live PDF + email preview                        | `quoting.pdf` + `packages/email`                                    | Fill preview pane                                             |
 |  22 | [093](../../tickets/done/093-quote-currency-fx-preferences.md) Currency comboboxes + live FX + Preferences    | `quoting.document` / `quoting.charges` / `org-settings` / geography | Base + line CCY search; Frankfurter FX; default base currency |
-|  23 | **[094](../../tickets/done/094-quote-react-pdf-email-templates.md)** react-pdf + react-email templates | `quoting.pdf` / `quoting.email`                                     | Schema-bound templates; tenant letterhead hooks               |
+|  23 | [094](../../tickets/done/094-quote-react-pdf-email-templates.md) react-pdf + react-email templates            | `quoting.pdf` / `quoting.email`                                     | Schema-bound templates; tenant letterhead hooks               |
 
 ```text
 088 epic
@@ -95,10 +95,34 @@ Multistep builder + FCL map + rate cards + live PDF/email preview. Design: [quot
          └──► 091 rate cards
 089 + 083 ──► 092 live preview
 092 ──► 093 currency / FX / Preferences
-092 ──► 094 react-pdf / react-email template schema   (follow-on on quote-flow)
+092 ──► 094 react-pdf / react-email template schema
 ```
 
-`089` before `090` / `091` / `092`. **093** / **094** follow 092 on **`quote-flow`**.
+---
+
+## Phase F — Rates catalog UX — **NOW**
+
+Map starboard-2 Rate Management top tabs into the Rates activity sidebar + standalone Spot search. Design: [rates-catalog-ux-2026-11-03.md](rates-catalog-ux-2026-11-03.md).
+
+**Git:** normal ticket flow — branch off `origin/dev`, PR to **`dev`** (no `quote-flow` exception) once `quote-flow` is promoted.
+
+|   # | Ticket                                                                                                  | Package / layer                      | Why                               |
+| --: | ------------------------------------------------------------------------------------------------------- | ------------------------------------ | --------------------------------- |
+|  24 | [095](../../tickets/done/095-rates-catalog-ux-epic.md) Epic (docs / orchestration)                      | —                                    | Sequence + ref doc                |
+|  25 | [096](../../tickets/done/096-rates-activity-ia.md) Rates activity IA + shells                           | `rates.catalog`                      | Four sidebar entries              |
+|  26 | [097](../../tickets/done/097-search-rates-ocean-fcl.md) Search Rates (Ocean FCL)                        | `rates.catalog`                      | Prod-shaped FCL search            |
+|  27 | **[098](../../tickets/in_progress/098-spot-search-standalone.md)** Spot search standalone               | `rates.catalog` + `spot.*`           | Offers without a quote            |
+|  28 | [099](../../tickets/todo/099-rate-sheets-and-sell-shell.md) Rate Sheets manage + Sell Rates gated shell | `rates.catalog` + `ingestion.fcl_v6` | Sheets UX; marketplace shell only |
+
+```text
+095 epic
+096 IA shells ──► 097 Search FCL
+               ├──► 098 Spot search
+               └──► 099 Sheets + Sell gated
+087 ingest (done) ── soft-dep for 099 status
+```
+
+**Next ticket to implement:** finish [098](../../tickets/in_progress/098-spot-search-standalone.md), then [099](../../tickets/todo/099-rate-sheets-and-sell-shell.md).
 
 ---
 
@@ -108,6 +132,6 @@ Multistep builder + FCL map + rate cards + live PDF/email preview. Design: [quot
 
 ---
 
-## Later (Phase F+)
+## Later (Phase G+)
 
-RFQ email → draft quote · more spot carriers · settings/billing productization · admin extension node-graph · Outlook/Gmail hosts · Public API · Companion · FFW OS · Air/LCL ingest extras · catalog schedule schema (if rate cards need ETD/ETA on catalog rows) · …
+RFQ email → draft quote · more spot carriers · settings/billing productization · admin extension node-graph · Outlook/Gmail hosts · Public API · Companion · FFW OS · Air/LCL ingest extras · LCL/Drayage/Cartage/Air Search Rates backends · full rate marketplace (if ever) · catalog schedule schema · …
