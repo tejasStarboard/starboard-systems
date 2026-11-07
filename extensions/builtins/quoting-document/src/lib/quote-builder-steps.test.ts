@@ -16,41 +16,36 @@ function fclLane(overrides?: Record<string, unknown>) {
   }
 }
 
-describe("quote builder steps (089)", () => {
-  test("orders Basics → Route → Cargo → Rates → Build", () => {
-    expect(nextStep("basics")).toBe("route")
-    expect(nextStep("route")).toBe("cargo")
-    expect(nextStep("cargo")).toBe("rates")
-    expect(nextStep("rates")).toBe("build")
-    expect(nextStep("build")).toBeNull()
-    expect(previousStep("basics")).toBeNull()
-    expect(previousStep("route")).toBe("basics")
+describe("quote builder steps", () => {
+  test("orders Route → Rate", () => {
+    expect(nextStep("route")).toBe("rate")
+    expect(nextStep("rate")).toBeNull()
+    expect(previousStep("route")).toBeNull()
+    expect(previousStep("rate")).toBe("route")
   })
 
-  test("Basics and Route are always open", () => {
+  test("Route is always open", () => {
     const lane = emptyLaneFormValues("fcl")
-    expect(stepBlockedReason("basics", lane)).toBeNull()
     expect(stepBlockedReason("route", lane)).toBeNull()
   })
 
-  test("ports gate Cargo and everything after", () => {
-    const lane = fclLane()
-    expect(stepBlockedReason("cargo", lane)).not.toBeNull()
-    expect(stepBlockedReason("rates", lane)).not.toBeNull()
-    const ready = { ...lane, origin: "NLRTM", destination: "USNYC" }
-    expect(stepBlockedReason("cargo", ready)).toBeNull()
-  })
+  test("ports and cargo gate Rate", () => {
+    const empty = fclLane()
+    expect(stepBlockedReason("rate", empty)).toBe(
+      "Set origin and destination first."
+    )
 
-  test("valid cargo gates Rates and Build", () => {
-    const ports = { origin: "NLRTM", destination: "USNYC" }
-    const empty = fclLane({
-      ...ports,
+    const portsOnly = {
+      ...empty,
+      origin: "NLRTM",
+      destination: "USNYC",
       containers: [createContainerLine({ containerType: "", count: 1 })],
-    })
-    expect(stepBlockedReason("rates", empty)).toBe("Add valid cargo first.")
-    expect(stepBlockedReason("build", empty)).toBe("Add valid cargo first.")
-    expect(stepBlockedReason("rates", fclLane(ports))).toBeNull()
-    expect(stepBlockedReason("build", fclLane(ports))).toBeNull()
+    }
+    expect(stepBlockedReason("rate", portsOnly)).toBe("Add valid cargo first.")
+
+    expect(
+      stepBlockedReason("rate", fclLane({ origin: "NLRTM", destination: "USNYC" }))
+    ).toBeNull()
   })
 
   test("LCL / Air cargo needs a weight, volume or pallet count", () => {

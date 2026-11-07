@@ -6,6 +6,7 @@ import type {
   CustomerRecord,
   ListContactsResponse,
 } from "@starboard/lib-contracts"
+import { LoadingState } from "@starboard/lib-ui/components/loading-state"
 
 import { CustomerDetail } from "../components/customer-detail"
 import type { BuiltinEditorProps } from "../host"
@@ -82,12 +83,9 @@ export function CustomerEditor({ resourceId }: BuiltinEditorProps) {
 
   if (state.status === "loading") {
     return (
-      <p
-        data-testid="customer-editor-loading"
-        className="p-4 text-xs text-muted-foreground"
-      >
+      <LoadingState data-testid="customer-editor-loading">
         Loading customer…
-      </p>
+      </LoadingState>
     )
   }
 

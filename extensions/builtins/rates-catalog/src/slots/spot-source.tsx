@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useRef, useState } from "react"
 
+import { Button } from "@starboard/lib-ui/components/button"
+import { LoadingState } from "@starboard/lib-ui/components/loading-state"
 import { toast } from "@starboard/lib-ui/components/toast"
 
 import { RateCard, RateCardRail } from "../components/rate-card"
@@ -182,23 +184,25 @@ export function SpotSource({
             <span className="text-xs text-muted-foreground">{carrier}</span>
           ) : null}
         </div>
-        <button
+        <Button
           type="button"
-          className="text-xs font-medium underline-offset-2 hover:underline disabled:opacity-50"
+          variant="link"
+          size="xs"
+          className="h-auto px-0"
           disabled={spotPending}
           onClick={() => void enqueueSpotSearch()}
         >
           {spotPending ? "Searching…" : `Search ${displayName}`}
-        </button>
+        </Button>
       </div>
       {spotJob ? (
         <div className="space-y-2 text-xs text-muted-foreground">
           {spotStatus && spotStatus.status !== "completed" ? (
-            <p>
+            <LoadingState size="inline">
               {spotStatus.status === "running"
                 ? "Searching…"
                 : `Search ${spotStatus.status}`}
-            </p>
+            </LoadingState>
           ) : null}
           {spotCards.length > 0 ? (
             <RateCardRail>

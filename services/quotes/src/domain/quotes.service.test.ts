@@ -359,9 +359,10 @@ describe("DefaultQuotesService.save", () => {
       organizationId: "org-1",
       source: "manual",
     })
+    expect(created.quoteId).toMatch(/^[A-Z0-9]{6}$/)
     const loaded = await service.get(created.id, "org-1")
     expect(loaded.status).toBe("draft")
-    expect(loaded.quoteId).toMatch(/^[A-Z0-9]{6}$/)
+    expect(loaded.quoteId).toBe(created.quoteId)
     expect(loaded.effectiveFrom).toBe("")
     expect(loaded.expiryAt).toBe("")
   })

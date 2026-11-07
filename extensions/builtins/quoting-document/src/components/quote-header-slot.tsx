@@ -11,11 +11,9 @@ import type { QuoteFormLayoutProps } from "./quote-form-layout-props"
  */
 export function QuoteHeaderSlot({
   props,
-  layout,
   className = "contents",
 }: {
   props: QuoteFormLayoutProps
-  layout: HeaderFieldsSlotProps["layout"]
   className?: string
 }) {
   const slotProps: HeaderFieldsSlotProps = {
@@ -25,7 +23,6 @@ export function QuoteHeaderSlot({
     setValue: props.setValue,
     errors: props.errors,
     commercialEditable: props.commercialEditable,
-    layout,
   }
   return (
     <QuoteSlot

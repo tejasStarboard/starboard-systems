@@ -4,7 +4,9 @@ import type {
   ExtensionCommandContribution,
   ExtensionEditorContribution,
   ExtensionManifest,
+  ExtensionNewTabContribution,
   ExtensionPointContribution,
+  ExtensionStatusBarContribution,
   ExtensionViewContribution,
   Plan,
 } from "./manifest.js"
@@ -19,6 +21,10 @@ export type ActiveWorkbenchContributions = {
   views: WithExtensionId<ExtensionViewContribution>[]
   editors: WithExtensionId<ExtensionEditorContribution>[]
   commands: WithExtensionId<ExtensionCommandContribution>[]
+  /** New Tab welcome quick actions (`workbench.newTab`). */
+  newTab: WithExtensionId<ExtensionNewTabContribution>[]
+  /** Footer launchers (`workbench.statusBar`). */
+  statusBar: WithExtensionId<ExtensionStatusBarContribution>[]
   /** Contributions to extension-defined points, keyed by point id. */
   points: Record<string, WithExtensionId<ExtensionPointContribution>[]>
 }
@@ -28,6 +34,8 @@ export const EMPTY_WORKBENCH_CONTRIBUTIONS: ActiveWorkbenchContributions = {
   views: [],
   editors: [],
   commands: [],
+  newTab: [],
+  statusBar: [],
   points: {},
 }
 
@@ -196,6 +204,27 @@ export function getActiveWorkbenchContributions(
       (manifest) => manifest.contributes.commands,
       (item) => item.id
     ),
+    // Stable sort by `order` (ascending); ties keep first-registered order.
+    newTab: collect(
+      active,
+      (manifest) => manifest.contributes.newTab,
+      (item) => item.id
+    )
+      .map((item, index) => ({ item, index }))
+      .sort(
+        (a, b) => (a.item.order ?? 0) - (b.item.order ?? 0) || a.index - b.index
+      )
+      .map(({ item }) => item),
+    statusBar: collect(
+      active,
+      (manifest) => manifest.contributes.statusBar,
+      (item) => item.id
+    )
+      .map((item, index) => ({ item, index }))
+      .sort(
+        (a, b) => (a.item.order ?? 0) - (b.item.order ?? 0) || a.index - b.index
+      )
+      .map(({ item }) => item),
     points,
   }
 }

@@ -4,7 +4,9 @@ import {
   type WorkbenchActivity,
   type WorkbenchContributions,
   type WorkbenchEditor,
+  type WorkbenchNewTabAction,
   type WorkbenchPointContribution,
+  type WorkbenchStatusBarAction,
   type WorkbenchView,
 } from "./types"
 
@@ -20,6 +22,8 @@ export type HostWorkbenchContributions = {
     }
   >
   editors: ReadonlyArray<WorkbenchEditor>
+  newTab?: ReadonlyArray<WorkbenchNewTabAction>
+  statusBar?: ReadonlyArray<WorkbenchStatusBarAction>
   points?: Readonly<Record<string, ReadonlyArray<WorkbenchPointContribution>>>
 }
 
@@ -97,6 +101,39 @@ export function mergeHostContributions(
     )
   }
 
+  const newTabIds = new Set(base.newTab.map((item) => item.id))
+  const newTab = [...base.newTab]
+  for (const item of host.newTab ?? []) {
+    if (newTabIds.has(item.id)) continue
+    newTabIds.add(item.id)
+    newTab.push({
+      id: item.id,
+      label: item.label,
+      ...(item.order !== undefined ? { order: item.order } : {}),
+      ...(item.keybinding ? { keybinding: [...item.keybinding] } : {}),
+      ...(item.opens ? { opens: { ...item.opens } } : {}),
+      ...(item.command ? { command: item.command } : {}),
+      ...(item.extensionId ? { extensionId: item.extensionId } : {}),
+    })
+  }
+  newTab.sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+
+  const statusBarIds = new Set(base.statusBar.map((item) => item.id))
+  const statusBar = [...base.statusBar]
+  for (const item of host.statusBar ?? []) {
+    if (statusBarIds.has(item.id)) continue
+    statusBarIds.add(item.id)
+    statusBar.push({
+      id: item.id,
+      label: item.label,
+      ...(item.order !== undefined ? { order: item.order } : {}),
+      ...(item.opens ? { opens: { ...item.opens } } : {}),
+      ...(item.command ? { command: item.command } : {}),
+      ...(item.extensionId ? { extensionId: item.extensionId } : {}),
+    })
+  }
+  statusBar.sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+
   const points: Record<string, WorkbenchPointContribution[]> = {
     ...base.points,
   }
@@ -119,7 +156,7 @@ export function mergeHostContributions(
     points[pointId] = merged
   }
 
-  return { activity, views, editors, points }
+  return { activity, views, editors, newTab, statusBar, points }
 }
 
 /**

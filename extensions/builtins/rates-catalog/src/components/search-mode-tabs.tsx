@@ -1,6 +1,10 @@
 "use client"
 
-import { cn } from "@starboard/lib-ui/lib/utils"
+import {
+  Tabs,
+  TabsList,
+  TabsTrigger,
+} from "@starboard/lib-ui/components/tabs"
 
 const MODES = [
   { id: "fcl", label: "Ocean FCL", enabled: true },
@@ -15,29 +19,19 @@ const MODES = [
  */
 export function SearchModeTabs() {
   return (
-    <div
-      role="tablist"
-      aria-label="Search mode"
-      className="flex flex-wrap gap-1"
-    >
-      {MODES.map((mode) => (
-        <button
-          key={mode.id}
-          type="button"
-          role="tab"
-          aria-selected={mode.enabled}
-          disabled={!mode.enabled}
-          title={mode.enabled ? undefined : "Coming soon"}
-          className={cn(
-            "rounded-md border px-2.5 py-1.5 text-xs font-medium",
-            mode.enabled
-              ? "border-foreground bg-foreground text-background"
-              : "cursor-not-allowed border-border text-muted-foreground opacity-60"
-          )}
-        >
-          {mode.label}
-        </button>
-      ))}
-    </div>
+    <Tabs defaultValue="fcl" aria-label="Search mode">
+      <TabsList>
+        {MODES.map((mode) => (
+          <TabsTrigger
+            key={mode.id}
+            value={mode.id}
+            disabled={!mode.enabled}
+            title={mode.enabled ? undefined : "Coming soon"}
+          >
+            {mode.label}
+          </TabsTrigger>
+        ))}
+      </TabsList>
+    </Tabs>
   )
 }

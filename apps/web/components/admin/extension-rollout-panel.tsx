@@ -21,6 +21,14 @@ import {
   CollapsibleTrigger,
 } from "@starboard/lib-ui/components/collapsible"
 import { Input } from "@starboard/lib-ui/components/input"
+import { LoadingState } from "@starboard/lib-ui/components/loading-state"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@starboard/lib-ui/components/select"
 import { Switch } from "@starboard/lib-ui/components/switch"
 import { toast } from "@starboard/lib-ui/components/toast"
 
@@ -251,11 +259,10 @@ export function ExtensionRolloutPanel({
                 <CollapsibleContent className="space-y-4 px-4 pb-4">
                   <div className="flex flex-col gap-2">
                     <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                      <select
-                        className="h-9 border bg-background px-2 text-sm"
+                      <Select
                         value={row.mode}
-                        onChange={(event) => {
-                          const mode = event.target.value as RolloutMode
+                        onValueChange={(value) => {
+                          const mode = value as RolloutMode
                           setRows((current) =>
                             current.map((item) =>
                               item.id === row.id ? { ...item, mode } : item
@@ -263,11 +270,22 @@ export function ExtensionRolloutPanel({
                           )
                         }}
                       >
-                        <option value="off">Off</option>
-                        <option value="common">Common beta list</option>
-                        <option value="beta">Custom beta list</option>
-                        <option value="on">On for all entitled</option>
-                      </select>
+                        <SelectTrigger className="w-full sm:w-56">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="off">Off</SelectItem>
+                          <SelectItem value="common">
+                            Common beta list
+                          </SelectItem>
+                          <SelectItem value="beta">
+                            Custom beta list
+                          </SelectItem>
+                          <SelectItem value="on">
+                            On for all entitled
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
                       <Button
                         type="button"
                         size="sm"
@@ -304,9 +322,9 @@ export function ExtensionRolloutPanel({
                   <div className="space-y-3 border-t pt-3">
                     <p className="text-xs font-medium">Settings</p>
                     {settingsLoading ? (
-                      <p className="text-xs text-muted-foreground">
+                      <LoadingState size="inline">
                         Loading settings…
-                      </p>
+                      </LoadingState>
                     ) : settingsLoadError ? (
                       <p className="text-xs text-muted-foreground">
                         Settings unavailable. Try refreshing the page.
@@ -384,17 +402,21 @@ function SettingControl({
         />
       ) : null}
       {field.type === "select" ? (
-        <select
-          className="h-9 border bg-background px-2 text-sm"
+        <Select
           value={field.textValue}
-          onChange={(event) => onChange({ textValue: event.target.value })}
+          onValueChange={(value) => onChange({ textValue: value ?? "" })}
         >
-          {(field.options ?? []).map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
+          <SelectTrigger className="w-full sm:w-56">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {(field.options ?? []).map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       ) : null}
       {field.type === "secret" ? (
         <Input

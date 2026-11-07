@@ -2,7 +2,7 @@
 id: 099
 wave: 09-rates-catalog-ux
 title: Rate Sheets manage UI + Sell Rates gated marketplace shell
-status: todo
+status: backlog
 depends_on: [096]
 epic: SYS-RATES-UX
 docs:

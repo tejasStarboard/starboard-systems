@@ -1,7 +1,8 @@
+import { NewTabWelcome } from "@/components/workbench/new-tab-welcome"
+
 /**
- * Workbench home. The quotes list now lives in the `quoting.document` built-in
- * (sidebar view + `quote.list` editor); the editor group renders its empty state.
+ * Workbench New Tab (`/`). No editor auto-opens; quotes list lives at `/quotes`.
  */
 export default function HomePage() {
-  return null
+  return <NewTabWelcome />
 }

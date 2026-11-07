@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 
+import { Button } from "@starboard/lib-ui/components/button"
 import {
   Combobox,
   ComboboxContent,
@@ -116,9 +117,10 @@ export function CustomerCombobox({
         <ComboboxContent className="w-(--anchor-width)">
           <ComboboxEmpty>
             {canCreate && !disabled ? (
-              <button
+              <Button
                 type="button"
-                className="w-full px-2 py-1.5 text-left text-sm text-foreground hover:underline"
+                variant="link"
+                className="h-auto w-full justify-start px-2 py-1.5"
                 disabled={creating}
                 onMouseDown={(event) => {
                   event.preventDefault()
@@ -126,7 +128,7 @@ export function CustomerCombobox({
                 }}
               >
                 {creating ? "Creating…" : `Create customer “${trimmedQuery}”`}
-              </button>
+              </Button>
             ) : (
               "No customers found."
             )}
@@ -139,9 +141,10 @@ export function CustomerCombobox({
             )}
           </ComboboxList>
           {canCreate && !disabled && options.length > 0 ? (
-            <button
+            <Button
               type="button"
-              className="border-t px-2 py-1.5 text-left text-sm text-muted-foreground hover:text-foreground"
+              variant="ghost"
+              className="h-auto w-full justify-start rounded-none border-t px-2 py-1.5 text-muted-foreground"
               disabled={creating}
               onMouseDown={(event) => {
                 event.preventDefault()
@@ -149,7 +152,7 @@ export function CustomerCombobox({
               }}
             >
               {creating ? "Creating…" : `Create “${trimmedQuery}”`}
-            </button>
+            </Button>
           ) : null}
         </ComboboxContent>
       </Combobox>

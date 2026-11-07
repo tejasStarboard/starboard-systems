@@ -248,6 +248,8 @@ export type CreateQuoteRequest = z.infer<typeof createQuoteRequestSchema>
 
 export const createQuoteResponseSchema = z.object({
   id: z.string(),
+  /** Org-scoped short quote number (tab title / list). */
+  quoteId: z.string().min(1).max(6),
 })
 
 export const saveQuoteRequestSchema = z.object({

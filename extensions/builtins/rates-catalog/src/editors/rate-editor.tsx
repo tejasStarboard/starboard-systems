@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 
 import type { Rate } from "@starboard/lib-contracts"
+import { LoadingState } from "@starboard/lib-ui/components/loading-state"
 
 import { RateDetail } from "../components/rate-detail"
 import type { BuiltinEditorProps } from "../host"
@@ -57,7 +58,7 @@ export function RateEditor({ resourceId, host }: BuiltinEditorProps) {
   }, [resourceId])
 
   if (state.status === "loading") {
-    return <p className="p-4 text-xs text-muted-foreground">Loading rate…</p>
+    return <LoadingState>Loading rate…</LoadingState>
   }
 
   if (state.status === "error") {

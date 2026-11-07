@@ -111,8 +111,8 @@ Map starboard-2 Rate Management top tabs into the Rates activity sidebar + stand
 |  24 | [095](../../tickets/done/095-rates-catalog-ux-epic.md) Epic (docs / orchestration)                      | —                                    | Sequence + ref doc                |
 |  25 | [096](../../tickets/done/096-rates-activity-ia.md) Rates activity IA + shells                           | `rates.catalog`                      | Four sidebar entries              |
 |  26 | [097](../../tickets/done/097-search-rates-ocean-fcl.md) Search Rates (Ocean FCL)                        | `rates.catalog`                      | Prod-shaped FCL search            |
-|  27 | **[098](../../tickets/in_progress/098-spot-search-standalone.md)** Spot search standalone               | `rates.catalog` + `spot.*`           | Offers without a quote            |
-|  28 | [099](../../tickets/todo/099-rate-sheets-and-sell-shell.md) Rate Sheets manage + Sell Rates gated shell | `rates.catalog` + `ingestion.fcl_v6` | Sheets UX; marketplace shell only |
+|  27 | [098](../../tickets/done/098-spot-search-standalone.md) Spot search standalone                         | `rates.catalog` + `spot.*`           | Offers without a quote            |
+|  28 | [099](../../tickets/backlog/099-rate-sheets-and-sell-shell.md) Rate Sheets manage + Sell Rates gated shell | `rates.catalog` + `ingestion.fcl_v6` | Sheets UX; marketplace shell only (**backlog**) |
 
 ```text
 095 epic
@@ -122,7 +122,13 @@ Map starboard-2 Rate Management top tabs into the Rates activity sidebar + stand
 087 ingest (done) ── soft-dep for 099 status
 ```
 
-**Next ticket to implement:** finish [098](../../tickets/in_progress/098-spot-search-standalone.md), then [099](../../tickets/todo/099-rate-sheets-and-sell-shell.md).
+**Phase F product tickets 095–098 done.** [099](../../tickets/backlog/099-rate-sheets-and-sell-shell.md) is in **backlog**.
+
+**Done (UX polish):** [101](../../tickets/done/101-ui-theming-and-access.md) UI theming + ease of access.
+
+**Active:** [100](../../tickets/in_progress/100-playwright-e2e-harness.md) Playwright e2e harness (if still open).
+
+**Todo (platform):** [102](../../tickets/todo/102-workbench-commands-keybindings.md) Workbench commands + keybindings · [109](../../tickets/todo/109-tanstack-start-parallel-shell.md) TanStack Start parallel shell (`apps/web_ts`, branch `109` — not mixed into 101).
 
 ---
 
@@ -134,4 +140,4 @@ Map starboard-2 Rate Management top tabs into the Rates activity sidebar + stand
 
 ## Later (Phase G+)
 
-RFQ email → draft quote · more spot carriers · settings/billing productization · admin extension node-graph · Outlook/Gmail hosts · Public API · Companion · FFW OS · Air/LCL ingest extras · LCL/Drayage/Cartage/Air Search Rates backends · full rate marketplace (if ever) · catalog schedule schema · …
+Workbench commands/keybindings (**102**) · Contribution invoke RPC (**107**; backlog) · Bottom panel foundation + friendly panels (**103** Workspace State + `workbench.panel` → **104** activity · **105** inbox peek · **106** quote notes; backlog) · Land TanStack parallel shell (**109**) · Retire Next for TanStack `web_ts` (**108**; backlog — after **109** + higher backlogs; keep developing on `apps/web` until then) · RFQ email → draft quote · more spot carriers · settings/billing productization · admin extension node-graph · Outlook/Gmail hosts · Public API · Companion · FFW OS · Air/LCL ingest extras · LCL/Drayage/Cartage/Air Search Rates backends · full rate marketplace (if ever) · catalog schedule schema · …

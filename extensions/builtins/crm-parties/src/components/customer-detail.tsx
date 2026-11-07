@@ -13,6 +13,10 @@ import {
 } from "@starboard/lib-contracts"
 import { Button } from "@starboard/lib-ui/components/button"
 import {
+  ButtonGroup,
+  ButtonGroupSeparator,
+} from "@starboard/lib-ui/components/button-group"
+import {
   Card,
   CardAction,
   CardDescription,
@@ -42,6 +46,8 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@starboard/lib-ui/components/sheet"
+import { Label } from "@starboard/lib-ui/components/label"
+import { LoadingState } from "@starboard/lib-ui/components/loading-state"
 import { Switch } from "@starboard/lib-ui/components/switch"
 import { Textarea } from "@starboard/lib-ui/components/textarea"
 import { toast } from "@starboard/lib-ui/components/toast"
@@ -76,7 +82,7 @@ function SwitchRow({
   onCheckedChange: (checked: boolean) => void
 }) {
   return (
-    <label
+    <Label
       className={`flex items-center justify-between gap-4 py-3 ${
         disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer"
       }`}
@@ -93,7 +99,7 @@ function SwitchRow({
         onCheckedChange={(value) => onCheckedChange(value === true)}
         className="shrink-0"
       />
-    </label>
+    </Label>
   )
 }
 
@@ -585,7 +591,7 @@ export function CustomerDetail({
         </div>
 
         <div className="flex shrink-0 items-center gap-3 border-t bg-background px-5 py-4 lg:px-8">
-          <label className="mr-auto flex items-center gap-2">
+          <Label className="mr-auto flex items-center gap-2">
             <Switch
               checked={isActive}
               disabled={togglingActive || isSubmitting}
@@ -593,21 +599,24 @@ export function CustomerDetail({
               aria-label="Active"
             />
             <span className="text-sm font-medium">Active</span>
-          </label>
-          <Button
-            type="button"
-            variant="outline"
-            disabled={formDisabled || !isDirty || isSubmitting}
-            onClick={() => form.reset()}
-          >
-            Undo
-          </Button>
-          <Button
-            type="submit"
-            disabled={formDisabled || isSubmitting || !isDirty}
-          >
-            {isSubmitting ? "Saving…" : "Save"}
-          </Button>
+          </Label>
+          <ButtonGroup aria-label="Save customer">
+            <Button
+              type="button"
+              variant="outline"
+              disabled={formDisabled || !isDirty || isSubmitting}
+              onClick={() => form.reset()}
+            >
+              Undo
+            </Button>
+            <ButtonGroupSeparator />
+            <Button
+              type="submit"
+              disabled={formDisabled || isSubmitting || !isDirty}
+            >
+              {isSubmitting ? "Saving…" : "Save"}
+            </Button>
+          </ButtonGroup>
         </div>
       </form>
 
@@ -646,12 +655,16 @@ export function CustomerDetail({
 
           <ul className="min-h-0 flex-1 space-y-2 overflow-y-auto px-4">
             {contacts.length === 0 ? (
-              <li className="py-6 text-sm text-muted-foreground">
-                {contactsLoading
-                  ? "Loading…"
-                  : contactsTotal === 0 && !contactsListQuery.q
-                    ? "No contacts yet."
-                    : "No contacts match."}
+              <li>
+                {contactsLoading ? (
+                  <LoadingState size="sm">Loading contacts…</LoadingState>
+                ) : (
+                  <p className="py-6 text-sm text-muted-foreground">
+                    {contactsTotal === 0 && !contactsListQuery.q
+                      ? "No contacts yet."
+                      : "No contacts match."}
+                  </p>
+                )}
               </li>
             ) : (
               contacts.map((contact) => (

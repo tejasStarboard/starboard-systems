@@ -19,6 +19,7 @@ import { CurrencyCombobox } from "@starboard/ext-geo-gazetteer"
 import { Button } from "@starboard/lib-ui/components/button"
 import { Checkbox } from "@starboard/lib-ui/components/checkbox"
 import { Input } from "@starboard/lib-ui/components/input"
+import { Label } from "@starboard/lib-ui/components/label"
 import {
   Select,
   SelectContent,
@@ -183,7 +184,7 @@ export function GlobalChargesEditor({
                     control={control}
                     name={`${prefix}.isIncludedInTotal`}
                     render={({ field: includeField }) => (
-                      <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                      <Label className="flex items-center gap-1.5 text-xs text-muted-foreground">
                         <Checkbox
                           checked={includeField.value}
                           onCheckedChange={(checked) =>
@@ -191,7 +192,7 @@ export function GlobalChargesEditor({
                           }
                         />
                         Incl.
-                      </label>
+                      </Label>
                     )}
                   />
                   <Button

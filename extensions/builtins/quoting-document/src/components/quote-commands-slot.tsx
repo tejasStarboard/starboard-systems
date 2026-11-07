@@ -10,8 +10,9 @@ import { QUOTING_SLOTS, type CommandsSlotProps } from "../slots/types"
 import type { QuoteFormLayoutProps } from "./quote-form-layout-props"
 
 /**
- * `quoting.commands` host: toolbar actions (PDF in 083). Empty until a
- * contributor mounts. Passes `exportAllowed` so contributors can gate.
+ * `quoting.commands` host: menu items for the Preview split button (PDF in
+ * 083). Empty until a contributor mounts. Passes `exportAllowed` so
+ * contributors can gate.
  */
 export function QuoteCommandsSlot({
   props,

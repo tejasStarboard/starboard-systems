@@ -132,6 +132,40 @@ export const extensionCommandContributionSchema = z.object({
   title: z.string().min(1),
 })
 
+/**
+ * `workbench.newTab` — quick actions on the New Tab welcome list.
+ * Portable key tokens: `mod` (⌘/Ctrl), `shift`, `alt`, letter/digit codes.
+ * Exactly one of `opens` (editor tab) or `command` (client handler id).
+ */
+export const extensionNewTabContributionSchema = z
+  .object({
+    id: z.string().min(1),
+    label: z.string().min(1),
+    order: z.number().optional(),
+    keybinding: z.array(z.string().min(1)).optional(),
+    opens: extensionViewEntryOpensSchema.optional(),
+    command: z.string().min(1).optional(),
+  })
+  .refine((entry) => Boolean(entry.opens) !== Boolean(entry.command), {
+    message: "newTab entry needs exactly one of opens or command",
+  })
+
+/**
+ * `workbench.statusBar` — footer launchers / toggles.
+ * Exactly one of `opens` (editor tab) or `command` (client handler id).
+ */
+export const extensionStatusBarContributionSchema = z
+  .object({
+    id: z.string().min(1),
+    label: z.string().min(1),
+    order: z.number().optional(),
+    opens: extensionViewEntryOpensSchema.optional(),
+    command: z.string().min(1).optional(),
+  })
+  .refine((entry) => Boolean(entry.opens) !== Boolean(entry.command), {
+    message: "statusBar entry needs exactly one of opens or command",
+  })
+
 /** Contribution into an extension-defined point (e.g. `quoting.slots.chargeTable`). */
 export const extensionPointContributionSchema = z.object({
   id: z.string().min(1),
@@ -165,6 +199,8 @@ export const extensionContributesSchema = z.object({
   views: z.array(extensionViewContributionSchema).optional(),
   editors: z.array(extensionEditorContributionSchema).optional(),
   commands: z.array(extensionCommandContributionSchema).optional(),
+  newTab: z.array(extensionNewTabContributionSchema).optional(),
+  statusBar: z.array(extensionStatusBarContributionSchema).optional(),
   /** Keyed by extension-defined point id → contributions to that point. */
   points: z
     .record(z.string().min(1), z.array(extensionPointContributionSchema))
@@ -239,6 +275,12 @@ export type ExtensionEditorContribution = z.infer<
 >
 export type ExtensionCommandContribution = z.infer<
   typeof extensionCommandContributionSchema
+>
+export type ExtensionNewTabContribution = z.infer<
+  typeof extensionNewTabContributionSchema
+>
+export type ExtensionStatusBarContribution = z.infer<
+  typeof extensionStatusBarContributionSchema
 >
 export type ExtensionPointContribution = z.infer<
   typeof extensionPointContributionSchema

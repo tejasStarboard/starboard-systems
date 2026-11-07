@@ -10,7 +10,11 @@ export type BuiltinHost = {
     viewType: string
     resourceId: string
     title?: string
+    /** Open in the right split pane (creates the horizontal split). */
+    side?: "beside"
   }) => void
+  /** Rename the focused editor tab (e.g. short quote id after load). */
+  setEditorTitle?: (title: string) => void
   /** Currently focused editor tab, if any (sidebar highlight). */
   activeEditor: { viewType: string; resourceId: string } | null
   /**

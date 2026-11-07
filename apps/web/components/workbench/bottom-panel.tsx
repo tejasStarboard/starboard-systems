@@ -3,9 +3,9 @@
 import { useWorkbench } from "@/components/workbench/workbench-context"
 import { Button } from "@starboard/lib-ui/components/button"
 
-/** Stub panel region + status bar (jobs/logs/messaging land here later). */
+/** Stub panel region + contribution-driven status bar (Preview, …). */
 export function BottomPanel() {
-  const { panelOpen, togglePanel } = useWorkbench()
+  const { panelOpen, togglePanel, contributions, openEditor } = useWorkbench()
 
   return (
     <>
@@ -30,6 +30,21 @@ export function BottomPanel() {
         >
           Panel
         </Button>
+        {contributions.statusBar.map((item) => {
+          if (!item.opens) return null
+          const opens = item.opens
+          return (
+            <Button
+              key={item.id}
+              variant="ghost"
+              size="xs"
+              data-testid={`status-bar-${item.id}`}
+              onClick={() => openEditor({ ...opens, side: "beside" })}
+            >
+              {item.label}
+            </Button>
+          )
+        })}
       </footer>
     </>
   )

@@ -12,6 +12,14 @@ import {
   UsersIcon,
 } from "@phosphor-icons/react"
 
+import { Button } from "@starboard/lib-ui/components/button"
+import {
+  Card,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@starboard/lib-ui/components/card"
+
 import type { BuiltinHost } from "../host"
 import { SETTINGS_PAGES } from "../lib/settings-pages"
 
@@ -44,12 +52,13 @@ export function SettingsIndex({ host }: { host: BuiltinHost }) {
             {section ? (
               <h2 className="text-sm text-muted-foreground">{section}</h2>
             ) : null}
-            <div className="divide-y divide-border overflow-hidden border">
+            <Card size="sm" className="gap-0 py-0 ring-foreground/10">
               {SETTINGS_PAGES.filter((page) => page.section === section).map(
                 (page) => (
-                  <button
+                  <Button
                     key={page.slug}
                     type="button"
+                    variant="ghost"
                     onClick={() =>
                       host.openEditor({
                         viewType: "settings",
@@ -57,24 +66,24 @@ export function SettingsIndex({ host }: { host: BuiltinHost }) {
                         title: page.title,
                       })
                     }
-                    className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/50"
+                    className="h-auto w-full justify-start gap-3 rounded-none border-b border-border px-4 py-3 text-left last:border-b-0"
                   >
                     <span className="flex size-8 shrink-0 items-center justify-center text-muted-foreground [&_svg]:size-4">
                       {ICONS[page.icon]}
                     </span>
-                    <span className="min-w-0 flex-1">
-                      <span className="block text-sm font-medium">
+                    <CardHeader className="min-w-0 flex-1 gap-0.5 p-0 px-0">
+                      <CardTitle className="text-sm font-medium">
                         {page.title}
-                      </span>
-                      <span className="block text-xs text-muted-foreground">
+                      </CardTitle>
+                      <CardDescription className="text-xs">
                         {page.description}
-                      </span>
-                    </span>
+                      </CardDescription>
+                    </CardHeader>
                     <CaretRightIcon className="size-4 shrink-0 text-muted-foreground" />
-                  </button>
+                  </Button>
                 )
               )}
-            </div>
+            </Card>
           </section>
         ))}
       </div>

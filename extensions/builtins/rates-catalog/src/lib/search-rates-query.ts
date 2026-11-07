@@ -14,7 +14,11 @@ export type SearchRatesFilters = {
 
 export type SearchRatesSort = "lane" | "carrier" | "validity" | "amount"
 
-export const EQUIPMENT_OPTIONS = ["20GP", "40GP", "40HC"] as const
+export const EQUIPMENT_OPTIONS = [
+  { value: "20GP", label: "20' General Purpose" },
+  { value: "40GP", label: "40' General Purpose" },
+  { value: "40HC", label: "40' High Cube" },
+] as const
 
 /** Page size for Search Rates results (matches quotes list chrome). */
 export const SEARCH_RATES_PAGE_SIZE = 25

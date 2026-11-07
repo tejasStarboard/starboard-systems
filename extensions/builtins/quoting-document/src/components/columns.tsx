@@ -5,6 +5,7 @@ import { createColumnHelper } from "@tanstack/react-table"
 import { Badge } from "@starboard/lib-ui/components/badge"
 
 import { type DataTableFeatures } from "./data-table-features"
+import { quoteStatusLabel } from "../lib/quote-stage"
 import { type QuoteListItem } from "../lib/quotes.schema"
 
 const columnHelper = createColumnHelper<DataTableFeatures, QuoteListItem>()
@@ -36,9 +37,7 @@ export const columns = columnHelper.columns([
   columnHelper.accessor("status", {
     header: "Status",
     cell: ({ getValue }) => (
-      <Badge variant="outline" className="capitalize">
-        {getValue()}
-      </Badge>
+      <Badge variant="outline">{quoteStatusLabel(getValue())}</Badge>
     ),
   }),
   columnHelper.accessor("customerName", {

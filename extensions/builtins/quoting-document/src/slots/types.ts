@@ -58,8 +58,6 @@ export type HeaderFieldsSlotProps = Form & {
   errors: FieldErrors<QuoteFormValues>
   /** False for terminal stages (win / loss / expired). */
   commercialEditable: boolean
-  /** Layout hint so contributed fields match header density. */
-  layout: "desktop" | "tablet" | "mobile"
 }
 
 /** Stage / validity / number chrome (self-contributed by quoting.document). */
@@ -67,15 +65,15 @@ export type LifecycleSlotProps = Pick<Form, "control" | "register"> & {
   quoteId: string
   status: QuoteStatus
   errors: FieldErrors<QuoteFormValues>
-  /** Layout hint so one contribution can adapt density. */
-  layout: "desktop" | "tablet" | "mobile"
+  /** False for terminal stages (win / loss / expired). */
+  commercialEditable: boolean
 }
 
 export type PreviewTab = "pdf" | "email"
 
 /**
  * Preview pane body (092 fills PDF / Email). The pane chrome (tabs, document
- * frame, mobile sheet) stays with `quoting.document`. A contribution declares
+ * frame) stays with `quoting.document`. A contribution declares
  * its tab via manifest `props: { tab: "pdf" | "email" }`; the host mounts it
  * only on that tab (no `tab` prop = both) and renders a stub when a tab has no
  * active contributor (unplug). `quoteId` is the persisted row UUID used by
@@ -92,9 +90,9 @@ export type PreviewSlotProps = Pick<Form, "control"> & {
   /** Resolved customer label (empty when unset). */
   customerName: string
   tab: PreviewTab
-  /** Active builder step id (`basics` … `build`). */
+  /** Active builder step id (`route` | `rate`). */
   step: string
-  /** Index of the active lane (steps 2–5), for per-lane previews. */
+  /** Index of the active lane, for per-lane previews. */
   selectedLaneIndex: number
   currencyCode: string
 }
@@ -119,10 +117,10 @@ export type LaneRouteSlotProps = {
 }
 
 /**
- * Toolbar actions (PDF in 083, …). Host always mounts contributions; gate
- * export/destructive actions with `exportAllowed`.
- * `quoteId` is the persisted row UUID used by `/api/quotes/:id` (not the
- * human-facing 6-char number).
+ * Preview split-menu actions (PDF in 083, …). Host mounts contributions as
+ * menu items under Preview; gate export/destructive actions with
+ * `exportAllowed`. `quoteId` is the persisted row UUID used by
+ * `/api/quotes/:id` (not the human-facing 6-char number).
  */
 export type CommandsSlotProps = {
   quoteId: string

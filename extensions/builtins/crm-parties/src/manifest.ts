@@ -47,6 +47,19 @@ export const manifest = {
         deepLink: "/customers",
       },
     ],
+    newTab: [
+      {
+        id: "crm.parties.findCustomers",
+        label: "Search or create customers",
+        order: 50,
+        keybinding: ["mod", "shift", "C"],
+        opens: {
+          viewType: "customer.list",
+          resourceId: "/customers",
+          title: "Customers",
+        },
+      },
+    ],
   },
   enabled: true,
 } as const

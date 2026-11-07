@@ -7,11 +7,12 @@ import type {
   CommandsSlotProps,
   SlotComponentProps,
 } from "@starboard/ext-quoting-document/slots"
-import { Button } from "@starboard/lib-ui/components/button"
+import { DropdownMenuItem } from "@starboard/lib-ui/components/dropdown-menu"
 
 /**
  * `quoting.pdf.export` → `quoting.commands`.
- * Host always mounts; gate with `exportAllowed` (review | sent | win | loss).
+ * Host mounts this inside the Preview split-button menu; gate with
+ * `exportAllowed` (review | sent | win | loss).
  * `quoteId` is the persisted row UUID (not the human quote number).
  */
 export function ExportPdfButton({
@@ -53,10 +54,7 @@ export function ExportPdfButton({
   }
 
   return (
-    <Button
-      type="button"
-      size="sm"
-      variant="outline"
+    <DropdownMenuItem
       disabled={!exportAllowed || pending || !quoteId}
       onClick={() => void onExport()}
       data-testid="quoting-pdf-export"
@@ -66,8 +64,8 @@ export function ExportPdfButton({
           : "Export available when status is review, sent, win, or loss"
       }
     >
-      <DownloadSimpleIcon className="size-4" />
+      <DownloadSimpleIcon />
       {pending ? "Exporting…" : "Export PDF"}
-    </Button>
+    </DropdownMenuItem>
   )
 }

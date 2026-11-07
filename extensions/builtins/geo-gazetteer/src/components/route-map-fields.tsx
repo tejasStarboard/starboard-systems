@@ -1,6 +1,7 @@
 "use client"
 
 import { useMemo, useState } from "react"
+import { CornersInIcon, GlobeHemisphereWestIcon } from "@phosphor-icons/react"
 
 import { Button } from "@starboard/lib-ui/components/button"
 import { Field, FieldLabel } from "@starboard/lib-ui/components/field"
@@ -95,6 +96,13 @@ export function RouteMapFields({
     : null
 
   const markers: MapMarker[] = []
+  const portDisplay = (code: string) => {
+    const upper = code.toUpperCase()
+    const label = geoOf(upper)?.label?.trim()
+    if (label) return label
+    return upper
+  }
+
   const addMarker = (
     kind: MapMarker["kind"],
     code: string,
@@ -104,7 +112,7 @@ export function RouteMapFields({
       markers.push({
         key: `${kind}-${code}`,
         kind,
-        label: code.toUpperCase(),
+        label: portDisplay(code),
         ...hit.point,
       })
     }
@@ -168,22 +176,13 @@ export function RouteMapFields({
           aria-label="Port to pick on the map"
         >
           <ToggleGroupItem value="origin">
-            Origin{origin ? ` · ${origin}` : ""}
+            Origin{origin ? ` · ${portDisplay(origin)}` : ""}
           </ToggleGroupItem>
           <ToggleGroupItem value="destination">
-            Destination{destination ? ` · ${destination}` : ""}
+            Destination{destination ? ` · ${portDisplay(destination)}` : ""}
           </ToggleGroupItem>
         </ToggleGroup>
-        {bothSet ? (
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => setShowWorld((v) => !v)}
-          >
-            {showWorld ? "Fit route" : "World view"}
-          </Button>
-        ) : null}
+       
       </div>
 
       <div className="relative">
@@ -200,6 +199,23 @@ export function RouteMapFields({
             )
           }
         />
+        {bothSet ? (
+          <Button
+            type="button"
+            variant="outline"
+            size="icon-sm"
+            className="absolute bottom-2 left-2 z-10 bg-background/90"
+            aria-label={showWorld ? "Fit route" : "World view"}
+            title={showWorld ? "Fit route" : "World view"}
+            onClick={() => setShowWorld((v) => !v)}
+          >
+            {showWorld ? (
+              <CornersInIcon className="size-3.5" />
+            ) : (
+              <GlobeHemisphereWestIcon className="size-3.5" />
+            )}
+          </Button>
+        ) : null}
         <p className="pointer-events-none absolute right-2 bottom-2 rounded bg-background/80 px-2 py-0.5 text-xs text-muted-foreground">
           {hovered
             ? hovered.name
@@ -246,7 +262,7 @@ export function RouteMapFields({
 
       <div className="grid gap-4 sm:grid-cols-2">
         <Field>
-          <FieldLabel htmlFor={id("origin")}>Find origin port</FieldLabel>
+          <FieldLabel htmlFor={id("origin")}>Origin</FieldLabel>
           <PortCombobox
             id={id("origin")}
             options={portOptions}
@@ -258,7 +274,7 @@ export function RouteMapFields({
         </Field>
         <Field>
           <FieldLabel htmlFor={id("destination")}>
-            Find destination port
+            Destination
           </FieldLabel>
           <PortCombobox
             id={id("destination")}

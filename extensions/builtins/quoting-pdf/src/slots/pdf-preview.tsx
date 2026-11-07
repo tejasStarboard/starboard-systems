@@ -10,6 +10,8 @@ import type {
   PreviewSlotProps,
   SlotComponentProps,
 } from "@starboard/ext-quoting-document/slots"
+import { LoadingState } from "@starboard/lib-ui/components/loading-state"
+import { cn } from "@starboard/lib-ui/lib/utils"
 
 import { buildQuoteDocumentView } from "../lib/build-document-view"
 
@@ -25,6 +27,9 @@ type ContextState =
   | { status: "ready"; context: PdfContext }
   | { status: "error"; message: string }
 
+const SCROLL_HIDE =
+  "[scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+
 /**
  * `quoting.pdf.preview` → `quoting.slots.preview` (PDF tab). Builds the
  * `QuoteDocumentView` from the host's debounced form snapshot + org context
@@ -33,6 +38,8 @@ type ContextState =
  * default), then renders the selected `quoting.pdf.templates` template with
  * `@react-pdf/renderer` into a blob URL. The previous PDF stays visible while
  * the next renders. Preview is not stage-gated; Export keeps its status gates.
+ *
+ * Zoom is left to the browser PDF viewer (no custom Fit/slider chrome).
  */
 export function PdfPreview({
   quote,
@@ -51,7 +58,8 @@ export function PdfPreview({
     fetch("/api/quotes/preview/pdf-context", { signal: controller.signal })
       .then(async (response) => {
         const payload = (await response.json().catch(() => null)) as
-          (Partial<PdfContext> & { error?: string }) | null
+          | (Partial<PdfContext> & { error?: string })
+          | null
         if (controller.signal.aborted) return
         if (!response.ok || !payload?.org || !payload.templateId) {
           throw new Error(
@@ -134,7 +142,7 @@ export function PdfPreview({
     return (
       <div
         data-testid="quote-preview-pdf-empty"
-        className="mx-auto flex aspect-[1/1.3] w-full max-w-md items-center justify-center border bg-background p-5 text-center text-sm text-muted-foreground shadow-sm"
+        className="flex min-h-0 flex-1 items-center justify-center p-5 text-center text-sm text-muted-foreground"
       >
         {gap}
       </div>
@@ -145,25 +153,52 @@ export function PdfPreview({
     <div
       data-testid="quote-preview-pdf"
       data-pending={pending ? "true" : "false"}
-      className="mx-auto w-full max-w-md space-y-2"
+      className="flex min-h-0 flex-1 flex-col"
     >
       {contextState.status === "error" || error ? (
-        <p role="alert" className="text-xs text-destructive">
+        <p role="alert" className="shrink-0 px-3 py-2 text-xs text-destructive">
           {contextState.status === "error" ? contextState.message : error}
         </p>
       ) : null}
       {url ? (
-        <iframe
-          title={`Quote ${quote.quoteId || "draft"} PDF preview`}
-          src={`${url}#toolbar=0&navpanes=0`}
-          className="aspect-[1/1.3] w-full border bg-background shadow-sm"
-        />
-      ) : (
-        <div className="flex aspect-[1/1.3] w-full items-center justify-center border bg-background text-sm text-muted-foreground shadow-sm">
-          {contextState.status === "error"
-            ? "Preview unavailable"
-            : "Rendering preview…"}
+        <div
+          data-testid="quote-preview-pdf-viewport"
+          className={cn(
+            "relative min-h-0 flex-1 overflow-hidden",
+            SCROLL_HIDE
+          )}
+        >
+          <iframe
+            title={`Quote ${quote.quoteId || "draft"} PDF preview`}
+            src={url}
+            className={cn(
+              "size-full border-0 bg-muted/40 transition-opacity",
+              pending && "opacity-40"
+            )}
+          />
+          {pending ? (
+            <div
+              data-testid="quote-preview-pdf-updating"
+              className="absolute inset-0 flex items-center justify-center bg-background/55"
+              aria-live="polite"
+            >
+              <LoadingState
+                size="inline"
+                className="w-auto rounded-none bg-background/90 px-3 py-2 ring-1 ring-foreground/10"
+              >
+                Updating preview…
+              </LoadingState>
+            </div>
+          ) : null}
         </div>
+      ) : contextState.status === "error" ? (
+        <p className="flex min-h-0 flex-1 items-center justify-center text-sm text-muted-foreground">
+          Preview unavailable
+        </p>
+      ) : (
+        <LoadingState className="min-h-0 flex-1">
+          Rendering preview…
+        </LoadingState>
       )}
     </div>
   )

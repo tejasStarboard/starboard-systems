@@ -108,7 +108,7 @@ export function CurrencyCombobox({
       filter={(option, query) =>
         option.label.toLowerCase().includes(query.trim().toLowerCase())
       }
-      itemToStringLabel={(option) => option.value}
+      itemToStringLabel={(option) => option.label}
       itemToStringValue={(option) => option.value}
       isItemEqualToValue={(a, b) => a.value === b.value}
     >

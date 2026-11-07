@@ -5,6 +5,11 @@ import { CaretLeftIcon, CaretRightIcon } from "@phosphor-icons/react"
 import type { Rate } from "@starboard/lib-contracts"
 import { Button } from "@starboard/lib-ui/components/button"
 import {
+  ButtonGroup,
+  ButtonGroupText,
+} from "@starboard/lib-ui/components/button-group"
+import { LoadingState } from "@starboard/lib-ui/components/loading-state"
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -76,7 +81,7 @@ export function SearchRatesResults({
             ? `${total} rate${total === 1 ? "" : "s"}`
             : "Run a search to see catalog rates"}
         </p>
-        <div className="ml-auto flex items-center gap-2">
+        <ButtonGroup aria-label="Sort and export" className="ml-auto">
           <Select
             value={sort}
             onValueChange={(value) => {
@@ -112,11 +117,11 @@ export function SearchRatesResults({
           >
             Export
           </Button>
-        </div>
+        </ButtonGroup>
       </div>
 
       {loading ? (
-        <p className="text-xs text-muted-foreground">Searching rates…</p>
+        <LoadingState size="sm">Searching rates…</LoadingState>
       ) : !hasSearched ? null : total === 0 ? (
         <p className="text-sm text-muted-foreground">No rates found.</p>
       ) : (
@@ -178,32 +183,34 @@ export function SearchRatesResults({
               })}
             </TableBody>
           </Table>
-          <div className="flex items-center justify-between gap-2 border-t pt-2">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              disabled={loading || page <= 1}
-              onClick={() => onPageChange(Math.max(1, page - 1))}
-              aria-label="Previous page"
-            >
-              <CaretLeftIcon className="size-4" />
-              <span className="sr-only sm:not-sr-only">Prev</span>
-            </Button>
-            <span className="text-xs text-muted-foreground">
-              {page} / {pages}
-            </span>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              disabled={loading || page >= pages}
-              onClick={() => onPageChange(page + 1)}
-              aria-label="Next page"
-            >
-              <span className="sr-only sm:not-sr-only">Next</span>
-              <CaretRightIcon className="size-4" />
-            </Button>
+          <div className="flex justify-center border-t pt-2">
+            <ButtonGroup aria-label="Results pagination">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={loading || page <= 1}
+                onClick={() => onPageChange(Math.max(1, page - 1))}
+                aria-label="Previous page"
+              >
+                <CaretLeftIcon className="size-4" />
+                <span className="sr-only sm:not-sr-only">Prev</span>
+              </Button>
+              <ButtonGroupText className="min-w-16 justify-center text-muted-foreground">
+                {page} / {pages}
+              </ButtonGroupText>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={loading || page >= pages}
+                onClick={() => onPageChange(page + 1)}
+                aria-label="Next page"
+              >
+                <span className="sr-only sm:not-sr-only">Next</span>
+                <CaretRightIcon className="size-4" />
+              </Button>
+            </ButtonGroup>
           </div>
         </>
       )}

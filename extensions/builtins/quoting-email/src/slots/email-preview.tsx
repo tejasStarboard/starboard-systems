@@ -13,8 +13,14 @@ import type {
   SlotComponentProps,
 } from "@starboard/ext-quoting-document/slots"
 import { Button } from "@starboard/lib-ui/components/button"
+import { ButtonGroup } from "@starboard/lib-ui/components/button-group"
+import { LoadingState } from "@starboard/lib-ui/components/loading-state"
+import { cn } from "@starboard/lib-ui/lib/utils"
 
 type EmailPreviewResult = { subject: string; html: string }
+
+const SCROLL_HIDE =
+  "[scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
 
 /**
  * `quoting.email.preview` → `quoting.slots.preview` (Email tab). Fetches the
@@ -50,7 +56,8 @@ export function EmailPreview({
     })
       .then(async (response) => {
         const payload = (await response.json().catch(() => null)) as
-          (Partial<EmailPreviewResult> & { error?: string }) | null
+          | (Partial<EmailPreviewResult> & { error?: string })
+          | null
         if (controller.signal.aborted) return
         if (!response.ok || !payload?.html) {
           throw new Error(
@@ -98,7 +105,7 @@ export function EmailPreview({
     return (
       <div
         data-testid="quote-preview-email-empty"
-        className="mx-auto flex w-full max-w-md items-center justify-center border bg-background p-5 py-16 text-center text-sm text-muted-foreground shadow-sm"
+        className="flex min-h-0 flex-1 items-center justify-center p-5 text-center text-sm text-muted-foreground"
       >
         {gap}
       </div>
@@ -109,61 +116,88 @@ export function EmailPreview({
     <div
       data-testid="quote-preview-email"
       data-pending={pending ? "true" : "false"}
-      className="mx-auto w-full max-w-xl space-y-2"
+      className="flex min-h-0 flex-1 flex-col"
     >
-      <div className="flex items-center justify-between gap-2">
+      <div className="flex shrink-0 items-center justify-between gap-2 border-b bg-background/80 px-2 py-1.5">
         <p
           className="min-w-0 truncate text-xs text-muted-foreground"
           data-testid="quote-preview-email-subject"
         >
           Subject: {result?.subject || "…"}
         </p>
-        <div className="flex shrink-0 gap-1">
+        <ButtonGroup aria-label="Email preview actions" className="shrink-0">
           <Button
             type="button"
-            size="sm"
+            size="xs"
             variant="outline"
             disabled={!result}
             onClick={() => void onCopy()}
             data-testid="quote-email-copy-html"
           >
             {copied ? (
-              <CheckIcon className="size-4" />
+              <CheckIcon className="size-3.5" />
             ) : (
-              <CopyIcon className="size-4" />
+              <CopyIcon className="size-3.5" />
             )}
             {copied ? "Copied" : "Copy HTML"}
           </Button>
           <Button
             type="button"
-            size="sm"
+            size="xs"
             variant="outline"
             disabled={!result}
             onClick={onOpenDraft}
             data-testid="quote-email-open-draft"
           >
-            <EnvelopeSimpleOpenIcon className="size-4" />
+            <EnvelopeSimpleOpenIcon className="size-3.5" />
             Open draft
           </Button>
-        </div>
+        </ButtonGroup>
       </div>
       {error ? (
-        <p role="alert" className="text-xs text-destructive">
+        <p role="alert" className="shrink-0 px-3 py-2 text-xs text-destructive">
           {error}
         </p>
       ) : null}
-      {result ? (
-        <iframe
-          title="Quote email preview"
-          sandbox=""
-          srcDoc={result.html}
-          className="h-[640px] w-full border bg-white shadow-sm"
-        />
-      ) : (
-        <div className="flex h-64 w-full items-center justify-center border bg-background text-sm text-muted-foreground shadow-sm">
-          Rendering preview…
-        </div>
-      )}
+      <div
+        className={cn(
+          "relative min-h-0 flex-1 overflow-auto overscroll-contain bg-muted/40 p-4",
+          SCROLL_HIDE
+        )}
+      >
+        {result ? (
+          <>
+            <iframe
+              title="Quote email preview"
+              sandbox=""
+              srcDoc={result.html}
+              className={cn(
+                "mx-auto min-h-full w-full min-w-[36rem] border bg-white shadow-sm transition-opacity",
+                pending && "opacity-40"
+              )}
+              style={{ height: "max(100%, 48rem)" }}
+            />
+            {pending ? (
+              <div
+                data-testid="quote-preview-email-updating"
+                className="absolute inset-0 flex items-center justify-center bg-background/55"
+                aria-live="polite"
+              >
+                <LoadingState
+                  size="inline"
+                  className="w-auto rounded-none bg-background/90 px-3 py-2 ring-1 ring-foreground/10"
+                >
+                  Updating preview…
+                </LoadingState>
+              </div>
+            ) : null}
+          </>
+        ) : (
+          <LoadingState className="h-full min-h-64">
+            Rendering preview…
+          </LoadingState>
+        )}
+      </div>
     </div>
   )
 }

@@ -13,8 +13,19 @@ test.describe("workbench shell", () => {
     await expect(bar.getByRole("button", { name: "Rates" })).toBeVisible()
   })
 
-  test("quotes home renders list chrome", async ({ page }) => {
+  test("home shows New Tab welcome", async ({ page }) => {
     await page.goto("/")
+    await expect(page.getByTestId("new-tab-welcome")).toBeVisible()
+    await expect(
+      page.getByRole("button", { name: "New Quote" })
+    ).toBeVisible()
+    await expect(
+      page.getByRole("button", { name: "Search Quotes" })
+    ).toBeVisible()
+  })
+
+  test("quotes list renders at /quotes", async ({ page }) => {
+    await page.goto("/quotes")
     await expect(editorHeading(page, "Quotes")).toBeVisible()
     await expect(
       editorGroup(page).getByRole("button", { name: "New quote" })

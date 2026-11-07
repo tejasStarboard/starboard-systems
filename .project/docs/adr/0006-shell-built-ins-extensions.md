@@ -72,9 +72,9 @@ Charge table, Incoterm, markup, rate sources are **editor-internal** contributio
 
 **[extension-points.md](../extension-points.md)** — kernel points are **generic only**. Nested quote UI (`chargeTable`, …) is **`defines`’d by `quoting.document`**, not by the kernel (Eclipse: plugins declare their own extension points).
 
-v1 kernel hosts: `workbench.activity` / `views` / `editors` / `commands`; `core.api` / `jobs` / `preferences` / `resources`; plus manifest **`defines.extensionPoints`** resolution.
+v1 kernel hosts: `workbench.activity` / `views` / `editors` / `commands`; `core.api` / `jobs` / `preferences` / `resources`; plus manifest **`defines.extensionPoints`** resolution. Later: `workbench.panel`, shell **Workspace State**, and **invoke** (host passes context args → child BFF handler) — see extension-points §5; no peer extension bus.
 
-Workbench **view state** lives in client shell (+ deep-link sync). Quote **data** stays in `services/quotes` behind the `quoting.document` built-in.
+Workbench **view state** lives in client shell (+ deep-link sync). Quote **data** stays in `services/quotes` behind the `quoting.document` built-in. Cross-extension **actions** use the child’s `/api/extensions/<id>/…` with explicit args; interactive slot UI keeps in-tree props/callbacks.
 
 ## Packages / services
 

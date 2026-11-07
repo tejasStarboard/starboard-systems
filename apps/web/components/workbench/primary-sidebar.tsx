@@ -9,6 +9,7 @@ import {
   builtinPointComponents,
   builtinViews,
 } from "@/lib/workbench/builtin-editors"
+import { Button } from "@starboard/lib-ui/components/button"
 import {
   Sheet,
   SheetContent,
@@ -63,21 +64,22 @@ function SidebarViews({ onNavigate }: { onNavigate?: () => void }) {
           {view.entries.map((entry) => (
             <li key={entry.id}>
               {entry.opens ? (
-                <button
+                <Button
                   type="button"
+                  variant="ghost"
                   onClick={() => {
                     openEditor(entry.opens!)
                     onNavigate?.()
                   }}
                   className={cn(
-                    "block w-full px-4 py-1.5 text-left text-sm hover:bg-muted",
+                    "h-auto w-full justify-start rounded-none px-4 py-1.5 text-left text-sm font-normal",
                     activeTab?.viewType === entry.opens.viewType &&
                       activeTab.resourceId === entry.opens.resourceId &&
                       "bg-muted font-medium"
                   )}
                 >
                   {entry.label}
-                </button>
+                </Button>
               ) : entry.href ? (
                 <Link
                   href={entry.href}
@@ -99,42 +101,47 @@ function SidebarViews({ onNavigate }: { onNavigate?: () => void }) {
   })
 }
 
-/** Inline sidebar on md+; overlay drawer on mobile (toggled via activity bar). */
-export function PrimarySidebar() {
-  const { sidebarOpen, mobileSidebarOpen, closeMobileSidebar } = useWorkbench()
+/**
+ * Desktop primary sidebar body. Width comes from the parent resizable panel
+ * (shell); fills the panel height.
+ */
+export function PrimarySidebarPanel() {
+  return (
+    <aside
+      aria-label="Primary sidebar"
+      data-region="primary-sidebar"
+      className="flex h-full min-h-0 w-full flex-col overflow-y-auto border-r bg-sidebar"
+    >
+      <SidebarViews />
+    </aside>
+  )
+}
+
+/** Mobile overlay drawer (toggled via activity bar). */
+export function PrimarySidebarMobile() {
+  const { mobileSidebarOpen, closeMobileSidebar } = useWorkbench()
 
   return (
-    <>
-      {sidebarOpen ? (
-        <aside
-          aria-label="Primary sidebar"
-          data-region="primary-sidebar"
-          className="hidden w-60 shrink-0 flex-col overflow-y-auto border-r bg-sidebar md:flex"
-        >
-          <SidebarViews />
-        </aside>
-      ) : null}
-      <Sheet
-        open={mobileSidebarOpen}
-        onOpenChange={(open) => {
-          if (!open) closeMobileSidebar()
-        }}
+    <Sheet
+      open={mobileSidebarOpen}
+      onOpenChange={(open) => {
+        if (!open) closeMobileSidebar()
+      }}
+    >
+      <SheetContent
+        side="left"
+        showCloseButton={false}
+        data-region="primary-sidebar-mobile"
+        className="w-60 max-w-[80vw] overflow-y-auto bg-sidebar p-0 md:hidden"
       >
-        <SheetContent
-          side="left"
-          showCloseButton={false}
-          data-region="primary-sidebar-mobile"
-          className="w-60 max-w-[80vw] overflow-y-auto bg-sidebar p-0 md:hidden"
-        >
-          <SheetHeader className="sr-only">
-            <SheetTitle>Sidebar</SheetTitle>
-            <SheetDescription>
-              Workbench primary sidebar views.
-            </SheetDescription>
-          </SheetHeader>
-          <SidebarViews onNavigate={closeMobileSidebar} />
-        </SheetContent>
-      </Sheet>
-    </>
+        <SheetHeader className="sr-only">
+          <SheetTitle>Sidebar</SheetTitle>
+          <SheetDescription>
+            Workbench primary sidebar views.
+          </SheetDescription>
+        </SheetHeader>
+        <SidebarViews onNavigate={closeMobileSidebar} />
+      </SheetContent>
+    </Sheet>
   )
 }

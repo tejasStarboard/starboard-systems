@@ -12,6 +12,14 @@ import {
   FieldLabel,
 } from "@starboard/lib-ui/components/field"
 import { Input } from "@starboard/lib-ui/components/input"
+import { LoadingState } from "@starboard/lib-ui/components/loading-state"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@starboard/lib-ui/components/select"
 import { toast } from "@starboard/lib-ui/components/toast"
 
 import { authClient } from "../lib/auth-client"
@@ -120,7 +128,7 @@ export function TeamSettingsForm() {
       <section className="space-y-3">
         <h2 className="text-sm font-medium">Members</h2>
         {loading ? (
-          <p className="text-sm text-muted-foreground">Loading…</p>
+          <LoadingState size="sm">Loading team…</LoadingState>
         ) : (
           <ul className="divide-y rounded-lg border">
             {members.map((member) => (
@@ -174,19 +182,22 @@ export function TeamSettingsForm() {
               name="role"
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid || undefined}>
-                  <FieldLabel htmlFor="invite-role">Role</FieldLabel>
-                  <select
-                    id="invite-role"
-                    className="h-9 w-full rounded-md border bg-background px-3 text-sm"
+                  <FieldLabel>Role</FieldLabel>
+                  <Select
                     value={field.value}
-                    onChange={field.onChange}
-                    onBlur={field.onBlur}
-                    name={field.name}
-                    ref={field.ref}
+                    onValueChange={field.onChange}
                   >
-                    <option value="member">Member</option>
-                    <option value="admin">Admin</option>
-                  </select>
+                    <SelectTrigger
+                      className="w-full"
+                      aria-invalid={fieldState.invalid}
+                    >
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="member">Member</SelectItem>
+                      <SelectItem value="admin">Admin</SelectItem>
+                    </SelectContent>
+                  </Select>
                   <FieldError errors={[fieldState.error]} />
                 </Field>
               )}

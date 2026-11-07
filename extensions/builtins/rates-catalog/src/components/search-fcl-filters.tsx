@@ -128,8 +128,8 @@ export function SearchFclFilters({
             <SelectContent>
               <SelectItem value="__any__">Any</SelectItem>
               {EQUIPMENT_OPTIONS.map((option) => (
-                <SelectItem key={option} value={option}>
-                  {option}
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -141,7 +141,7 @@ export function SearchFclFilters({
             id="search-agent"
             value={filters.agent}
             onChange={(event) => set("agent", event.target.value)}
-            placeholder="Customer / agent id"
+            placeholder="Agent name or id"
           />
         </Field>
         <Field>

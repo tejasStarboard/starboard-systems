@@ -25,7 +25,7 @@ import {
 } from "../lib/quotes.schema"
 import { LaneRoutePorts } from "./lane-route-ports"
 
-/** Step 2 (Route): mode, ports, vias and door addresses for one lane. */
+/** Route step: mode, ports, vias and door addresses for one lane. */
 export function LaneRouteFields({
   control,
   setValue,

@@ -12,10 +12,23 @@ import type {
   SlotComponentProps,
 } from "@starboard/ext-quoting-document/slots"
 import { Button } from "@starboard/lib-ui/components/button"
+import {
+  Field,
+  FieldLabel,
+} from "@starboard/lib-ui/components/field"
 import { Input } from "@starboard/lib-ui/components/input"
+import { Label } from "@starboard/lib-ui/components/label"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@starboard/lib-ui/components/select"
 
 import { GlobalChargesEditor } from "../components/global-charges-editor"
 import { RateSurchargesEditor } from "../components/rate-surcharges-editor"
+import { equipmentLabel } from "../lib/equipment-label"
 
 /**
  * `quoting.charges.table` → `quoting.slots.chargeTable`.
@@ -78,36 +91,40 @@ export function ChargeTable({
         {selectedIndex >= 0 ? (
           <>
             <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
-              <label className="flex flex-1 flex-col gap-1">
-                <span className="text-xs text-muted-foreground">
-                  Base freight
-                </span>
+              <Field className="flex-1 gap-1">
+                <FieldLabel>Base freight</FieldLabel>
                 <Input
                   placeholder="Rate label"
                   {...register(
                     `${lanePath}.manualRates.${selectedIndex}.label`
                   )}
                 />
-              </label>
-              <label className="flex flex-col gap-1">
-                <span className="text-xs text-muted-foreground">Basis</span>
-                <select
-                  className="h-8 border bg-background px-2 text-xs"
+              </Field>
+              <Field className="gap-1">
+                <FieldLabel>Basis</FieldLabel>
+                <Select
                   value={rates[selectedIndex]?.baseMode ?? "flat"}
-                  onChange={(event) => {
-                    setValue(
-                      `${lanePath}.manualRates.${selectedIndex}.baseMode`,
-                      event.target.value as RateBaseMode,
-                      { shouldDirty: true }
-                    )
+                  onValueChange={(value) => {
+                    if (value === "flat" || value === "per_eq") {
+                      setValue(
+                        `${lanePath}.manualRates.${selectedIndex}.baseMode`,
+                        value as RateBaseMode,
+                        { shouldDirty: true }
+                      )
+                    }
                   }}
                 >
-                  <option value="flat">Flat</option>
-                  <option value="per_eq">Per Eq</option>
-                </select>
-              </label>
-              <label className="flex w-36 flex-col gap-1">
-                <span className="text-xs text-muted-foreground">Amount</span>
+                  <SelectTrigger className="w-28">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="flat">Flat</SelectItem>
+                    <SelectItem value="per_eq">Per Eq</SelectItem>
+                  </SelectContent>
+                </Select>
+              </Field>
+              <Field className="w-36 gap-1">
+                <FieldLabel>Amount</FieldLabel>
                 <Input
                   type="number"
                   step="0.01"
@@ -117,7 +134,7 @@ export function ChargeTable({
                     { valueAsNumber: true }
                   )}
                 />
-              </label>
+              </Field>
               <Button
                 type="button"
                 variant="ghost"
@@ -142,12 +159,13 @@ export function ChargeTable({
                     (row) => row.containerType === container.containerType
                   )
                   return (
-                    <label
+                    <Label
                       key={container.id || containerIndex}
                       className="flex items-center gap-2 text-xs"
                     >
-                      <span className="w-24 font-mono">
-                        {container.containerType || "Eq"} × {container.count}
+                      <span className="min-w-28 truncate">
+                        {equipmentLabel(container.containerType)} ×{" "}
+                        {container.count}
                       </span>
                       <Input
                         type="number"
@@ -178,7 +196,7 @@ export function ChargeTable({
                           )
                         }}
                       />
-                    </label>
+                    </Label>
                   )
                 })}
               </div>

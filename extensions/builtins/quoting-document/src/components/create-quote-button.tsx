@@ -8,20 +8,23 @@ import { toast } from "@starboard/lib-ui/components/toast"
 
 import type { BuiltinHost } from "../host"
 
+interface CreateQuoteButtonProps extends React.ComponentProps<typeof Button> {
+  host: BuiltinHost
+  onCreated?: () => void
+}
+
 export function CreateQuoteButton({
   host,
   onCreated,
   size,
-}: {
-  host: BuiltinHost
-  onCreated?: () => void
-  size?: "default" | "sm"
-}) {
+  children,
+  ...props
+}: CreateQuoteButtonProps) {
   const [pending, startTransition] = useTransition()
 
   return (
     <Button
-      type="button"
+      type={props.type ?? "button"}
       size={size}
       disabled={pending}
       onClick={() => {
@@ -39,14 +42,26 @@ export function CreateQuoteButton({
             return
           }
 
-          const payload = (await response.json()) as { id: string }
-          host.openEditor({ viewType: "quote", resourceId: payload.id })
+          const payload = (await response.json()) as {
+            id: string
+            quoteId: string
+          }
+          host.openEditor({
+            viewType: "quote",
+            resourceId: payload.id,
+            title: payload.quoteId,
+          })
           onCreated?.()
         })
       }}
+      {...props}
     >
-      <PlusIcon data-icon="inline-start" />
-      {pending ? "Creating..." : "New quote"}
+      {children ?? (
+        <>
+          <PlusIcon data-icon="inline-start" />
+          {pending ? "Creating..." : "New quote"}
+        </>
+      )}
     </Button>
   )
 }

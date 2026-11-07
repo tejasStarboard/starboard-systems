@@ -6,10 +6,13 @@
  * credit + enterprise; missing rollout row = on.
  *
  * - `quotes` activity + `quoting.document.list` sidebar view (UI factory in
- *   `index.ts` `views`; the static entry opens the full list editor).
+ *   `index.ts` `views`; filter/sort chrome lives in the view, not static
+ *   entries).
  * - `quote` editor owns the `/quote/:resourceId` deep link; `quote.list` owns
- *   the workbench home `/` (static deep link) so the quotes table opens by
- *   default, survives refresh, and is discoverable on mobile.
+ *   `/quotes` (static deep link); `quote.preview` owns `/preview/:resourceId`
+ *   (status-bar Preview → center tab). Workbench home `/` is the New Tab
+ *   welcome; this built-in contributes New Quote + Search Quotes into
+ *   `workbench.newTab` and Preview into `workbench.statusBar`.
  * - `defines.extensionPoints` (073 / 082): the quote editor owns these slots;
  *   charges, rate sources, Incoterm, markup, PDF, … contribute into them. The
  *   kernel never names them. Self-contributes lifecycle chrome into
@@ -44,7 +47,8 @@ export const manifest = {
       },
       {
         id: "quoting.slots.preview",
-        description: "Preview pane body (PDF | Email) beside the builder.",
+        description:
+          "Preview body (PDF | Email) in the quote.preview center tab.",
       },
       {
         id: "quoting.slots.laneRoute",
@@ -69,17 +73,6 @@ export const manifest = {
         id: "quoting.document.list",
         name: "Quotes",
         activityId: "quotes",
-        entries: [
-          {
-            id: "quoting.document.all",
-            label: "All quotes",
-            opens: {
-              viewType: "quote.list",
-              resourceId: "/",
-              title: "Quotes",
-            },
-          },
-        ],
       },
     ],
     editors: [
@@ -88,7 +81,44 @@ export const manifest = {
         displayName: "Quote",
         deepLink: "/quote/:resourceId",
       },
-      { viewType: "quote.list", displayName: "Quotes", deepLink: "/" },
+      { viewType: "quote.list", displayName: "Quotes", deepLink: "/quotes" },
+      {
+        viewType: "quote.preview",
+        displayName: "Preview",
+        deepLink: "/preview/:resourceId",
+      },
+    ],
+    newTab: [
+      {
+        id: "quoting.document.newQuote",
+        label: "New Quote",
+        order: 10,
+        keybinding: ["mod", "N"],
+        command: "quoting.document.newQuote",
+      },
+      {
+        id: "quoting.document.searchQuotes",
+        label: "Search Quotes",
+        order: 20,
+        keybinding: ["mod", "P"],
+        opens: {
+          viewType: "quote.list",
+          resourceId: "/quotes",
+          title: "Quotes",
+        },
+      },
+    ],
+    statusBar: [
+      {
+        id: "quoting.document.preview",
+        label: "Preview",
+        order: 10,
+        opens: {
+          viewType: "quote.preview",
+          resourceId: "-",
+          title: "Preview",
+        },
+      },
     ],
     points: {
       "quoting.slots.lifecycle": [

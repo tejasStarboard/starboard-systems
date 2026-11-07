@@ -14,11 +14,9 @@ import type { QuoteFormLayoutProps } from "./quote-form-layout-props"
  */
 export function QuoteLifecycleSlot({
   props,
-  layout,
   className,
 }: {
   props: QuoteFormLayoutProps
-  layout: LifecycleSlotProps["layout"]
   className?: string
 }) {
   const status = (useWatch({ control: props.control, name: "status" }) ??
@@ -29,7 +27,7 @@ export function QuoteLifecycleSlot({
     control: props.control,
     register: props.register,
     errors: props.errors,
-    layout,
+    commercialEditable: props.commercialEditable,
   }
   return (
     <QuoteSlot

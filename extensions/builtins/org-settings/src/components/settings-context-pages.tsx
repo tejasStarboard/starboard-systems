@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react"
 
+import { LoadingState } from "@starboard/lib-ui/components/loading-state"
+
 import { CarrierCredentialsPanel } from "./carrier-credentials-panel"
 import { ConnectOutlook } from "./connect-outlook"
 import type { SettingsContext } from "../lib/settings-context"
@@ -58,7 +60,7 @@ function Pending({ state }: { state: State }) {
       </p>
     )
   }
-  return <p className="p-6 text-xs text-muted-foreground">Loading…</p>
+  return <LoadingState>Loading…</LoadingState>
 }
 
 export function BillingSettings() {

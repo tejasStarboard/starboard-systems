@@ -4,12 +4,12 @@ import { useEffect, useMemo, useState, useTransition } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useFieldArray, useForm, useWatch } from "react-hook-form"
 
-import { useBreakpoint } from "@starboard/lib-ui/hooks/use-breakpoint"
 import { toast } from "@starboard/lib-ui/components/toast"
 import { mergeBaseFxRates } from "@starboard/lib-pricing"
 
 import { QuoteBuilderShell } from "./quote-builder-shell"
 import type { QuoteFormLayoutProps } from "./quote-form-layout-props"
+import { emitQuoteSaved } from "../lib/quote-events"
 import { isCommercialEditable } from "../lib/quote-stage"
 import { useLiveFx } from "../lib/use-live-fx"
 import { useQuoteSlotEntries } from "../slots/slot-host"
@@ -57,6 +57,7 @@ export function QuoteForm({
   portOptions,
   containerTypeOptions,
   palletTypeOptions,
+  onOpenPreview,
 }: {
   defaultValues: QuoteFormValues
   customerOptions: QuoteFormOption[]
@@ -64,8 +65,8 @@ export function QuoteForm({
   portOptions: QuoteFormOption[]
   containerTypeOptions: QuoteFormOption[]
   palletTypeOptions: QuoteFormOption[]
+  onOpenPreview?: () => void
 }) {
-  const breakpoint = useBreakpoint()
   const [pending, startTransition] = useTransition()
   // Rates may only be applied while the charge table is mounted; otherwise the
   // result would land in charge UI the user cannot see (quoting.charges off).
@@ -73,7 +74,7 @@ export function QuoteForm({
     useQuoteSlotEntries(QUOTING_SLOTS.chargeTable).length > 0
   const [selectedLaneIndex, setSelectedLaneIndex] = useState(0)
   // Bumped on Cancel so the builder shell remounts with fresh navigation state
-  // (step, per-lane steps, preview sheet) instead of showing a stale step.
+  // (step, per-lane steps) instead of showing a stale step.
   const [shellKey, setShellKey] = useState(0)
   const [manualRatesVisibleByLane, setManualRatesVisibleByLane] = useState<
     Record<string, boolean>
@@ -244,6 +245,7 @@ export function QuoteForm({
       }
 
       form.reset(values)
+      emitQuoteSaved(values.id)
       toast.add({
         type: "success",
         title: "Quote saved",
@@ -394,6 +396,7 @@ export function QuoteForm({
     },
     onRemoveRate: handleRemoveRate,
     onCancel: handleCancel,
+    ...(onOpenPreview ? { onOpenPreview } : {}),
   }
 
   return (
@@ -406,11 +409,7 @@ export function QuoteForm({
         <input type="hidden" {...form.register("quoteId")} />
         <input type="hidden" {...form.register("source")} />
 
-        <QuoteBuilderShell
-          key={shellKey}
-          props={layoutProps}
-          layout={breakpoint}
-        />
+        <QuoteBuilderShell key={shellKey} props={layoutProps} />
       </form>
     </div>
   )

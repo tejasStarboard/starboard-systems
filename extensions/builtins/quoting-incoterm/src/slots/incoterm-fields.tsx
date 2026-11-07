@@ -27,16 +27,15 @@ import { cn } from "@starboard/lib-ui/lib/utils"
 /**
  * `quoting.incoterm.fields` → `quoting.slots.headerFields`.
  * Incoterm + Role selects; fragment so a `contents` slot host can place each
- * field as its own flex/grid child (desktop / tablet / mobile).
+ * field as its own flex/grid child.
  */
 export function IncotermFields({
   control,
   commercialEditable,
-  layout,
 }: SlotComponentProps<HeaderFieldsSlotProps>) {
   const disabled = !commercialEditable
-  const incotermClass = layout === "desktop" ? "w-[6.5rem] shrink-0" : "w-full"
-  const roleClass = layout === "desktop" ? "w-[8.5rem] shrink-0" : "w-full"
+  const incotermClass = "w-[6.5rem] shrink-0"
+  const roleClass = "w-[8.5rem] shrink-0"
   return (
     <>
       <Controller

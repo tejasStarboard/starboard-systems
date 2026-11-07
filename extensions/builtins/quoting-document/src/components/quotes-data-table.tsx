@@ -6,6 +6,7 @@ import { useTable, type ColumnDef } from "@tanstack/react-table"
 
 import type { ListQuotesViewResponse } from "@starboard/lib-contracts"
 import { Button } from "@starboard/lib-ui/components/button"
+import { LoadingState } from "@starboard/lib-ui/components/loading-state"
 import {
   Table,
   TableBody,
@@ -140,13 +141,14 @@ export function QuotesDataTable({ columns, host }: QuotesDataTableProps) {
             ))
           ) : (
             <TableRow>
-              <TableCell
-                colSpan={columns.length}
-                className="h-24 text-center text-muted-foreground"
-              >
-                {loading
-                  ? "Loading…"
-                  : "No quotes yet. Create one to get started."}
+              <TableCell colSpan={columns.length} className="h-24 p-0">
+                {loading ? (
+                  <LoadingState size="sm">Loading quotes…</LoadingState>
+                ) : (
+                  <p className="text-center text-muted-foreground">
+                    No quotes yet. Create one to get started.
+                  </p>
+                )}
               </TableCell>
             </TableRow>
           )}

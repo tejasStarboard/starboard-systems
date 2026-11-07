@@ -12,6 +12,7 @@ import {
   FieldLabel,
 } from "@starboard/lib-ui/components/field"
 import { Input } from "@starboard/lib-ui/components/input"
+import { LoadingState } from "@starboard/lib-ui/components/loading-state"
 import { toast } from "@starboard/lib-ui/components/toast"
 
 import {
@@ -79,7 +80,7 @@ export function CompanySettingsForm() {
       </div>
 
       {loading ? (
-        <p className="text-sm text-muted-foreground">Loading…</p>
+        <LoadingState size="sm">Loading company…</LoadingState>
       ) : (
         <form
           className="space-y-4"

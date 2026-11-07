@@ -38,7 +38,7 @@ import {
   type QuoteFormValues,
 } from "../lib/quotes.schema"
 
-/** Step 3 (Cargo): FCL container table or LCL / Air weight, volume, pallets. */
+/** Route step cargo: FCL container table or LCL / Air weight, volume, pallets. */
 export function LaneCargoFields({
   control,
   register,
@@ -119,7 +119,7 @@ export function LaneCargoFields({
                                   key={option.value}
                                   value={option.value}
                                 >
-                                  {option.value}
+                                  {option.label}
                                 </SelectItem>
                               ))}
                             </SelectContent>

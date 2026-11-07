@@ -4,11 +4,13 @@ import { useTheme } from "next-themes"
 import { useEffect, useState } from "react"
 
 import { Button } from "@starboard/lib-ui/components/button"
+import { ButtonGroup } from "@starboard/lib-ui/components/button-group"
 import {
   Field,
   FieldGroup,
   FieldLabel,
 } from "@starboard/lib-ui/components/field"
+import { LoadingState } from "@starboard/lib-ui/components/loading-state"
 import { toast } from "@starboard/lib-ui/components/toast"
 
 import { QuotePreferencesSection } from "./quote-preferences-section"
@@ -73,21 +75,22 @@ export function PreferencesSettingsForm({
           <Field>
             <FieldLabel>Theme</FieldLabel>
             {!mounted ? (
-              <p className="text-sm text-muted-foreground">Loading…</p>
+              <LoadingState size="inline">Loading…</LoadingState>
             ) : (
-              <div className="flex flex-wrap gap-2">
+              <ButtonGroup aria-label="Theme">
                 {(["system", "light", "dark"] as const).map((value) => (
                   <Button
                     key={value}
                     type="button"
-                    variant={theme === value ? "default" : "outline"}
+                    variant={theme === value ? "secondary" : "outline"}
                     size="sm"
+                    aria-pressed={theme === value}
                     onClick={() => choose(value)}
                   >
                     {value}
                   </Button>
                 ))}
-              </div>
+              </ButtonGroup>
             )}
           </Field>
         </FieldGroup>

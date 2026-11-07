@@ -91,17 +91,36 @@ describe("driving built-in manifests (076)", () => {
       (v) => v.id === "quoting.document.list"
     )
     expect(view?.extensionId).toBe("quoting.document")
-    expect(view?.entries?.[0]?.opens).toEqual({
-      viewType: "quote.list",
-      resourceId: "/",
-      title: "Quotes",
-    })
+    expect(view?.entries ?? []).toEqual([])
     const quoting = contributions.editors.filter(
       (e) => e.extensionId === "quoting.document"
     )
-    expect(quoting.map((e) => e.viewType)).toEqual(["quote", "quote.list"])
+    expect(quoting.map((e) => e.viewType)).toEqual([
+      "quote",
+      "quote.list",
+      "quote.preview",
+    ])
     expect(quoting[0]?.deepLink).toBe("/quote/:resourceId")
-    expect(quoting[1]?.deepLink).toBe("/")
+    expect(quoting[1]?.deepLink).toBe("/quotes")
+    expect(quoting[2]?.deepLink).toBe("/preview/:resourceId")
+    expect(
+      contributions.newTab
+        .filter((item) => item.extensionId === "quoting.document")
+        .map((item) => item.id)
+    ).toEqual([
+      "quoting.document.newQuote",
+      "quoting.document.searchQuotes",
+    ])
+    expect(
+      contributions.statusBar
+        .filter((item) => item.extensionId === "quoting.document")
+        .map((item) => item.id)
+    ).toEqual(["quoting.document.preview"])
+    expect(contributions.statusBar[0]?.opens).toEqual({
+      viewType: "quote.preview",
+      resourceId: "-",
+      title: "Preview",
+    })
   })
 
   test("crm.parties + org.settings contribute customer / settings editors (078)", () => {

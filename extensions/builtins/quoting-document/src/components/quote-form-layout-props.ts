@@ -41,7 +41,7 @@ export type QuoteFormLayoutProps = {
   totals: { subtotal: number; markup: number; total: number }
   excludedBuckets: Array<"origin" | "freight" | "destination">
   currencyCode: string
-  /** Live FX (Frankfurter) status for the Step 1 base currency. */
+  /** Live FX (Frankfurter) status for the Rate-step base currency. */
   fx: LiveFxState
   pending: boolean
   isDirty: boolean
@@ -55,4 +55,6 @@ export type QuoteFormLayoutProps = {
   onAppendRate: () => void
   onRemoveRate: (index: number) => void
   onCancel: () => void
+  /** Opens the standalone `quote.preview` center tab (status bar surface). */
+  onOpenPreview?: () => void
 }

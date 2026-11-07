@@ -32,7 +32,7 @@ export interface QuotesClient {
   createQuote(
     input: CreateQuoteRequest,
     requestId?: string
-  ): Promise<{ id: string }>
+  ): Promise<{ id: string; quoteId: string }>
   saveQuote(
     values: QuoteFormValues,
     input: { ownerId: string; organizationId: string },
@@ -109,7 +109,7 @@ class HttpQuotesClient implements QuotesClient {
   async createQuote(
     input: CreateQuoteRequest,
     requestId?: string
-  ): Promise<{ id: string }> {
+  ): Promise<{ id: string; quoteId: string }> {
     const options = createServiceOptions({
       baseUrl: this.options.baseUrl,
       organizationId: input.organizationId,

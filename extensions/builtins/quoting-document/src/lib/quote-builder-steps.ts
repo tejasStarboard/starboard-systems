@@ -1,52 +1,30 @@
 import { isLaneReady, type LaneFormValues } from "./quotes.schema"
 
 /**
- * Quote builder step model (ticket 089). Step 1 is quote-level; steps 2–5 walk
- * the active lane. Pure helpers — no React — so gates are unit-testable.
+ * Per-lane step model (lane is parent; pick a lane, then walk these):
+ * 1. Route — mode, ports, and cargo
+ * 2. Rate — quote basics + rate pick + charges/totals
  */
 export const QUOTE_STEPS = [
-  {
-    id: "basics",
-    label: "Basics",
-    scope: "quote",
-    hint: "Customer, currency and terms for the whole quote.",
-  },
   {
     id: "route",
     label: "Route",
     scope: "lane",
-    hint: "Choose a mode and set where this lane starts and ends.",
+    hint: "Set the lane route and what is moving.",
   },
   {
-    id: "cargo",
-    label: "Cargo",
+    id: "rate",
+    label: "Rate",
     scope: "lane",
-    hint: "What is moving on this lane.",
-  },
-  {
-    id: "rates",
-    label: "Rates",
-    scope: "lane",
-    hint: "Find or add the rate for this lane.",
-  },
-  {
-    id: "build",
-    label: "Build",
-    scope: "lane",
-    hint: "Review charges, markup and totals.",
+    hint: "Customer and currency, then pick a rate and review charges.",
   },
 ] as const
 
 export type QuoteStep = (typeof QUOTE_STEPS)[number]
 export type QuoteStepId = QuoteStep["id"]
-export type LaneStepId = Exclude<QuoteStepId, "basics">
 
 export function stepIndex(id: QuoteStepId): number {
   return QUOTE_STEPS.findIndex((step) => step.id === id)
-}
-
-export function isLaneStep(id: QuoteStepId): id is LaneStepId {
-  return id !== "basics"
 }
 
 export function previousStep(id: QuoteStepId): QuoteStepId | null {
@@ -68,22 +46,18 @@ export function isCargoValid(lane: LaneFormValues): boolean {
 }
 
 /**
- * Why `target` cannot be entered yet for `lane`, or `null` when open. Going
- * back is always open; going forward requires every earlier lane gate:
- * ports before Cargo, valid cargo before Rates / Build.
+ * Why `target` cannot be entered yet for `lane`, or `null` when open.
+ * Rate requires ports + valid cargo on the active lane.
  */
 export function stepBlockedReason(
   target: QuoteStepId,
   lane: LaneFormValues | undefined
 ): string | null {
-  const index = stepIndex(target)
-  if (index <= stepIndex("route")) {
-    return null
-  }
+  if (target === "route") return null
   if (!lane || !isLaneReady(lane)) {
     return "Set origin and destination first."
   }
-  if (index > stepIndex("cargo") && !isCargoValid(lane)) {
+  if (!isCargoValid(lane)) {
     return "Add valid cargo first."
   }
   return null

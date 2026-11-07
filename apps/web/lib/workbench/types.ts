@@ -39,6 +39,29 @@ export type WorkbenchEditor = {
   deepLink?: string
 }
 
+/** `workbench.newTab` — New Tab welcome quick action. */
+export type WorkbenchNewTabAction = {
+  id: string
+  label: string
+  order?: number
+  /** Portable chord tokens (`mod`, `shift`, `alt`, letter). */
+  keybinding?: string[]
+  opens?: { viewType: string; resourceId: string; title?: string }
+  /** Client handler id resolved by the shell (`builtinNewTabCommands`). */
+  command?: string
+  extensionId?: string
+}
+
+/** `workbench.statusBar` — footer launcher / toggle. */
+export type WorkbenchStatusBarAction = {
+  id: string
+  label: string
+  order?: number
+  opens?: { viewType: string; resourceId: string; title?: string }
+  command?: string
+  extensionId?: string
+}
+
 /** Serializable contribution into an extension-defined point. */
 export type WorkbenchPointContribution = {
   id: string
@@ -53,6 +76,8 @@ export type WorkbenchContributions = {
   activity: WorkbenchActivity[]
   views: WorkbenchView[]
   editors: WorkbenchEditor[]
+  newTab: WorkbenchNewTabAction[]
+  statusBar: WorkbenchStatusBarAction[]
   /** Contributions to extension-defined points, keyed by point id. */
   points: Record<string, WorkbenchPointContribution[]>
 }
@@ -61,8 +86,13 @@ export const EMPTY_CONTRIBUTIONS: WorkbenchContributions = {
   activity: [],
   views: [],
   editors: [],
+  newTab: [],
+  statusBar: [],
   points: {},
 }
+
+/** Side-by-side editor columns (Cursor / VS Code–style horizontal split). */
+export type EditorGroupId = "primary" | "secondary"
 
 export type EditorTab = {
   /** `${viewType}:${resourceId}` */
@@ -70,4 +100,6 @@ export type EditorTab = {
   viewType: string
   resourceId: string
   title: string
+  /** Which split pane owns this tab. */
+  groupId: EditorGroupId
 }

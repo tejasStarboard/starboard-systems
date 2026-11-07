@@ -18,6 +18,10 @@ import type {
 } from "@starboard/lib-contracts"
 import { Button } from "@starboard/lib-ui/components/button"
 import {
+  ButtonGroup,
+  ButtonGroupText,
+} from "@starboard/lib-ui/components/button-group"
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -34,6 +38,7 @@ import {
   FieldLabel,
 } from "@starboard/lib-ui/components/field"
 import { Input } from "@starboard/lib-ui/components/input"
+import { LoadingState } from "@starboard/lib-ui/components/loading-state"
 import { cn } from "@starboard/lib-ui/lib/utils"
 
 import type { BuiltinHost } from "../host"
@@ -296,52 +301,55 @@ export function CustomersList({ host }: { host: BuiltinHost }) {
   )
 
   const pagination = (
-    <div
-      className={cn(
-        "flex shrink-0 items-center justify-between gap-2 border-t",
-        "px-4 py-3"
-      )}
-    >
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        disabled={loading || listQuery.page <= 1}
-        onClick={() =>
-          setListQuery((prev) => ({
-            ...prev,
-            page: Math.max(1, prev.page - 1),
-          }))
-        }
-        aria-label="Previous page"
-      >
-        <CaretLeftIcon className="size-4" />
-        <span className="sr-only sm:not-sr-only">Prev</span>
-      </Button>
-      <span className="text-xs text-muted-foreground">
-        {total === 0 ? "0" : listQuery.page} / {total === 0 ? 0 : pages}
-      </span>
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        disabled={loading || listQuery.page >= pages || total === 0}
-        onClick={() =>
-          setListQuery((prev) => ({ ...prev, page: prev.page + 1 }))
-        }
-        aria-label="Next page"
-      >
-        <span className="sr-only sm:not-sr-only">Next</span>
-        <CaretRightIcon className="size-4" />
-      </Button>
+    <div className={cn("flex shrink-0 justify-center border-t", "px-4 py-3")}>
+      <ButtonGroup aria-label="Customers pagination">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          disabled={loading || listQuery.page <= 1}
+          onClick={() =>
+            setListQuery((prev) => ({
+              ...prev,
+              page: Math.max(1, prev.page - 1),
+            }))
+          }
+          aria-label="Previous page"
+        >
+          <CaretLeftIcon className="size-4" />
+          <span className="sr-only sm:not-sr-only">Prev</span>
+        </Button>
+        <ButtonGroupText className="min-w-16 justify-center text-muted-foreground">
+          {total === 0 ? "0" : listQuery.page} / {total === 0 ? 0 : pages}
+        </ButtonGroupText>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          disabled={loading || listQuery.page >= pages || total === 0}
+          onClick={() =>
+            setListQuery((prev) => ({ ...prev, page: prev.page + 1 }))
+          }
+          aria-label="Next page"
+        >
+          <span className="sr-only sm:not-sr-only">Next</span>
+          <CaretRightIcon className="size-4" />
+        </Button>
+      </ButtonGroup>
     </div>
   )
 
   const list = (
     <ul className="min-h-0 flex-1 divide-y overflow-y-auto">
       {hits.length === 0 ? (
-        <li className="px-4 py-6 text-sm text-muted-foreground">
-          {loading ? "Loading…" : "No customers or contacts match."}
+        <li>
+          {loading ? (
+            <LoadingState size="sm">Loading customers…</LoadingState>
+          ) : (
+            <p className="px-4 py-6 text-sm text-muted-foreground">
+              No customers or contacts match.
+            </p>
+          )}
         </li>
       ) : (
         hits.map((hit) => {
@@ -357,11 +365,12 @@ export function CustomersList({ host }: { host: BuiltinHost }) {
           if (hit.kind === "contact") {
             return (
               <li key={hit.key}>
-                <button
+                <Button
                   type="button"
+                  variant="ghost"
                   onClick={open}
                   className={cn(
-                    "flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/50",
+                    "h-auto w-full items-center justify-between gap-3 rounded-none px-4 py-3 text-left font-normal",
                     selected && "bg-muted"
                   )}
                 >
@@ -380,18 +389,19 @@ export function CustomersList({ host }: { host: BuiltinHost }) {
                         .join(" · ")}
                     </span>
                   </span>
-                </button>
+                </Button>
               </li>
             )
           }
 
           return (
             <li key={hit.key}>
-              <button
+              <Button
                 type="button"
+                variant="ghost"
                 onClick={open}
                 className={cn(
-                  "flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/50",
+                  "h-auto w-full items-center justify-between gap-3 rounded-none px-4 py-3 text-left font-normal",
                   selected && "bg-muted",
                   !hit.customer.isActive && "opacity-60"
                 )}
@@ -413,7 +423,7 @@ export function CustomersList({ host }: { host: BuiltinHost }) {
                       .join(" · ")}
                   </span>
                 </span>
-              </button>
+              </Button>
             </li>
           )
         })

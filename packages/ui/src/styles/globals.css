@@ -124,7 +124,20 @@
   * {
     @apply border-border outline-ring/50;
   }
+  html {
+    -webkit-user-select: none;
+    user-select: none;
+  }
   body {
     @apply bg-background text-foreground;
+  }
+  /* Keep typing surfaces selectable so forms still work. */
+  input,
+  textarea,
+  select,
+  [contenteditable="true"],
+  [contenteditable=""] {
+    -webkit-user-select: text;
+    user-select: text;
   }
 }

@@ -6,6 +6,10 @@ import { Controller, useForm } from "react-hook-form"
 import type { Rate } from "@starboard/lib-contracts"
 import { Button } from "@starboard/lib-ui/components/button"
 import {
+  ButtonGroup,
+  ButtonGroupSeparator,
+} from "@starboard/lib-ui/components/button-group"
+import {
   Field,
   FieldError,
   FieldGroup,
@@ -164,7 +168,7 @@ export function RateDetail({
         {!rate.isActive ? (
           <span className="text-xs text-muted-foreground">inactive</span>
         ) : null}
-        <div className="ml-auto flex flex-wrap gap-2">
+        <ButtonGroup aria-label="Rate lifecycle" className="ml-auto">
           {rate.isActive ? (
             <Button
               type="button"
@@ -184,6 +188,7 @@ export function RateDetail({
               Reactivate
             </Button>
           )}
+          <ButtonGroupSeparator />
           <Button
             type="button"
             size="sm"
@@ -192,7 +197,7 @@ export function RateDetail({
           >
             Delete permanently
           </Button>
-        </div>
+        </ButtonGroup>
       </div>
 
       <form

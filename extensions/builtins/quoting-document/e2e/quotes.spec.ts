@@ -7,7 +7,7 @@ import {
 
 test.describe("quoting.document", () => {
   test("quotes list shows new-quote action", async ({ page }) => {
-    await page.goto("/")
+    await page.goto("/quotes")
     await expect(editorHeading(page, "Quotes")).toBeVisible()
     await expect(
       editorGroup(page).getByRole("button", { name: "New quote" })
@@ -39,7 +39,7 @@ test.describe("quoting.document", () => {
       "Quotes service unavailable — skip create flow"
     )
 
-    await page.goto("/")
+    await page.goto("/quotes")
     await editorGroup(page).getByRole("button", { name: "New quote" }).click()
     await expect(page).toHaveURL(/\/quote\/[^/]+/, { timeout: 20_000 })
     await expect(page.getByTestId("quote-lifecycle-chrome")).toBeVisible({

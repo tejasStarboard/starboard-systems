@@ -20,6 +20,7 @@ import { CurrencyCombobox } from "@starboard/ext-geo-gazetteer"
 import { Button } from "@starboard/lib-ui/components/button"
 import { Checkbox } from "@starboard/lib-ui/components/checkbox"
 import { Input } from "@starboard/lib-ui/components/input"
+import { Label } from "@starboard/lib-ui/components/label"
 import {
   Select,
   SelectContent,
@@ -29,6 +30,7 @@ import {
 } from "@starboard/lib-ui/components/select"
 import { cn } from "@starboard/lib-ui/lib/utils"
 
+import { equipmentLabel } from "../lib/equipment-label"
 import { ChargeGuardrails } from "./charge-guardrails"
 import { RowFxHint } from "./row-fx-hint"
 import { USAGE_UNIT_LABELS } from "./usage-labels"
@@ -88,7 +90,7 @@ export function RateSurchargesEditor({
       .map((container) => container.containerType.trim())
       .filter(Boolean)
       .filter((value, index, all) => all.indexOf(value) === index)
-      .map((value) => ({ value, label: value })),
+      .map((value) => ({ value, label: equipmentLabel(value) })),
   ]
 
   const byLeg = LEGS.map((leg) => ({
@@ -305,7 +307,7 @@ export function RateSurchargesEditor({
                           control={control}
                           name={`${prefix}.isIncludedInTotal`}
                           render={({ field: includeField }) => (
-                            <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                            <Label className="flex items-center gap-1.5 text-xs text-muted-foreground">
                               <Checkbox
                                 checked={includeField.value}
                                 onCheckedChange={(checked) =>
@@ -313,7 +315,7 @@ export function RateSurchargesEditor({
                                 }
                               />
                               Incl.
-                            </label>
+                            </Label>
                           )}
                         />
                         <Button

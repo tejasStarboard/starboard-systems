@@ -7,6 +7,10 @@ import { Controller, useForm } from "react-hook-form"
 
 import { Button } from "@starboard/lib-ui/components/button"
 import {
+  ButtonGroup,
+  ButtonGroupSeparator,
+} from "@starboard/lib-ui/components/button-group"
+import {
   Field,
   FieldError,
   FieldGroup,
@@ -14,7 +18,7 @@ import {
   FieldSeparator,
 } from "@starboard/lib-ui/components/field"
 import { Input } from "@starboard/lib-ui/components/input"
-import { Spinner } from "@starboard/lib-ui/components/spinner"
+import { LoadingState } from "@starboard/lib-ui/components/loading-state"
 
 import { useOrganizations } from "@/hooks/use-organizations"
 import {
@@ -57,14 +61,7 @@ export function SelectOrgForm() {
   }
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center gap-2 py-8">
-        <Spinner />
-        <span className="text-xs text-muted-foreground">
-          Loading organizations...
-        </span>
-      </div>
-    )
+    return <LoadingState>Loading organizations…</LoadingState>
   }
 
   return (
@@ -79,12 +76,13 @@ export function SelectOrgForm() {
       {organizations.length > 0 ? (
         <div className="flex flex-col gap-2">
           {organizations.map((org) => (
-            <button
+            <Button
               key={org.id}
               type="button"
+              variant="outline"
               disabled={enteringId !== null}
               onClick={() => void enterOrganization(org.id)}
-              className="flex w-full items-center gap-3 border border-border px-3 py-2.5 text-left transition-colors hover:bg-muted disabled:opacity-50"
+              className="h-auto w-full items-center justify-start gap-3 px-3 py-2.5 text-left"
             >
               <span className="flex size-8 items-center justify-center bg-muted">
                 <Buildings className="size-4" />
@@ -93,14 +91,14 @@ export function SelectOrgForm() {
                 <span className="block truncate text-xs font-medium">
                   {org.name}
                 </span>
-                <span className="block truncate text-xs text-muted-foreground">
+                <span className="block truncate text-xs font-normal text-muted-foreground">
                   {org.slug}
                 </span>
               </span>
-              <span className="text-xs text-muted-foreground">
+              <span className="text-xs font-normal text-muted-foreground">
                 {enteringId === org.id ? "Entering..." : "Enter"}
               </span>
-            </button>
+            </Button>
           ))}
         </div>
       ) : (
@@ -164,20 +162,23 @@ export function SelectOrgForm() {
             />
           </FieldGroup>
 
-          <div className="flex gap-2">
+          <ButtonGroup aria-label="Create organization" className="w-full">
             {organizations.length > 0 ? (
-              <Button
-                type="button"
-                variant="outline"
-                className="flex-1"
-                disabled={form.formState.isSubmitting}
-                onClick={() => {
-                  setShowCreate(false)
-                  form.reset({ name: "", slug: "" })
-                }}
-              >
-                Cancel
-              </Button>
+              <>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="flex-1"
+                  disabled={form.formState.isSubmitting}
+                  onClick={() => {
+                    setShowCreate(false)
+                    form.reset({ name: "", slug: "" })
+                  }}
+                >
+                  Cancel
+                </Button>
+                <ButtonGroupSeparator />
+              </>
             ) : null}
             <Button
               type="submit"
@@ -186,7 +187,7 @@ export function SelectOrgForm() {
             >
               {form.formState.isSubmitting ? "Creating..." : "Create and enter"}
             </Button>
-          </div>
+          </ButtonGroup>
         </form>
       ) : (
         <Button

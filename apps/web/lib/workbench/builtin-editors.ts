@@ -20,14 +20,16 @@ import {
 } from "@starboard/ext-org-settings"
 import {
   editors as quotingDocumentEditors,
+  newTabCommands as quotingDocumentNewTabCommands,
   pointComponents as quotingDocumentPoints,
   views as quotingDocumentViews,
   type BuiltinEditorProps,
   type BuiltinHost,
   type BuiltinViewProps,
+  type NewTabCommandHandler,
 } from "@starboard/ext-quoting-document"
 
-export type { BuiltinHost }
+export type { BuiltinHost, NewTabCommandHandler }
 
 /** Props the editor host passes to a built-in editor factory. */
 export type BuiltinEditorComponent = ComponentType<BuiltinEditorProps>
@@ -72,4 +74,14 @@ export const builtinPointComponents: Readonly<
   ...quotingPdfPoints,
   ...quotingEmailPoints,
   ...ratesCatalogPoints,
+}
+
+/**
+ * Handlers for `workbench.newTab` `command` ids. Navigate-only entries use
+ * `opens` in the manifest and need no registration here.
+ */
+export const builtinNewTabCommands: Readonly<
+  Record<string, NewTabCommandHandler>
+> = {
+  ...quotingDocumentNewTabCommands,
 }

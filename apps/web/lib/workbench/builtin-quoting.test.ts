@@ -26,6 +26,30 @@ describe("077 quoting.document in the workbench", () => {
     expect(typeof builtinViews["quoting.document.list"]).toBe("function")
   })
 
+  test("newTab contributions include quote quick actions", () => {
+    expect(merged.newTab.map((item) => item.id)).toEqual([
+      "quoting.document.newQuote",
+      "quoting.document.searchQuotes",
+      "rates.catalog.uploadRates",
+      "rates.catalog.searchRates",
+      "crm.parties.findCustomers",
+    ])
+    expect(merged.newTab[0]?.command).toBe("quoting.document.newQuote")
+    expect(merged.newTab[1]?.opens?.viewType).toBe("quote.list")
+  })
+
+  test("statusBar Preview opens quote.preview", () => {
+    expect(merged.statusBar.map((item) => item.id)).toContain(
+      "quoting.document.preview"
+    )
+    expect(merged.statusBar[0]?.opens?.viewType).toBe("quote.preview")
+    expect(typeof builtinEditors["quote.preview"]).toBe("function")
+    expect(matchDeepLink("/preview/-", merged.editors)).toEqual({
+      viewType: "quote.preview",
+      resourceId: "-",
+    })
+  })
+
   test("/quote/:id deep link opens the built-in `quote` editor", () => {
     expect(matchDeepLink("/quote/q-1", merged.editors)).toEqual({
       viewType: "quote",
@@ -41,22 +65,37 @@ describe("077 quoting.document in the workbench", () => {
     expect(tabHref(state.tabs[0]!, merged.editors)).toBe("/quote/q-1")
   })
 
-  test("home `/` auto-opens the quote.list editor and round-trips", () => {
+  test("home `/` does not auto-open an editor (New Tab)", () => {
     const state = tabsReducer(initialTabsState(), {
       type: "route",
       pathname: "/",
       editors: merged.editors,
     })
-    expect(state.activeTabId).toBe("quote.list:/")
-    expect(tabHref(state.tabs[0]!, merged.editors)).toBe("/")
+    expect(state.activeTabId).toBeNull()
+    expect(state.tabs).toEqual([])
+    expect(matchDeepLink("/", merged.editors)).toBeNull()
   })
 
-  test("sidebar entry opens the list editor tab on the same route", () => {
-    const opens = merged.views.find((v) => v.id === "quoting.document.list")!
-      .entries[0]!.opens!
+  test("`/quotes` opens the quote.list editor and round-trips", () => {
+    const state = tabsReducer(initialTabsState(), {
+      type: "route",
+      pathname: "/quotes",
+      editors: merged.editors,
+    })
+    expect(state.activeTabId).toBe("quote.list:/quotes")
+    expect(tabHref(state.tabs[0]!, merged.editors)).toBe("/quotes")
+  })
+
+  test("quotes sidebar view has no static All quotes entry (filter UI in view)", () => {
+    const view = merged.views.find((v) => v.id === "quoting.document.list")
+    expect(view?.entries ?? []).toEqual([])
+    expect(typeof builtinViews["quoting.document.list"]).toBe("function")
+    // Full list editor still reachable via New Tab / deep link.
+    const opens = merged.newTab.find(
+      (item) => item.id === "quoting.document.searchQuotes"
+    )!.opens!
     const state = tabsReducer(initialTabsState(), { type: "open", ...opens })
-    expect(state.activeTabId).toBe("quote.list:/")
-    expect(tabHref(state.tabs[0]!, merged.editors)).toBe("/")
+    expect(state.activeTabId).toBe("quote.list:/quotes")
     expect(typeof builtinEditors["quote.list"]).toBe("function")
   })
 

@@ -1,6 +1,8 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
+
+import { LoadingState } from "@starboard/lib-ui/components/loading-state"
 
 import type { BuiltinEditorProps } from "../host"
 import { QuoteForm } from "../components/quote-form"
@@ -26,6 +28,8 @@ type LoadState =
  */
 export function QuoteEditor({ resourceId, host }: BuiltinEditorProps) {
   const [state, setState] = useState<LoadState>({ status: "loading" })
+  const setEditorTitleRef = useRef(host.setEditorTitle)
+  setEditorTitleRef.current = host.setEditorTitle
 
   useEffect(() => {
     const controller = new AbortController()
@@ -49,9 +53,13 @@ export function QuoteEditor({ resourceId, host }: BuiltinEditorProps) {
           })
           return
         }
+        const input = prepareQuoteEditorInput(body)
+        if (input.defaultValues.quoteId) {
+          setEditorTitleRef.current?.(input.defaultValues.quoteId)
+        }
         setState({
           status: "ready",
-          input: prepareQuoteEditorInput(body),
+          input,
         })
       } catch (error) {
         if (controller.signal.aborted) return
@@ -69,12 +77,9 @@ export function QuoteEditor({ resourceId, host }: BuiltinEditorProps) {
 
   if (state.status === "loading") {
     return (
-      <p
-        data-testid="quote-editor-loading"
-        className="p-4 text-xs text-muted-foreground"
-      >
+      <LoadingState data-testid="quote-editor-loading">
         Loading quote…
-      </p>
+      </LoadingState>
     )
   }
 
@@ -88,12 +93,23 @@ export function QuoteEditor({ resourceId, host }: BuiltinEditorProps) {
 
   const { slots, ...formInput } = state.input
   return (
-    <div className="flex flex-1 flex-col p-3 sm:p-4">
+    <div className="flex min-h-0 flex-1 flex-col overflow-auto p-3 sm:p-4">
       <QuoteSlotsProvider
         slots={slots}
         components={host.pointComponents ?? NO_COMPONENTS}
       >
-        <QuoteForm key={resourceId} {...formInput} />
+        <QuoteForm
+          key={resourceId}
+          {...formInput}
+          onOpenPreview={() =>
+            host.openEditor({
+              viewType: "quote.preview",
+              resourceId,
+              title: formInput.defaultValues.quoteId || "Preview",
+              side: "beside",
+            })
+          }
+        />
       </QuoteSlotsProvider>
     </div>
   )

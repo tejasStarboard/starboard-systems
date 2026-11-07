@@ -10,6 +10,7 @@ test.describe("quoting.pdf", () => {
     await expect(page.getByTestId("quote-editor-loading")).toHaveCount(0, {
       timeout: 30_000,
     })
+    await page.getByTestId("quote-preview-actions").click()
     await expect(page.getByTestId("quoting-pdf-export")).toBeVisible({
       timeout: 30_000,
     })

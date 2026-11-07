@@ -105,6 +105,30 @@ export const manifest = {
         deepLink: "/rates/spot",
       },
     ],
+    newTab: [
+      {
+        id: "rates.catalog.uploadRates",
+        label: "Upload Rates",
+        order: 30,
+        keybinding: ["mod", "U"],
+        opens: {
+          viewType: "rate.sheets",
+          resourceId: "/rates/sheets",
+          title: "Rate Sheets",
+        },
+      },
+      {
+        id: "rates.catalog.searchRates",
+        label: "Search Rates",
+        order: 40,
+        keybinding: ["mod", "shift", "R"],
+        opens: {
+          viewType: "rate.search",
+          resourceId: "/rates/search",
+          title: "Search Rates",
+        },
+      },
+    ],
     points: {
       "quoting.slots.rateSources": [
         {

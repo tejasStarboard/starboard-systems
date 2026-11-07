@@ -15,6 +15,7 @@ import {
   FieldLabel,
 } from "@starboard/lib-ui/components/field"
 import { Input } from "@starboard/lib-ui/components/input"
+import { Spinner } from "@starboard/lib-ui/components/spinner"
 import {
   Select,
   SelectContent,
@@ -28,6 +29,7 @@ import { cn } from "@starboard/lib-ui/lib/utils"
 import { CustomerCombobox } from "@starboard/ext-crm-parties"
 import { CurrencyCombobox } from "@starboard/ext-geo-gazetteer"
 import type { LiveFxState } from "../lib/use-live-fx"
+import { quoteStatusLabel } from "../lib/quote-stage"
 import {
   quoteStatusSchema,
   type QuoteFormOption,
@@ -44,16 +46,15 @@ export function QuoteIdField({
   className?: string
 }) {
   return (
-    <div className={cn("space-y-2.5", className)}>
-      <p className="text-[11px] tracking-wide text-muted-foreground uppercase">
-        Quote ID
-      </p>
-      <div className="flex items-center gap-2">
-        <p className="font-medium tabular-nums">{quoteId}</p>
+    <Field className={cn("gap-1", className)}>
+      <FieldLabel className="text-[11px] text-muted-foreground">Quote ID</FieldLabel>
+      <div className="flex h-7 items-center gap-1">
+        <p className="text-xs font-medium tabular-nums">{quoteId}</p>
         <Button
           type="button"
-          variant="outline"
-          size="icon-sm"
+          variant="ghost"
+          size="icon-xs"
+          aria-label="Copy quote ID"
           onClick={() => {
             navigator.clipboard.writeText(quoteId)
             toast.add({
@@ -66,7 +67,7 @@ export function QuoteIdField({
           <CopyIcon />
         </Button>
       </div>
-    </div>
+    </Field>
   )
 }
 
@@ -83,10 +84,10 @@ export function QuoteStatusField({
       name="status"
       render={({ field, fieldState }) => (
         <Field
-          className={cn(className)}
+          className={cn("gap-1", className)}
           data-invalid={fieldState.invalid || undefined}
         >
-          <FieldLabel>Status</FieldLabel>
+          <FieldLabel className="text-[11px] text-muted-foreground">Status</FieldLabel>
           <Select
             value={field.value}
             onValueChange={(value) => {
@@ -103,15 +104,16 @@ export function QuoteStatusField({
             }}
           >
             <SelectTrigger
-              className="w-full capitalize"
+              size="sm"
+              className="w-full"
               aria-invalid={fieldState.invalid}
             >
-              <SelectValue />
+              <SelectValue>{quoteStatusLabel(field.value)}</SelectValue>
             </SelectTrigger>
             <SelectContent>
               {quoteStatusOptions.map((status) => (
-                <SelectItem key={status} value={status} className="capitalize">
-                  {status}
+                <SelectItem key={status} value={status}>
+                  {quoteStatusLabel(status)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -200,23 +202,30 @@ export function QuoteCurrencyField({
 function FxStatusNote({ fx }: { fx: LiveFxState }) {
   return (
     <p className="flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
-      <span>
-        {fx.status === "loading"
-          ? "Loading live FX…"
-          : fx.status === "error"
+      {fx.status === "loading" ? (
+        <span className="inline-flex items-center gap-1.5">
+          <Spinner className="size-3.5 text-muted-foreground" />
+          Loading live FX…
+        </span>
+      ) : (
+        <span>
+          {fx.status === "error"
             ? "Live FX unavailable — existing rates kept."
             : fx.asOf
               ? `FX rates as of ${fx.asOf} (Frankfurter / ECB).`
               : "Totals convert charge lines into this currency."}
-      </span>
-      <button
+        </span>
+      )}
+      <Button
         type="button"
-        className="underline underline-offset-2 hover:text-foreground disabled:no-underline disabled:opacity-50"
+        variant="link"
+        size="xs"
+        className="h-auto px-0"
         disabled={fx.status === "loading"}
         onClick={fx.refresh}
       >
         Refresh
-      </button>
+      </Button>
     </p>
   )
 }
@@ -225,20 +234,29 @@ export function QuoteEffectiveField({
   register,
   errors,
   className,
+  disabled,
 }: {
   register: UseFormRegister<QuoteFormValues>
   errors: FieldErrors<QuoteFormValues>
   className?: string
+  disabled?: boolean
 }) {
   return (
     <Field
-      className={cn(className)}
+      className={cn("gap-1", className)}
       data-invalid={!!errors.effectiveFrom || undefined}
     >
-      <FieldLabel htmlFor="effectiveFrom">Effective</FieldLabel>
+      <FieldLabel
+        htmlFor="effectiveFrom"
+        className="text-[11px] text-muted-foreground"
+      >
+        Effective
+      </FieldLabel>
       <Input
         id="effectiveFrom"
         type="date"
+        className="h-7"
+        disabled={disabled}
         aria-invalid={!!errors.effectiveFrom}
         {...register("effectiveFrom")}
       />
@@ -251,20 +269,29 @@ export function QuoteExpiryField({
   register,
   errors,
   className,
+  disabled,
 }: {
   register: UseFormRegister<QuoteFormValues>
   errors: FieldErrors<QuoteFormValues>
   className?: string
+  disabled?: boolean
 }) {
   return (
     <Field
-      className={cn(className)}
+      className={cn("gap-1", className)}
       data-invalid={!!errors.expiryAt || undefined}
     >
-      <FieldLabel htmlFor="expiryAt">Expires</FieldLabel>
+      <FieldLabel
+        htmlFor="expiryAt"
+        className="text-[11px] text-muted-foreground"
+      >
+        Expires
+      </FieldLabel>
       <Input
         id="expiryAt"
         type="date"
+        className="h-7"
+        disabled={disabled}
         aria-invalid={!!errors.expiryAt}
         {...register("expiryAt")}
       />

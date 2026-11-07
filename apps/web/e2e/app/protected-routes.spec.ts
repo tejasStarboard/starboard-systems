@@ -6,6 +6,7 @@ import { expect, test } from "@playwright/test"
  */
 const protectedPaths = [
   "/",
+  "/quotes",
   "/customers",
   "/settings",
   "/rates",

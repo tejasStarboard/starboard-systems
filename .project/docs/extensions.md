@@ -124,6 +124,14 @@ Rules: point ids are globally unique and owned by exactly one extension; extensi
 | `quoting.commands`           | `quoteId, status, exportAllowed`                                                                     | `quoting.pdf` Export PDF (**083**)                       |
 | `rates.slots.ingestActions`  | `contribution` (+ optional `host.openEditor`); shared panel `rates.ingestUpload`                     | `ingestion.fcl_v6` Upload rates (**087**)                |
 
+**Context model:** the **host slot** supplies identity + callbacks in props (above). For **actions / jobs / headless** work, the child exposes handlers on **its own** BFF; the host (or the child’s UI) **invokes** that API with explicit args (`quoteId`, …). Child re-checks org access. There is no extension↔extension RPC bus — only mediated HTTP to `/api/extensions/<childId>/…`. See [extension-points.md §5](extension-points.md#5-context-for-child-contributions--ui-props-vs-invoke-rpc) and ticket **[107](../tickets/backlog/107-contribution-invoke-rpc.md)**.
+
+| Mechanism | When |
+| --------- | ---- |
+| Slot props + host callbacks | Interactive UI inside the owner’s tree (forms, apply-to-lane) |
+| Invoke child BFF (RPC-style HTTP) | Commands, exports, searches, headless hooks |
+| Shell Workspace State (**103**) | Bottom-panel / global chrome outside the document tree |
+
 ## Async job contract
 
 | Step    | HTTP                     | Body                                                                 |

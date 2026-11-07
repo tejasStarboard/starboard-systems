@@ -7,6 +7,7 @@ import type {
   SlotComponentProps,
 } from "@starboard/ext-quoting-document/slots"
 import type { Rate } from "@starboard/lib-contracts"
+import { LoadingState } from "@starboard/lib-ui/components/loading-state"
 import { toast } from "@starboard/lib-ui/components/toast"
 
 import { RateCard, RateCardRail } from "../components/rate-card"
@@ -89,11 +90,7 @@ export function CatalogSource({
   )
 
   if (loading) {
-    return (
-      <p className="text-center text-xs text-muted-foreground">
-        Loading rates…
-      </p>
-    )
+    return <LoadingState size="sm">Loading rates…</LoadingState>
   }
   if (loadFailed) {
     return (

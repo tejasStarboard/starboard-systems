@@ -17,6 +17,8 @@ import {
   ToggleGroupItem,
 } from "@starboard/lib-ui/components/toggle-group"
 
+import { equipmentLabel } from "../lib/equipment-label"
+
 function formatMoney(value: number, currencyCode: string) {
   if (!currencyCode) return value.toFixed(2)
   try {
@@ -169,7 +171,7 @@ export function MarkupFooter({
                 className="flex items-end justify-between gap-3"
               >
                 <MarkupDial
-                  label={`Markup · ${container.containerType || "Eq"}`}
+                  label={`Markup · ${equipmentLabel(container.containerType)}`}
                   markupType={type}
                   markupValue={value}
                   onTypeChange={(next) =>

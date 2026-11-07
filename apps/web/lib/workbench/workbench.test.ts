@@ -54,7 +54,7 @@ describe("deep links", () => {
     expect(matchDeepLink("/quote/q-123/", editors)?.resourceId).toBe("q-123")
   })
 
-  test("rates/messaging/settings/customers resolve; home opens the list editor", () => {
+  test("rates/messaging/settings/customers/quotes resolve; home is New Tab", () => {
     expect(matchDeepLink("/rates/upload", editors)).toEqual({
       viewType: "rates.upload",
       resourceId: "/rates/upload",
@@ -62,10 +62,11 @@ describe("deep links", () => {
     expect(matchDeepLink("/settings/team", editors)?.viewType).toBe("settings")
     expect(matchDeepLink("/customers", editors)?.viewType).toBe("customer.list")
     expect(matchDeepLink("/customers/c1", editors)?.viewType).toBe("customer")
-    expect(matchDeepLink("/", editors)).toEqual({
+    expect(matchDeepLink("/quotes", editors)).toEqual({
       viewType: "quote.list",
-      resourceId: "/",
+      resourceId: "/quotes",
     })
+    expect(matchDeepLink("/", editors)).toBeNull()
     // Without a matching editor, unknown paths do not open a tab.
     expect(matchDeepLink("/unknown/path", editors)).toBeNull()
   })
@@ -111,6 +112,21 @@ describe("tab host", () => {
     expect(state.tabs).toHaveLength(2)
   })
 
+  test("rename updates tab title", () => {
+    let state = run({
+      type: "open",
+      viewType: "quote",
+      resourceId: "uuid-1",
+      title: "Quote uuid-1",
+    })
+    state = tabsReducer(state, {
+      type: "rename",
+      id: "quote:uuid-1",
+      title: "AB12CD",
+    })
+    expect(state.tabs[0]?.title).toBe("AB12CD")
+  })
+
   test("focus + close picks neighbor, then empties", () => {
     let state = run(
       { type: "open", viewType: "quote", resourceId: "a" },
@@ -128,15 +144,86 @@ describe("tab host", () => {
     expect(state.activeTabId).toBeNull()
   })
 
-  test("route sync opens quote tab; home opens the list; empty editors deselect", () => {
+  test("splitRight moves active tab into secondary group", () => {
+    let state = run(
+      { type: "open", viewType: "quote", resourceId: "a" },
+      { type: "open", viewType: "quote", resourceId: "b" }
+    )
+    expect(state.tabs.every((t) => t.groupId === "primary")).toBe(true)
+    state = tabsReducer(state, { type: "splitRight" })
+    expect(state.tabs.find((t) => t.id === "quote:b")?.groupId).toBe(
+      "secondary"
+    )
+    expect(state.activeByGroup.secondary).toBe("quote:b")
+    expect(state.activeByGroup.primary).toBe("quote:a")
+    expect(state.focusedGroup).toBe("secondary")
+    expect(state.activeTabId).toBe("quote:b")
+  })
+
+  test("open beside creates secondary without stealing primary active", () => {
+    let state = run({ type: "open", viewType: "quote", resourceId: "a" })
+    state = tabsReducer(state, {
+      type: "open",
+      viewType: "quote.preview",
+      resourceId: "-",
+      title: "Preview",
+      group: "beside",
+    })
+    expect(state.tabs.map((t) => [t.id, t.groupId])).toEqual([
+      ["quote:a", "primary"],
+      ["quote.preview:-", "secondary"],
+    ])
+    expect(state.activeByGroup.primary).toBe("quote:a")
+    expect(state.activeByGroup.secondary).toBe("quote.preview:-")
+    expect(state.focusedGroup).toBe("secondary")
+  })
+
+  test("showNewTab clears group active but keeps tabs; focus restores", () => {
+    let state = run(
+      { type: "open", viewType: "quote", resourceId: "a" },
+      { type: "open", viewType: "quote", resourceId: "b" }
+    )
+    expect(state.activeTabId).toBe("quote:b")
+    state = tabsReducer(state, { type: "showNewTab", group: "primary" })
+    expect(state.activeByGroup.primary).toBeNull()
+    expect(state.activeTabId).toBeNull()
+    expect(state.tabs.map((t) => t.id)).toEqual(["quote:a", "quote:b"])
+    state = tabsReducer(state, { type: "focus", id: "quote:a" })
+    expect(state.activeTabId).toBe("quote:a")
+  })
+
+  test("closing last secondary tab collapses the split", () => {
+    let state = run(
+      { type: "open", viewType: "quote", resourceId: "a" },
+      {
+        type: "open",
+        viewType: "quote.preview",
+        resourceId: "-",
+        group: "beside",
+      }
+    )
+    state = tabsReducer(state, { type: "close", id: "quote.preview:-" })
+    expect(state.tabs.map((t) => t.groupId)).toEqual(["primary"])
+    expect(state.activeByGroup.secondary).toBeNull()
+    expect(state.focusedGroup).toBe("primary")
+    expect(state.activeTabId).toBe("quote:a")
+  })
+
+  test("route sync opens quote tab; home deselects (New Tab); /quotes opens list", () => {
     let state = run({ type: "route", pathname: "/quote/q1", editors })
     expect(state.activeTabId).toBe("quote:q1")
     expect(state.tabs[0]?.title).toBe("Quote q1")
     expect(tabHref(state.tabs[0]!, editors)).toBe("/quote/q1")
     state = tabsReducer(state, { type: "route", pathname: "/", editors })
-    expect(state.activeTabId).toBe("quote.list:/")
-    expect(state.tabs.map((t) => t.id)).toEqual(["quote:q1", "quote.list:/"])
-    expect(tabHref(state.tabs[1]!, editors)).toBe("/")
+    expect(state.activeTabId).toBeNull()
+    expect(state.tabs.map((t) => t.id)).toEqual(["quote:q1"])
+    state = tabsReducer(state, { type: "route", pathname: "/quotes", editors })
+    expect(state.activeTabId).toBe("quote.list:/quotes")
+    expect(state.tabs.map((t) => t.id)).toEqual([
+      "quote:q1",
+      "quote.list:/quotes",
+    ])
+    expect(tabHref(state.tabs[1]!, editors)).toBe("/quotes")
 
     let bare = run({
       type: "route",

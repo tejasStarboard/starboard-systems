@@ -7,6 +7,7 @@ import { Controller, useForm } from "react-hook-form"
 
 import type { Rate } from "@starboard/lib-contracts"
 import { Button } from "@starboard/lib-ui/components/button"
+import { Checkbox } from "@starboard/lib-ui/components/checkbox"
 import {
   Dialog,
   DialogContent,
@@ -23,6 +24,8 @@ import {
   FieldLabel,
 } from "@starboard/lib-ui/components/field"
 import { Input } from "@starboard/lib-ui/components/input"
+import { Label } from "@starboard/lib-ui/components/label"
+import { LoadingState } from "@starboard/lib-ui/components/loading-state"
 import { toast } from "@starboard/lib-ui/components/toast"
 import { cn } from "@starboard/lib-ui/lib/utils"
 
@@ -147,14 +150,15 @@ export function RatesList({ host }: { host: BuiltinHost }) {
             pointComponents={host.pointComponents ?? {}}
             host={host}
           />
-          <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <input
-              type="checkbox"
+          <Label className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <Checkbox
               checked={includeInactive}
-              onChange={(event) => setIncludeInactive(event.target.checked)}
+              onCheckedChange={(checked) =>
+                setIncludeInactive(checked === true)
+              }
             />
             Show inactive
-          </label>
+          </Label>
           <Dialog
             open={dialogOpen}
             onOpenChange={(open) => {
@@ -206,7 +210,7 @@ export function RatesList({ host }: { host: BuiltinHost }) {
       />
 
       {loading ? (
-        <p className="text-xs text-muted-foreground">Loading rates…</p>
+        <LoadingState size="sm">Loading rates…</LoadingState>
       ) : rows.length === 0 ? (
         <p className="text-sm text-muted-foreground">No rates found.</p>
       ) : (
@@ -217,10 +221,11 @@ export function RatesList({ host }: { host: BuiltinHost }) {
               host.activeEditor.resourceId === rate.id
             return (
               <li key={rate.id}>
-                <button
+                <Button
                   type="button"
+                  variant="ghost"
                   className={cn(
-                    "flex w-full flex-col gap-0.5 px-1 py-2.5 text-left text-sm hover:bg-muted/50",
+                    "h-auto w-full flex-col items-start gap-0.5 rounded-none px-1 py-2.5 text-left text-sm font-normal",
                     active && "bg-muted"
                   )}
                   onClick={() =>
@@ -247,7 +252,7 @@ export function RatesList({ host }: { host: BuiltinHost }) {
                     {rate.currencyCode} {rate.amount}
                     {rate.carrier ? ` · ${rate.carrier}` : ""}
                   </span>
-                </button>
+                </Button>
               </li>
             )
           })}

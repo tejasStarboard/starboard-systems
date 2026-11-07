@@ -4,6 +4,7 @@ import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 
 import { Button } from "@starboard/lib-ui/components/button"
+import { LoadingState } from "@starboard/lib-ui/components/loading-state"
 
 import { useAuth } from "@/hooks/use-auth"
 import { useOrganizationInvitation } from "@/hooks/use-organizations"
@@ -31,9 +32,7 @@ export function InvitationForm() {
   }
 
   if (loadingInvite || sessionPending) {
-    return (
-      <p className="text-xs text-muted-foreground">Loading invitation...</p>
-    )
+    return <LoadingState size="sm">Loading invitation…</LoadingState>
   }
 
   if (loadFailed) {

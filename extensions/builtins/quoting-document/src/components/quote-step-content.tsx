@@ -1,10 +1,14 @@
 "use client"
 
 import { useState } from "react"
-import { PlusIcon } from "@phosphor-icons/react"
+import { PlusIcon, QuestionIcon } from "@phosphor-icons/react"
 
 import { Button } from "@starboard/lib-ui/components/button"
-import { cn } from "@starboard/lib-ui/lib/utils"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@starboard/lib-ui/components/tooltip"
 
 import { LaneCargoFields } from "./lane-cargo-fields"
 import { LaneRouteFields } from "./lane-route-fields"
@@ -20,45 +24,7 @@ import {
   type TotalsSlotProps,
 } from "../slots/types"
 
-type Layout = "desktop" | "tablet" | "mobile"
-
-function laneLabel(props: QuoteFormLayoutProps) {
-  const origin = props.selectedLane?.origin.trim() ?? ""
-  const destination = props.selectedLane?.destination.trim() ?? ""
-  if (origin && destination) return `${origin} → ${destination}`
-  return origin || destination || `Lane ${props.selectedLaneIndex + 1}`
-}
-
-function StepHeading({
-  step,
-  props,
-}: {
-  step: QuoteStepId
-  props: QuoteFormLayoutProps
-}) {
-  const meta = QUOTE_STEPS.find((entry) => entry.id === step)
-  return (
-    <div className="space-y-1">
-      <h2 className="text-sm font-medium">
-        {meta?.label}
-        {meta?.scope === "lane" ? (
-          <span className="ml-2 font-normal text-muted-foreground">
-            {laneLabel(props)}
-          </span>
-        ) : null}
-      </h2>
-      <p className="text-xs text-muted-foreground">{meta?.hint}</p>
-    </div>
-  )
-}
-
-function RatesStep({
-  props,
-  fullWidthActions,
-}: {
-  props: QuoteFormLayoutProps
-  fullWidthActions: boolean
-}) {
+function RatesSection({ props }: { props: QuoteFormLayoutProps }) {
   // Rates are applied into the charge table, so search/apply need BOTH slots;
   // without a charge table existing manual rates are left untouched.
   const hasRateSources =
@@ -91,17 +57,11 @@ function RatesStep({
 
   return (
     <div className="space-y-4">
-      <div
-        className={cn(
-          "flex gap-2",
-          fullWidthActions ? "flex-col" : "flex-wrap"
-        )}
-      >
+      <div className="flex flex-wrap gap-2">
         {hasChargeTable ? (
           <Button
             type="button"
             variant="outline"
-            className={cn(fullWidthActions && "w-full")}
             disabled={!props.laneReady || locked}
             onClick={props.onAddManualRate}
           >
@@ -150,20 +110,14 @@ function RatesStep({
         >
           {rateCount === 0
             ? "No rate on this lane yet. Select a rate card or add one manually."
-            : `${rateCount} rate${rateCount === 1 ? "" : "s"} on this lane. Review charges and totals in Build.`}
+            : `${rateCount} rate${rateCount === 1 ? "" : "s"} on this lane.`}
         </p>
       ) : null}
     </div>
   )
 }
 
-function BuildStep({
-  props,
-  onStepChange,
-}: {
-  props: QuoteFormLayoutProps
-  onStepChange: (step: QuoteStepId) => void
-}) {
+function BuildSection({ props }: { props: QuoteFormLayoutProps }) {
   const hasChargeTable =
     useQuoteSlotEntries(QUOTING_SLOTS.chargeTable).length > 0
 
@@ -184,19 +138,9 @@ function BuildStep({
 
   if (!props.manualRatesVisible) {
     return (
-      <div className="space-y-2 border border-dashed p-3">
-        <p className="text-xs text-muted-foreground">
-          No charges on this lane yet. Pick or add a rate first.
-        </p>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() => onStepChange("rates")}
-        >
-          Go to Rates
-        </Button>
-      </div>
+      <p className="border border-dashed p-3 text-xs text-muted-foreground">
+        No charges on this lane yet. Pick or add a rate above.
+      </p>
     )
   }
 
@@ -242,41 +186,51 @@ function BuildStep({
 }
 
 /**
- * Body of the active step. Step 1 is quote-level (customer, currency,
- * `headerFields`); steps 2–5 operate on the selected lane. Existing slots
- * remount where they belong: `headerFields` → Basics, `rateSources` → Rates,
- * `chargeTable` / `totals` → Build.
+ * Body of the active step.
+ * Route → ports + cargo. Rate → basics + rate sources + charges/totals.
  */
 export function QuoteStepContent({
   step,
   props,
-  layout,
-  onStepChange,
 }: {
   step: QuoteStepId
   props: QuoteFormLayoutProps
-  layout: Layout
-  onStepChange: (step: QuoteStepId) => void
 }) {
   const locked = !props.commercialEditable
-  const [ratesVisited, setRatesVisited] = useState(step === "rates")
-  if (step === "rates" && !ratesVisited) setRatesVisited(true)
-  const ratesMounted = step === "rates" || ratesVisited
+  const [ratesVisited, setRatesVisited] = useState(step === "rate")
+  if (step === "rate" && !ratesVisited) setRatesVisited(true)
+  const ratesMounted = step === "rate" || ratesVisited
+
   return (
     <div className="flex min-w-0 flex-col gap-4">
-      <StepHeading step={step} props={props} />
+      {step === "route" ? (
+        <>
+          <LaneRouteFields
+            key={`route-${props.selectedLaneId ?? props.selectedLaneIndex}`}
+            control={props.control}
+            setValue={props.setValue}
+            laneIndex={props.selectedLaneIndex}
+            portOptions={props.portOptions}
+            containerTypeOptions={props.containerTypeOptions}
+            palletTypeOptions={props.palletTypeOptions}
+          />
+          <LaneCargoFields
+            key={`cargo-${props.selectedLaneId ?? props.selectedLaneIndex}`}
+            control={props.control}
+            register={props.register}
+            laneIndex={props.selectedLaneIndex}
+            containerTypeOptions={props.containerTypeOptions}
+            palletTypeOptions={props.palletTypeOptions}
+          />
+        </>
+      ) : null}
 
-      {step === "basics" ? (
-        <div
-          className={cn(
-            "grid gap-4",
-            layout === "mobile" ? "grid-cols-1" : "grid-cols-2"
-          )}
-        >
+      {step === "rate" ? (
+        <div className="grid grid-cols-2 gap-4">
           <QuoteCustomerField
             control={props.control}
             customerOptions={props.customerOptions}
-            className={cn("w-full", layout !== "mobile" && "col-span-2")}
+            className="col-span-2 w-full"
             disabled={locked}
           />
           <QuoteCurrencyField
@@ -286,45 +240,20 @@ export function QuoteStepContent({
             className="w-full"
             disabled={locked}
           />
-          <QuoteHeaderSlot props={props} layout={layout} />
+          <QuoteHeaderSlot props={props} />
         </div>
-      ) : null}
-
-      {step === "route" ? (
-        <LaneRouteFields
-          key={props.selectedLaneId ?? props.selectedLaneIndex}
-          control={props.control}
-          setValue={props.setValue}
-          laneIndex={props.selectedLaneIndex}
-          portOptions={props.portOptions}
-          containerTypeOptions={props.containerTypeOptions}
-          palletTypeOptions={props.palletTypeOptions}
-        />
-      ) : null}
-
-      {step === "cargo" ? (
-        <LaneCargoFields
-          key={props.selectedLaneId ?? props.selectedLaneIndex}
-          control={props.control}
-          register={props.register}
-          laneIndex={props.selectedLaneIndex}
-          containerTypeOptions={props.containerTypeOptions}
-          palletTypeOptions={props.palletTypeOptions}
-        />
       ) : null}
 
       {/* Kept mounted (hidden) once visited so in-progress / completed spot
           searches survive step navigation; rate sources reset themselves when
           the lane's ports change. */}
       {ratesMounted ? (
-        <div hidden={step !== "rates"}>
-          <RatesStep props={props} fullWidthActions={layout === "mobile"} />
+        <div hidden={step !== "rate"}>
+          <RatesSection props={props} />
         </div>
       ) : null}
 
-      {step === "build" ? (
-        <BuildStep props={props} onStepChange={onStepChange} />
-      ) : null}
+      {step === "rate" ? <BuildSection props={props} /> : null}
     </div>
   )
 }

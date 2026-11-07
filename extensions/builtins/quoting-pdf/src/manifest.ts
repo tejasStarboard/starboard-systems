@@ -5,7 +5,7 @@
  * `@starboard/ext-host` Zod schema validates it at load. Default-on for
  * credit + enterprise; missing rollout row = on.
  *
- * Contributes Export PDF into `quoting.document`'s `quoting.commands` point
+ * Contributes Export PDF into `quoting.document`'s `quoting.commands` menu
  * and the PDF tab body into `quoting.slots.preview` (092; `props.tab` routes
  * it). 094: **defines** `quoting.pdf.templates` (id, label; renderer is
  * registered by the contributing package) and self-contributes the default

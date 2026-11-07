@@ -5,6 +5,7 @@ import { Controller, type Control, type UseFormRegister } from "react-hook-form"
 import type { QuoteFormValues, ScopeOverride } from "@starboard/lib-contracts"
 import { Checkbox } from "@starboard/lib-ui/components/checkbox"
 import { Input } from "@starboard/lib-ui/components/input"
+import { Label } from "@starboard/lib-ui/components/label"
 import {
   Select,
   SelectContent,
@@ -75,7 +76,7 @@ export function ChargeGuardrails({
         name={`${prefix}.isVisible`}
         render={({ field }) => (
           <span className="flex items-center gap-2">
-            <label
+            <Label
               className="flex items-center gap-1.5 text-xs text-muted-foreground"
               title="Split shows this line on its own. Unchecked absorbs it into the total."
             >
@@ -84,7 +85,7 @@ export function ChargeGuardrails({
                 onCheckedChange={(checked) => field.onChange(checked === true)}
               />
               Split
-            </label>
+            </Label>
             {field.value ? null : (
               <span className="text-[11px] text-muted-foreground">
                 Absorbed

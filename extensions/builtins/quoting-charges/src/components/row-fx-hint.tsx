@@ -2,6 +2,7 @@
 
 import { tryConvertCurrency, tryGetFxRate } from "@starboard/lib-pricing"
 import { Input } from "@starboard/lib-ui/components/input"
+import { Label } from "@starboard/lib-ui/components/label"
 
 /**
  * Display FX when line currency ≠ quote currency (starboard-2 row FX).
@@ -37,7 +38,7 @@ export function RowFxHint({
           @ {rate.toFixed(6)} (1 {from} = {sample.converted.toFixed(4)} {to})
         </span>
       ) : (
-        <label className="flex items-center gap-1">
+        <Label className="flex items-center gap-1">
           <span>FX missing — set rate</span>
           <Input
             type="number"
@@ -52,7 +53,7 @@ export function RowFxHint({
               }
             }}
           />
-        </label>
+        </Label>
       )}
     </div>
   )

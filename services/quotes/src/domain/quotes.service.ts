@@ -51,7 +51,7 @@ export interface QuotesService {
     query?: QuotesListQueryInput
   ): Promise<ListQuotesResponse>
   get(quoteId: string, organizationId: string): Promise<QuoteFormValues>
-  create(input: CreateQuoteRequest): Promise<{ id: string }>
+  create(input: CreateQuoteRequest): Promise<{ id: string; quoteId: string }>
   save(
     values: QuoteFormValues,
     input: { ownerId: string; organizationId: string }
@@ -96,7 +96,9 @@ export class DefaultQuotesService implements QuotesService {
     return row
   }
 
-  async create(input: CreateQuoteRequest): Promise<{ id: string }> {
+  async create(
+    input: CreateQuoteRequest
+  ): Promise<{ id: string; quoteId: string }> {
     const parsed = createQuoteRequestSchema.safeParse(input)
     if (!parsed.success) {
       throw new QuotesValidationError(
@@ -125,7 +127,7 @@ export class DefaultQuotesService implements QuotesService {
       customerRole: "shipper",
     })
 
-    return { id }
+    return { id, quoteId }
   }
 
   async save(

@@ -3,7 +3,20 @@
 import { useEffect, useState } from "react"
 
 import { Button } from "@starboard/lib-ui/components/button"
+import {
+  ButtonGroup,
+  ButtonGroupSeparator,
+} from "@starboard/lib-ui/components/button-group"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@starboard/lib-ui/components/card"
+import { Field, FieldLabel } from "@starboard/lib-ui/components/field"
 import { Input } from "@starboard/lib-ui/components/input"
+import { LoadingState } from "@starboard/lib-ui/components/loading-state"
 import { toast } from "@starboard/lib-ui/components/toast"
 
 import {
@@ -142,7 +155,7 @@ export function CarrierCredentialsPanel() {
     return <p className="text-sm text-destructive">{loadError}</p>
   }
   if (!carriers) {
-    return <p className="text-sm text-muted-foreground">Loading credentials…</p>
+    return <LoadingState size="sm">Loading credentials…</LoadingState>
   }
 
   return (
@@ -157,26 +170,24 @@ export function CarrierCredentialsPanel() {
       {carriers.map((carrier) => {
         const validating = validatingId === carrier.extensionId
         return (
-          <section
-            key={carrier.extensionId}
-            className="flex flex-col gap-3 border p-4"
-          >
-            <div className="flex flex-col gap-0.5">
-              <h3 className="text-sm font-medium">{carrier.displayName}</h3>
-              <p className="text-xs text-muted-foreground">
+          <Card key={carrier.extensionId} size="sm">
+            <CardHeader>
+              <CardTitle>{carrier.displayName}</CardTitle>
+              <CardDescription>
                 {carrierValidationMessage({
                   validating,
                   status: carrier.validation.status,
                   errorMessage: carrier.validation.errorMessage,
                 })}
-              </p>
-            </div>
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-col gap-3">
             {carrier.settings.map((setting) => (
-              <label key={setting.key} className="flex flex-col gap-1">
-                <span className="text-xs text-muted-foreground">
+              <Field key={setting.key} className="gap-1">
+                <FieldLabel>
                   {setting.label}
                   {setting.configured ? " · configured" : ""}
-                </span>
+                </FieldLabel>
                 <Input
                   type="password"
                   autoComplete="off"
@@ -194,9 +205,9 @@ export function CarrierCredentialsPanel() {
                     }))
                   }}
                 />
-              </label>
+              </Field>
             ))}
-            <div className="flex gap-2">
+            <ButtonGroup aria-label="Credential actions">
               <Button
                 type="button"
                 size="sm"
@@ -205,6 +216,7 @@ export function CarrierCredentialsPanel() {
               >
                 {validating ? "Validating…" : "Save"}
               </Button>
+              <ButtonGroupSeparator />
               <Button
                 type="button"
                 size="sm"
@@ -214,8 +226,9 @@ export function CarrierCredentialsPanel() {
               >
                 Validate
               </Button>
-            </div>
-          </section>
+            </ButtonGroup>
+            </CardContent>
+          </Card>
         )
       })}
     </div>
