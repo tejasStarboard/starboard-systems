@@ -309,8 +309,10 @@ describe("getActiveWorkbenchContributions", () => {
       "org.settings",
       "messaging.msgraph",
     ])
-    // rates.catalog: detail + search + sheets + sell + spotSearch (096)
+    // quoting.document: quote + list + preview (101); rates.catalog: detail +
+    // search + sheets + sell + spotSearch (096)
     expect(result.editors.map((e) => e.extensionId)).toEqual([
+      "quoting.document",
       "quoting.document",
       "quoting.document",
       "crm.parties",
