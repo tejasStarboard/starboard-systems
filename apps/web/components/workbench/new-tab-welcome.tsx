@@ -22,7 +22,8 @@ function displayKey(token: string, isApple: boolean): string {
   if (normalized === "shift") return isApple ? "⇧" : "Shift"
   if (normalized === "alt") return isApple ? "⌥" : "Alt"
   if (normalized === "ctrl" || normalized === "control") return "Ctrl"
-  if (normalized === "meta" || normalized === "cmd") return isApple ? "⌘" : "Meta"
+  if (normalized === "meta" || normalized === "cmd")
+    return isApple ? "⌘" : "Meta"
   return token.length === 1 ? token.toUpperCase() : token
 }
 

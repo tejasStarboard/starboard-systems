@@ -16,9 +16,7 @@ test.describe("workbench shell", () => {
   test("home shows New Tab welcome", async ({ page }) => {
     await page.goto("/")
     await expect(page.getByTestId("new-tab-welcome")).toBeVisible()
-    await expect(
-      page.getByRole("button", { name: "New Quote" })
-    ).toBeVisible()
+    await expect(page.getByRole("button", { name: "New Quote" })).toBeVisible()
     await expect(
       page.getByRole("button", { name: "Search Quotes" })
     ).toBeVisible()

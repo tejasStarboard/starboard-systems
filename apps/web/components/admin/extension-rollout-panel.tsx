@@ -278,9 +278,7 @@ export function ExtensionRolloutPanel({
                           <SelectItem value="common">
                             Common beta list
                           </SelectItem>
-                          <SelectItem value="beta">
-                            Custom beta list
-                          </SelectItem>
+                          <SelectItem value="beta">Custom beta list</SelectItem>
                           <SelectItem value="on">
                             On for all entitled
                           </SelectItem>

@@ -136,9 +136,7 @@ export function PrimarySidebarMobile() {
       >
         <SheetHeader className="sr-only">
           <SheetTitle>Sidebar</SheetTitle>
-          <SheetDescription>
-            Workbench primary sidebar views.
-          </SheetDescription>
+          <SheetDescription>Workbench primary sidebar views.</SheetDescription>
         </SheetHeader>
         <SidebarViews onNavigate={closeMobileSidebar} />
       </SheetContent>

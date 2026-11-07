@@ -52,10 +52,7 @@ function WorkbenchMain({ children }: { children: React.ReactNode }) {
       >
         <PrimarySidebarPanel />
       </ResizablePanel>
-      <ResizableHandle
-        withHandle
-        data-testid="sidebar-editor-resize-handle"
-      />
+      <ResizableHandle withHandle data-testid="sidebar-editor-resize-handle" />
       <ResizablePanel
         id="workbench-editor"
         defaultSize="70%"

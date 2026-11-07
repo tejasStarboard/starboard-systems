@@ -57,7 +57,7 @@ function Calendar({
         // Absolute nav overlays the caption; ignore hits except on the real
         // prev/next buttons so day cells stay clickable (RDP v10 / shadcn).
         nav: cn(
-          "absolute inset-x-0 top-0 flex w-full items-center justify-between gap-1 pointer-events-none",
+          "pointer-events-none absolute inset-x-0 top-0 flex w-full items-center justify-between gap-1",
           defaultClassNames.nav
         ),
         button_previous: cn(

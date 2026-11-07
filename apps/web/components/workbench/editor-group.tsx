@@ -243,7 +243,7 @@ function TabStrip({
             draggingTabId && canDropOnEdge && "border-dashed border-border/80",
             edgeHot &&
               canDropOnEdge &&
-              "border-primary bg-primary/15 ring-1 ring-inset ring-primary/40"
+              "border-primary bg-primary/15 ring-1 ring-primary/40 ring-inset"
           )}
           onDragEnter={(event) => {
             if (!draggingTab || draggingTab.groupId !== "primary") return
