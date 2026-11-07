@@ -28,13 +28,13 @@ Empty / disabled messaging when no quote tab is focused (“Open a quote to add 
 
 ## Extension model
 
-| | |
-| -- | -- |
-| **Package / id** | `quoting.notes` (optional or default-on built-in — decide at implement) |
-| **Contributes** | `workbench.panel` → Notes |
-| **Reads** | Workspace State active quote id (shell) — not `quoting.document` slot props |
-| **Data** | Own BFF routes; must **not** mutate quote aggregate via undocumented coupling — soft FK to quote id only. Host does not RPC into notes for v1; notes UI calls its BFF directly |
-| **Unplug** | Notes tab gone; quote editor unchanged |
+|                  |                                                                                                                                                                                |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Package / id** | `quoting.notes` (optional or default-on built-in — decide at implement)                                                                                                        |
+| **Contributes**  | `workbench.panel` → Notes                                                                                                                                                      |
+| **Reads**        | Workspace State active quote id (shell) — not `quoting.document` slot props                                                                                                    |
+| **Data**         | Own BFF routes; must **not** mutate quote aggregate via undocumented coupling — soft FK to quote id only. Host does not RPC into notes for v1; notes UI calls its BFF directly |
+| **Unplug**       | Notes tab gone; quote editor unchanged                                                                                                                                         |
 
 ## Non-goals
 

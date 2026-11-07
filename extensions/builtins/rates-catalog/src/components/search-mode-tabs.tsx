@@ -1,10 +1,6 @@
 "use client"
 
-import {
-  Tabs,
-  TabsList,
-  TabsTrigger,
-} from "@starboard/lib-ui/components/tabs"
+import { Tabs, TabsList, TabsTrigger } from "@starboard/lib-ui/components/tabs"
 
 const MODES = [
   { id: "fcl", label: "Ocean FCL", enabled: true },

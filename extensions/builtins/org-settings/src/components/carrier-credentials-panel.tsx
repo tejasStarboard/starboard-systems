@@ -182,51 +182,51 @@ export function CarrierCredentialsPanel() {
               </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-3">
-            {carrier.settings.map((setting) => (
-              <Field key={setting.key} className="gap-1">
-                <FieldLabel>
-                  {setting.label}
-                  {setting.configured ? " · configured" : ""}
-                </FieldLabel>
-                <Input
-                  type="password"
-                  autoComplete="off"
+              {carrier.settings.map((setting) => (
+                <Field key={setting.key} className="gap-1">
+                  <FieldLabel>
+                    {setting.label}
+                    {setting.configured ? " · configured" : ""}
+                  </FieldLabel>
+                  <Input
+                    type="password"
+                    autoComplete="off"
+                    disabled={validating}
+                    value={drafts[carrier.extensionId]?.[setting.key] ?? ""}
+                    placeholder={setting.configured ? "Configured" : ""}
+                    onChange={(event) => {
+                      const value = event.target.value
+                      setDrafts((current) => ({
+                        ...current,
+                        [carrier.extensionId]: {
+                          ...current[carrier.extensionId],
+                          [setting.key]: value,
+                        },
+                      }))
+                    }}
+                  />
+                </Field>
+              ))}
+              <ButtonGroup aria-label="Credential actions">
+                <Button
+                  type="button"
+                  size="sm"
                   disabled={validating}
-                  value={drafts[carrier.extensionId]?.[setting.key] ?? ""}
-                  placeholder={setting.configured ? "Configured" : ""}
-                  onChange={(event) => {
-                    const value = event.target.value
-                    setDrafts((current) => ({
-                      ...current,
-                      [carrier.extensionId]: {
-                        ...current[carrier.extensionId],
-                        [setting.key]: value,
-                      },
-                    }))
-                  }}
-                />
-              </Field>
-            ))}
-            <ButtonGroup aria-label="Credential actions">
-              <Button
-                type="button"
-                size="sm"
-                disabled={validating}
-                onClick={() => void save(carrier)}
-              >
-                {validating ? "Validating…" : "Save"}
-              </Button>
-              <ButtonGroupSeparator />
-              <Button
-                type="button"
-                size="sm"
-                variant="outline"
-                disabled={validating}
-                onClick={() => void revalidate(carrier.extensionId)}
-              >
-                Validate
-              </Button>
-            </ButtonGroup>
+                  onClick={() => void save(carrier)}
+                >
+                  {validating ? "Validating…" : "Save"}
+                </Button>
+                <ButtonGroupSeparator />
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  disabled={validating}
+                  onClick={() => void revalidate(carrier.extensionId)}
+                >
+                  Validate
+                </Button>
+              </ButtonGroup>
             </CardContent>
           </Card>
         )

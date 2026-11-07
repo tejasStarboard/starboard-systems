@@ -12,10 +12,7 @@ import type {
   SlotComponentProps,
 } from "@starboard/ext-quoting-document/slots"
 import { Button } from "@starboard/lib-ui/components/button"
-import {
-  Field,
-  FieldLabel,
-} from "@starboard/lib-ui/components/field"
+import { Field, FieldLabel } from "@starboard/lib-ui/components/field"
 import { Input } from "@starboard/lib-ui/components/input"
 import { Label } from "@starboard/lib-ui/components/label"
 import {

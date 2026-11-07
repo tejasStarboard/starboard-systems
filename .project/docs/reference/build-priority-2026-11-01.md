@@ -106,12 +106,12 @@ Map starboard-2 Rate Management top tabs into the Rates activity sidebar + stand
 
 **Git:** normal ticket flow — branch off `origin/dev`, PR to **`dev`** (no `quote-flow` exception) once `quote-flow` is promoted.
 
-|   # | Ticket                                                                                                  | Package / layer                      | Why                               |
-| --: | ------------------------------------------------------------------------------------------------------- | ------------------------------------ | --------------------------------- |
-|  24 | [095](../../tickets/done/095-rates-catalog-ux-epic.md) Epic (docs / orchestration)                      | —                                    | Sequence + ref doc                |
-|  25 | [096](../../tickets/done/096-rates-activity-ia.md) Rates activity IA + shells                           | `rates.catalog`                      | Four sidebar entries              |
-|  26 | [097](../../tickets/done/097-search-rates-ocean-fcl.md) Search Rates (Ocean FCL)                        | `rates.catalog`                      | Prod-shaped FCL search            |
-|  27 | [098](../../tickets/done/098-spot-search-standalone.md) Spot search standalone                         | `rates.catalog` + `spot.*`           | Offers without a quote            |
+|   # | Ticket                                                                                                     | Package / layer                      | Why                                             |
+| --: | ---------------------------------------------------------------------------------------------------------- | ------------------------------------ | ----------------------------------------------- |
+|  24 | [095](../../tickets/done/095-rates-catalog-ux-epic.md) Epic (docs / orchestration)                         | —                                    | Sequence + ref doc                              |
+|  25 | [096](../../tickets/done/096-rates-activity-ia.md) Rates activity IA + shells                              | `rates.catalog`                      | Four sidebar entries                            |
+|  26 | [097](../../tickets/done/097-search-rates-ocean-fcl.md) Search Rates (Ocean FCL)                           | `rates.catalog`                      | Prod-shaped FCL search                          |
+|  27 | [098](../../tickets/done/098-spot-search-standalone.md) Spot search standalone                             | `rates.catalog` + `spot.*`           | Offers without a quote                          |
 |  28 | [099](../../tickets/backlog/099-rate-sheets-and-sell-shell.md) Rate Sheets manage + Sell Rates gated shell | `rates.catalog` + `ingestion.fcl_v6` | Sheets UX; marketplace shell only (**backlog**) |
 
 ```text

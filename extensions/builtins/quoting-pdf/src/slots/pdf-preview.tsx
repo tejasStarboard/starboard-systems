@@ -58,8 +58,7 @@ export function PdfPreview({
     fetch("/api/quotes/preview/pdf-context", { signal: controller.signal })
       .then(async (response) => {
         const payload = (await response.json().catch(() => null)) as
-          | (Partial<PdfContext> & { error?: string })
-          | null
+          (Partial<PdfContext> & { error?: string }) | null
         if (controller.signal.aborted) return
         if (!response.ok || !payload?.org || !payload.templateId) {
           throw new Error(
@@ -163,10 +162,7 @@ export function PdfPreview({
       {url ? (
         <div
           data-testid="quote-preview-pdf-viewport"
-          className={cn(
-            "relative min-h-0 flex-1 overflow-hidden",
-            SCROLL_HIDE
-          )}
+          className={cn("relative min-h-0 flex-1 overflow-hidden", SCROLL_HIDE)}
         >
           <iframe
             title={`Quote ${quote.quoteId || "draft"} PDF preview`}

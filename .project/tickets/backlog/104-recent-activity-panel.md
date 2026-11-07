@@ -26,13 +26,13 @@ Examples: “Created quote AB12CD”, “Saved customer Acme”, “Opened Searc
 
 ## Extension model
 
-| | |
-| -- | -- |
-| **Package / id** | New built-in or optional (decide at implement time; default-on if thin) |
-| **Contributes** | `workbench.panel` → Activity |
-| **Reads** | Workspace State from shell (**103**) |
-| **Data** | Own BFF + store or event stream; do **not** call other extensions’ internals. Optional later: host events via **107** invoke — not required for v1 |
-| **Unplug** | Activity tab disappears; workbench intact |
+|                  |                                                                                                                                                    |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Package / id** | New built-in or optional (decide at implement time; default-on if thin)                                                                            |
+| **Contributes**  | `workbench.panel` → Activity                                                                                                                       |
+| **Reads**        | Workspace State from shell (**103**)                                                                                                               |
+| **Data**         | Own BFF + store or event stream; do **not** call other extensions’ internals. Optional later: host events via **107** invoke — not required for v1 |
+| **Unplug**       | Activity tab disappears; workbench intact                                                                                                          |
 
 Context: Workspace State (**103**) only — not quote slot props.
 

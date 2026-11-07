@@ -4,7 +4,10 @@ import { useEffect, useState, type ReactNode } from "react"
 import { useWatch, type Control } from "react-hook-form"
 
 import { Button } from "@starboard/lib-ui/components/button"
-import { ButtonGroup, ButtonGroupSeparator } from "@starboard/lib-ui/components/button-group"
+import {
+  ButtonGroup,
+  ButtonGroupSeparator,
+} from "@starboard/lib-ui/components/button-group"
 import { Card, CardContent } from "@starboard/lib-ui/components/card"
 import { LoadingState } from "@starboard/lib-ui/components/loading-state"
 import { Skeleton } from "@starboard/lib-ui/components/skeleton"
@@ -179,7 +182,7 @@ export function QuotePreviewPane({
           >
             PDF
           </Button>
-          <ButtonGroupSeparator/>
+          <ButtonGroupSeparator />
           <Button
             type="button"
             id="quote-preview-mode-email"

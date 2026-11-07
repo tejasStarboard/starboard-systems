@@ -107,10 +107,7 @@ describe("driving built-in manifests (076)", () => {
       contributions.newTab
         .filter((item) => item.extensionId === "quoting.document")
         .map((item) => item.id)
-    ).toEqual([
-      "quoting.document.newQuote",
-      "quoting.document.searchQuotes",
-    ])
+    ).toEqual(["quoting.document.newQuote", "quoting.document.searchQuotes"])
     expect(
       contributions.statusBar
         .filter((item) => item.extensionId === "quoting.document")

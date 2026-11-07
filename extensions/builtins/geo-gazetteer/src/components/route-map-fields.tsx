@@ -182,7 +182,6 @@ export function RouteMapFields({
             Destination{destination ? ` · ${portDisplay(destination)}` : ""}
           </ToggleGroupItem>
         </ToggleGroup>
-       
       </div>
 
       <div className="relative">
@@ -273,9 +272,7 @@ export function RouteMapFields({
           />
         </Field>
         <Field>
-          <FieldLabel htmlFor={id("destination")}>
-            Destination
-          </FieldLabel>
+          <FieldLabel htmlFor={id("destination")}>Destination</FieldLabel>
           <PortCombobox
             id={id("destination")}
             options={portOptions}

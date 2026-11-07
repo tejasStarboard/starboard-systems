@@ -47,16 +47,16 @@ Host activation: resolve contribution target `quoting.slots.chargeTable` → own
 
 ### Workbench (UI)
 
-| Point                                           | Purpose                       | Who contributes                                    |
-| ----------------------------------------------- | ----------------------------- | -------------------------------------------------- |
-| `workbench.activity`                            | Activity bar icons            | Any                                                |
-| `workbench.views`                               | Sidebar / panel views         | `quoting.document` (Quotes list), `crm.parties`, … |
-| `workbench.editors`                             | Center tab **document types** | `quoting.document` → viewType `quote`              |
-| `workbench.newTab`                              | New Tab welcome quick actions | `quoting.document`, `rates.catalog`, `crm.parties` |
-| `workbench.commands` / `menus` / `toolbars`     | Actions                       | Any                                                |
-| `workbench.statusBar`                           | Footer actions / launchers    | e.g. Preview → `quote.preview` editor (**101**)  |
-| `workbench.panel`                               | Bottom drawer tabs            | Activity / inbox / notes (**103–106**)             |
-| `workbench.perspectives`                        | Later                         | —                                                  |
+| Point                                       | Purpose                       | Who contributes                                    |
+| ------------------------------------------- | ----------------------------- | -------------------------------------------------- |
+| `workbench.activity`                        | Activity bar icons            | Any                                                |
+| `workbench.views`                           | Sidebar / panel views         | `quoting.document` (Quotes list), `crm.parties`, … |
+| `workbench.editors`                         | Center tab **document types** | `quoting.document` → viewType `quote`              |
+| `workbench.newTab`                          | New Tab welcome quick actions | `quoting.document`, `rates.catalog`, `crm.parties` |
+| `workbench.commands` / `menus` / `toolbars` | Actions                       | Any                                                |
+| `workbench.statusBar`                       | Footer actions / launchers    | e.g. Preview → `quote.preview` editor (**101**)    |
+| `workbench.panel`                           | Bottom drawer tabs            | Activity / inbox / notes (**103–106**)             |
+| `workbench.perspectives`                    | Later                         | —                                                  |
 
 **Preview placement (**101**):** do **not** put PDF/email canvas in the bottom drawer. Status-bar **Preview** opens a **center** `quote.preview` tab (quote combobox + PDF \| Email). Bodies stay on `quoting.slots.preview` (`quoting.pdf` / `quoting.email`); the quote **builder** no longer hosts the side pane — open Preview from the status bar (or builder shortcut).
 
@@ -183,12 +183,12 @@ Driving extensions **host** contribution points; children **contribute** UI and/
 
 The **owner’s React tree** mounts the child’s component and passes a typed **slot props** contract (identity, form handles, callbacks). Contributors import **types only** from the owner (e.g. `@starboard/ext-quoting-document/slots`).
 
-| Passes | Examples |
-| ------ | -------- |
-| Identity / scope | `quoteId` (row UUID), `status`, `lanePath`, ports |
-| Live UI | RHF `control` / `register`, debounced `quote` snapshot |
-| Host callbacks | `onApplyRate`, `onAppendRate` — child asks host to update **host-owned** document state |
-| Static manifest `props` | `{ carrier: "maersk" }` |
+| Passes                  | Examples                                                                                |
+| ----------------------- | --------------------------------------------------------------------------------------- |
+| Identity / scope        | `quoteId` (row UUID), `status`, `lanePath`, ports                                       |
+| Live UI                 | RHF `control` / `register`, debounced `quote` snapshot                                  |
+| Host callbacks          | `onApplyRate`, `onAppendRate` — child asks host to update **host-owned** document state |
+| Static manifest `props` | `{ carrier: "maersk" }`                                                                 |
 
 Use for charge grids, rate-source panels, preview bodies, anything that must feel local to the editor. **Do not** RPC per keystroke.
 
@@ -204,11 +204,11 @@ Host (slot chrome / command)
   → result → host applies (callback / form) when required
 ```
 
-| Use invoke RPC for | Do not use invoke RPC for |
-| -------------------- | ------------------------- |
-| Toolbar / commands (export, send, run job) | Live form binding, charge editing |
-| Headless hooks (validators, totals hooks) | Replacing `onApplyRate` with a write into quotes from the child |
-| Jobs the child already owns (`spot.search`, …) | Peer calls into another extension’s private API |
+| Use invoke RPC for                             | Do not use invoke RPC for                                       |
+| ---------------------------------------------- | --------------------------------------------------------------- |
+| Toolbar / commands (export, send, run job)     | Live form binding, charge editing                               |
+| Headless hooks (validators, totals hooks)      | Replacing `onApplyRate` with a write into quotes from the child |
+| Jobs the child already owns (`spot.search`, …) | Peer calls into another extension’s private API                 |
 
 **Shell Workspace State** ([103](../tickets/backlog/103-workspace-state-and-panel-host.md)) is a third, thinner channel: org + active editor for **panel** UIs outside the document tree — not a substitute for slot props or invoke.
 

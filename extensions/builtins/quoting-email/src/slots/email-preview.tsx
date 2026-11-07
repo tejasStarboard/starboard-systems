@@ -56,8 +56,7 @@ export function EmailPreview({
     })
       .then(async (response) => {
         const payload = (await response.json().catch(() => null)) as
-          | (Partial<EmailPreviewResult> & { error?: string })
-          | null
+          (Partial<EmailPreviewResult> & { error?: string }) | null
         if (controller.signal.aborted) return
         if (!response.ok || !payload?.html) {
           throw new Error(

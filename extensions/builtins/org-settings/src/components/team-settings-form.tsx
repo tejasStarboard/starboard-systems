@@ -183,10 +183,7 @@ export function TeamSettingsForm() {
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid || undefined}>
                   <FieldLabel>Role</FieldLabel>
-                  <Select
-                    value={field.value}
-                    onValueChange={field.onChange}
-                  >
+                  <Select value={field.value} onValueChange={field.onChange}>
                     <SelectTrigger
                       className="w-full"
                       aria-invalid={fieldState.invalid}

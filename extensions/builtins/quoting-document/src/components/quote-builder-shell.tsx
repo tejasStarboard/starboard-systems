@@ -205,11 +205,7 @@ function PreviewActions({ props }: { props: QuoteFormLayoutProps }) {
  * they collapse to a top strip — driven by this container's width (not the
  * viewport), so workbench split panes behave correctly.
  */
-export function QuoteBuilderShell({
-  props,
-}: {
-  props: QuoteFormLayoutProps
-}) {
+export function QuoteBuilderShell({ props }: { props: QuoteFormLayoutProps }) {
   const locked = !props.commercialEditable
   const [laneSteps, setLaneSteps] = useState<Record<string, QuoteStepId>>({})
   const { ref: shellRef, width: shellWidth } = useElementWidth()

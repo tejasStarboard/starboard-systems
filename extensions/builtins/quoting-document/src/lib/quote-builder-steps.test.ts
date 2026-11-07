@@ -44,7 +44,10 @@ describe("quote builder steps", () => {
     expect(stepBlockedReason("rate", portsOnly)).toBe("Add valid cargo first.")
 
     expect(
-      stepBlockedReason("rate", fclLane({ origin: "NLRTM", destination: "USNYC" }))
+      stepBlockedReason(
+        "rate",
+        fclLane({ origin: "NLRTM", destination: "USNYC" })
+      )
     ).toBeNull()
   })
 

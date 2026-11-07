@@ -24,13 +24,13 @@ Optional: when a quote editor is active and message↔quote links exist, prefer 
 
 ## Extension model
 
-| | |
-| -- | -- |
-| **Package / id** | `messaging.msgraph` (+ UI factory registration if needed) |
-| **Contributes** | `workbench.panel` → Inbox |
-| **Reads** | Workspace State `organizationId` (+ optional active quote) |
-| **Data** | Existing messaging BFF / `/api/extensions/messaging.msgraph/…` — org-scoped session |
-| **Unplug** | Inbox panel tab gone |
+|                  |                                                                                     |
+| ---------------- | ----------------------------------------------------------------------------------- |
+| **Package / id** | `messaging.msgraph` (+ UI factory registration if needed)                           |
+| **Contributes**  | `workbench.panel` → Inbox                                                           |
+| **Reads**        | Workspace State `organizationId` (+ optional active quote)                          |
+| **Data**         | Existing messaging BFF / `/api/extensions/messaging.msgraph/…` — org-scoped session |
+| **Unplug**       | Inbox panel tab gone                                                                |
 
 ## Non-goals
 

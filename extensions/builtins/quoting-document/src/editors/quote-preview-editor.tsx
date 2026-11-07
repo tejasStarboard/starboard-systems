@@ -147,8 +147,7 @@ export function QuotePreviewEditor({ resourceId, host }: BuiltinEditorProps) {
           { signal: controller.signal }
         )
         const body = (await response.json().catch(() => null)) as
-          | (QuoteEditorContext & { error?: string })
-          | null
+          (QuoteEditorContext & { error?: string }) | null
         if (!response.ok || !body?.quote || !body.options) {
           setQuote({
             status: "error",
@@ -184,9 +183,7 @@ export function QuotePreviewEditor({ resourceId, host }: BuiltinEditorProps) {
   }, [selectedId, reloadToken])
 
   const formValues =
-    quote.status === "ready"
-      ? quote.input.defaultValues
-      : EMPTY_PREVIEW_VALUES
+    quote.status === "ready" ? quote.input.defaultValues : EMPTY_PREVIEW_VALUES
 
   const form = useForm<QuoteFormValues>({
     values: formValues,

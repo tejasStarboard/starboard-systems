@@ -28,12 +28,12 @@ Foundation for end-user-friendly bottom panel extensions (activity, inbox peek, 
 
 ## Where state lives
 
-| Layer | Role |
-| ----- | ---- |
-| `apps/web` WorkbenchProvider / host API | **Runtime owner** of Workspace State |
-| Auth / org session | Source of truth for active org |
-| `@starboard/ext-host` | **`contributes.panel` schema + merge only** — not a focused-tab process |
-| Optional shared types package (later) | Types importable by builtins without importing `apps/web` |
+| Layer                                   | Role                                                                    |
+| --------------------------------------- | ----------------------------------------------------------------------- |
+| `apps/web` WorkbenchProvider / host API | **Runtime owner** of Workspace State                                    |
+| Auth / org session                      | Source of truth for active org                                          |
+| `@starboard/ext-host`                   | **`contributes.panel` schema + merge only** — not a focused-tab process |
+| Optional shared types package (later)   | Types importable by builtins without importing `apps/web`               |
 
 ## Non-goals
 

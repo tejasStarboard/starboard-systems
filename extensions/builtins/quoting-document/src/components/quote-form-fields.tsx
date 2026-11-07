@@ -47,7 +47,9 @@ export function QuoteIdField({
 }) {
   return (
     <Field className={cn("gap-1", className)}>
-      <FieldLabel className="text-[11px] text-muted-foreground">Quote ID</FieldLabel>
+      <FieldLabel className="text-[11px] text-muted-foreground">
+        Quote ID
+      </FieldLabel>
       <div className="flex h-7 items-center gap-1">
         <p className="text-xs font-medium tabular-nums">{quoteId}</p>
         <Button
@@ -87,7 +89,9 @@ export function QuoteStatusField({
           className={cn("gap-1", className)}
           data-invalid={fieldState.invalid || undefined}
         >
-          <FieldLabel className="text-[11px] text-muted-foreground">Status</FieldLabel>
+          <FieldLabel className="text-[11px] text-muted-foreground">
+            Status
+          </FieldLabel>
           <Select
             value={field.value}
             onValueChange={(value) => {
