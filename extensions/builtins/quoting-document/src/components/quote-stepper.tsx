@@ -38,38 +38,40 @@ export function QuoteStepper({
         value={current}
         onValueChange={(value) => onSelect(value as QuoteStepId)}
       >
-        <TabsList className="h-auto w-fit justify-start gap-1 bg-transparent p-0">
-          {QUOTE_STEPS.map((step, index) => {
-            const reason = blockedReason(step.id)
-            const blocked = reason !== null
-            return (
-              <TooltipProvider key={step.id}>
-                <Tooltip>
-                  <TooltipTrigger>
-                    <TabsTrigger
-                      value={step.id}
-                      data-testid={`quote-step-${step.id}`}
-                      disabled={blocked}
-                      title={reason ?? step.hint}
-                      className={cn(
-                        "flex-none gap-1.5 px-2.5 py-1.5 data-active:bg-foreground data-active:text-background",
-                        !blocked &&
-                          index < currentIndex &&
-                          "text-foreground data-active:bg-foreground"
-                      )}
-                    >
-                      <span className="tabular-nums">{index + 1}</span>
-                      {step.label}
-                    </TabsTrigger>
+        <TooltipProvider>
+          <TabsList className="h-auto w-fit justify-start gap-1 bg-transparent p-0">
+            {QUOTE_STEPS.map((step, index) => {
+              const reason = blockedReason(step.id)
+              const blocked = reason !== null
+              return (
+                <Tooltip key={step.id}>
+                  <TooltipTrigger
+                    render={
+                      <TabsTrigger
+                        value={step.id}
+                        data-testid={`quote-step-${step.id}`}
+                        disabled={blocked}
+                        title={reason ?? step.hint}
+                        className={cn(
+                          "flex-none gap-1.5 px-2.5 py-1.5 data-active:bg-foreground data-active:text-background",
+                          !blocked &&
+                            index < currentIndex &&
+                            "text-foreground data-active:bg-foreground"
+                        )}
+                      />
+                    }
+                  >
+                    <span className="tabular-nums">{index + 1}</span>
+                    {step.label}
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>{step.hint}</p>
+                    <p>{reason ?? step.hint}</p>
                   </TooltipContent>
                 </Tooltip>
-              </TooltipProvider>
-            )
-          })}
-        </TabsList>
+              )
+            })}
+          </TabsList>
+        </TooltipProvider>
       </Tabs>
     </nav>
   )
